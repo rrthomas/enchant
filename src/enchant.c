@@ -43,6 +43,16 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
+#ifdef XP_TARGET_COCOA
+#import "enchant_cocoa.h"
+#endif
+
+#ifdef XP_TARGET_COCOA
+#define ENCHANT_USER_PATH_EXTENSION "Library", "Application Support", "Enchant"
+#else
+#define ENCHANT_USER_PATH_EXTENSION ".enchant"
+#endif
+
 ENCHANT_PLUGIN_DECLARE("Enchant")
 
 /********************************************************************************/
@@ -73,6 +83,7 @@ typedef struct str_enchant_session
 } EnchantSession;
 
 typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
+typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider, const char * module_dir);
 
 #ifndef BUFSIZ
 #define BUFSIZ 1024
@@ -108,6 +119,9 @@ enchant_unlock_file (FILE * f)
 static char *
 enchant_get_module_dir (void)
 {
+#ifdef XP_TARGET_COCOA
+	return g_strdup ([[EnchantResourceProvider instance] moduleFolder]);
+#endif
 	char * module_dir = NULL;
 
 	module_dir = enchant_get_registry_value ("Config", "Module_Dir");
@@ -124,6 +138,9 @@ enchant_get_module_dir (void)
 static char *
 enchant_get_conf_dir (void)
 {
+#ifdef XP_TARGET_COCOA
+	return g_strdup ([[EnchantResourceProvider instance] configFolder]);
+#endif
 	char * ordering_dir = NULL;
 
 	ordering_dir = enchant_get_registry_value ("Config", "Data_Dir");
@@ -286,7 +303,7 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 		{
 			filename = g_strdup_printf ("%s.dic", lang);
 			dic = g_build_filename (home_dir,
-						".enchant",
+						ENCHANT_USER_PATH_EXTENSION,
 						filename,
 						NULL);
 			g_free (filename);
@@ -711,6 +728,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 	
 	EnchantProvider *provider;
 	EnchantProviderInitFunc init_func;
+	EnchantPreConfigureFunc conf_func;
 	
 	dir = g_dir_open (dir_name, 0, NULL);
 	if (!dir) 
@@ -720,6 +738,8 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 
 	while ((dir_entry = g_dir_read_name (dir)) != NULL)
 		{
+			provider = 0;
+
 			entry_len = strlen (dir_entry);
 			if ((entry_len > g_module_suffix_len) && 
 			    !strcmp(dir_entry+(entry_len-g_module_suffix_len), G_MODULE_SUFFIX))
@@ -753,6 +773,17 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 					
 					g_free (filename);
 				}
+			if (provider)
+				{
+					/* optional entry point to allow modules to look for associated files
+					 */
+					if (g_module_symbol
+					    (module, "configure_enchant_provider", (gpointer *) (&conf_func))
+					    && conf_func)
+						{
+							conf_func (provider, dir_name);
+						}
+				}
 		}
 	
 	g_dir_close (dir);
@@ -761,7 +792,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	gchar *user_dir, *home_dir;       
+	gchar *user_dir, *home_dir, *system_dir;
 	
 	/* load USER providers first. since the GSList is ordered,
 	   this intentionally gives preference to USER providers */
@@ -770,13 +801,18 @@ enchant_load_providers (EnchantBroker * broker)
 
 	if (home_dir) 
 		{
-			user_dir = g_build_filename (home_dir, ".enchant", NULL);
+			user_dir = g_build_filename (home_dir, ENCHANT_USER_PATH_EXTENSION, NULL);
 			enchant_load_providers_in_dir (broker, user_dir);
 			g_free (user_dir);
 			g_free (home_dir);
 		}
-	
-	enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
+
+	system_dir = enchant_get_module_dir ();
+	if (system_dir)
+		{
+			enchant_load_providers_in_dir (broker, system_dir);
+			g_free (system_dir);
+		}
 }
 
 static void
@@ -832,7 +868,7 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 	
 	if (home_dir) 
 		{
-			ordering_file = g_build_filename (home_dir, ".enchant", "enchant.ordering", NULL);
+			ordering_file = g_build_filename (home_dir, ENCHANT_USER_PATH_EXTENSION, "enchant.ordering", NULL);
 			enchant_load_ordering_from_file (broker, ordering_file);
 			g_free (ordering_file);
 			g_free (home_dir);
