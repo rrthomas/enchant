@@ -47,6 +47,7 @@
 #include <uspell/uspell.h>
 
 static const size_t MAXALTERNATIVE = 20; // we won't return more than this number of suggestions
+static const size_t MAXCHARS = 100; // maximum number of bytes of utf8 or chars of UCS4 in a word
 
 typedef struct {
 	char *personalName; // name of file containing personal dictionary
@@ -57,26 +58,28 @@ static int
 uspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	uSpell *manager;
-	wide_t *curBuf, *otherBuf, *tmpBuf;
+	wide_t buf1[MAXCHARS], buf2[MAXCHARS], *curBuf, *otherBuf, *tmpBuf;
+	utf8_t myWord[MAXCHARS];
 	int length;
 	
+	if (len >= MAXCHARS)
+		return 1; // too long; can't be right
+	memcpy(reinterpret_cast<char *>(myWord), word, len);
+	myWord[len] = 0;
+	curBuf = buf1;
+	otherBuf = buf2;
 	manager = reinterpret_cast<uspellData *>(me->user_data)->manager;
-	curBuf = reinterpret_cast<wide_t *>(calloc(len+1, sizeof(wide_t)));
 #ifdef DEBUG
 	fprintf(stdout, "Checking [%s]\n", word);
 #endif
-	length = utf8_wide(curBuf, reinterpret_cast<const utf8_t *>(word), len+1);
+	length = utf8_wide(curBuf, myWord, MAXCHARS);
 	if (manager->isSpelledRight(curBuf, length)) {
-		free(curBuf);
 		return 0; // correct the first time
 	}
-	otherBuf = reinterpret_cast<wide_t *>(calloc(len+1, sizeof(wide_t)));
 	if (manager->theFlags & uSpell::upperLower) {
 		toUpper(otherBuf, curBuf, length);
 		if (manager->isSpelledRight(otherBuf, length)) {
-			manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
-			free(curBuf);
-			free(otherBuf);
+			manager->acceptWord(myWord);
 			return 0; // correct if converted to all upper case
 		}
 		tmpBuf = curBuf;
@@ -86,9 +89,7 @@ uspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	if (manager->theFlags & uSpell::hasComposition) {
 		unPrecompose(otherBuf, &length, curBuf, length);
 		if (manager->isSpelledRight(otherBuf, length)) {
-			manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
-			free(curBuf);
-			free(otherBuf);
+			manager->acceptWord(myWord);
 			return 0; // correct if precomposed characters expanded, all upper
 		}
 		tmpBuf = curBuf;
@@ -97,14 +98,10 @@ uspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	}
 	if (manager->theFlags & uSpell::hasCompounds) {
 		if (manager->isSpelledRightMultiple(curBuf, length)) {
-			manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
-			free(curBuf);
-			free(otherBuf);
+			manager->acceptWord(myWord);
 			return 0; // correct as two words.  Not right for all languages.
 		}
 	}
-	free(curBuf);
-	free(otherBuf);
 	return 1;
 }
 
@@ -113,20 +110,24 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
 	uSpell *manager;
+	utf8_t myWord[MAXCHARS];
 	
 	char **sugg_arr = NULL;
 	const utf8_t *sugg;
-	wide_t *curBuf;
+	wide_t buf[MAXCHARS];
 	int length, i;
 	utf8_t **list;
 	
+	if (len >= MAXCHARS) // no suggestions; the word is outlandish
+		return g_new0 (char *, 1); 
+	memcpy(reinterpret_cast<char *>(myWord), word, len);
+	myWord[len] = 0;
 	manager = reinterpret_cast<uspellData *>(me->user_data)->manager;
 	
 	list = reinterpret_cast<utf8_t **>(
 					   calloc(sizeof(char *), MAXALTERNATIVE));
-	curBuf = reinterpret_cast<wide_t *>(calloc(len+1, sizeof(wide_t)));
-	length = utf8_wide(curBuf, reinterpret_cast<const utf8_t *>(word), len+1);
-	*out_n_suggs = manager->showAlternatives(curBuf, length,
+	length = utf8_wide(buf, myWord, MAXCHARS);
+	*out_n_suggs = manager->showAlternatives(buf, length,
 						 list, MAXALTERNATIVE);
 	
 	if (*out_n_suggs)
@@ -142,7 +143,6 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 				}
 		}
 	free(list);
-	free(curBuf);
 	return sugg_arr;
 }
 
@@ -152,9 +152,13 @@ uspell_dict_add_to_personal (EnchantDict * me,
 {
 	uSpell *manager;
 	FILE *personalFile;
+	utf8_t myWord[MAXCHARS];
 	
+	if (len >= MAXCHARS) return; // too long; can't be right
+	memcpy(reinterpret_cast<char *>(myWord), word, len);
+	myWord[len] = 0;
 	manager = reinterpret_cast<uspellData *>(me->user_data)->manager;
-	manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
+	manager->acceptWord(myWord);
 	if (!reinterpret_cast<uspellData *>(me->user_data)->personalName)
 			return; // no personal file
 	personalFile =
@@ -164,7 +168,7 @@ uspell_dict_add_to_personal (EnchantDict * me,
 		flock(fileno(personalFile), LOCK_EX);
 		fseek(personalFile, 0, SEEK_END);  // in case someone else intervened
 #endif
-		fprintf(personalFile, "%s\n", word);
+		fprintf(personalFile, "%s\n", myWord);
 		fclose(personalFile);
 	}
 }
