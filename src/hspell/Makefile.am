@@ -1,0 +1,15 @@
+if WITH_HSPELL
+target_lib = libenchant_hspell.la
+else
+target_lib =
+endif
+
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -D_ENCHANT_BUILD=1
+
+hspell_LTLIBRARIES = $(target_lib)
+hspelldir= $(libdir)/enchant
+
+libenchant_hspell_la_LIBADD= $(ENCHANT_LIBS) $(HSPELL_LIBS) $(top_builddir)/src/libenchant.la
+libenchant_hspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
+libenchant_hspell_la_SOURCES = hspell_provider.c
+libenchant_hspell_lalibdir=$(libdir)/enchant

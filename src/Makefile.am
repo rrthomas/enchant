@@ -1,4 +1,4 @@
-SUBDIRS=. aspell ispell uspell myspell
+SUBDIRS=. aspell ispell uspell myspell hspell
 
 INCLUDES=-I$(top_srcdir) $(ENCHANT_CFLAGS) -DENCHANT_GLOBAL_MODULE_DIR=\"$(libdir)/enchant\" -DENCHANT_GLOBAL_ORDERING=\"$(datadir)/enchant\" -D_ENCHANT_BUILD=1
 

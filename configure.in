@@ -187,6 +187,37 @@ AC_SUBST(USPELL_LIBS)
 
 AM_CONDITIONAL(WITH_USPELL, test "$build_uspell" = yes)
 
+dnl =========================================================================================
+dnl proposed hspell backend
+dnl =========================================================================================
+
+build_hspell=no
+
+check_hspell=yes
+AC_ARG_ENABLE(hspell, [  --disable-hspell     enable the hspell backend [default=auto]], check_hspell="$enableval", check_hspell=yes)
+
+dnl change to pkg-config sometime
+
+if test "x$check_hspell" != "xno"; then
+   AC_CHECK_LIB(hspell,hspell_check,build_hspell=yes, build_hspell=no)
+fi
+
+hspell_dir=${datadir}/enchant/hspell
+AC_ARG_WITH(hspell-dir, [  --with-hspell-dir=PATH    path to installed hspell dicts ])
+
+if test "x$with_hspell_dir" != "x" ; then
+   hspell_dir=$with_hspell_dir
+fi
+
+HSPELL_LIBS=" -lhspell"
+HSPELL_CFLAGS="$HSPELL_CFLAGS -DENCHANT_HSPELL_DICT_DIR='\"$hspell_dict_dir\"'"
+AC_SUBST(HSPELL_CFLAGS)
+AC_SUBST(HSPELL_LIBS)
+
+AM_CONDITIONAL(WITH_HSPELL, test "$build_hspell" = yes)
+
+dnl =======================================================================================
+
 AC_OUTPUT([
 Makefile
 enchant.pc
@@ -196,11 +227,12 @@ src/aspell/Makefile
 src/ispell/Makefile
 src/uspell/Makefile
 src/myspell/Makefile
+src/hspell/Makefile
 tests/Makefile
 doc/Makefile
 ])
 
-dnl =============================================================================================
+dnl ===========================================================================================
 echo "
 $PACKAGE-$VERSION
 
@@ -211,4 +243,5 @@ $PACKAGE-$VERSION
 	Build Ispell backend:           ${build_ispell}
 	Build Uspell backend:           ${build_uspell}
 	Build Myspell backend:          ${build_myspell}
+	Build Hspell backend:           ${build_hspell}
 "
