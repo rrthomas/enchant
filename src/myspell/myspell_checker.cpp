@@ -142,17 +142,18 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 static void
 s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
-	char * tmp, * private_dir, * home_dir, * ispell_prefix;
+	char * tmp, * private_dir, * home_dir, * ispell_prefix, * dict_dic;
 
 	names.clear ();
 
-	home_dir = enchant_get_user_home_dir ();
+	dict_dic = g_strconcat(dict, ".dic", NULL);
 
+	home_dir = enchant_get_user_home_dir ();
 	if (home_dir) {
 		private_dir = g_build_filename (home_dir, ".enchant", 
 						"myspell", NULL);
 		
-		tmp = g_build_filename (private_dir, dict, NULL);
+		tmp = g_build_filename (private_dir, dict_dic, NULL);
 		names.push_back (tmp);
 		g_free (tmp);
 
@@ -160,13 +161,15 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 		g_free (home_dir);
 	}
 
-	ispell_prefix = myspell_checker_get_prefix ();
-	if (ispell_prefix) {
-		tmp = g_build_filename (ispell_prefix, dict, NULL);
+	myspell_prefix = myspell_checker_get_prefix ();
+	if (myspell_prefix) {
+		tmp = g_build_filename (myspell_prefix, dict_dict, NULL);
 		names.push_back (tmp);
 		g_free (tmp);
-		g_free (ispell_prefix);
+		g_free (myspell_prefix);
 	}
+
+	g_free(dict_dic);
 }
 
 static char *
