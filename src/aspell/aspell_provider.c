@@ -199,10 +199,34 @@ aspell_provider_dictionary_exists (struct str_enchant_provider * me,
 	EnchantDict * dict;
 	int exists = 0;
 
-	dict = aspell_provider_request_dict (me, tag);
-	if (dict) {
-		exists = 1;       
-		aspell_provider_dispose_dict (me, dict);
+#ifdef ASPELL_DICT_DIR
+	char * file, * ext;
+
+	/* hack for a quick existence test */
+
+	ext = g_strdup_printf ("%s.multi", tag);
+	file = g_build_filename (ASPELL_DICT_DIR, ext);
+	if (g_file_test (file, G_FILE_TEST_EXISTS))
+		exists = 1;
+	g_free (file);
+	g_free (ext);
+
+	if (strlen (tag) > 2 && tag[2] == '_') {
+		ext = g_strdup_printf ("%c%c.multi", tag[0], tag[1]);
+		file = g_build_filename (ASPELL_DICT_DIR, ext);
+		if (g_file_test (file, G_FILE_TEST_EXISTS))
+			exists = 1;
+		g_free (file);
+		g_free (ext);
+	}
+#endif
+
+	if (!exists) {
+		dict = aspell_provider_request_dict (me, tag);
+		if (dict) {
+			exists = 1;       
+			aspell_provider_dispose_dict (me, dict);
+		}
 	}
 
 	return exists;
