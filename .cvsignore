@@ -2,8 +2,8 @@ mkinstalldirs
 missing
 ltmain.sh
 libtool
-libenchant.spec
-libenchant.pc
+enchant.spec
+enchant.pc
 install-sh
 depcomp
 configure

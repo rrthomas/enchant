@@ -2,7 +2,7 @@ AC_INIT(src/enchant.h)
 
 dnl Set release number
 dnl This is derived from "Versioning" chapter of info libtool documentation.
-PACKAGE=libenchant
+PACKAGE=enchant
 dnl     4a) Increment when removing or changing interfaces.
 ENCHANT_MAJOR_VERSION=0
 dnl     4a) 5) Increment when adding interfaces.
@@ -129,8 +129,8 @@ AM_CONDITIONAL(WITH_USPELL, test "$build_uspell" = yes)
 
 AC_OUTPUT([
 Makefile
-libenchant.pc
-libenchant.spec
+enchant.pc
+enchant.spec
 src/Makefile
 src/aspell/Makefile
 src/ispell/Makefile
