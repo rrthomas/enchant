@@ -40,7 +40,7 @@
 
 #include "enchant.h"
 
-/* has to be bigger than this to be checked */
+/* word has to be bigger than this to be checked */
 #define MIN_WORD_LENGTH 1
 
 typedef enum 
@@ -68,6 +68,9 @@ static gboolean
 consume_line (FILE * in, GString * str)
 {
 	int ch;
+	gsize bytes_read, bytes_written;
+	gchar * utf;
+	gboolean ret = TRUE;
 
 	g_string_truncate (str, 0);
 
@@ -76,12 +79,30 @@ consume_line (FILE * in, GString * str)
 			continue;
 		else {
 			g_string_append_c (str, ch);
-			if (ch == '\n')
-				return FALSE;
+			if (ch == '\n') {
+				ret = FALSE;
+			}
 		}
 	}
 
-	return TRUE;
+	utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
+	g_free (str->str);
+
+	str->str = utf;
+	str->len = bytes_written;
+
+	return ret;
+}
+
+static void
+print_utf (FILE * out, const char * str)
+{
+	gsize bytes_read, bytes_written;
+	gchar * native;
+
+	native = g_locale_from_utf8 (str, -1, &bytes_read, &bytes_written, NULL);
+	fwrite (native, 1, bytes_written, out);
+	g_free (native);
 }
 
 static void
@@ -91,22 +112,30 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
 	char ** suggs;
 
 	if (enchant_dict_check (dict, word->str, word->len) == 0)
-		fprintf (out, "*\n");
+		fwrite ("*\n", 1, 3, out);
 	else {
 		suggs = enchant_dict_suggest (dict, word->str, 
 					      word->len, &n_suggs);
-		if (!n_suggs || !suggs)
-			fprintf (out, "# %s %ld\n", word->str, start_pos+1);
+		if (!n_suggs || !suggs) {
+			fwrite ("# ", 1, 2, out);
+			print_utf (out, word->str);
+			fprintf (out, " %ld\n", start_pos+1);
+		}
 		else {
 			size_t i = 0;
 			
-			fprintf (out, "& %s %ld %ld:", word->str, n_suggs, start_pos);
+			fwrite ("& ", 1, 2, out);
+			print_utf (out, word->str);
+			fprintf (out, " %ld %ld:", n_suggs, start_pos);
 			
 			for (i = 0; i < n_suggs; i++) {
+				fprintf (out, " ");
+				print_utf (out, suggs[i]);
+
 				if (i != (n_suggs - 1))
-					fprintf (out, " %s,", suggs[i]);
+					fwrite (",", 1, 1, out);
 				else
-					fprintf (out, " %s\n", suggs[i]);
+					fwrite ("\n", 1, 1, out);
 			}
 		}
 	}
@@ -183,7 +212,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 		}
 
 		if (mode == MODE_A)
-			fprintf (out, "\n");
+			fwrite ("\n", 1, 1, out);
 	}
 	
 	enchant_broker_release_dict (broker, dict);
