@@ -33,6 +33,7 @@
  * for Enchant.
  */
 
+#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -355,6 +356,8 @@ int main (int argc, char ** argv)
 		print_help (stdout, argv[0]);
 	}
 	else {
+		setlocale (LC_ALL, "");
+
 		if (file) {
 			fp = fopen (file, "r");
 			if (!fp) {
