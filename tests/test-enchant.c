@@ -110,6 +110,7 @@ main (int argc, char **argv)
 {
 	EnchantBroker *broker;
 	EnchantDict *dict;
+	const char * err;
 	
 	broker = enchant_broker_init ();
 	
@@ -117,7 +118,11 @@ main (int argc, char **argv)
 	
 	if (!dict) 
 		{
-			fprintf (stderr, "Couldn't create dictionary for en_US\n");
+			err = enchant_broker_get_error (broker);
+			if (err)
+				fprintf (stderr, "Couldn't create dictionary for en_US: %s\n", err);
+			else
+				fprintf (stderr, "Couldn't create dictionary for en_US\n");
 		} 
 	else 
 		{

@@ -40,6 +40,28 @@ namespace enchant
 {
 	class Broker;
 
+	class Exception : public std::exception
+		{
+		public:
+			Exception (const char * ex) 
+				: std::exception ()
+				{
+					if (ex)
+						m_ex = ex;
+				}
+
+			virtual ~Exception () throw()
+				{
+				}
+			
+			virtual const char * what () throw() {
+				return m_ex.c_str();
+			}
+
+		private:
+			std::string m_ex;
+		};
+
 	class Dict
 		{
 			friend class enchant::Broker;
@@ -51,10 +73,17 @@ namespace enchant
 			}
 					
 			bool check (const std::string & utf8word) {
-				if (enchant_dict_check (m_dict, utf8word.c_str(), 
-							utf8word.size()) == 0)
+				int val;
+
+				val = enchant_dict_check (m_dict, utf8word.c_str(), 
+							  utf8word.size());
+				if (val == 0)
 					return true;
-				return false;
+				else if (val > 0)
+					return false;
+				else {
+					throw Exception (enchant_dict_get_error (m_dict));
+				}
 			}
 			
 			void add_to_personal (const std::string & utf8word) {
@@ -130,13 +159,12 @@ namespace enchant
 			static Broker * instance () {
 				return &m_instance;
 			}
-			
-			
+						
 			Dict * request_dict (const std::string & lang) {
 				EnchantDict * dict = enchant_broker_request_dict (m_broker, lang.c_str());
 				
 				if (!dict) {
-					throw std::exception ();
+					throw Exception (enchant_broker_get_error (m_broker));
 					return 0; // not actually reached
 				}
 				

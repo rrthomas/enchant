@@ -44,13 +44,19 @@ static int
 aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	PspellManager *manager;
-	
+	int val;
+
 	manager = (PspellManager *) me->user_data;
 	
-	if (1 == pspell_manager_check (manager, word, len))
-		return 0;
-	
-	return 1;
+	val = pspell_manager_check (manager, word, len);
+	if (val == 0)
+		return 1;
+	else if (val > 0)
+		return 1;
+	else {
+		enchant_dict_set_error (me, pspell_manager_error_message (manager));
+		return -1;
+	}
 }
 
 static char **
@@ -156,6 +162,7 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 			  g_warning ("Aspell Enchant backend error when requesting '%s' dictionary: %s\n",
 			  tag, pspell_error_message(spell_error));
 			*/
+			enchant_provider_set_error (me, pspell_error_message(spell_error));
 			return NULL;
 		}
 	

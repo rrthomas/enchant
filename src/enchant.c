@@ -165,6 +165,15 @@ enchant_get_conf_dir (void)
 #endif
 }
 
+struct str_enchant_broker
+{
+	GSList *provider_list;	/* list of all of the spelling backend providers */
+	GHashTable *dict_map;		/* map of language tag -> dictionary */
+	GHashTable *provider_ordering; /* map of language tag -> provider order */
+
+	gchar * error;
+};
+
 typedef struct str_enchant_session
 {
 	GHashTable *session;
@@ -172,6 +181,8 @@ typedef struct str_enchant_session
 
 	char * personal_filename;
 	char * language_tag;
+
+	char * error;
 
 	EnchantProvider * provider;
 } EnchantSession;
@@ -274,6 +285,96 @@ enchant_session_destroy (EnchantSession * session)
 	g_free (session->personal_filename);
 	g_free (session->language_tag);
 	g_free (session);
+
+	if (session->error)
+		g_free (session->error);
+}
+
+static void
+enchant_session_clear_error (EnchantSession * session)
+{
+	if (session->error) {
+		g_free (session->error);
+		session->error = NULL;
+	}
+}
+
+/**
+ * enchant_dict_set_error
+ *
+ * Sets the current runtime error to @err
+ */
+ENCHANT_MODULE_EXPORT(void)
+enchant_dict_set_error (EnchantDict * dict, const char * const err)
+{
+	EnchantSession * session;
+
+	g_return_if_fail (dict);
+	
+	session = (EnchantSession*)dict->enchant_private_data;
+
+	enchant_session_clear_error (session);
+	session->error = g_strdup (err);	
+}
+
+/**
+ * enchant_dict_get_error
+ *
+ * Returns a const char string or NULL describing the last exception.
+ * WARNING: error is cleared as soon as the next dictionary operation is called
+ */
+ENCHANT_MODULE_EXPORT(char *)
+enchant_dict_get_error (EnchantDict * dict)
+{
+	EnchantSession * session;
+
+	g_return_val_if_fail (dict, NULL);
+	
+	session = (EnchantSession*)dict->enchant_private_data;
+
+	return session->error;
+}
+
+static void
+enchant_broker_clear_error (EnchantBroker * broker)
+{
+	if (broker->error) {
+		g_free (broker->error);
+		broker->error = NULL;
+	}
+}
+
+/**
+ * enchant_provider_set_error
+ *
+ * Sets the current runtime error to @err
+ */
+ENCHANT_MODULE_EXPORT(void)
+enchant_provider_set_error (EnchantProvider * provider, const char * const err)
+{
+	EnchantBroker * broker;
+
+	g_return_if_fail (provider);
+
+	broker = provider->owner;
+	g_return_if_fail (broker);
+	
+	enchant_broker_clear_error (broker);
+	broker->error = g_strdup (err);	
+}
+
+/**
+ * enchant_broker_get_error
+ *
+ * Returns a const char string or NULL describing the last exception.
+ * WARNING: error is cleared as soon as the next broker operation is called
+ */
+ENCHANT_MODULE_EXPORT(char *)
+enchant_broker_get_error (EnchantBroker * broker)
+{
+	g_return_val_if_fail (broker, NULL);
+	
+	return broker->error;
 }
 
 /**
@@ -285,7 +386,7 @@ enchant_session_destroy (EnchantSession * session)
  * Will return an "incorrect" value if any of those pre-conditions
  * are not met.
  *
- * Returns: 0 if the word is correctly spelled, non-zero if not
+ * Returns: 0 if the word is correctly spelled, positive if not, negative if error
  */
 ENCHANT_MODULE_EXPORT (int)
 enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
@@ -297,6 +398,7 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
 	g_return_val_if_fail (len, 1);
 	
 	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
 
 	/* first, see if it's in our session */
 	if (enchant_session_contains (session, word, len))
@@ -356,15 +458,16 @@ enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
 	g_return_if_fail (len);
+
+	/* add to enchant-specific backend regardless */
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
+	enchant_session_add_personal (session, word, len);
 	
 	if (dict->add_to_personal)
 		{
 			(*dict->add_to_personal) (dict, word, len);
 		}
-
-	/* add to enchant-specific backend regardless */
-	session = (EnchantSession*)dict->enchant_private_data;
-	enchant_session_add_personal (session, word, len);
 }
 
 /**
@@ -384,6 +487,9 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 	g_return_if_fail (word);
 	g_return_if_fail (len);
 	
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
+
 	if (dict->add_to_session)
 		{
 			(*dict->add_to_session) (dict, word, len);
@@ -391,7 +497,6 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 	else
 		{
 			/* emulate a session backend if one is not provided for */
-			session = (EnchantSession*)dict->enchant_private_data;
 			enchant_session_add (session, word, len);
 		}
 }
@@ -413,11 +518,16 @@ enchant_dict_store_replacement (EnchantDict * dict,
 				const char *const mis, size_t mis_len,
 				const char *const cor, size_t cor_len)
 {
+	EnchantSession * session;
+
 	g_return_if_fail (dict);
 	g_return_if_fail (mis);
 	g_return_if_fail (mis_len);
 	g_return_if_fail (cor);
 	g_return_if_fail (cor_len);
+
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
 	
 	/* if it's not implemented, it's not worth emulating */
 	if (dict->store_replacement)
@@ -437,8 +547,13 @@ enchant_dict_store_replacement (EnchantDict * dict,
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions)
 {
+	EnchantSession * session;
+
 	g_return_if_fail (dict);
 	g_return_if_fail (suggestions);
+
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
 	
 	if (dict->free_suggestions)
 		{
@@ -448,13 +563,6 @@ enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions)
 
 /***********************************************************************************/
 /***********************************************************************************/
-
-struct str_enchant_broker
-{
-	GSList *provider_list;	/* list of all of the spelling backend providers */
-	GHashTable *dict_map;		/* map of language tag -> dictionary */
-	GHashTable *provider_ordering; /* map of language tag -> provider order */
-};
 
 typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
 
@@ -498,6 +606,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 									if (provider)
 										{
 											provider->enchant_private_data = (void *) module;
+											provider->owner = broker;
 											broker->provider_list = g_slist_append (broker->provider_list, (gpointer)provider);
 										}
 								}
@@ -736,7 +845,9 @@ enchant_broker_free (EnchantBroker * broker)
 	
 	g_slist_foreach (broker->provider_list, enchant_provider_free, NULL);
 	g_slist_free (broker->provider_list);
-	
+
+	enchant_broker_clear_error (broker);
+
 	g_free (broker);
 }
 
@@ -757,6 +868,8 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	
 	g_return_val_if_fail (broker, NULL);
 	g_return_val_if_fail (tag && strlen(tag), NULL);
+
+	enchant_broker_clear_error (broker);
 	
 	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
 	if (dict)
@@ -810,6 +923,8 @@ enchant_broker_describe (EnchantBroker * broker,
 
 	g_return_if_fail (broker);
 	g_return_if_fail (fn);
+
+	enchant_broker_clear_error (broker);
 
 	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
@@ -876,6 +991,8 @@ enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 	g_return_if_fail (broker);
 	g_return_if_fail (dict);
 
+	enchant_broker_clear_error (broker);
+
 	session = (EnchantSession*)dict->enchant_private_data;
 	
 	g_hash_table_remove (broker->dict_map, session->language_tag);
@@ -899,6 +1016,8 @@ enchant_broker_dictionary_status (EnchantBroker * broker,
 
 	g_return_val_if_fail (broker, EDS_UNKNOWN);
 	g_return_val_if_fail (tag && strlen(tag), EDS_UNKNOWN);
+
+	enchant_broker_clear_error (broker);
 
 	/* don't query the providers if we can just do a quick map lookup */
 	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL)
@@ -950,6 +1069,8 @@ enchant_broker_set_ordering (EnchantBroker * broker,
 	g_return_if_fail (broker);
 	g_return_if_fail (tag && strlen(tag));
 	g_return_if_fail (ordering && strlen(ordering));
+
+	enchant_broker_clear_error (broker);
 
 	tag_dupl = g_strdup (tag);
 	ordering_dupl = g_strdup (ordering);

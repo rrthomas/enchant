@@ -75,6 +75,10 @@ ENCHANT_MODULE_EXPORT (void)
 ENCHANT_MODULE_EXPORT (void)
      enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions);
 
+/* const */
+ENCHANT_MODULE_EXPORT(char *)
+     enchant_dict_get_error (EnchantDict * dict);
+
 ENCHANT_MODULE_EXPORT (EnchantBroker *) 
      enchant_broker_init (void);
 ENCHANT_MODULE_EXPORT (void)
@@ -90,9 +94,13 @@ ENCHANT_MODULE_EXPORT (EnchantDictStatus)
 				       const char * const tag);
 
 ENCHANT_MODULE_EXPORT (void)
-enchant_broker_set_ordering (EnchantBroker * broker,
-			     const char * const tag,
-			     const char * const ordering);
+     enchant_broker_set_ordering (EnchantBroker * broker,
+				  const char * const tag,
+				  const char * const ordering);
+
+/* const */
+ENCHANT_MODULE_EXPORT(char *)
+     enchant_broker_get_error (EnchantBroker * broker);
 
 /**
  * EnchantBrokerDescribeFn

@@ -56,11 +56,17 @@ ENCHANT_MODULE_EXPORT (char *)
 ENCHANT_MODULE_EXPORT (char *)
 	enchant_get_registry_value (const char * const prefix, const char * const key);
 
+ENCHANT_MODULE_EXPORT(void)
+	enchant_dict_set_error (EnchantDict * dict, const char * const err);
+
+ENCHANT_MODULE_EXPORT(void)
+	enchant_provider_set_error (EnchantProvider * provider, const char * const err);
+
 struct str_enchant_dict
 {
 	void *user_data;
 	void *enchant_private_data;
-	
+
 	int (*check) (struct str_enchant_dict * me, const char *const word,
 		      size_t len);
 	
@@ -88,6 +94,7 @@ struct str_enchant_provider
 {
 	void *user_data;
 	void *enchant_private_data;
+	EnchantBroker * owner;
 	
 	void (*dispose) (struct str_enchant_provider * me);
 	

@@ -37,20 +37,20 @@
 using namespace enchant;
 
 static void
-enumerate_dicts (const char * const name,
-		 const char * const desc,
-		 const char * const file,
-		 void * ud)
+enumerate_dicts_fn (const char * const name,
+		    const char * const desc,
+		    const char * const file,
+		    void * ud)
 {
 	printf ("%s: '%s' (%s)\n", name, desc, file);
 }
 
 static void
-describe_dict (const char * const lang,
-	       const char * const name,
-	       const char * const desc,
-	       const char * const file,
-	       void * ud)
+describe_dict_fn (const char * const lang,
+		  const char * const name,
+		  const char * const desc,
+		  const char * const file,
+		  void * ud)
 {
 	printf ("%s: %s '%s' (%s)\n", lang, name, desc, file);
 }
@@ -110,13 +110,13 @@ main (int argc, char **argv)
 	
 	try {
 		dict = broker->request_dict ("en_US");
-		dict->describe (describe_dict);
+		dict->describe (describe_dict_fn);
 		run_dict_tests (dict);
 		
-		broker->describe (enumerate_dicts);
+		broker->describe (enumerate_dicts_fn);
 		delete dict;
-	} catch (...) {
-		fprintf (stderr, "Couldn't create dictionary for en_US\n");
+	} catch (Exception & ex) {
+		fprintf (stderr, "Couldn't create dictionary for en_US: %s\n", ex.what());
 		return 1;
 	}
 
