@@ -4,10 +4,10 @@ dnl Set release number
 dnl This is derived from "Versioning" chapter of info libtool documentation.
 PACKAGE=enchant
 dnl     4a) Increment when removing or changing interfaces.
-ENCHANT_MAJOR_VERSION=0
+ENCHANT_MAJOR_VERSION=1
 dnl     4a) 5) Increment when adding interfaces.
 dnl     6) Set to zero when removing or changing interfaces.
-ENCHANT_MINOR_VERSION=4
+ENCHANT_MINOR_VERSION=0
 dnl     3) Increment when interfaces not changed at all,
 dnl               only bug fixes or internal changes made.
 dnl     4b) Set to zero when adding, removing or changing interfaces.
