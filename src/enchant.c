@@ -238,11 +238,11 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	new_tag = g_strstrip (new_tag);
 
 	/* strip off en_GB@euro */
-	if ((needle = strstr (new_tag, "@")) != NULL)
+	if ((needle = strchr (new_tag, '@')) != NULL)
 		*needle = '\0';
 
 	/* strip off en_GB.UTF-8 */
-	if ((needle = strstr (new_tag, ".")) != NULL)
+	if ((needle = strchr (new_tag, '.')) != NULL)
 		*needle = '\0';
 
 	return new_tag;

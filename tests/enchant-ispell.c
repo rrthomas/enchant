@@ -49,8 +49,7 @@ typedef enum
 		MODE_NONE,
 		MODE_VERSION,
 		MODE_A,
-		MODE_L,
-		MODE_FILE
+		MODE_L
 	} IspellMode_t;
 
 static void 
@@ -63,10 +62,10 @@ static void
 print_help (FILE * to, const char * prog)
 {
 	fprintf (to, "Usage: %s [options] -a|-l|-L|-v[v]|<file>\n", prog);
-	fprintf (to, "\t-a lists alternatives.\n", prog);
-	fprintf (to, "\t-l lists misspelings.\n", prog);
-	fprintf (to, "\t-L displays line numbers.\n", prog);
-	fprintf (to, "\t-v displays program version.\n", prog);
+	fprintf (to, "\t-a lists alternatives.\n");
+	fprintf (to, "\t-l lists misspellings.\n");
+	fprintf (to, "\t-L displays line numbers.\n");
+	fprintf (to, "\t-v displays program version.\n");
 }
 
 static gboolean
@@ -114,6 +113,7 @@ print_utf (FILE * out, const char * str)
 		fwrite (native, 1, bytes_written, out);
 		g_free (native);
 	} else {
+		/* we'll assume that it's already utf8 and glib is just being stupid */
 		fwrite (str, 1, strlen (str), out);
 	}
 }
@@ -250,16 +250,16 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
 	if (mode == MODE_A)
 		print_version (out);
 
-	lang = g_strdup (g_getenv ("LANG"));
+#if defined(G_OS_WIN32)
+	lang = g_win32_getlocale ();
+#else
+	lang = g_strdup (setlocale (LC_ALL, NULL));
+#endif
+
 	if (!lang || !strcmp (lang, "C"))
 		lang = g_strdup ("en");
-	else {
-		/* get rid of useless trailing garbage like de_DE@euro or de_DE.ISO-8859-15 */
-		if ((lang_punct = strrchr (lang, '.')) != NULL)
-			*lang_punct = '\0';
-		if ((lang_punct = strrchr (lang, '@')) != NULL)
-			*lang_punct = '\0';
-	}
+
+	/* Enchant will get rid of useless trailing garbage like de_DE@euro or de_DE.ISO-8859-15 */
 	
 	broker = enchant_broker_init ();
 	dict = enchant_broker_request_dict (broker, lang);
@@ -323,7 +323,7 @@ int main (int argc, char ** argv)
 {
 	IspellMode_t mode = MODE_NONE;
 	
-	char * arg, * file = NULL;
+	char * file = NULL;
 	int i, rval = 0;
 	
 	FILE * fp = stdin;
@@ -331,16 +331,17 @@ int main (int argc, char ** argv)
 	int countLines = 0;
 	
 	for (i = 1; i < argc; i++) {
-		arg = argv[i];
+		char * arg = argv[i];
 		if (arg[0] == '-') {
 			if (strlen (arg) == 2) {
-				if (arg[1] == 'a')
+				/* it seems that the first one of these that is specified gets precedence */
+				if (arg[1] == 'a' && MODE_NONE == mode)
 					mode = MODE_A;
-				else if (arg[1] == 'l')
+				else if (arg[1] == 'l' && MODE_NONE == mode)
 					mode = MODE_L;
-				else if (arg[1] == 'v')
+				else if (arg[1] == 'v' && MODE_NONE == mode)
 					mode = MODE_VERSION;
-				else if (arg[1] == 'L')
+				else if (arg[1] == 'L' && MODE_NONE == mode)
 					countLines = 1;
 			} 
 			else if (strlen (arg) > 2) {
@@ -361,10 +362,8 @@ int main (int argc, char ** argv)
 		print_help (stdout, argv[0]);
 	}
 	else {
-		setlocale (LC_ALL, "");
-
 		if (file) {
-			fp = fopen (file, "r");
+			fp = fopen (file, "rb");
 			if (!fp) {
 				fprintf (stderr, "Couldn't open '%s' to spellcheck\n", file);
 				exit (1);
