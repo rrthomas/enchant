@@ -445,7 +445,7 @@ enchant_dict_get_error (EnchantDict * dict)
  * enchant_dict_check
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to correct, in UTF-8 encoding
- * @len: The non-zero byte length of @word
+ * @len: The byte length of @word, or -1 for strlen (@word)
  *
  * Will return an "incorrect" value if any of those pre-conditions
  * are not met.
@@ -453,13 +453,15 @@ enchant_dict_get_error (EnchantDict * dict)
  * Returns: 0 if the word is correctly spelled, positive if not, negative if error
  */
 ENCHANT_MODULE_EXPORT (int)
-enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
+enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 {
 	EnchantSession * session;
 
 	g_return_val_if_fail (dict, -1);
 	g_return_val_if_fail (word, -1);
-	g_return_val_if_fail (len, -1);
+
+	if (len < 0)
+		len = strlen (word);
 	
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
@@ -480,7 +482,7 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
  * enchant_dict_suggest
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to find suggestions for, in UTF-8 encoding
- * @len: The non-zero byte length of @word
+ * @len: The byte length of @word, or -1 for strlen (@word)
  * @out_n_suggs: The location to store the # of suggestions returned, or %null
  *
  * Will return an %null value if any of those pre-conditions
@@ -490,14 +492,16 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
  */
 ENCHANT_MODULE_EXPORT (char **)
 enchant_dict_suggest (EnchantDict * dict, const char *const word,
-		      size_t len, size_t * out_n_suggs)
+		      ssize_t len, size_t * out_n_suggs)
 {
 	size_t n_suggs;
 	char ** suggs;
 
 	g_return_val_if_fail (dict, NULL);
 	g_return_val_if_fail (word, NULL);
-	g_return_val_if_fail (len, NULL);
+
+	if (len < 0)
+		len = strlen (word);
 	
 	if (dict->suggest) 
 		{
@@ -537,18 +541,20 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
  * enchant_dict_add_to_pwl
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
- * @len: The non-zero byte length of @word
+ * @len: The byte length of @word, or -1 for strlen (@word)
  *
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
-			 size_t len)
+			 ssize_t len)
 {
 	EnchantSession * session;
 
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
-	g_return_if_fail (len);
+
+	if (len < 0)
+		len = strlen (word);
 
 	/* add to session backend regardless */
 	enchant_dict_add_to_session (dict, word, len);
@@ -565,13 +571,13 @@ enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
  * enchant_dict_add_to_personal
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
- * @len: The non-zero byte length of @word
+ * @len: The byte length of @word, or -1 for strlen (@word)
  *
  * DEPRECATED. Please use enchant_dict_add_to_pwl() instead.
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
-			      size_t len)
+			      ssize_t len)
 {
 	enchant_dict_add_to_pwl (dict, word, len);
 }
@@ -580,18 +586,20 @@ enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
  * enchant_dict_add_to_session
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to add to this spell-checking session, in UTF-8 encoding
- * @len: The non-zero byte length of @word
+ * @len: The byte length of @word, or -1 for strlen (@word)
  *
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
-			     size_t len)
+			     ssize_t len)
 {
 	EnchantSession * session;
 
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
-	g_return_if_fail (len);
+
+	if (len < 0)
+		len = strlen (word);
 	
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
@@ -601,15 +609,23 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 		(*dict->add_to_session) (dict, word, len);
 }
 
+/**
+ * enchant_dict_is_in_session
+ * @dict: A non-null #EnchantDict
+ * @word: The word you wish to see if it's in your session
+ * @len: the byte length of @word, or -1 for strlen (@word)
+ */
 ENCHANT_MODULE_EXPORT (int)
 enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
-			    size_t len)
+			    ssize_t len)
 {
 	EnchantSession * session;
 
 	g_return_val_if_fail (dict, 0);
 	g_return_val_if_fail (word, 0);
-	g_return_val_if_fail (len, 0);
+
+	if (len < 0)
+		len = strlen (word);
 	
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
@@ -621,9 +637,9 @@ enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
  * enchant_dict_store_replacement
  * @dict: A non-null #EnchantDict
  * @mis: The non-null word you wish to add a correction for, in UTF-8 encoding
- * @mis_len: The non-zero byte length of @mis
+ * @mis_len: The byte length of @mis, or -1 for strlen (@mis)
  * @cor: The non-null correction word, in UTF-8 encoding
- * @cor_len: The non-zero byte length of @cor
+ * @cor_len: The byte length of @cor, or -1 for strlen (@cor)
  *
  * Notes that you replaced @mis with @cor, so it's possibly more likely
  * that future occurrences of @mis will be replaced with @cor. So it might
@@ -631,16 +647,20 @@ enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_store_replacement (EnchantDict * dict,
-				const char *const mis, size_t mis_len,
-				const char *const cor, size_t cor_len)
+				const char *const mis, ssize_t mis_len,
+				const char *const cor, ssize_t cor_len)
 {
 	EnchantSession * session;
 
 	g_return_if_fail (dict);
 	g_return_if_fail (mis);
-	g_return_if_fail (mis_len);
 	g_return_if_fail (cor);
-	g_return_if_fail (cor_len);
+
+	if (mis_len < 0)
+		mis_len = strlen (mis);
+
+	if (cor_len < 0)
+		cor_len = strlen (cor);
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
