@@ -102,6 +102,18 @@ pspell_dict_add_to_session (EnchantDict * me,
 }
 
 static void
+pspell_dict_store_replacement (struct str_enchant_dict * me,
+			       const char *const mis, size_t mis_len,
+			       const char *const cor, size_t cor_len)
+{
+	PspellManager *manager;
+	
+	manager = (PspellManager *) me->user_data;
+	pspell_manager_store_replacement (manager, mis, mis_len,
+					  cor, cor_len);
+}
+
+static void
 pspell_dict_free_suggestions (EnchantDict * me, char **str_list)
 {
 	g_strfreev (str_list);
@@ -135,6 +147,7 @@ pspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->suggest = pspell_dict_suggest;
 	dict->add_to_personal = pspell_dict_add_to_personal;
 	dict->add_to_session = pspell_dict_add_to_session;
+	dict->store_replacement = pspell_dict_store_replacement;
 	dict->free_suggestions = pspell_dict_free_suggestions;
 	
 	return dict;
