@@ -216,7 +216,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 	const gchar * lang;
 	size_t pos;
 
-	gboolean was_last_line = FALSE;
+	gboolean was_last_line = FALSE, corrected_something = FALSE;
 
 	if (mode == MODE_A)
 		print_version (out);
@@ -240,8 +240,10 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 
 		if (str->len) {
 
+			corrected_something = FALSE;
 			token_ptr = tokens = tokenize_line (str);
 			while (tokens != NULL) {
+				corrected_something = TRUE;
 
 				word = (GString *)tokens->data;
 				tokens = tokens->next;
@@ -260,15 +262,11 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 
 			if (token_ptr)
 				g_slist_free (token_ptr);
-			else if (mode == MODE_A)
-				fwrite ("\n", 1, 1, out);
 		} 
-		else if (mode == MODE_A && !was_last_line)
+		
+		if (mode == MODE_A && corrected_something)
 			fwrite ("\n", 1, 1, out);
 		
-		if (mode == MODE_A)
-			fwrite ("\n", 1, 1, out);
-
 		g_string_truncate (str, 0);
 	}
 	
