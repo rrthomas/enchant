@@ -16,7 +16,7 @@
  * gives permission to link the code of this program with
  * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
- * the two.  You must obey the GNU General Public License in all
+ * the two.  You must obey the GNU Lesser General Public License in all
  * respects for all of the code used other than said providers.  If you modify
  * this file, you may extend this exception to your version of the
  * file, but you are not obligated to do so.  If you do not wish to

@@ -21,7 +21,7 @@
  * gives permission to link the code of this program with
  * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
- * the two.  You must obey the GNU General Public License in all
+ * the two.  You must obey the GNU Lesser General Public License in all
  * respects for all of the code used other than said providers.  If you modify
  * this file, you may extend this exception to your version of the
  * file, but you are not obligated to do so.  If you do not wish to
@@ -95,6 +95,9 @@
 
 /*
  * $Log$
+ * Revision 1.4  2003/08/14 17:51:28  dom
+ * update license - exception clause should be Lesser GPL
+ *
  * Revision 1.3  2003/07/28 20:40:27  dom
  * fix up the license clause, further win32-registry proof some directory getting functions
  *
