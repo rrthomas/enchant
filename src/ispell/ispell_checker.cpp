@@ -174,9 +174,7 @@ ISpellChecker::~ISpellChecker()
 
 bool
 ISpellChecker::checkWord(const char * const utf8Word, size_t length)
-{
-	bool retVal = false;
-	
+{	
 	ichar_t iWord[INPUTWORDLEN + MAXAFFIXLEN];
 	char szWord[INPUTWORDLEN + MAXAFFIXLEN];
 	
@@ -190,6 +188,8 @@ ISpellChecker::checkWord(const char * const utf8Word, size_t length)
 		return true;
 	if (m_session[utf8Word])
 		return true;
+
+	bool retVal = false;
 
 	if (!g_iconv_is_valid(m_translate_in))
 		return false;	
@@ -213,11 +213,7 @@ ISpellChecker::checkWord(const char * const utf8Word, size_t length)
 				{
 					retVal = true;
 				}
-			else
-				retVal = false;
 		}
-	else
-		retVal = false;
 	
 	return retVal;
 }
@@ -467,7 +463,7 @@ ispell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	
 	checker = (ISpellChecker *) me->user_data;
 	
-	if (true == checker->checkWord(word, len))
+	if (checker->checkWord(word, len))
 		return 0;
 	
 	return 1;
