@@ -52,7 +52,7 @@ main (int argc, char **argv)
 	
 	enchant_broker_describe (broker, enumerate_dicts, NULL);
 	
-	enchant_broker_term (broker);
+	enchant_broker_free (broker);
 	
 	return 0;
 }

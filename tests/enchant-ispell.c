@@ -74,7 +74,7 @@ consume_line (FILE * in, GString * str)
 
 	g_string_truncate (str, 0);
 
-	while ((ch = fgetc (in)) != EOF) {
+	while (ret && (ch = fgetc (in)) != EOF) {
 		if (ch == '\r')
 			continue;
 		else {
@@ -152,6 +152,59 @@ do_mode_l (FILE * out, EnchantDict * dict, GString * word)
 	}
 }
 
+/* splits a line into a set of (word,word_position) touples */
+static GSList *
+tokenize_line (GString * line)
+{
+	GSList * tokens = NULL;
+	size_t start_pos, cur_pos;
+	char *utf = (char *) line->str;
+
+	GString * word;
+	
+	gunichar uc;
+	
+	start_pos = cur_pos = 0;
+	word = g_string_new (NULL);
+
+	while (cur_pos < line->len && *utf) {
+		uc = g_utf8_get_char (utf); 
+		
+		if (g_unichar_isalpha (uc)) {
+			g_string_append_unichar (word, uc);
+			cur_pos++;
+		}
+		else if (g_unichar_ispunct (uc)) {
+			if (uc == '\'') {
+				g_string_append_unichar (word, uc);
+				cur_pos++;
+			} else {
+				if (word->len) {
+					tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
+					tokens = g_slist_append (tokens, GINT_TO_POINTER(start_pos));
+					g_string_truncate (word, 0);
+				}
+
+				start_pos = ++cur_pos;
+			}
+		} else {
+			if (word->len) {
+				tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
+				tokens = g_slist_append (tokens, GINT_TO_POINTER(start_pos));
+				g_string_truncate (word, 0);
+			}
+
+			start_pos = ++cur_pos;
+		}
+
+		utf = g_utf8_next_char (utf);
+	}
+
+	g_string_free (word, TRUE);
+
+	return tokens;
+}
+
 static int
 parse_file (FILE * in, FILE * out, IspellMode_t mode)
 {
@@ -159,18 +212,14 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 	EnchantDict * dict;
 	
 	GString * str, * word;
-	const gchar * lang, * utf;
-	gunichar uc;
+	GSList * tokens, *token_ptr;
+	const gchar * lang;
+	size_t pos;
 
-	size_t start_pos, cur_pos;
-	
 	gboolean was_last_line = FALSE;
 
 	if (mode == MODE_A)
 		print_version (out);
-	
-	str = g_string_new (NULL);
-	word = g_string_new (NULL);
 
 	lang = g_getenv ("LANG");
 	if (!lang || !strcmp (lang, "C"))
@@ -180,49 +229,54 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 	dict = enchant_broker_request_dict (broker, lang);
 	if (!dict) {
 		fprintf (stderr, "Couldn't create a dictionary for %s\n", lang);
-		enchant_broker_term (broker);
+		enchant_broker_free (broker);
+		return 1;
 	}
+
+	str = g_string_new (NULL);
 	
 	while (!was_last_line) {
 		was_last_line = consume_line (in, str);
 
 		if (str->len) {
 
-			utf = (gchar *)str->str;
-			start_pos = cur_pos = 0;
+			token_ptr = tokens = tokenize_line (str);
+			while (tokens != NULL) {
 
-			while (cur_pos < str->len && *utf) {
-				uc = g_utf8_get_char (utf); 
+				word = (GString *)tokens->data;
+				tokens = tokens->next;
+				pos = GPOINTER_TO_INT(tokens->data);
+				tokens = tokens->next;
 
-				if (g_unichar_isalpha (uc) || uc == '\'') {
-					g_string_append_unichar (word, uc);
-					cur_pos++;
-				} else {
-					if (word->len > MIN_WORD_LENGTH) {
-						if (mode == MODE_A) {
-							do_mode_a (out, dict, word, start_pos);
-						} 
-						else if (mode == MODE_L) {
-							do_mode_l (out, dict, word);
-						}
+				if (word->len > MIN_WORD_LENGTH) {
+					if (mode == MODE_A) {
+						do_mode_a (out, dict, word, pos);
+					} 
+					else if (mode == MODE_L) {
+						do_mode_l (out, dict, word);
 					}
-					
-					start_pos = ++cur_pos;
-					g_string_truncate (word, 0);					
 				}
-
-				utf = g_utf8_next_char (utf);
 			}
-		}
 
+			if (token_ptr)
+				g_slist_free (token_ptr);
+			else if (mode == MODE_A)
+				fwrite ("\n", 1, 1, out);
+		} 
+		else if (mode == MODE_A && !was_last_line)
+			fwrite ("\n", 1, 1, out);
+		
 		if (mode == MODE_A)
 			fwrite ("\n", 1, 1, out);
+
+		g_string_truncate (str, 0);
 	}
 	
-	enchant_broker_release_dict (broker, dict);
-	enchant_broker_term (broker);
+	enchant_broker_free_dict (broker, dict);
+	enchant_broker_free (broker);
 
-	g_string_free (word, TRUE);
+	if (word)
+		g_string_free (word, TRUE);
 	g_string_free (str, TRUE);
 
 	return 0;

@@ -78,12 +78,12 @@ ENCHANT_MODULE_EXPORT (void)
 ENCHANT_MODULE_EXPORT (EnchantBroker *) 
      enchant_broker_init (void);
 ENCHANT_MODULE_EXPORT (void)
-     enchant_broker_term (EnchantBroker * broker);
+     enchant_broker_free (EnchantBroker * broker);
 
 ENCHANT_MODULE_EXPORT (EnchantDict *)
      enchant_broker_request_dict (EnchantBroker * broker, const char *const tag);
 ENCHANT_MODULE_EXPORT (void)
-     enchant_broker_release_dict (EnchantBroker * broker, EnchantDict * dict);
+     enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict);
 
 ENCHANT_MODULE_EXPORT (EnchantDictStatus)
      enchant_broker_dictionary_status (EnchantBroker * broker,

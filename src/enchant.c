@@ -713,13 +713,13 @@ enchant_broker_init (void)
 }
 
 /**
- * enchant_broker_term
+ * enchant_broker_free
  * @broker: A non-null #EnchantBroker
  *
  * Destroys the broker object
  */
 ENCHANT_MODULE_EXPORT (void) 
-enchant_broker_term (EnchantBroker * broker)
+enchant_broker_free (EnchantBroker * broker)
 {
 	guint n_remaining;
 
@@ -862,14 +862,14 @@ enchant_dict_describe (EnchantDict * dict,
 }
 
 /**
- * enchant_broker_release_dict
+ * enchant_broker_free_dict
  * @broker: A non-null #EnchantBroker
  * @dict: A non-null #EnchantDict
  *
  * Releases the dictionary when you are done using it
  */
 ENCHANT_MODULE_EXPORT (void)
-enchant_broker_release_dict (EnchantBroker * broker, EnchantDict * dict)
+enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 {
 	EnchantSession * session;
 

@@ -125,10 +125,10 @@ main (int argc, char **argv)
 			run_dict_tests (dict);
 			
 			enchant_broker_describe (broker, enumerate_dicts, NULL);
-			enchant_broker_release_dict (broker, dict);
+			enchant_broker_free_dict (broker, dict);
 		}
 	
-	enchant_broker_term (broker);
+	enchant_broker_free (broker);
 	
 	return 0;
 }

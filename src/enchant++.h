@@ -47,7 +47,7 @@ namespace enchant
 		public:
 			
 			~Dict () {
-				enchant_broker_release_dict (m_broker, m_dict);
+				enchant_broker_free_dict (m_broker, m_dict);
 			}
 					
 			bool check (const std::string & utf8word) {
@@ -164,7 +164,7 @@ namespace enchant
 				}
 			
 			~Broker () {
-				enchant_broker_term (m_broker);
+				enchant_broker_free (m_broker);
 			}
 			
 			// not implemented
