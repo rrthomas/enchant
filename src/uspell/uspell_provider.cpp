@@ -131,7 +131,7 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 	utf8_t **list;
 	
 	if (len >= MAXCHARS) // no suggestions; the word is outlandish
-		return g_new0 (char *, 1); 
+		return NULL;
 	memcpy(reinterpret_cast<char *>(myWord), word, len);
 	myWord[len] = 0;
 	manager = reinterpret_cast<uSpell *>(me->user_data);
@@ -156,7 +156,32 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 		}
 	free(list);
 	return sugg_arr;
-}
+} // uspell_dict_suggest
+
+static void
+uspell_dict_add_to_session (EnchantDict * me, const char *const word,
+		     size_t len)
+{
+	uSpell *manager;
+	wide_t buf[MAXCHARS];
+	utf8_t myWord[MAXCHARS];
+	int length, index;
+	
+	manager = reinterpret_cast<uSpell *>(me->user_data);
+
+	manager->acceptWord((const utf8_t *)word);
+	if (len >= MAXCHARS)
+		return; // too long; can't reasonably convert
+	// see if we want to acceptWord(uppercase(myWord))
+	if (!(manager->theFlags & uSpell::upperLower)) return; // non-case language
+	length = utf8_wide(buf, (const utf8_t *)word, MAXCHARS);
+	for (index = 0; index < length; index++) {
+		if (g_unichar_isupper(buf[index])) return; // case-sensitive word
+		buf[index] = g_unichar_toupper(buf[index]);
+	}
+	wide_utf8(myWord, MAXCHARS, buf, length);
+	manager->acceptWord(myWord);
+} // uspell_dict_add_to_session
 
 static void
 uspell_dict_free_suggestions (EnchantDict * me, char **str_list)
@@ -173,7 +198,8 @@ typedef struct {
 static const Mapping mapping [] = {
 	{"he",    "hebrew",  0},
 	{"he_IL", "hebrew",  0},
-	{"yi",    "yiddish", uSpell::hasCompounds | uSpell::hasComposition}
+	{"yi",    "yiddish", uSpell::hasComposition},
+	{"en_US", "american", uSpell::upperLower},
 };
 
 static const size_t n_mappings = (sizeof(mapping)/sizeof(mapping[0]));
@@ -329,7 +355,7 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = manager;
 	dict->check = uspell_dict_check;
 	dict->suggest = uspell_dict_suggest;
-	dict->store_replacement = 0;
+	dict->add_to_session = uspell_dict_add_to_session;
 	dict->free_suggestions = uspell_dict_free_suggestions;
 	// don't use personal, session - let higher level implement that
 	
