@@ -1,4 +1,4 @@
-SUBDIRS=aspell ispell uspell
+SUBDIRS=. aspell ispell uspell
 
 if OS_WIN32
 

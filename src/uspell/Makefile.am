@@ -21,7 +21,7 @@ INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(USPELL_CFLAGS)
 uspell_LTLIBRARIES = $(target_lib)
 uspelldir= $(libdir)/enchant
 
-libenchant_uspell_la_LIBADD= $(ENCHANT_LIBS) $(USPELL_LIBS)
+libenchant_uspell_la_LIBADD= $(ENCHANT_LIBS) $(USPELL_LIBS) $(top_builddir)/src/libenchant.la
 libenchant_uspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
 libenchant_uspell_la_SOURCES = uspell_provider.cpp
 libenchant_uspell_lalibdir=$(libdir)/enchant
