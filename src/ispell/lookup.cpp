@@ -72,6 +72,9 @@
 
 /*
  * $Log$
+ * Revision 1.7  2003/09/25 02:44:48  dom
+ * bug 5813
+ *
  * Revision 1.6  2003/08/26 13:20:40  dom
  * ispell crasher fix, implement enchant_dictionary_release
  *
@@ -381,22 +384,22 @@ int ISpellChecker::linit (char *hashname)
 			if (dp->word == (char *) -1)
 				dp->word = NULL;
 			else
-				dp->word = &m_hashstrings [ reinterpret_cast<int>(dp->word) ];
+				dp->word = &m_hashstrings [ reinterpret_cast<size_t>(dp->word) ];
 			if (dp->next == (struct dent *) -1)
 				dp->next = NULL;
 			else
-				dp->next = &m_hashtbl [ reinterpret_cast<int>(dp->next) ];
+				dp->next = &m_hashtbl [ reinterpret_cast<size_t>(dp->next) ];
 	    }
 	}
 
     for (i = m_numsflags + m_numpflags, entry = m_sflaglist; --i >= 0; entry++)
 	{
 		if (entry->stripl)
-			entry->strip = reinterpret_cast<ichar_t *>(&m_hashstrings[reinterpret_cast<int>(entry->strip)]);
+			entry->strip = reinterpret_cast<ichar_t *>(&m_hashstrings[reinterpret_cast<size_t>(entry->strip)]);
 		else
 			entry->strip = NULL;
 		if (entry->affl)
-			entry->affix = reinterpret_cast<ichar_t *>(&m_hashstrings[reinterpret_cast<int>(entry->affix)]);
+			entry->affix = reinterpret_cast<ichar_t *>(&m_hashstrings[reinterpret_cast<size_t>(entry->affix)]);
 		else
 			entry->affix = NULL;
 	}
