@@ -40,6 +40,8 @@ AM_PROG_LIBTOOL
 
 AC_C_CONST
 
+AC_CHECK_FUNCS(flock lockf)
+
 have_cxx=yes
 AC_PROG_CXX(,have_cxx=no)
 AM_CONDITIONAL(WITH_CXX, test "x$have_cxx" = "xyes")
