@@ -1,3 +1,5 @@
 Makefile.in
 Makefile
+test-enchant
 .deps
+.libs
