@@ -227,18 +227,6 @@ static int appleSpell_dict_check (EnchantDict * me, const char * const word, siz
 	return result;
 }
 
-static void appleSpell_dict_free_suggestions (EnchantDict * me, char ** str_list)
-{
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-
-	// NSLog (@"appleSpell_dict_free_suggestions");
-
-	if (str_list)
-		g_strfreev (str_list);
-
-	if (pool) [pool release];
-}
-
 static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, const char * const tag)
 {
 	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
@@ -267,7 +255,6 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 
 	dict->check            = appleSpell_dict_check;
 	dict->suggest          = appleSpell_dict_suggest;
-	dict->free_string_list = appleSpell_dict_free_suggestions;
 
 	AppleSpellDictionary * ASD = g_new0 (AppleSpellDictionary, 1);
 	if (!ASD)
