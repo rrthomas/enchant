@@ -1,0 +1,41 @@
+.PU
+.TH enchant 1 
+.SH NAME
+Enchant \- a spellchecker
+.SH SYNOPSIS
+.ll +8
+.B enchant [-a] [-l] [-L] [-v]
+.ll -8
+.br
+.SH DESCRIPTION
+.I Enchant is an ispell-compatible spellchecker.
+.SS OPTIONS
+.TP
+.I "\-a"
+List alternatives
+.TP
+.I "\-l"
+List only the misspellings
+.TP
+.I "\-L"
+Includes the line number in the output
+.TP
+.I "\-v"
+Prints the program's version
+.SH Enchant Ordering File
+.TP
+Enchant has a global and a local ordering file. It lets the user specify
+which spelling backend to use for individual languages if you really care
+which backend gets used. It takes the form of:
+*:aspell,myspell,ispell
+en:aspell,myspell,ispell
+fr:myspell,ispell:aspell
+.SH MORE INFORMATION
+http://www.abisource.com/enchant/
+.SH "SEE ALSO"
+.BR aspell(1),
+.BR ispell(1),
+.SH "AUTHOR"
+ Dom Lachowicz
+ WEB: http://www.abisource.com/enchant/
+ MAIL: cinamod@hotmail.com

@@ -195,6 +195,7 @@ src/ispell/Makefile
 src/uspell/Makefile
 src/myspell/Makefile
 tests/Makefile
+doc/Makefile
 ])
 
 dnl =============================================================================================
