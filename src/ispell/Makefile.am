@@ -1,20 +1,3 @@
-if OS_WIN32
-
-if WITH_ISPELL
-install-libtool-import-lib:
-	$(INSTALL) .libs/libenchant_ispell.dll.a $(DESTDIR)$(libdir)
-
-uninstall-libtool-import-lib:
-	-rm $(DESTDIR)$(libdir)/libenchant_ispell.dll.a
-else
-install-libtool-import-lib:
-uninstall-libtool-import-lib:
-endif
-else
-install-libtool-import-lib:
-uninstall-libtool-import-lib:
-endif
-
 if WITH_ISPELL
 target_lib = libenchant_ispell.la
 else
@@ -42,7 +25,3 @@ libenchant_ispell_la_SOURCES =	\
 	msgs.h			\
 	sp_spell.h		\
 	ispell_checker.cpp
-
-install-data-local: install-libtool-import-lib
-
-uninstall-local: uninstall-libtool-import-lib

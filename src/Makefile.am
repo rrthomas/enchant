@@ -1,17 +1,5 @@
 SUBDIRS=. aspell ispell uspell
 
-if OS_WIN32
-
-install-libtool-import-lib:
-	$(INSTALL) .libs/libenchant.dll.a $(DESTDIR)$(libdir)
-
-uninstall-libtool-import-lib:
-	-rm $(DESTDIR)$(libdir)/libenchant.dll.a
-else
-install-libtool-import-lib:
-uninstall-libtool-import-lib:
-endif
-
 INCLUDES=-I$(top_srcdir) $(ENCHANT_CFLAGS) -DENCHANT_GLOBAL_MODULE_DIR=\"$(libdir)/enchant\" -DENCHANT_GLOBAL_ORDERING=\"$(datadir)/enchant\"
 
 lib_LTLIBRARIES = libenchant.la
@@ -22,7 +10,3 @@ libenchant_la_SOURCES = enchant.c enchant.h
 
 libenchant_includedir = $(includedir)/enchant/
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
-
-install-data-local: install-libtool-import-lib
-
-uninstall-local: uninstall-libtool-import-lib
