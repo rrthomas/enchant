@@ -145,13 +145,15 @@ if test "x$check_aspell" != "xno"; then
       if test "x$ASPELL_DICT_DIR" = "x"; then
 	      AC_MSG_WARN([Didn't find aspell >= 0.50.0 and no explicit path aspell specified. Guessing at $aspell_prefix])
 	      ASPELL_LIBS="-L$aspell_prefix/lib -laspell"
-	      ASPELL_DICT_DIR="\"$aspell_prefix/lib/aspell\""
+	      ASPELL_DICT_DIR="'\"$aspell_prefix/lib/aspell\"'"
       fi
    fi
 
-   AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,AC_MSG_WARN([Enchant building without the aspell library]),)
+   AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,
+      [AC_CHECK_LIB(pspell, new_pspell_config, build_aspell=yes, AC_MSG_WARN([Enchant building without the aspell library]))]
+      ,)
    LDFLAGS=$saved_LDFLAGS
-
+   
    AC_SUBST(ASPELL_INC)
    AC_SUBST(ASPELL_LIBS)
    AC_SUBST(ASPELL_DICT_DIR)
