@@ -103,6 +103,7 @@ aspell_dict_add_to_personal (EnchantDict * me,
 	
 	manager = (PspellManager *) me->user_data;
 	pspell_manager_add_to_personal (manager, word, len);
+	pspell_manager_save_all_word_lists (manager);
 }
 
 static void
@@ -125,6 +126,7 @@ aspell_dict_store_replacement (struct str_enchant_dict * me,
 	manager = (PspellManager *) me->user_data;
 	pspell_manager_store_replacement (manager, mis, mis_len,
 					  cor, cor_len);
+	pspell_manager_save_all_word_lists (manager);
 }
 
 static void

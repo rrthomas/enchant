@@ -112,8 +112,9 @@ AC_ARG_WITH(aspell-prefix, [  --with-aspell-prefix=DIR
                           specify under which prefix aspell is installed.], with_aspell_prefix="$withval", )
 
 if test "x$check_aspell" != "xno"; then
-   if test "x$with_aspell_prefix" != "x"; then
-       saved_LDFLAGS=$LDFLAGS
+   saved_LDFLAGS=$LDFLAGS
+
+   if test "x$with_aspell_prefix" != "x"; then       
        LDFLAGS="-L$with_aspell_prefix/lib "$LDFLAGS
        ASPELL_INC="-I$with_aspell_prefix/include"
        ASPELL_LIBS="-L$with_aspell_prefix/lib -laspell"
@@ -126,9 +127,7 @@ if test "x$check_aspell" != "xno"; then
    fi
 
    AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,AC_MSG_WARN([Enchant building without the aspell library]),)
-   if test "x$with_aspell_prefix" != "x"; then
-          LDFLAGS=$saved_LDFLAGS
-   fi
+   LDFLAGS=$saved_LDFLAGS
 
    AC_SUBST(ASPELL_INC)
    AC_SUBST(ASPELL_LIBS)
