@@ -229,6 +229,25 @@ enchant_get_user_home_dir (void)
 /********************************************************************************/
 /********************************************************************************/
 
+static char *
+enchant_normalize_dictionary_tag (const char * const dict_tag)
+{
+	char * new_tag = g_strdup (dict_tag);
+	char * needle;
+
+	new_tag = g_strstrip (new_tag);
+
+	/* strip off en_GB@euro */
+	if ((needle = strstr (new_tag, "@")) != NULL)
+		*needle = '\0';
+
+	/* strip off en_GB.UTF-8 */
+	if ((needle = strstr (new_tag, ".")) != NULL)
+		*needle = '\0';
+
+	return new_tag;
+}
+
 static void
 enchant_session_destroy (EnchantSession * session)
 {
@@ -1070,20 +1089,25 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 {
 	EnchantSession *session;
 	EnchantDict *dict = NULL;
-	
+	char * normalized_pwl;
+
 	g_return_val_if_fail (broker, NULL);
 	g_return_val_if_fail (pwl && strlen(pwl), NULL);
 
 	enchant_broker_clear_error (broker);
 
-	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) pwl);
-	if (dict)
+	normalized_pwl = enchant_normalize_dictionary_tag (pwl);
+	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) normalized_pwl);
+	if (dict) {
+		g_free (normalized_pwl);
 		return dict;
+	}
 
 	session = enchant_session_new_with_pwl (NULL, pwl, "Personal WordList", TRUE);
 	if (!session) 
 		{
-			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
+			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", normalized_pwl);
+			g_free (normalized_pwl);
 			return NULL;
 		}
 
@@ -1092,7 +1116,7 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 	dict = g_new0 (EnchantDict, 1);
 	dict->enchant_private_data = (void *)session;
 
-	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (pwl), dict);
+	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (normalized_pwl), dict);
 
 	return dict;
 }
@@ -1111,34 +1135,39 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	EnchantProvider *provider;
 	EnchantDict *dict = NULL;
 	GSList *list = NULL;
-	
+	char * normalized_tag;
+
 	g_return_val_if_fail (broker, NULL);
 	g_return_val_if_fail (tag && strlen(tag), NULL);
 
 	enchant_broker_clear_error (broker);
 	
-	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
-	if (dict)
+	normalized_tag = enchant_normalize_dictionary_tag (tag);
+	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) normalized_tag);
+	if (dict) {
+		g_free (normalized_tag);
 		return dict;
-	
-	for (list = enchant_get_ordered_providers (broker, tag); list != NULL; list = g_slist_next (list))
+	}
+
+	for (list = enchant_get_ordered_providers (broker, normalized_tag); list != NULL; list = g_slist_next (list))
 		{
 			provider = (EnchantProvider *) list->data;
 			
 			if (provider->request_dict)
 				{
-					dict = (*provider->request_dict) (provider, tag);
+					dict = (*provider->request_dict) (provider, normalized_tag);
 					
 					if (dict)
 						{
-							session = enchant_session_new (provider, tag);
+							session = enchant_session_new (provider, normalized_tag);
 							dict->enchant_private_data = (void*)session;
-							g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (tag), dict);
+							g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (normalized_tag), dict);
 							break;
 						}
 				}
 		}
 
+	g_free (normalized_tag);
 	g_slist_free (list);
 	
 	/* Nothing found */
@@ -1281,15 +1310,20 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 {
 	EnchantProvider *provider;
 	GSList *list;
+	char * normalized_tag;
 
 	g_return_val_if_fail (broker, 0);
 	g_return_val_if_fail (tag && strlen(tag), 0);
 
 	enchant_broker_clear_error (broker);
 
+	normalized_tag = enchant_normalize_dictionary_tag (tag);
+
 	/* don't query the providers if we can just do a quick map lookup */
-	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL)
+	if (g_hash_table_lookup (broker->dict_map, (gpointer) normalized_tag) != NULL) {
+		g_free (normalized_tag);
 		return 1;
+	}
 
 	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
@@ -1297,11 +1331,14 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 
 			if (provider->dictionary_exists)
 				{
-					if ((*provider->dictionary_exists) (provider, tag))
+					if ((*provider->dictionary_exists) (provider, normalized_tag)) {
+						g_free (normalized_tag);
 						return 1;
+					}
 				}
 		}
 
+	g_free (normalized_tag);
 	return 0;
 }
 
@@ -1331,10 +1368,9 @@ enchant_broker_set_ordering (EnchantBroker * broker,
 
 	enchant_broker_clear_error (broker);
 
-	tag_dupl = g_strdup (tag);
-	ordering_dupl = g_strdup (ordering);
+	tag_dupl = enchant_normalize_dictionary_tag (tag);
 
-	tag_dupl = g_strstrip (tag_dupl);
+	ordering_dupl = g_strdup (ordering);
 	ordering_dupl = g_strstrip (ordering_dupl);
 
 	if (tag_dupl && strlen(tag_dupl) &&
