@@ -3,5 +3,6 @@ Makefile
 test-enchant
 test-enchantxx
 enchant-lsmod
+enchant
 .deps
 .libs
