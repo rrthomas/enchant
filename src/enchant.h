@@ -31,7 +31,7 @@
 #ifndef ENCHANT_H
 #define ENCHANT_H
 
-/* for size_t */
+/* for size_t, ssize_t */
 #include <sys/types.h>
 
 #ifdef __cplusplus

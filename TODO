@@ -1,1 +1,4 @@
-hspell backend
+myspell dictionary enumaration: use GDir for this
+incoming language_LOCALE normalization: strip off .UTF-8 or @euro, etc...
+change API to use ssize_t, calculate strlen() of incoming string in case where len == -1
+change LGPL exception from "link" to "combine/incorporate" or something. clean up the language.
