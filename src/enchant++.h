@@ -157,8 +157,7 @@ namespace enchant
 				}
 			
 			~Broker () {
-				if (m_broker)
-					enchant_broker_term (m_broker);
+				enchant_broker_term (m_broker);
 			}
 			
 			// not implemented
