@@ -199,6 +199,10 @@ ISpellChecker::ISpellChecker()
 	memset(m_pflagindex,0,sizeof(m_pflagindex));
 }
 
+#ifndef FREEP
+#define FREEP(p)        do { if (p) free(p); } while (0)
+#endif
+
 ISpellChecker::~ISpellChecker()
 {
         // lcleanup(); // replaced this with functions for Win32 brokeness
