@@ -52,8 +52,6 @@ typedef enum
 		MODE_FILE
 	} IspellMode_t;
 
-static int countLines = 0, lineCount = 0;
-
 static void 
 print_version (FILE * to)
 {
@@ -78,7 +76,6 @@ consume_line (FILE * in, GString * str)
 	gchar * utf;
 	gboolean ret = TRUE;
 
-	lineCount++;
 	g_string_truncate (str, 0);
 
 	while (ret && (ch = fgetc (in)) != EOF) {
@@ -86,9 +83,8 @@ consume_line (FILE * in, GString * str)
 			continue;
 		else {
 			g_string_append_c (str, ch);
-			if (ch == '\n') {
+			if (ch == '\n')
 				ret = FALSE;
-			}
 		}
 	}
 
@@ -117,25 +113,23 @@ print_utf (FILE * out, const char * str)
 }
 
 static void
-do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
+do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, size_t lineCount)
 {
 	size_t n_suggs;
-	char ** suggs;
+	char ** suggs;	
 
-	if (enchant_dict_check (dict, word->str, word->len) == 0)
-		if (countLines) {
-			fprintf (out, "* %d\n", lineCount);
-		} else {
+	if (word->len <= MIN_WORD_LENGTH || enchant_dict_check (dict, word->str, word->len) == 0)
+		if (lineCount)
+			fprintf (out, "* %ld\n", lineCount);
+		else
 			fwrite ("*\n", 1, 2, out);
-		}
 	else {
 		suggs = enchant_dict_suggest (dict, word->str, 
 					      word->len, &n_suggs);
 		if (!n_suggs || !suggs) {
 			fwrite ("# ", 1, 2, out);
-			if (countLines) {
-				fprintf (out, "%d ", lineCount);
-			}
+			if (lineCount)
+				fprintf (out, "%ld ", lineCount);
 			print_utf (out, word->str);
 			fprintf (out, " %ld\n", start_pos+1);
 		}
@@ -143,9 +137,8 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
 			size_t i = 0;
 			
 			fwrite ("& ", 1, 2, out);
-			if (countLines) {
-				fprintf (out, "%d ", lineCount);
-			}
+			if (lineCount)
+				fprintf (out, "%ld ", lineCount);
 			print_utf (out, word->str);
 			fprintf (out, " %ld %ld:", n_suggs, start_pos);
 			
@@ -163,12 +156,11 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
 }
 
 static void
-do_mode_l (FILE * out, EnchantDict * dict, GString * word)
+do_mode_l (FILE * out, EnchantDict * dict, GString * word, size_t lineCount)
 {
 	if (enchant_dict_check (dict, word->str, word->len) != 0) {
-		if (countLines) {
-			fprintf (out, "%d ", lineCount);
-		}
+		if (lineCount)
+			fprintf (out, "%ld ", lineCount);
 		print_utf (out, word->str);
 		fwrite ("\n", 1, 1, out);
 	}
@@ -192,42 +184,42 @@ tokenize_line (GString * line)
 	while (cur_pos < line->len && *utf) {
 		uc = g_utf8_get_char (utf); 
 		
-		// fprintf(stdout, "type of %s is %d\n", utf, g_unichar_type(uc));
 		switch (g_unichar_type(uc)) {
-			case G_UNICODE_MODIFIER_LETTER:
-			case G_UNICODE_LOWERCASE_LETTER:
-			case G_UNICODE_TITLECASE_LETTER:
-			case G_UNICODE_UPPERCASE_LETTER:
-			case G_UNICODE_OTHER_LETTER:
-			case G_UNICODE_COMBINING_MARK:
-			case G_UNICODE_ENCLOSING_MARK:
-			case G_UNICODE_NON_SPACING_MARK:
-			case G_UNICODE_DECIMAL_NUMBER:
-			case G_UNICODE_LETTER_NUMBER:
-			case G_UNICODE_OTHER_NUMBER:
-			case G_UNICODE_CONNECT_PUNCTUATION:
+		case G_UNICODE_MODIFIER_LETTER:
+		case G_UNICODE_LOWERCASE_LETTER:
+		case G_UNICODE_TITLECASE_LETTER:
+		case G_UNICODE_UPPERCASE_LETTER:
+		case G_UNICODE_OTHER_LETTER:
+		case G_UNICODE_COMBINING_MARK:
+		case G_UNICODE_ENCLOSING_MARK:
+		case G_UNICODE_NON_SPACING_MARK:
+		case G_UNICODE_DECIMAL_NUMBER:
+		case G_UNICODE_LETTER_NUMBER:
+		case G_UNICODE_OTHER_NUMBER:
+		case G_UNICODE_CONNECT_PUNCTUATION:
+			g_string_append_unichar (word, uc);
+			cur_pos++;
+			break;
+		case G_UNICODE_OTHER_PUNCTUATION:
+			if (uc == '\'') {
 				g_string_append_unichar (word, uc);
 				cur_pos++;
 				break;
-			case G_UNICODE_OTHER_PUNCTUATION:
-				if (uc == '\'') {
-					g_string_append_unichar (word, uc);
-					cur_pos++;
-					break;
-				}
-				// else fall through
-			default: // some sort of non-word character
-				if (word->len) {
-					tokens = g_slist_append (tokens,
-						g_string_new_len (word->str, word->len));
-					tokens = g_slist_append (tokens,
-						GINT_TO_POINTER(start_pos));
-					g_string_truncate (word, 0);
-				}
-		} // switch
-		start_pos = ++cur_pos;
+			}
+			/* else fall through */
+		default: /* some sort of non-word character */
+			if (word->len) {
+				tokens = g_slist_append (tokens,
+							 g_string_new_len (word->str, word->len));
+				tokens = g_slist_append (tokens,
+							 GINT_TO_POINTER(start_pos));
+				g_string_truncate (word, 0);
+				start_pos = ++cur_pos;
+			}
+			break;
+		}
 		utf = g_utf8_next_char (utf);
-	} // while
+	}
 
 	g_string_free (word, TRUE);
 
@@ -235,38 +227,51 @@ tokenize_line (GString * line)
 }
 
 static int
-parse_file (FILE * in, FILE * out, IspellMode_t mode)
+parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
 {
 	EnchantBroker * broker;
 	EnchantDict * dict;
 	
-	GString * str, * word;
+	GString * str, * word = NULL;
 	GSList * tokens, *token_ptr;
-	const gchar * lang;
-	size_t pos;
+	gchar * lang, *lang_punct;
+	size_t pos, lineCount = 0;
 
 	gboolean was_last_line = FALSE, corrected_something = FALSE;
 
 	if (mode == MODE_A)
 		print_version (out);
 
-	lang = g_getenv ("LANG");
+	lang = g_strdup (g_getenv ("LANG"));
 	if (!lang || !strcmp (lang, "C"))
-		lang = "en";
+		lang = g_strdup ("en");
+	else {
+		/* get rid of useless trailing garbage like de_DE@euro or de_DE.ISO-8859-15 */
+		if ((lang_punct = strrchr (lang, '.')) != NULL)
+			*lang_punct = '\0';
+		if ((lang_punct = strrchr (lang, '@')) != NULL)
+			*lang_punct = '\0';
+	}
 	
 	broker = enchant_broker_init ();
 	dict = enchant_broker_request_dict (broker, lang);
+
 	if (!dict) {
 		fprintf (stderr, "Couldn't create a dictionary for %s\n", lang);
+		g_free (lang);
 		enchant_broker_free (broker);
 		return 1;
 	}
 
+	g_free (lang);
+
 	str = g_string_new (NULL);
 	
 	while (!was_last_line) {
-		str = g_string_new (NULL); // wasteful, but avoids segfault
 		was_last_line = consume_line (in, str);
+
+		if (countLines)
+			lineCount++;
 
 		if (str->len) {
 
@@ -280,14 +285,10 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 				pos = GPOINTER_TO_INT(tokens->data);
 				tokens = tokens->next;
 
-				if (word->len > MIN_WORD_LENGTH) {
-					if (mode == MODE_A) {
-						do_mode_a (out, dict, word, pos);
-					} 
-					else if (mode == MODE_L) {
-						do_mode_l (out, dict, word);
-					}
-				}
+				if (mode == MODE_A)
+					do_mode_a (out, dict, word, pos, lineCount);
+				else if (mode == MODE_L)
+					do_mode_l (out, dict, word, lineCount);
 			}
 
 			if (token_ptr)
@@ -318,6 +319,8 @@ int main (int argc, char ** argv)
 	int i, rval = 0;
 	
 	FILE * fp = stdin;
+
+	int countLines = 0;
 	
 	for (i = 1; i < argc; i++) {
 		arg = argv[i];
@@ -330,7 +333,7 @@ int main (int argc, char ** argv)
 				else if (arg[1] == 'v')
 					mode = MODE_VERSION;
 				else if (arg[1] == 'L')
-					countLines++;
+					countLines = 1;
 			} 
 			else if (strlen (arg) > 2) {
 				fprintf (stderr, "-%c does not take any parameters.\n", arg[1]);
@@ -358,7 +361,7 @@ int main (int argc, char ** argv)
 			}
 		}
 		
-		rval = parse_file (fp, stdout, mode);
+		rval = parse_file (fp, stdout, mode, countLines);
 		
 		if (file)
 			fclose (fp);
