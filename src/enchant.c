@@ -78,10 +78,10 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 
 /**
  * enchant_get_registry_value
- * @prefix:
- * @key:
+ * @prefix: Your category, such as "Ispell" or "Myspell"
+ * @key: The tag within your category that you're interested in
  *
- * Returns:
+ * Returns: the value if it exists, or %null otherwise. Must be free'd
  */
 ENCHANT_MODULE_EXPORT (char *)
 enchant_get_registry_value (const char * const prefix, const char * const key)
@@ -387,8 +387,9 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
  * @cor: The non-null correction word, in UTF-8 encoding
  * @cor_len: The non-zero byte length of @cor
  *
- * An implementation of "store_replacement" is not guaranteed to work in all cases.
- * This function's implementation may vary by provider.
+ * Notes that you replaced @mis with @cor, so it's possibly more likely
+ * that future occurrences of @mis will be replaced with @cor. So it might
+ * bump @cor up in the suggestion list.
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_store_replacement (EnchantDict * dict,
@@ -401,6 +402,7 @@ enchant_dict_store_replacement (EnchantDict * dict,
 	g_return_if_fail (cor);
 	g_return_if_fail (cor_len);
 	
+	/* if it's not implemented, it's not worth emulating */
 	if (dict->store_replacement)
 		{
 			(*dict->store_replacement) (dict, mis, mis_len, cor, cor_len);
