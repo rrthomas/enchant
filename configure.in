@@ -11,7 +11,7 @@ ENCHANT_MINOR_VERSION=1
 dnl     3) Increment when interfaces not changed at all,
 dnl               only bug fixes or internal changes made.
 dnl     4b) Set to zero when adding, removing or changing interfaces.
-ENCHANT_MICRO_VERSION=2
+ENCHANT_MICRO_VERSION=3
 dnl
 dnl     Set this too
 MAJOR_VERSION_PLUS_MINOR_VERSION=`expr $ENCHANT_MAJOR_VERSION + $ENCHANT_MINOR_VERSION`
@@ -187,19 +187,15 @@ AC_SUBST(USPELL_LIBS)
 
 AM_CONDITIONAL(WITH_USPELL, test "$build_uspell" = yes)
 
-dnl =========================================================================================
-dnl proposed hspell backend
-dnl =========================================================================================
-
 build_hspell=no
 
 check_hspell=yes
 AC_ARG_ENABLE(hspell, [  --disable-hspell     enable the hspell backend [default=auto]], check_hspell="$enableval", check_hspell=yes)
 
-dnl change to pkg-config sometime
+dnl change to pkg-config when hspell will provide an hspell.pc file
 
 if test "x$check_hspell" != "xno"; then
-   AC_CHECK_LIB(hspell,hspell_check,build_hspell=yes, build_hspell=no)
+   AC_CHECK_LIB(hspell,hspell_check_word,build_hspell=yes, build_hspell=no)
 fi
 
 hspell_dir=${datadir}/enchant/hspell

@@ -17,7 +17,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  *
- * In addition, as a special exception, Dom Lachowicz
+ * In addition, as a special exception, Dom Lachowicz and Yaacov Zamir
  * gives permission to link the code of this program with
  * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
@@ -38,87 +38,169 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
-ENCHANT_PLUGIN_DECLARE("Hspell")
+ENCHANT_PLUGIN_DECLARE ("Hspell")
+
+/**
+ * hspell helper functions
+ */
+     
+/**
+ * is hebrew
+ * return TRUE if iso hebrew ( must be null terminated )
+ */
+static int is_hebrew (const char *const iso_word)
+{
+	if (iso_word[0] < 'à' || iso_word[0] > 'ú')
+		return FALSE;
+	return TRUE;
+}
+
+/**
+ * convert struct corlist to **char
+ * the **char must be g_freed
+ */
+static gchar **
+corlist2strv (struct corlist *cl)
+{
+	int i;
+	gsize len;
+	char **sugg_arr = NULL;
+	const char *sugg;
+	
+	if (corlist_n (cl) > 0)
+		{
+			sugg_arr = g_new0 (char *, corlist_n (cl) + 1);
+			for (i = 0; i < corlist_n (cl); i++)
+				{
+					sugg = corlist_str (cl, i);
+					if (sugg)
+						sugg_arr[i] = g_convert (sugg,
+									 strlen (sugg),
+									 "utf-8", "iso8859-8", NULL, &len, NULL);
+				}
+		}
+	
+	return sugg_arr;
+}
+
+/**
+ * end of helper functions
+ */
+
+/**
+ * this is global !??
+ */
+static struct dict_radix *hspell_common_dict = NULL;
+static size_t dict_ref_cnt = 0;
 
 static int
 hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
-	return ( hspell_check ( (hspell_session*)(me->user_data) , word, len ) );
+	int res;
+	char *iso_word;
+	gsize length;
+	int preflen;
+
+	/* convert to iso 8859-8 */
+	iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
+	
+	/* check if hebrew ( if not hebrew give it the benefit of a doubt ) */
+	if (iso_word == NULL || !is_hebrew (iso_word))
+		{
+			if (iso_word)
+				g_free (iso_word);
+			return TRUE;
+		}
+
+	/* check */
+	res = hspell_check_word (hspell_common_dict, iso_word, &preflen);
+	
+	/* if not correct try gimatria */
+	if (res != 1)
+		{
+			res = hspell_is_canonic_gimatria (iso_word);
+			if (res != 0)
+				res = 1;
+		}
+	
+	/* free the word */
+	g_free (iso_word);
+	
+	return (res != 1);
 }
 
 static char **
 hspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
-{	
+{
+	
+	int res;
+	gsize length;
+	char *iso_word;
 	char **sugg_arr = NULL;
-	size_t n_suggestions=0;
+	struct corlist cl;
+	
+	/* convert to iso 8859-8 */
+	iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
+	
+	/* check if hebrew ( if not hebrew cant do anything ) */
+	if (iso_word == NULL || !is_hebrew (iso_word))
+		{
+			if (iso_word != NULL)
+				g_free (iso_word);
+			return NULL;
+		}
 
-	// suggest only for hebrew words
-	// FIXME: what about utf-8 ?
-	//        this is just for iso8859-8
-	*out_n_suggs = n_suggestions;
-	if ( word[0] < 'à' || word[0] > 'ú' ) return NULL;
- 
-	sugg_arr = hspell_suggest ( (hspell_session*)(me->user_data) , 
-				word, len, &n_suggestions);
-
-	*out_n_suggs = n_suggestions;
-	return ( sugg_arr );
-}
-
-static void
-hspell_dict_add_to_personal (EnchantDict * me,
-			     const char *const word, size_t len)
-{
-	hspell_add_to_personal ((hspell_session*)(me->user_data),
-			    word, len);
-}
-
-static void
-hspell_dict_add_to_session (EnchantDict * me,
-			    const char *const word, size_t len)
-{
-	hspell_add_to_session ((hspell_session*)(me->user_data),
-			    word, len);
-}
-
-static void
-hspell_dict_store_replacement (struct str_enchant_dict * me,
-			       const char *const mis, size_t mis_len,
-			       const char *const cor, size_t cor_len)
-{
-	hspell_store_replacement ((hspell_session*)(me->user_data),
-			    mis, mis_len, cor, cor_len);
+	/* get suggestions */
+	corlist_init (&cl);
+	hspell_trycorrect (hspell_common_dict, iso_word, &cl);
+	
+	/* set size of list */
+	*out_n_suggs = corlist_n (&cl);
+	
+	/* convert suggestion list to strv list */
+	sugg_arr = corlist2strv (&cl);
+	
+	/* free the list */
+	corlist_free (&cl);
+	
+	/* free the word */
+	g_free (iso_word);
+	
+	return sugg_arr;	
 }
 
 static void
 hspell_dict_free_suggestions (EnchantDict * me, char **str_list)
 {
-	hspell_free_suggestions ( (hspell_session*)(me->user_data) , str_list);
+	g_strfreev (str_list);
 }
 
 static EnchantDict *
 hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	EnchantDict *dict;
-	hspell_session* my_session;
-
-	// try to set a new session
-	my_session = hspell_session_new ();
+	int dict_flag = 0;
 	
-	if ( !my_session)
-	{
-		enchant_provider_set_error (me, "can't create new session.");
-		return NULL;
-	}
-
+	/* try to set a new session */
+	if (hspell_common_dict == NULL)
+		{
+			dict_flag = hspell_init (&hspell_common_dict, HSPELL_OPT_DEFAULT);
+		}
+	
+	if (dict_flag != 0)
+		{
+			enchant_provider_set_error (me, "can't create new dict.");
+			return NULL;
+		}
+	else 
+		{
+			dict_ref_cnt++;
+		}
+	
 	dict = g_new0 (EnchantDict, 1);
-	dict->user_data = (void *) my_session;
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
-	dict->add_to_personal = hspell_dict_add_to_personal;
-	dict->add_to_session = hspell_dict_add_to_session;
-	dict->store_replacement = hspell_dict_store_replacement;
 	dict->free_suggestions = hspell_dict_free_suggestions;
 	
 	return dict;
@@ -127,22 +209,27 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 static void
 hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 {
-	if  ( me->user_data )
-		hspell_session_unref  ( me->user_data ); 
+	dict_ref_cnt--;
+	if (dict_ref_cnt == 0) 
+		{
+			/* deleting the dict is not posible yet (hspell v.0.7) :-( */
+		}
 	g_free (dict);
 }
 
 static int
-hspell_provider_dictionary_exists (struct str_enchant_provider * me,
+hspell_provider_dictionary_exists (struct str_enchant_provider *me,
 				   const char *const tag)
 {
-	// cheak if tag is he[_IL.something]
-	if ( tag[0] == 'h' && tag[1] == 'e' ) 
-	{
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+	/* cheak if tag is he[_IL.something] */
+	if (tag[0] == 'h' && tag[1] == 'e')
+		{
+			return TRUE;
+		}
+	else
+		{
+			return FALSE;
+		}
 }
 
 static void
@@ -164,9 +251,10 @@ hspell_provider_describe (EnchantProvider * me)
 }
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-
+	
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
 init_enchant_provider (void)
 {
@@ -179,7 +267,7 @@ init_enchant_provider (void)
 	provider->dictionary_exists = hspell_provider_dictionary_exists;
 	provider->identify = hspell_provider_identify;
 	provider->describe = hspell_provider_describe;
-
+	
 	return provider;
 }
 
