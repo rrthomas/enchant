@@ -1,0 +1,42 @@
+libenchant -- Generic spell checking library
+Dom Lachowicz <cinamod@hotmail.com>
+
+   libenchant is licensed under the terms of the GNU LGPL included in the
+file COPYING.LIB.
+
+   The project aims to provide an efficient extensible abstraction for
+dealing with different spell checking libraries.
+
+To report libgsf bugs, please visit bugzilla.abisource.com.
+    This library is free software; you can redistribute it and/or modify
+    it under the terms of version 2.1 of the GNU Lesser General Public License
+    as published by the Free Software Foundation.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program; if not, write to the Free Software Foundation,
+    Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+-- 
+
+This library has taken insight from
+
+Aspell/Pspell:
+	- http://aspell.net
+
+Mailing lists
+-------------
+
+   There is NO mailing list used to discuss libenchant specificly as yet.  For now
+please use the AbiWord-devel list. To subscribe send a mail to:
+
+	abiword-dev-request@abisource.com
+And in the body of the message write "subscribe"
+
+An archive of the mailing lists is available in:
+	http://www.abisource.com/mailinglists/abiword-dev/
+

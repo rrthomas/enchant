@@ -1,0 +1,75 @@
+%define name libenchant
+%define version @VERSION@
+%define release 1
+%define prefix /usr
+
+Summary: An Enchanting Spell Checking Library
+
+Name: %{name}
+Version: %{version}
+Release: %{release}
+Group: System Environment/Libraries
+License: LGPL
+
+Source: ftp://ftp.gnome.org/pub/GNOME/unstable/sources/libgsf/%{name}-%{version}.tar.gz
+Buildroot: /var/tmp/%{name}-%{version}-%{release}-root
+URL: http://www.abisource.com/
+
+Requires: glib2 >= 2.0.0
+BuildRequires: glib2-devel >= 2.0.0
+
+%description
+A library that wraps other spell checking backends.
+
+%package devel
+Summary: Support files necessary to compile applications with libenchant.
+Group: Development/Libraries
+Requires: libgsf
+
+%description devel
+Libraries, headers, and support files necessary to compile applications using libenchant.
+
+%prep
+
+%setup
+
+%build
+%ifarch alpha
+  MYARCH_FLAGS="--host=alpha-redhat-linux"
+%endif
+
+if [ ! -f configure ]; then
+CFLAGS="$RPM_OPT_FLAGS" ./autogen.sh --prefix=%{prefix}
+else
+CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix}
+fi
+
+if [ "$SMP" != "" ]; then
+  (make "MAKE=make -k -j $SMP"; exit 0)
+  make
+else
+  make
+fi
+
+%install
+if [ -d $RPM_BUILD_ROOT ]; then rm -r $RPM_BUILD_ROOT; fi
+mkdir -p $RPM_BUILD_ROOT%{prefix}
+make prefix=$RPM_BUILD_ROOT%{prefix} install
+
+%files
+%defattr(644,root,root,755)
+%doc AUTHORS COPYING README
+%{prefix}/lib/lib*.so*
+
+%files devel
+%defattr(644,root,root,755)
+%{prefix}/lib/*a
+%{prefix}/lib/pkgconfig/libenchant.pc
+%{prefix}/include/libenchant/*
+
+%clean
+rm -r $RPM_BUILD_ROOT
+
+%changelog
+* Sun Jul 13 11:48:04 EDT 2003 Dom Lachowicz <cinamod@hotmail.com>
+- Initial version

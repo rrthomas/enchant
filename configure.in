@@ -1,0 +1,72 @@
+AC_INIT(src/enchant.h)
+
+dnl Set release number
+dnl This is derived from "Versioning" chapter of info libtool documentation.
+PACKAGE=libenchant
+dnl     4a) Increment when removing or changing interfaces.
+ENCHANT_MAJOR_VERSION=0
+dnl     4a) 5) Increment when adding interfaces.
+dnl     6) Set to zero when removing or changing interfaces.
+ENCHANT_MINOR_VERSION=1
+dnl     3) Increment when interfaces not changed at all,
+dnl               only bug fixes or internal changes made.
+dnl     4b) Set to zero when adding, removing or changing interfaces.
+ENCHANT_MICRO_VERSION=0
+dnl
+dnl     Set this too
+MAJOR_VERSION_PLUS_MINOR_VERSION=`expr $ENCHANT_MAJOR_VERSION + $ENCHANT_MINOR_VERSION`
+dnl
+VERSION=$ENCHANT_MAJOR_VERSION.$ENCHANT_MINOR_VERSION.$ENCHANT_MICRO_VERSION
+dnl Version info for libraries = CURRENT:REVISION:AGE
+VERSION_INFO=$MAJOR_VERSION_PLUS_MINOR_VERSION:$ENCHANT_MICRO_VERSION:$ENCHANT_MINOR_VERSION
+AC_SUBST(VERSION_INFO)
+AC_SUBST(ENCHANT_MAJOR_VERSION)
+AC_SUBST(ENCHANT_MINOR_VERSION)
+AC_SUBST(ENCHANT_MICRO_VERSION)
+
+AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
+AM_MAINTAINER_MODE
+
+dnl Checks for programs.
+AC_ISC_POSIX
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_STDC_HEADERS
+AC_LIBTOOL_WIN32_DLL
+AM_PROG_LIBTOOL
+#AC_PROG_LIBTOOL
+
+AC_C_CONST
+
+AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+
+PKG_CHECK_MODULES(ENCHANT, [glib-2.0 gmodule-2.0])
+
+AC_SUBST(ENCHANT_CFLAGS)
+AC_SUBST(ENCHANT_LIBS)
+
+AC_MSG_CHECKING([for native Win32])
+case "$host" in
+  *-*-mingw*)
+    native_win32=yes
+    ;;
+  *)
+    native_win32=no
+    ;;
+esac
+AC_MSG_RESULT([$native_win32])
+AM_CONDITIONAL(OS_WIN32, test "$native_win32" = yes)
+
+AC_OUTPUT([
+Makefile
+libenchant.pc
+libenchant.spec
+src/Makefile
+src/aspell/Makefile
+tests/Makefile
+])
+
+AC_MSG_RESULT([Configured $PACKAGE $VERSION])
