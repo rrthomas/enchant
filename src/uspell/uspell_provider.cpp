@@ -28,12 +28,12 @@
  * do so, delete this exception statement from your version.
  */
 
-// TODO: Language should have a description file indicating appropriate options
-// TODO: don't use BUFLEN or strcat
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <string>
 
 #include <glib.h>
 #include "enchant.h"
@@ -44,35 +44,55 @@
 
 static const size_t MAXALTERNATIVE = 20; // we won't return more than this number of suggests
 
-#ifndef BUFLEN
-#define BUFLEN 1024
-#endif
-
 static int
 uspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
-	class uSpell *manager;
-	wide_t bigBuf[BUFLEN], upperBuf[BUFLEN];
+	uSpell *manager;
+	wide_t *curBuf, *otherBuf, *tmpBuf;
 	int length;
 	
-	manager = (class uSpell *) me->user_data;
-	length = utf8_wide(bigBuf, reinterpret_cast<const utf8_t *>(word), BUFLEN);
-	if (manager->isSpelledRight(bigBuf, length)) 
+	manager = (uSpell *) me->user_data;
+	curBuf = reinterpret_cast<wide_t *>(calloc(len+1, sizeof(wide_t)));
+	length = utf8_wide(curBuf, reinterpret_cast<const utf8_t *>(word), len+1);
+	if (manager->isSpelledRight(curBuf, length)) {
+		free(curBuf);
 		return 0; // correct the first time
-	toUpper(upperBuf, bigBuf, length);
-	if (manager->isSpelledRight(upperBuf, length)) {
-		manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
-		return 0; // correct if converted to all upper case
 	}
-	unPrecompose(bigBuf, &length, upperBuf, length);
-	if (manager->isSpelledRight(bigBuf, length)) {
-		manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
-		return 0; // correct if precomposed characters expanded, all upper
+	otherBuf = reinterpret_cast<wide_t *>(calloc(len+1, sizeof(wide_t)));
+	if (manager->theFlags & uSpell::upperLower) {
+		toUpper(otherBuf, curBuf, length);
+		if (manager->isSpelledRight(otherBuf, length)) {
+			manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
+			free(curBuf);
+			free(otherBuf);
+			return 0; // correct if converted to all upper case
+		}
+		tmpBuf = curBuf;
+		curBuf = otherBuf;
+		otherBuf = tmpBuf;
 	}
-	if (manager->isSpelledRightMultiple(bigBuf, length)) {
-		manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
-		return 0; // correct as two words.  Not right for all languages.
+	if (manager->theFlags & uSpell::hasComposition) {
+		unPrecompose(otherBuf, &length, curBuf, length);
+		if (manager->isSpelledRight(otherBuf, length)) {
+			manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
+			free(curBuf);
+			free(otherBuf);
+			return 0; // correct if precomposed characters expanded, all upper
+		}
+		tmpBuf = curBuf;
+		curBuf = otherBuf;
+		otherBuf = tmpBuf;
 	}
+	if (manager->theFlags & uSpell::hasCompounds) {
+		if (manager->isSpelledRightMultiple(curBuf, length)) {
+			manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
+			free(curBuf);
+			free(otherBuf);
+			return 0; // correct as two words.  Not right for all languages.
+		}
+	}
+	free(curBuf);
+	free(otherBuf);
 	return 1;
 }
 
@@ -80,20 +100,21 @@ static char **
 uspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
-	class uSpell *manager;
+	uSpell *manager;
 	
 	char **sugg_arr = NULL;
 	const utf8_t *sugg;
-	wide_t bigBuf[BUFLEN], upperBuf[BUFLEN];
+	wide_t *curBuf;
 	int length, i;
 	utf8_t **list;
 	
-	manager = (class uSpell *) me->user_data;
+	manager = (uSpell *) me->user_data;
 	
 	list = reinterpret_cast<utf8_t **>(
 					   calloc(sizeof(char *), MAXALTERNATIVE));
-	length = utf8_wide(bigBuf, reinterpret_cast<const utf8_t *>(word), BUFLEN);
-	*out_n_suggs = manager->showAlternatives(bigBuf, length,
+	curBuf = reinterpret_cast<wide_t *>(calloc(len+1, sizeof(wide_t)));
+	length = utf8_wide(curBuf, reinterpret_cast<const utf8_t *>(word), len+1);
+	*out_n_suggs = manager->showAlternatives(curBuf, length,
 						 list, MAXALTERNATIVE);
 	
 	if (*out_n_suggs)
@@ -109,6 +130,7 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 				}
 		}
 	free(list);
+	free(curBuf);
 	return sugg_arr;
 }
 
@@ -116,10 +138,10 @@ static void
 uspell_dict_add_to_personal (EnchantDict * me,
 			     const char *const word, size_t len)
 {
-	class uSpell *manager;
+	uSpell *manager;
 	
 	// Don't worry about saving this to a personal dictionary - just add to session
-	manager = (class uSpell *) me->user_data;
+	manager = (uSpell *) me->user_data;
 	manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
 }
 
@@ -127,9 +149,9 @@ static void
 uspell_dict_add_to_session (EnchantDict * me,
 			    const char *const word, size_t len)
 {
-	class uSpell *manager;
+	uSpell *manager;
 	
-	manager = (class uSpell *) me->user_data;
+	manager = (uSpell *) me->user_data;
 	manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
 }
 
@@ -142,28 +164,57 @@ uspell_dict_free_suggestions (EnchantDict * me, char **str_list)
 typedef struct {
 	char * language_tag;
 	char * corresponding_uspell_file_name;
+	int language_flags;
 } Mapping;
 
 static const Mapping mapping [] = {
-	{"yi", "yiddish"}
+	{"he",    "hebrew",  uSpell::hasCompounds | uSpell::hasComposition},
+	{"he_IL", "hebrew",  uSpell::hasCompounds | uSpell::hasComposition},
+	{"yi",    "yiddish", uSpell::hasCompounds | uSpell::hasComposition}
 };
 
 static const size_t n_mappings = (sizeof(mapping)/sizeof(mapping[0]));
 
-static class uSpell *
-uspell_request_dict (const char * base, const char * mapping)
+static uSpell *
+uspell_request_dict (const char * base, const char * mapping, const int flags)
 {
-	char * fileName, *transName;
+	char *fileName, *transName, *filePart, *transPart;
 
-	class uSpell *manager;
+	uSpell *manager;
 
-	fileName = g_build_filename (base, mapping, ".uspell.dat");
-	transName = g_build_filename (base, mapping, ".uspell.trans");
+	filePart =  g_strconcat(mapping, ".uspell.dat", NULL);
+	transPart =  g_strconcat(mapping, ".uspell.trans", NULL);
+	fileName = g_build_filename (base, filePart, NULL);
+	transName = g_build_filename (base, transPart, NULL);
+	g_free(filePart);	
+	g_free(transPart);	
 
-	manager = new uSpell(fileName, transName, uSpell::expandPrecomposed);
+	try {
+		manager = new uSpell(fileName, transName, flags);
+	} 
+	catch (...) {
+		manager = NULL;
+	}
 
 	g_free (fileName);
 	g_free (transName);
+
+	return manager;
+}
+
+static uSpell *
+uspell_request_manager (const char * private_dir, size_t mapIndex)
+{
+	uSpell * manager = NULL;
+
+	manager = uspell_request_dict (private_dir,
+				       mapping[mapIndex].corresponding_uspell_file_name,
+				       mapping[mapIndex].language_flags);
+
+	if (!manager)
+		manager = uspell_request_dict (ENCHANT_USPELL_DICT_DIR,
+					       mapping[mapIndex].corresponding_uspell_file_name,
+					       mapping[mapIndex].language_flags);
 
 	return manager;
 }
@@ -172,22 +223,42 @@ static EnchantDict *
 uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	EnchantDict *dict;
-	class uSpell *manager;
+	uSpell *manager;
 	int mapIndex;
+
+	char * private_dir = g_build_filename (g_get_home_dir(), ".enchant",
+					       "uspell", NULL);
 
 	for (mapIndex = 0; mapIndex < n_mappings; mapIndex++) {
 		if (!strcmp(tag, mapping[mapIndex].language_tag)) 
 			break;
 	}
-	if (mapIndex == n_mappings)
-		return NULL; // I don't understand this language
 
-	char * private_dir = g_build_filename (g_get_home_dir(), ".enchant", "uspell", NULL);
-	manager = uspell_request_dict (private_dir, mapping[mapIndex].corresponding_uspell_file_name);
+	if (mapIndex < n_mappings) {
+		manager = uspell_request_manager (private_dir, mapIndex);
+	}
+
+	if (!manager) {
+		// try shortened form: he_IL => he
+		std::string shortened_dict (tag);
+		size_t uscore_pos;
+		
+		if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
+			shortened_dict = shortened_dict.substr(0, uscore_pos);
+
+			for (mapIndex = 0; mapIndex < n_mappings; mapIndex++) {
+				if (!strcmp(shortened_dict.c_str(), mapping[mapIndex].language_tag)) 
+					break;
+			}
+
+			if (mapIndex < n_mappings) {
+				manager = uspell_request_manager (private_dir, mapIndex);
+			}			
+		}
+	}
+
 	g_free (private_dir);
 
-	if (!manager)
-		manager = uspell_request_dict (ENCHANT_USPELL_DICT_DIR, mapping[mapIndex].corresponding_uspell_file_name);
 	if (!manager) 
 		return NULL;
 
@@ -203,14 +274,19 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	return dict;
 }
 
+EnchantDictStatus uspell_provider_dictionary_status(struct str_enchant_provider * me, 
+						    const char *const tag)
+{
+	// TODO: a g_file_exists check on the dictionary associated with the tag
+	return(ED_UNKNOWN);
+}
+
 static void
 uspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 {
-	class uSpell *manager;
+	uSpell *manager;
 	
-	manager = (class uSpell *) dict->user_data;
-
-	//manager->~uSpell();
+	manager = (uSpell *) dict->user_data;
 	delete manager;
 
 	g_free (dict);
@@ -235,6 +311,7 @@ init_enchant_provider (void)
 	provider->dispose = uspell_provider_dispose;
 	provider->request_dict = uspell_provider_request_dict;
 	provider->dispose_dict = uspell_provider_dispose_dict;
+	provider->dictionary_status = uspell_provider_dictionary_status;
 	
 	return provider;
 }

@@ -174,6 +174,14 @@ pspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
+static EnchantDictStatus
+pspell_provider_dictionary_status (struct str_enchant_provider * me,
+				   const char *const tag)
+{
+	/* TODO: get kevina to apply my patch */
+	return ED_UNKNOWN;
+}
+
 static void
 pspell_provider_dispose (EnchantProvider * me)
 {
@@ -193,6 +201,7 @@ init_enchant_provider (void)
 	provider->dispose = pspell_provider_dispose;
 	provider->request_dict = pspell_provider_request_dict;
 	provider->dispose_dict = pspell_provider_dispose_dict;
+	provider->dictionary_status = pspell_provider_dictionary_status;
 	
 	return provider;
 }

@@ -111,7 +111,7 @@ if test "x$have_cxx" = "xno"; then
 fi
 
 if test "x$check_uspell" != "xno"; then
-   PKG_CHECK_MODULES(USPELL, [libuspell >= 0.1.0], build_uspell=yes, build_uspell=no)
+   PKG_CHECK_MODULES(USPELL, [libuspell >= 1.0.1], build_uspell=yes, build_uspell=no)
 fi
 
 uspell_dict_dir=${datadir}/enchant/uspell

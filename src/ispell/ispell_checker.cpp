@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h> 
 
+#include <vector>
+
 #include "sp_spell.h"
 #include "ispell_checker.h"
 #include "enchant.h"
@@ -48,12 +50,17 @@ typedef struct str_ispell_map
 } IspellMap;
 
 static const IspellMap ispall_map [] = {
+	{"ca"    ,"catala.hash"         ,"iso-8859-1" },
 	{"ca_ES" ,"catala.hash"         ,"iso-8859-1" },
+	{"cs"    ,"czech.hash"          ,"iso-8859-2" },
 	{"cs_CZ" ,"czech.hash"          ,"iso-8859-2" },
+	{"da"    ,"dansk.hash"          ,"iso-8859-1" },
 	{"da_DK" ,"dansk.hash"          ,"iso-8859-1" },
+	{"de"    ,"deutsch.hash"        ,"iso-8859-1" },
 	{"de_CH" ,"swiss.hash"          ,"iso-8859-1" },
 	{"de_AT" ,"deutsch.hash"        ,"iso-8859-1" },
 	{"de_DE" ,"deutsch.hash"        ,"iso-8859-1" },
+	{"el"    ,"ellhnika.hash"       ,"iso-8859-7" },
 	{"el_GR" ,"ellhnika.hash"       ,"iso-8859-7" },
 	{"en"    ,"british.hash"        ,"iso-8859-1" },
 	{"en_AU" ,"british.hash"        ,"iso-8859-1" },
@@ -69,6 +76,7 @@ static const IspellMap ispall_map [] = {
 	{"en_PH" ,"american.hash"       ,"iso-8859-1" },
 	{"en_US" ,"american.hash"       ,"iso-8859-1" },
 	{"eo"    ,"esperanto.hash"      ,"iso-8859-3" },
+	{"es"    ,"espanol.hash"        ,"iso-8859-1" },
 	{"es_AR" ,"espanol.hash"        ,"iso-8859-1" },
 	{"es_BO" ,"espanol.hash"        ,"iso-8859-1" },
 	{"es_CL" ,"espanol.hash"        ,"iso-8859-1" },
@@ -88,33 +96,52 @@ static const IspellMap ispall_map [] = {
 	{"es_SV" ,"espanol.hash"        ,"iso-8859-1" },
 	{"es_UY" ,"espanol.hash"        ,"iso-8859-1" },
 	{"es_VE" ,"espanol.hash"        ,"iso-8859-1" },
+	{"fi"    ,"finnish.hash"        ,"iso-8859-1" },
 	{"fi_FI" ,"finnish.hash"        ,"iso-8859-1" },
+	{"fr"    ,"francais.hash"       ,"iso-8859-1" },
 	{"fr_BE" ,"francais.hash"       ,"iso-8859-1" },
 	{"fr_CA" ,"francais.hash"       ,"iso-8859-1" },
 	{"fr_CH" ,"francais.hash"       ,"iso-8859-1" },
 	{"fr_FR" ,"francais.hash"       ,"iso-8859-1" },
 	{"fr_LU" ,"francais.hash"       ,"iso-8859-1" },
 	{"fr_MC" ,"francais.hash"       ,"iso-8859-1" },
+	{"hu"    ,"hungarian.hash"      ,"iso-8859-2" },
 	{"hu_HU" ,"hungarian.hash"      ,"iso-8859-2" },
+	{"ga"    ,"irish.hash"          ,"iso-8859-1" },
 	{"ga_IE" ,"irish.hash"          ,"iso-8859-1" },
+	{"gl"    ,"galician.hash"       ,"iso-8859-1" },
 	{"gl_ES" ,"galician.hash"       ,"iso-8859-1" },
+	{"it"    ,"italian.hash"        ,"iso-8859-1" },
 	{"it_IT" ,"italian.hash"        ,"iso-8859-1" },
 	{"it_CH" ,"italian.hash"        ,"iso-8859-1" },
+	{"la"    ,"mlatin.hash"         ,"iso-8859-1" },
 	{"la_IT" ,"mlatin.hash"         ,"iso-8859-1" },
+	{"lt"    ,"lietuviu.hash"       ,"iso-8859-13" },
 	{"lt_LT" ,"lietuviu.hash"       ,"iso-8859-13" },
+	{"nl"    ,"nederlands.hash"     ,"iso-8859-1" },
 	{"nl_NL" ,"nederlands.hash"     ,"iso-8859-1" },
 	{"nl_BE" ,"nederlands.hash"     ,"iso-8859-1" },
+	{"nb"    ,"norsk.hash"          ,"iso-8859-1" },
 	{"nb_NO" ,"norsk.hash"          ,"iso-8859-1" },
+	{"nn"    ,"nyorsk.hash"         ,"iso-8859-1" },
 	{"nn_NO" ,"nyorsk.hash"         ,"iso-8859-1" },
+	{"pl"    ,"polish.hash"         ,"iso-8859-2" },
 	{"pl_PL" ,"polish.hash"         ,"iso-8859-2" },
+	{"pt"    ,"brazilian.hash"      ,"iso-8859-1" },
 	{"pt_BR" ,"brazilian.hash"      ,"iso-8859-1" },
 	{"pt_PT" ,"portugues.hash"      ,"iso-8859-1" },
+	{"ru"    ,"russian.hash"        ,"koi8-r" },
 	{"ru_MD" ,"russian.hash"        ,"koi8-r" },
 	{"ru_RU" ,"russian.hash"        ,"koi8-r" },
+	{"sc"    ,"sardinian.hash"      ,"iso-8859-1" },
 	{"sc_IT" ,"sardinian.hash"      ,"iso-8859-1" },
+	{"sk"    ,"slovak.hash"         ,"iso-8859-2" },
 	{"sk_SK" ,"slovak.hash"         ,"iso-8859-2" },
+	{"sl"    ,"slovensko.hash"      ,"iso-8859-2" },
 	{"sl_SI" ,"slovensko.hash"      ,"iso-8859-2" },
+	{"sv"    ,"svenska.hash"        ,"iso-8859-1" },
 	{"sv_SE" ,"svenska.hash"        ,"iso-8859-1" },
+	{"uk"    ,"ukrainian.hash"      ,"koi8-u" },
 	{"uk_UA" ,"ukrainian.hash"      ,"koi8-u" },
 	{"yi"    ,"yiddish-yivo.hash"   ,"UTF-8" }
 };
@@ -278,9 +305,7 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 				if (!g_iconv_is_valid(m_translate_out))
 					{
 						/* copy to 8bit string and null terminate */
-						register int x;
-						
-						for (x = 0; x < l; x++)
+						for (int x = 0; x < l; x++)
 							utf8Sugg[x] = static_cast<unsigned char>(m_possibilities[c][x]);
 						utf8Sugg[l] = 0;
 					}
@@ -305,43 +330,41 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 	return sugg_arr;
 }
 
-static char *
-s_buildHashName ( const char * base, const char * dict )
+static void
+s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
-	return g_build_filename (base, dict, NULL);
+	char * tmp, * private_dir;
+
+	names.clear ();
+
+	private_dir = g_build_filename (g_get_home_dir(), ".enchant", 
+					"ispell", NULL);
+
+	tmp = g_build_filename (private_dir, dict, NULL);
+	names.push_back (tmp);
+	g_free (tmp);
+
+	tmp = g_build_filename (ENCHANT_ISPELL_DICT_DIR, dict, NULL);
+	names.push_back (tmp);
+	g_free (tmp);
+
+	g_free (private_dir);
 }
 
 char *
-ISpellChecker::loadGlobalDictionary ( const char *szHash )
+ISpellChecker::loadDictionary (const char * szdict)
 {
-	char *hashname = NULL;
-	hashname = s_buildHashName (ENCHANT_ISPELL_DICT_DIR, szHash);
-	if (linit(const_cast<char*>(hashname)) < 0)
+	std::vector<std::string> dict_names;
+
+	s_buildHashNames (dict_names, szdict);
+
+	for (size_t i = 0; i < dict_names.size(); i++)
 		{
-			g_free( hashname );
-			return(NULL);
+			if (linit(const_cast<char*>(dict_names[i].c_str())) > 0)
+				return g_strdup (dict_names[i].c_str());
 		}
-	
-	return(hashname);
-}
 
-char *
-ISpellChecker::loadLocalDictionary ( const char *szHash )
-{
-	char * private_dir;
-
-	private_dir = g_build_filename (g_get_home_dir(), ".enchant", "ispell", NULL);
-
-	char *hashname = NULL;
-	hashname = s_buildHashName (private_dir, szHash );
-	g_free(private_dir);
-
-	if (linit(const_cast<char*>(hashname)) < 0)
-		{
-			g_free(hashname);
-			return(NULL);
-		}
-	return(hashname);
+	return NULL;
 }
 
 /*!
@@ -374,16 +397,13 @@ ISpellChecker::loadDictionaryForLanguage ( const char * szLang )
 
 	alloc_ispell_struct();
 	
-	if (!(hashname = loadGlobalDictionary(szFile)))
-		{
-			if (!(hashname = loadLocalDictionary(szFile)))
-				{
-					return false;
-				}
-		}
+	if (!(hashname = loadDictionary(szFile)))
+		return false;
 	
 	// one of the two above calls succeeded
-	setDictionaryEncoding ( hashname, encoding );
+	setDictionaryEncoding (hashname, encoding);
+	g_free (hashname);
+
 	return true;
 }
 
@@ -443,7 +463,15 @@ ISpellChecker::requestDictionary(const char *szLang)
 {
 	if (!loadDictionaryForLanguage (szLang))
 		{
-			return false;
+			// handle a shortened version of the language tag: en_US => en
+			std::string shortened_dict (szLang);
+			size_t uscore_pos;
+			
+			if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
+				shortened_dict = shortened_dict.substr(0, uscore_pos);
+				if (!loadDictionaryForLanguage (shortened_dict.c_str()))
+					return false;
+			}
 		}
 	
 	m_bSuccessfulInit = true;
@@ -550,6 +578,14 @@ ispell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
+static EnchantDictStatus
+ispell_provider_dictionary_status (struct str_enchant_provider * me,
+				   const char *const tag)
+{
+	// TODO: use g_file_test to test existance
+	return ED_UNKNOWN;
+}
+
 static void
 ispell_provider_dispose (EnchantProvider * me)
 {
@@ -567,7 +603,8 @@ init_enchant_provider (void)
 	provider->dispose = ispell_provider_dispose;
 	provider->request_dict = ispell_provider_request_dict;
 	provider->dispose_dict = ispell_provider_dispose_dict;
-	
+	provider->dictionary_status = ispell_provider_dictionary_status;
+
 	return provider;
 }
 

@@ -434,8 +434,8 @@ enchant_broker_dictionary_status (EnchantBroker * broker,
 	EnchantProvider *provider;
 	GSList *list;
 
-	g_return_if_fail (broker);
-	g_return_if_fail (tag);
+	g_return_val_if_fail (broker, ED_UNKNOWN);
+	g_return_val_if_fail (tag, ED_UNKNOWN);
 
 	/* don't query the providers if we can just do a quick map lookup */
 	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL)

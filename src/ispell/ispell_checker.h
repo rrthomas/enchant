@@ -62,9 +62,7 @@ private:
 	ISpellChecker(const ISpellChecker&);	// no impl
 	void operator=(const ISpellChecker&);	// no impl
 
-	char * loadGlobalDictionary ( const char *szHash );
-	char * loadLocalDictionary ( const char *szHash );
-
+	char * loadDictionary (const char * szLang );
 	bool   loadDictionaryForLanguage ( const char * szLang );
 	void   setDictionaryEncoding ( const char * hashname, const char * enc );
 
