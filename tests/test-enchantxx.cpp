@@ -47,7 +47,7 @@ enumerate_dicts (const char * name,
 }
 
 static void
-run_dict_tests (Broker::Dict * dict)
+run_dict_tests (Dict * dict)
 {
 	std::vector<std::string> suggs;
 	size_t i, j;
@@ -77,7 +77,7 @@ int
 main (int argc, char **argv)
 {
 	Broker *broker;
-	Broker::Dict *dict;
+	Dict *dict;
 	
 	broker = Broker::instance ();
 	

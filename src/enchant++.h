@@ -38,10 +38,85 @@
 
 namespace enchant 
 {
+	class Broker;
+
+	class Dict
+		{
+			friend class enchant::Broker;
+			
+		public:
+			
+			~Dict () {
+				enchant_broker_release_dict (m_broker, m_dict);
+			}
+					
+			bool check (const std::string & utf8word) {
+				if (enchant_dict_check (m_dict, utf8word.c_str(), 
+							utf8word.size()) == 0)
+					return true;
+				return false;
+			}
+			
+			void add_to_personal (const std::string & utf8word) {
+				enchant_dict_add_to_personal (m_dict, utf8word.c_str(), 
+							      utf8word.size());
+			}
+			
+			void add_to_session (const std::string & utf8word) {
+				enchant_dict_add_to_session (m_dict, utf8word.c_str(), 
+							     utf8word.size());
+			}
+			
+			void store_replacement (const std::string & utf8bad, 
+						const std::string & utf8good) {
+				enchant_dict_store_replacement (m_dict, 
+								utf8bad.c_str(), utf8bad.size(),
+								utf8good.c_str(), utf8good.size());
+			}
+			
+			void suggest (const std::string & utf8word, 
+				      std::vector<std::string> & out_suggestions) {
+				size_t n_suggs;
+				char ** suggs;
+				
+				out_suggestions.clear ();
+				
+				suggs = enchant_dict_suggest (m_dict, utf8word.c_str(), 
+							      utf8word.size(), &n_suggs);
+				
+				if (suggs && n_suggs) {
+					for (size_t i = 0; i < n_suggs; i++) {
+						out_suggestions.push_back (suggs[i]);
+					}
+					
+					enchant_dict_free_suggestions (m_dict, suggs);
+				}
+			}
+			
+			std::vector<std::string> suggest (const std::string & utf8word) {
+				std::vector<std::string> result;
+				suggest (utf8word, result);
+				return result;
+			}
+			
+		private:
+			
+			Dict (EnchantDict * dict, EnchantBroker * broker)
+				: m_dict (dict), m_broker (broker)
+				{
+				}
+			
+			// private, unimplemented
+			Dict ();
+			Dict (const Dict & rhs);
+			Dict& operator=(const Dict & rhs);
+			
+			EnchantDict * m_dict;
+			EnchantBroker * m_broker;
+		}; // class enchant::Dict
 	
 	class Broker
 		{
-		friend class Dict;
 			
 		public:
 			
@@ -49,82 +124,8 @@ namespace enchant
 				return &m_instance;
 			}
 			
-			class Dict
-				{
-				friend class enchant::Broker;
-					
-				public:
-					
-					~Dict () {
-						m_broker->_release_dict (this);
-					}
-					
-					bool check (const std::string & utf8word) {
-						if (enchant_dict_check (m_dict, utf8word.c_str(), 
-									utf8word.size()) == 0)
-							return true;
-						return false;
-					}
-					
-					void add_to_personal (const std::string & utf8word) {
-						enchant_dict_add_to_personal (m_dict, utf8word.c_str(), 
-									      utf8word.size());
-					}
-					
-					void add_to_session (const std::string & utf8word) {
-						enchant_dict_add_to_session (m_dict, utf8word.c_str(), 
-									     utf8word.size());
-					}
-					
-					void store_replacement (const std::string & utf8bad, 
-								const std::string & utf8good) {
-						enchant_dict_store_replacement (m_dict, 
-										utf8bad.c_str(), utf8bad.size(),
-										utf8good.c_str(), utf8good.size());
-					}
-					
-					void suggest (const std::string & utf8word, 
-						      std::vector<std::string> & out_suggestions) {
-						size_t n_suggs;
-						char ** suggs;
-						
-						out_suggestions.clear ();
-						
-						suggs = enchant_dict_suggest (m_dict, utf8word.c_str(), 
-									      utf8word.size(), &n_suggs);
-						
-						if (suggs && n_suggs) {
-							for (size_t i = 0; i < n_suggs; i++) {
-								out_suggestions.push_back (suggs[i]);
-							}
-							
-							enchant_dict_free_suggestions (m_dict, suggs);
-						}
-					}
-					
-					std::vector<std::string> suggest (const std::string & utf8word) {
-						std::vector<std::string> result;
-						suggest (utf8word, result);
-						return result;
-					}
-					
-				private:
-					
-					Dict (EnchantDict * dict, enchant::Broker * broker)
-						: m_dict (dict), m_broker (broker)
-						{
-						}
-					
-					// private, unimplemented
-					Dict ();
-					Dict (const Dict & rhs);
-					Dict& operator=(const Dict & rhs);
-					
-					EnchantDict * m_dict;
-					enchant::Broker * m_broker;
-				}; // class enchant::Broker::Dict
 			
-			Broker::Dict * request_dict (const std::string & lang) {
+			Dict * request_dict (const std::string & lang) {
 				EnchantDict * dict = enchant_broker_request_dict (m_broker, lang.c_str());
 				
 				if (!dict) {
@@ -132,7 +133,7 @@ namespace enchant
 					return 0; // not actually reached
 				}
 				
-				return new Broker::Dict (dict, this);
+				return new Dict (dict, m_broker);
 			}
 			
 			EnchantDictStatus dict_status (const std::string & lang) {
@@ -158,11 +159,6 @@ namespace enchant
 			~Broker () {
 				if (m_broker)
 					enchant_broker_term (m_broker);
-			}
-			
-			// only called by Dict's d'tor
-			void _release_dict (Broker::Dict * dict) {
-				enchant_broker_release_dict (m_broker, dict->m_dict);
 			}
 			
 			// not implemented

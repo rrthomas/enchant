@@ -1,5 +1,6 @@
 Makefile.in
 Makefile
 test-enchant
+test-enchantxx
 .deps
 .libs
