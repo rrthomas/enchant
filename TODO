@@ -1,3 +1,1 @@
-myspell dictionary enumaration: use GDir for this
-incoming language_LOCALE normalization: strip off .UTF-8 or @euro, etc...
-change LGPL exception from "link" to "combine/incorporate" or something. clean up the language.
+High-level language tag intelligence: "en_US failed, try en"

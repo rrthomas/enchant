@@ -286,6 +286,70 @@ myspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static void
+myspell_provider_enum_dicts (const char * const directory,
+			     std::vector<std::string> & out_dicts)
+{
+	GDir * dir = g_dir_open (directory, 0, NULL);
+	if (dir) {
+		const char * entry;
+		
+		while ((entry = g_dir_read_name (dir)) != NULL) {
+			char * utf8_entry = g_filename_to_utf8 (entry, -1, NULL, NULL, NULL);
+			if (utf8_entry) {
+				std::string dir_entry (utf8_entry);
+				g_free (utf8_entry);
+
+				int hit = dir_entry.rfind (".dic");
+				if (hit != -1) {
+					out_dicts.push_back (dir_entry.substr (0, hit));
+				}
+			}
+		}
+
+		g_dir_close (dir);
+	}
+}
+
+static char ** 
+myspell_provider_list_dicts (EnchantProvider * me, 
+			    size_t * out_n_dicts)
+{
+	char ** dictionary_list = NULL;
+	*out_n_dicts = 0;
+
+	std::vector<std::string> dicts;
+       	
+	char * home_dir = enchant_get_user_home_dir ();
+	if (home_dir) {
+		char * private_dir = g_build_filename (home_dir, ".enchant", 
+						       "myspell", NULL);
+		
+		myspell_provider_enum_dicts (private_dir, dicts);
+
+		g_free (private_dir);
+		g_free (home_dir);
+	}
+
+	char * myspell_prefix = myspell_checker_get_prefix ();
+	if (myspell_prefix) {
+		myspell_provider_enum_dicts (myspell_prefix, dicts);
+		g_free (myspell_prefix);
+	}
+
+	if (dicts.size () > 0) {
+		dictionary_list = g_new0 (char *, dicts.size() + 1);
+
+		for (int i = 0; i < dicts.size(); i++) {
+			dictionary_list[i] = g_strdup (dicts[i].c_str());
+		}
+
+		*out_n_dicts = dicts.size ();
+	}
+
+	return dictionary_list;
+}
+
+static void
 myspell_provider_free_string_list (EnchantProvider * me, char **str_list)
 {
 	g_strfreev (str_list);
@@ -388,6 +452,7 @@ init_enchant_provider (void)
 	provider->identify = myspell_provider_identify;
 	provider->describe = myspell_provider_describe;
 	provider->free_string_list = myspell_provider_free_string_list;
+	provider->list_dicts = myspell_provider_list_dicts;
 
 	return provider;
 }
