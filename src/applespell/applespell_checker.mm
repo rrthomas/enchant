@@ -346,6 +346,18 @@ static char * appleSpell_provider_describe (EnchantProvider * me)
 	return "AppleSpell Provider";
 }
 
+static void appleSpell_provider_free_string_list (EnchantProvider * me, char **str_list)
+{
+	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	
+	// NSLog (@"appleSpell_provider_free_suggestions");
+	
+	if (str_list)
+		g_strfreev (str_list);
+	
+	if (pool) [pool release];
+}
+
 extern "C" {
 	ENCHANT_MODULE_EXPORT (EnchantProvider *) 
 	     init_enchant_provider (void)
@@ -367,6 +379,7 @@ extern "C" {
 		provider->dictionary_exists = appleSpell_provider_dictionary_exists;
 		provider->identify          = appleSpell_provider_identify;
 		provider->describe          = appleSpell_provider_describe;
+		provider->free_string_list  = appleSpell_provider_free_string_list;
 
 		AppleSpellChecker * checker = 0;
 		try
