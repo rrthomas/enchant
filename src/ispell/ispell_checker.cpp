@@ -222,9 +222,11 @@ ISpellChecker::checkWord(const char * const utf8Word, size_t length)
 	if (!utf8Word || length >= (INPUTWORDLEN + MAXAFFIXLEN) || length == 0)
 		return false;
 	
-	if (m_personal[utf8Word])
+	std::string word (utf8Word, length);
+
+	if (m_personal[word])
 		return true;
-	if (m_session[utf8Word])
+	if (m_session[word])
 		return true;
 
 	bool retVal = false;

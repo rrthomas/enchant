@@ -54,25 +54,11 @@ myspell_checker_get_prefix (void)
 #endif
 }
 
-typedef struct str_myspell_map
-{
-	char * lang;
-	char * dict;
-} MyspellMap;
-
-static const MyspellMap myspell_map [] = {
-	{"ca"    ,"ca_ES.dic" },
-	{"ca_ES" ,"ca_ES.dic" },
-};
-
-static const size_t size_myspell_map = G_N_ELEMENTS(myspell_map);
-
 static bool
 g_iconv_is_valid(GIConv i)
 {
 	return (i != G_ICONV_INVALID);
 }
-
 
 MySpellChecker::MySpellChecker()
 {
@@ -97,6 +83,13 @@ MySpellChecker::checkWord(const char *utf8Word, size_t len)
 {
 	if (len > MAXWORDLEN || !g_iconv_is_valid(m_translate_in))
 		return false;
+
+	std::string word (utf8Word, len);
+	if (m_personal[word])
+		return true;
+	if (m_session[word])
+		return true;
+
 	char *in = (char*) utf8Word;
 	char word8[MAXWORDLEN + 1];
 	char *out = word8;
@@ -146,22 +139,15 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 		return 0;
 }
 
-bool
-MySpellChecker::requestDictionary(const char *szLang)
+static char *
+myspell_request_dictionary (const char * tag) 
 {
-	const char *dictBase = NULL;
-	for (size_t i=0; i<size_myspell_map; i++)
-		if (strcmp(myspell_map[i].lang, szLang) == 0) {
-			dictBase = myspell_map[i].dict;
-			break;
-		}
-	if (!dictBase)
-		return false;
-	char *dic = NULL, *aff = NULL;
+	char * dic = NULL;
+
 	char *home_dir = enchant_get_user_home_dir();
 	if (home_dir) {
 		char *priv_dic = g_build_filename (home_dir, ".enchant", 
-						   "myspell", dictBase, NULL);
+						   "myspell", tag, NULL);
 		if (g_file_test(priv_dic, G_FILE_TEST_EXISTS))
 			dic = priv_dic;
 		else
@@ -169,19 +155,43 @@ MySpellChecker::requestDictionary(const char *szLang)
 
 		g_free (home_dir);
 	}
+
 	if (!dic) {
-	  char * pub_dir = myspell_checker_get_prefix ();
-	  if (pub_dir) {
-		char *pub_dic = g_build_filename(pub_dir, dictBase, NULL);
-		if (g_file_test(pub_dic, G_FILE_TEST_EXISTS))
+		char * pub_dir = myspell_checker_get_prefix ();
+		if (pub_dir) {
+			char *pub_dic = g_build_filename(pub_dir, tag, NULL);
+			if (g_file_test(pub_dic, G_FILE_TEST_EXISTS))
 			dic = pub_dic;
-		else
-			g_free (pub_dic);
-		g_free (pub_dir);
-	  }
+			else
+				g_free (pub_dic);
+			g_free (pub_dir);
+		}
+	}
+	
+	return dic;
+}
+
+bool
+MySpellChecker::requestDictionary(const char *szLang)
+{
+	const char *dictBase = NULL;
+	char *dic = NULL, *aff = NULL;
+	char *home_dir = enchant_get_user_home_dir();
+
+	dic = myspell_request_dictionary (szLang);
+	if (!dic) {
+		std::string shortened_dict (szLang);
+		size_t uscore_pos;
+		
+		// try abbreviated form
+		if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
+			shortened_dict = shortened_dict.substr(0, uscore_pos);
+			dic = myspell_request_dictionary (shortened_dict.c_str());
+		}
 	}
 	if (!dic)
 		return false;
+
 	aff = g_strdup(dic);
 	int len_dic = strlen(dic);
 	strcpy(aff+len_dic-3, "aff");
@@ -233,8 +243,7 @@ myspell_dict_add_to_personal (EnchantDict * me,
 	// interface
 
 	checker = (MySpellChecker *) me->user_data;
-	//checker->addToPersonal(word, len);
-	g_warning("myspell_dict_add_to_personal stub - unimplemented\n");
+	checker->addToPersonal(word, len);
 }
 
 static void
@@ -246,8 +255,7 @@ myspell_dict_add_to_session(EnchantDict * me,
 	// implement a session interface
 
 	checker = (MySpellChecker *) me->user_data;
-	//checker->addToSession(word, len);
-	g_warning("myspell_dict_add_to_session stub - unimplemented\n");
+	checker->addToSession(word, len);
 }
 
 static void
