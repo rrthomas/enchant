@@ -52,7 +52,7 @@ aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	if (val == 0)
 		return 1;
 	else if (val > 0)
-		return 1;
+		return 0;
 	else {
 		enchant_dict_set_error (me, pspell_manager_error_message (manager));
 		return -1;
