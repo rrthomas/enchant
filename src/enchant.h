@@ -20,6 +20,12 @@
 #ifndef ENCHANT_H
 #define ENCHANT_H
 
+#include <sys/types.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef _WIN32
 #define ENCHANT_MODULE_EXPORT(x) __declspec(dllexport) x
 #else
@@ -110,5 +116,9 @@ struct str_enchant_provider
   void (*_reserved_func4) (void);
   void (*_reserved_func5) (void);
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ENCHANT_H */
