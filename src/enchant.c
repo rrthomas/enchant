@@ -182,9 +182,6 @@ struct str_enchant_broker
   GHashTable *dict_map;		/* map of language tag -> dictionary */
 };
 
-/* todo: autoconf will do this for me once you have a build system set up*/
-#define ENCHANT_GLOBAL_MODULE_DIR "/usr/lib/enchant"
-
 typedef EnchantProvider *(*EnchantProviderInitFunc) ();
 
 static void

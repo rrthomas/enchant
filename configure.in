@@ -37,7 +37,6 @@ AC_PROG_MAKE_SET
 AC_STDC_HEADERS
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
-#AC_PROG_LIBTOOL
 
 AC_C_CONST
 
@@ -59,6 +58,11 @@ case "$host" in
 esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "$native_win32" = yes)
+
+dnl TODO: pspell support
+
+build_pspell=no
+AM_CONDITIONAL(WITH_PSPELL, test "$build_pspell" = yes)
 
 AC_OUTPUT([
 Makefile
