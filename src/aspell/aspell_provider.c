@@ -153,7 +153,7 @@ pspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 static void
 pspell_provider_dispose (EnchantProvider * me)
 {
-  /* NADA */
+  g_free (me);
 }
 
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 

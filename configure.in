@@ -61,8 +61,25 @@ AM_CONDITIONAL(OS_WIN32, test "$native_win32" = yes)
 
 dnl TODO: pspell support
 
-build_pspell=no
-AM_CONDITIONAL(WITH_PSPELL, test "$build_pspell" = yes)
+check_pspell=yes
+
+AC_ARG_ENABLE(pspell, [  --disable-pspell     enable the pspell backend [default=auto]], check_pspell="$enableval", check_pspell=yes)
+
+found_pspell=no
+
+if test "x$check_pspell" != "xno"; then
+   AC_CHECK_LIB(pspell, pspell_manager_add_to_personal,
+		[found_pspell=yes
+		PSPELL_LIBS=-lpspell AC_SUBST(PSPELL_LIBS)])
+
+   if test "$found_pspell" = "no"; then
+	AC_CHECK_LIB(aspell, aspell_speller_add_to_personal,
+	     	     [found_pspell=yes
+	     	      PSPELL_LIBS=-laspell AC_SUBST(PSPELL_LIBS)])
+   fi
+fi
+
+AM_CONDITIONAL(WITH_PSPELL, test "$found_pspell" = yes)
 
 AC_OUTPUT([
 Makefile
@@ -73,4 +90,12 @@ src/aspell/Makefile
 tests/Makefile
 ])
 
-AC_MSG_RESULT([Configured $PACKAGE $VERSION])
+dnl =============================================================================================
+echo "
+$PACKAGE-$VERSION
+
+	prefix:                         ${prefix}
+	compiler:                       ${CC}
+	
+	Build Aspell/Pspell backend:    ${found_pspell}
+"

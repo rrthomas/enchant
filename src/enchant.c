@@ -59,7 +59,10 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
  * @len: The non-zero byte length of @word
  * @out_n_suggs: The non-null location to store the # of suggestions returned
  *
- * Returns: A %null terminated list of UTF-8 encoded suggestions
+ * Will return an %null value if any of those pre-conditions
+ * are not met.
+ *
+ * Returns: A %null terminated list of UTF-8 encoded suggestions, or %null
  */
 ENCHANT_MODULE_EXPORT (char **)
 enchant_dict_suggest (EnchantDict * dict, const char *const word,
@@ -277,11 +280,13 @@ enchant_provider_free (gpointer data, gpointer user_data)
 
   provider = (EnchantProvider *) data;
 
+  module = (GModule *) provider->enchant_private_data;
+
   if (provider->dispose) {
     (*provider->dispose) (provider);
   }
 
-  module = (GModule *) provider->enchant_private_data;
+  /* close module only after invoking dispose */
   g_module_close (module);
 }
 

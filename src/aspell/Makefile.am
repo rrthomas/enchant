@@ -10,8 +10,6 @@ install-libtool-import-lib:
 uninstall-libtool-import-lib:
 endif
 
-# TODO: figure out how to install this in a subdir of $(libdir)
-
 if WITH_PSPELL
 target_lib = libenchant_aspell.la
 else
@@ -20,11 +18,13 @@ endif
 
 INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
-lib_LTLIBRARIES = $(target_lib)
+enchant_LTLIBRARIES = $(target_lib)
+enchantdir= $(libdir)/enchant
 
 libenchant_aspell_la_LIBADD= $(ENCHANT_LIBS) $(PSPELL_LIBS)
 libenchant_aspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
 libenchant_aspell_la_SOURCES = aspell_provider.c
+libenchant_aspell_lalibdir=$(libdir)/enchant
 
 install-data-local: install-libtool-import-lib
 
