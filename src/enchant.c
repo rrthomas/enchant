@@ -1,3 +1,4 @@
+/* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
  *
@@ -40,16 +41,16 @@
 ENCHANT_MODULE_EXPORT (int)
 enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
 {
-  g_return_val_if_fail (dict, 1);
-  g_return_val_if_fail (word, 1);
-  g_return_val_if_fail (len, 1);
-
-  if (dict->check)
-    {
-      return (*dict->check) (dict, word, len);
-    }
-
-  return 1;
+	g_return_val_if_fail (dict, 1);
+	g_return_val_if_fail (word, 1);
+	g_return_val_if_fail (len, 1);
+	
+	if (dict->check)
+		{
+			return (*dict->check) (dict, word, len);
+		}
+	
+	return 1;
 }
 
 /**
@@ -68,18 +69,18 @@ ENCHANT_MODULE_EXPORT (char **)
 enchant_dict_suggest (EnchantDict * dict, const char *const word,
 		      size_t len, size_t * out_n_suggs)
 {
-  g_return_val_if_fail (dict, NULL);
-  g_return_val_if_fail (word, NULL);
-  g_return_val_if_fail (len, NULL);
-  g_return_val_if_fail (out_n_suggs, NULL);
-
-  if (dict->suggest)
-    {
-      return (*dict->suggest) (dict, word, len, out_n_suggs);
-    }
-
-  *out_n_suggs = 0;
-  return NULL;
+	g_return_val_if_fail (dict, NULL);
+	g_return_val_if_fail (word, NULL);
+	g_return_val_if_fail (len, NULL);
+	g_return_val_if_fail (out_n_suggs, NULL);
+	
+	if (dict->suggest)
+		{
+			return (*dict->suggest) (dict, word, len, out_n_suggs);
+		}
+	
+	*out_n_suggs = 0;
+	return NULL;
 }
 
 /**
@@ -95,14 +96,14 @@ ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 			      size_t len)
 {
-  g_return_if_fail (dict);
-  g_return_if_fail (word);
-  g_return_if_fail (len);
-
-  if (dict->add_to_personal)
-    {
-      (*dict->add_to_personal) (dict, word, len);
-    }
+	g_return_if_fail (dict);
+	g_return_if_fail (word);
+	g_return_if_fail (len);
+	
+	if (dict->add_to_personal)
+		{
+			(*dict->add_to_personal) (dict, word, len);
+		}
 }
 
 /**
@@ -118,14 +119,14 @@ ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 			     size_t len)
 {
-  g_return_if_fail (dict);
-  g_return_if_fail (word);
-  g_return_if_fail (len);
-
-  if (dict->add_to_session)
-    {
-      (*dict->add_to_session) (dict, word, len);
-    }
+	g_return_if_fail (dict);
+	g_return_if_fail (word);
+	g_return_if_fail (len);
+	
+	if (dict->add_to_session)
+		{
+			(*dict->add_to_session) (dict, word, len);
+		}
 }
 
 /**
@@ -144,16 +145,16 @@ enchant_dict_store_replacement (EnchantDict * dict,
 				const char *const mis, size_t mis_len,
 				const char *const cor, size_t cor_len)
 {
-  g_return_if_fail (dict);
-  g_return_if_fail (mis);
-  g_return_if_fail (mis_len);
-  g_return_if_fail (cor);
-  g_return_if_fail (cor_len);
-
-  if (dict->store_replacement)
-    {
-      (*dict->store_replacement) (dict, mis, mis_len, cor, cor_len);
-    }
+	g_return_if_fail (dict);
+	g_return_if_fail (mis);
+	g_return_if_fail (mis_len);
+	g_return_if_fail (cor);
+	g_return_if_fail (cor_len);
+	
+	if (dict->store_replacement)
+		{
+			(*dict->store_replacement) (dict, mis, mis_len, cor, cor_len);
+		}
 }
 
 /**
@@ -167,13 +168,13 @@ enchant_dict_store_replacement (EnchantDict * dict,
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions)
 {
-  g_return_if_fail (dict);
-  g_return_if_fail (suggestions);
-
-  if (dict->free_suggestions)
-    {
-      (*dict->free_suggestions) (dict, suggestions);
-    }
+	g_return_if_fail (dict);
+	g_return_if_fail (suggestions);
+	
+	if (dict->free_suggestions)
+		{
+			(*dict->free_suggestions) (dict, suggestions);
+		}
 }
 
 /***********************************************************************************/
@@ -181,8 +182,8 @@ enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions)
 
 struct str_enchant_broker
 {
-  GSList *provider_list;	/* list of all of the spelling backend providers */
-  GHashTable *dict_map;		/* map of language tag -> dictionary */
+	GSList *provider_list;	/* list of all of the spelling backend providers */
+	GHashTable *dict_map;		/* map of language tag -> dictionary */
 };
 
 typedef EnchantProvider *(*EnchantProviderInitFunc) ();
@@ -190,104 +191,110 @@ typedef EnchantProvider *(*EnchantProviderInitFunc) ();
 static void
 enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 {
-  GModule *module;
-  GDir *dir;
-  G_CONST_RETURN char *dir_entry;
-
-  char * filename;
-
-  EnchantProvider *provider;
-  EnchantProviderInitFunc init_func;
-
-  dir = g_dir_open (dir_name, 0, NULL);
-  if (!dir) {
-    return;
-  }
-
-  while ((dir_entry = g_dir_read_name (dir)) != NULL)
-    {
-      if (/* g_file_test (dir_entry, G_FILE_TEST_EXISTS) &&
-	     !g_file_test (dir_entry,G_FILE_TEST_IS_DIR) && */
-	  strstr (dir_entry, G_MODULE_SUFFIX) != NULL)
-	{
-	  filename = g_build_filename (dir_name, dir_entry, NULL);
-
-	  /* this is a module we can try to load */
-	  module = g_module_open (filename, (GModuleFlags) 0);
-	  if (module) {
-	    if (g_module_symbol
-		(module, "init_enchant_provider", (gpointer *) (&init_func))
-		&& init_func)
-	      {
-		provider = init_func ();
-		if (provider)
-		  {
-		    provider->enchant_private_data = (void *) module;
-		    broker->provider_list = g_slist_append (broker->provider_list, (gpointer)provider);
-		  }
-	      }
-	    else
-	      {
-		g_module_close (module);
-	      }
-	  } else {
-	    g_warning ("Module error: %s\n", g_module_error());
-	  }
-
-	  g_free (filename);
-	}
-    }
-
-  g_dir_close (dir);
+	GModule *module;
+	GDir *dir;
+	G_CONST_RETURN char *dir_entry;
+	
+	char * filename;
+	
+	EnchantProvider *provider;
+	EnchantProviderInitFunc init_func;
+	
+	dir = g_dir_open (dir_name, 0, NULL);
+	if (!dir) 
+		{
+			return;
+		}
+	
+	while ((dir_entry = g_dir_read_name (dir)) != NULL)
+		{
+			if (/* g_file_test (dir_entry, G_FILE_TEST_EXISTS) &&
+			       !g_file_test (dir_entry,G_FILE_TEST_IS_DIR) && */
+			    strstr (dir_entry, G_MODULE_SUFFIX) != NULL)
+				{
+					filename = g_build_filename (dir_name, dir_entry, NULL);
+					
+					/* this is a module we can try to load */
+					module = g_module_open (filename, (GModuleFlags) 0);
+					if (module) 
+						{
+							if (g_module_symbol
+							    (module, "init_enchant_provider", (gpointer *) (&init_func))
+							    && init_func)
+								{
+									provider = init_func ();
+									if (provider)
+										{
+											provider->enchant_private_data = (void *) module;
+											broker->provider_list = g_slist_append (broker->provider_list, (gpointer)provider);
+										}
+								}
+							else
+								{
+									g_module_close (module);
+								}
+						} 
+					else 
+						{
+							g_warning ("Module error: %s\n", g_module_error());
+						}
+					
+					g_free (filename);
+				}
+		}
+	
+	g_dir_close (dir);
 }
 
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-  gchar *private_dir;
-
-  enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
-
-  private_dir = g_strdup_printf ("%s%s.enchant", g_get_home_dir (), 
-				 G_DIR_SEPARATOR_S);
-  enchant_load_providers_in_dir (broker, private_dir);
-  g_free (private_dir);
+	gchar *user_dir;
+	
+	enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
+	
+	user_dir = g_strdup_printf ("%s%s.enchant", g_get_home_dir (), 
+				    G_DIR_SEPARATOR_S);
+	enchant_load_providers_in_dir (broker, user_dir);
+	g_free (user_dir);
 }
 
 static void
 enchant_dict_destroyed (gpointer data)
 {
-  EnchantDict *dict;
-  EnchantProvider *owner;
-
-  g_return_if_fail (data);
-
-  dict = (EnchantDict *) data;
-  owner = dict->owner;
-
-  if (owner->dispose_dict) {
-    (*owner->dispose_dict) (owner, dict);
-  }
+	EnchantDict *dict;
+	EnchantProvider *owner;
+	
+	g_return_if_fail (data);
+	
+	dict = (EnchantDict *) data;
+	owner = dict->owner;
+	
+	if (owner->dispose_dict) 
+		{
+			(*owner->dispose_dict) (owner, dict);
+		}
 }
 
 static void
 enchant_provider_free (gpointer data, gpointer user_data)
 {
-  EnchantProvider *provider;
-  GModule *module;
-
-  g_return_if_fail (data);
-
-  provider = (EnchantProvider *) data;
-
-  module = (GModule *) provider->enchant_private_data;
-
-  if (provider->dispose) {
-    (*provider->dispose) (provider);
-  }
-
-  /* close module only after invoking dispose */
-  g_module_close (module);
+	EnchantProvider *provider;
+	GModule *module;
+	
+	g_return_if_fail (data);
+	
+	provider = (EnchantProvider *) data;
+	
+	module = (GModule *) provider->enchant_private_data;
+	
+	if (provider->dispose) 
+		{
+			(*provider->dispose) (provider);
+		}
+	
+	/* close module only after invoking dispose */
+	g_module_close (module);
 }
 
 /**
@@ -296,20 +303,21 @@ enchant_provider_free (gpointer data, gpointer user_data)
  * Returns: A new broker object capable of requesting
  * dictionaries from
  */
-ENCHANT_MODULE_EXPORT (EnchantBroker *) enchant_broker_init (void)
+ENCHANT_MODULE_EXPORT (EnchantBroker *) 
+enchant_broker_init (void)
 {
-  EnchantBroker *broker = NULL;
-
-  g_return_val_if_fail (g_module_supported (), NULL);
-
-  broker = g_new0 (EnchantBroker, 1);
-
-  broker->dict_map = g_hash_table_new_full (g_str_hash, g_str_equal,
-					    NULL, enchant_dict_destroyed);
-
-  enchant_load_providers (broker);
-
-  return broker;
+	EnchantBroker *broker = NULL;
+	
+	g_return_val_if_fail (g_module_supported (), NULL);
+	
+	broker = g_new0 (EnchantBroker, 1);
+	
+	broker->dict_map = g_hash_table_new_full (g_str_hash, g_str_equal,
+						  NULL, enchant_dict_destroyed);
+	
+	enchant_load_providers (broker);
+	
+	return broker;
 }
 
 /**
@@ -318,17 +326,18 @@ ENCHANT_MODULE_EXPORT (EnchantBroker *) enchant_broker_init (void)
  *
  * Destroys the broker object
  */
-ENCHANT_MODULE_EXPORT (void) enchant_broker_term (EnchantBroker * broker)
+ENCHANT_MODULE_EXPORT (void) 
+enchant_broker_term (EnchantBroker * broker)
 {
-  g_return_if_fail (broker);
-
-  /* will destroy the dictionaries for us */
-  g_hash_table_destroy (broker->dict_map);
-
-  g_slist_foreach (broker->provider_list, enchant_provider_free, NULL);
-  g_slist_free (broker->provider_list);
-
-  g_free (broker);
+	g_return_if_fail (broker);
+	
+	/* will destroy the dictionaries for us */
+	g_hash_table_destroy (broker->dict_map);
+	
+	g_slist_foreach (broker->provider_list, enchant_provider_free, NULL);
+	g_slist_free (broker->provider_list);
+	
+	g_free (broker);
 }
 
 /**
@@ -341,33 +350,35 @@ ENCHANT_MODULE_EXPORT (void) enchant_broker_term (EnchantBroker * broker)
 ENCHANT_MODULE_EXPORT (EnchantDict *)
 enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 {
-  EnchantProvider *provider;
-  EnchantDict *dict;
-  GSList *list;
-
-  g_return_val_if_fail (broker, NULL);
-  g_return_val_if_fail (tag, NULL);
-  g_return_val_if_fail (strlen (tag), NULL);
-
-  dict = g_hash_table_lookup (broker->dict_map, (gpointer) tag);
-  if (dict)
-    return dict;
-
-  for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
-    {
-      provider = (EnchantProvider *) list->data;
-      dict = (*provider->request_dict) (provider, tag);
-
-      if (dict)
-	{
-	  dict->owner = provider;
-	  g_hash_table_insert (broker->dict_map, (gpointer) tag, dict);
-	  return dict;
-	}
-    }
-
-  /* Nothing found */
-  return NULL;
+	EnchantProvider *provider;
+	EnchantDict *dict;
+	GSList *list;
+	
+	g_return_val_if_fail (broker, NULL);
+	g_return_val_if_fail (tag, NULL);
+	g_return_val_if_fail (strlen (tag), NULL);
+	
+	dict = g_hash_table_lookup (broker->dict_map, (gpointer) tag);
+	if (dict)
+		{
+			return dict;
+		}
+	
+	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
+		{
+			provider = (EnchantProvider *) list->data;
+			dict = (*provider->request_dict) (provider, tag);
+			
+			if (dict)
+				{
+					dict->owner = provider;
+					g_hash_table_insert (broker->dict_map, (gpointer) tag, dict);
+					return dict;
+				}
+		}
+	
+	/* Nothing found */
+	return NULL;
 }
 
 /**
@@ -380,8 +391,8 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 ENCHANT_MODULE_EXPORT (void)
 enchant_broker_release_dict (EnchantBroker * broker, EnchantDict * dict)
 {
-  g_return_if_fail (broker);
-  g_return_if_fail (dict);
-
-  /* this will be a noop for now, perhaps indefinitely */
+	g_return_if_fail (broker);
+	g_return_if_fail (dict);
+	
+	/* this will be a noop for now, perhaps indefinitely */
 }

@@ -1,3 +1,4 @@
+/* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
  *
@@ -67,54 +68,54 @@ ENCHANT_MODULE_EXPORT (void)
 
 struct str_enchant_dict
 {
-  void *user_data;
-  EnchantProvider *owner;
-  
-  int (*check) (struct str_enchant_dict * me, const char *const word,
-		size_t len);
-  
-  char **(*suggest) (struct str_enchant_dict * me,
-		     const char *const word, size_t len,
-		     size_t * out_n_suggs);
-  
-  void (*add_to_personal) (struct str_enchant_dict * me,
-			   const char *const word, size_t len);
-  
-  void (*add_to_session) (struct str_enchant_dict * me,
-			  const char *const word, size_t len);
-  
-  void (*store_replacement) (struct str_enchant_dict * me,
-			     const char *const mis, size_t mis_len,
-			     const char *const cor, size_t cor_len);
-  
-  void (*free_suggestions) (struct str_enchant_dict * me,
-			    char **str_list);
-  
-  void (*_reserved_func1) (void);
-  void (*_reserved_func2) (void);
-  void (*_reserved_func3) (void);
-  void (*_reserved_func4) (void);
-  void (*_reserved_func5) (void);
+	void *user_data;
+	EnchantProvider *owner;
+	
+	int (*check) (struct str_enchant_dict * me, const char *const word,
+		      size_t len);
+	
+	char **(*suggest) (struct str_enchant_dict * me,
+			   const char *const word, size_t len,
+			   size_t * out_n_suggs);
+	
+	void (*add_to_personal) (struct str_enchant_dict * me,
+				 const char *const word, size_t len);
+	
+	void (*add_to_session) (struct str_enchant_dict * me,
+				const char *const word, size_t len);
+	
+	void (*store_replacement) (struct str_enchant_dict * me,
+				   const char *const mis, size_t mis_len,
+				   const char *const cor, size_t cor_len);
+	
+	void (*free_suggestions) (struct str_enchant_dict * me,
+				  char **str_list);
+	
+	void (*_reserved_func1) (void);
+	void (*_reserved_func2) (void);
+	void (*_reserved_func3) (void);
+	void (*_reserved_func4) (void);
+	void (*_reserved_func5) (void);
 };
-
+	
 struct str_enchant_provider
 {
-  void *user_data;
-  void *enchant_private_data;
-  
-  void (*dispose) (struct str_enchant_provider * me);
-  
-  EnchantDict *(*request_dict) (struct str_enchant_provider * me,
-				const char *const tag);
-  
-  void (*dispose_dict) (struct str_enchant_provider * me,
-			EnchantDict * dict);
-  
-  void (*_reserved_func1) (void);
-  void (*_reserved_func2) (void);
-  void (*_reserved_func3) (void);
-  void (*_reserved_func4) (void);
-  void (*_reserved_func5) (void);
+	void *user_data;
+	void *enchant_private_data;
+	
+	void (*dispose) (struct str_enchant_provider * me);
+	
+	EnchantDict *(*request_dict) (struct str_enchant_provider * me,
+				      const char *const tag);
+	
+	void (*dispose_dict) (struct str_enchant_provider * me,
+			      EnchantDict * dict);
+	
+	void (*_reserved_func1) (void);
+	void (*_reserved_func2) (void);
+	void (*_reserved_func3) (void);
+	void (*_reserved_func4) (void);
+	void (*_reserved_func5) (void);
 };
 
 #ifdef __cplusplus
