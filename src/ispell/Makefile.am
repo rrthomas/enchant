@@ -16,7 +16,7 @@ else
 target_lib =
 endif
 
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -DENCHANT_ISPELL_DICT_DIR=\"$(datadir)/enchant/ispell\"
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(ISPELL_CFLAGS)
 
 ispell_LTLIBRARIES = $(target_lib)
 ispelldir= $(libdir)/enchant
