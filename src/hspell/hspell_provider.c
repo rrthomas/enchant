@@ -155,7 +155,7 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
 	
 	/* check if hebrew ( if not hebrew cant do anything ) */
-	if (iso_word == NULL || !is_hebrew (iso_word))
+	if (iso_word == NULL || !is_hebrew (iso_word, length))
 		{
 			if (iso_word != NULL)
 				g_free (iso_word);
@@ -238,7 +238,7 @@ hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	hspell_dict = (struct dict_radix *)dict->user_data;
 
 	/* deleting the dict is not posible on hspell ver. < v.0.8 */
-#if (HSPELL_VERSION_MAJOR >= 0) && (HSPELL_VERSION_MINOR >= 8)
+#if (HSPELL_VERSION_MAJOR > 0) || (HSPELL_VERSION_MINOR >= 8)
 	hspell_uninit (hspell_dict);
 #endif
 	g_free (dict);
