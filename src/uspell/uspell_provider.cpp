@@ -222,8 +222,8 @@ uspell_request_manager (const char * private_dir, size_t mapIndex)
 static EnchantDict *
 uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
-	EnchantDict *dict;
-	uSpell *manager;
+	EnchantDict *dict = NULL;
+	uSpell *manager = NULL;
 	int mapIndex;
 
 	char * private_dir = g_build_filename (g_get_home_dir(), ".enchant",

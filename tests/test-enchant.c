@@ -81,11 +81,11 @@ main (int argc, char **argv)
 	
 	broker = enchant_broker_init ();
 	
-	dict = enchant_broker_request_dict (broker, "en_US");
+	dict = enchant_broker_request_dict (broker, "fr_FR");
 	
 	if (!dict) 
 		{
-			fprintf (stderr, "Couldn't create dictionary for en_US\n");
+			fprintf (stderr, "Couldn't create dictionary for fr_FR\n");
 		} 
 	else 
 		{
