@@ -104,6 +104,9 @@ namespace enchant
 			}
 			
 		private:
+
+			// space reserved for API/ABI expansion
+			void * _private[5];
 			
 			Dict (EnchantDict * dict, EnchantBroker * broker)
 				: m_dict (dict), m_broker (broker)
