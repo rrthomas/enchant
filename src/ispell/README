@@ -1,0 +1,22 @@
+Ispell Enchant Backend
+
+Ispell is as old as time. I'll bore you with the history lesson - let it
+suffice to say that there are many forks of Ispell floating around there.
+
+This is based off of work done by myself (Dom) and others inside of AbiWord
+(http://www.abisource.com). It is a port of Ispell to C++, some other general
+modifications, plus it's stateful (no static/global data). These are all good
+things.
+
+The current version of enchant looks for dictionary files in 2 places:
+
+1) Global directory - this is $prefix/share/enchant/ispell/
+2) User-local directory - this is $home/.enchant/ispell/
+
+The user's dictionaries, if present, always take precedence over the global
+ones.
+
+You can grab dictionaries compatible with this version of Ispell from:
+
+http://www.abisource.com/~fjf/
+http://sourceforge.net/project/showfiles.php?group_id=15518&release_id=84373
