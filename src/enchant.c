@@ -194,6 +194,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 	GModule *module;
 	GDir *dir;
 	G_CONST_RETURN char *dir_entry;
+	size_t entry_len, g_module_suffix_len;
 	
 	char * filename;
 	
@@ -206,11 +207,14 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 			return;
 		}
 	
+	g_module_suffix_len = strlen (G_MODULE_SUFFIX);
+
 	while ((dir_entry = g_dir_read_name (dir)) != NULL)
 		{
+			entry_len = strlen (dir_entry);
 			if (/* g_file_test (dir_entry, G_FILE_TEST_EXISTS) &&
 			       !g_file_test (dir_entry,G_FILE_TEST_IS_DIR) && */
-			    strstr (dir_entry, G_MODULE_SUFFIX) != NULL)
+			    (entry_len > g_module_suffix_len) && !strcmp(dir_entry+(entry_len-g_module_suffix_len), G_MODULE_SUFFIX))
 				{
 					filename = g_build_filename (dir_name, dir_entry, NULL);
 					
