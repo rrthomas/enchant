@@ -1,3 +1,14 @@
+0.3.0
+-------------------
+Better Aspell detection
+Aspell backend sync's dictionary lists to disk
+Ispell crash fixes
+Myspell crash fixes
+Refined C++ API/ABI
+Refined C ABI
+Implemented some new APIs
+Better implemented some internals
+
 0.2.0
 -------------------
 Myspell support
