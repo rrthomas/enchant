@@ -282,12 +282,53 @@ enchant_provider_order_destroyed (gpointer data)
 }
 
 static void
+enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
+{
+	char line [1024];
+	char * tag, * ordering;
+
+	size_t i, len;
+
+	FILE * f;
+
+	f = fopen (file, "r");
+	if (!f)
+		return;
+
+	while (NULL != fgets (line, sizeof(line), f)) {
+		for (i = 0, len = strlen(line); i < len && line[i] != ':'; i++) {
+			;
+		}
+
+		if (i < len) {
+			tag = g_strndup (line, i);
+			ordering = g_strndup (line+(i+1), len - i);
+
+			enchant_broker_set_ordering (broker, tag, ordering);
+
+			g_free (tag);
+			g_free (ordering);
+		}
+	}
+
+	fclose (f);
+}
+
+static void
 enchant_load_provider_ordering (EnchantBroker * broker)
 {
+	char * ordering_file;
+
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal,
 							   NULL, enchant_provider_order_destroyed);
 
-	/* STUB TODO: load the global and user-local provider ordering files */
+	ordering_file = g_build_filename (ENCHANT_GLOBAL_ORDERING, "enchant.ordering", NULL);
+	enchant_load_ordering_from_file (broker, ordering_file);
+	g_free (ordering_file);
+
+	ordering_file = g_build_filename (g_get_home_dir (), ".enchant", "enchant.ordering", NULL);
+	enchant_load_ordering_from_file (broker, ordering_file);
+	g_free (ordering_file);
 }
 
 static GSList *
@@ -405,8 +446,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	GSList *list = NULL;
 	
 	g_return_val_if_fail (broker, NULL);
-	g_return_val_if_fail (tag, NULL);
-	g_return_val_if_fail (strlen (tag), NULL);
+	g_return_val_if_fail (tag && strlen(tag), NULL);
 	
 	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
 	if (dict)
@@ -506,7 +546,7 @@ enchant_broker_dictionary_status (EnchantBroker * broker,
 	GSList *list;
 
 	g_return_val_if_fail (broker, EDS_UNKNOWN);
-	g_return_val_if_fail (tag, EDS_UNKNOWN);
+	g_return_val_if_fail (tag && strlen(tag), EDS_UNKNOWN);
 
 	/* don't query the providers if we can just do a quick map lookup */
 	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL)
@@ -548,14 +588,32 @@ enchant_broker_dictionary_status (EnchantBroker * broker,
  * language that does not explictly declare an ordering.
  */
 ENCHANT_MODULE_EXPORT (void)
-enchant_broke_set_ordering (EnchantBroker * broker,
-			    const char * const tag,
-			    const char * const ordering)
+enchant_broker_set_ordering (EnchantBroker * broker,
+			     const char * const tag,
+			     const char * const ordering)
 {
-	g_return_if_fail (broker);
-	g_return_if_fail (tag);
-	g_return_if_fail (ordering);
+	char * tag_dupl;
+	char * ordering_dupl;
 
-	g_hash_table_insert (broker->provider_ordering, (gpointer)tag,
-			     g_strdup (ordering));
+	g_return_if_fail (broker);
+	g_return_if_fail (tag && strlen(tag));
+	g_return_if_fail (ordering && strlen(ordering));
+
+	tag_dupl = g_strdup (tag);
+	ordering_dupl = g_strdup (ordering);
+
+	tag_dupl = g_strstrip (tag_dupl);
+	ordering_dupl = g_strstrip (ordering_dupl);
+
+	if (tag_dupl && strlen(tag_dupl) &&
+	    ordering_dupl && strlen(ordering_dupl)) {
+		g_hash_table_insert (broker->provider_ordering, (gpointer)tag_dupl,
+				     g_strdup (ordering_dupl));
+
+		/* we will free ordering_dupl when the hash is destroyed */
+		g_free (tag_dupl);
+	} else {
+		g_free (tag_dupl);
+		g_free (ordering_dupl);
+	}
 }

@@ -12,7 +12,7 @@ install-libtool-import-lib:
 uninstall-libtool-import-lib:
 endif
 
-INCLUDES=-I$(top_srcdir) $(ENCHANT_CFLAGS) -DENCHANT_GLOBAL_MODULE_DIR=\"$(libdir)/enchant\"
+INCLUDES=-I$(top_srcdir) $(ENCHANT_CFLAGS) -DENCHANT_GLOBAL_MODULE_DIR=\"$(libdir)/enchant\" -DENCHANT_GLOBAL_ORDERING=\"$(datadir)/enchant\"
 
 lib_LTLIBRARIES = libenchant.la
 

@@ -87,9 +87,9 @@ ENCHANT_MODULE_EXPORT (EnchantDictStatus)
 				       const char * const tag);
 
 ENCHANT_MODULE_EXPORT (void)
-enchant_broke_set_ordering (EnchantBroker * broker,
-			    const char * const tag,
-			    const char * const ordering);
+enchant_broker_set_ordering (EnchantBroker * broker,
+			     const char * const tag,
+			     const char * const ordering);
 
 /**
  * EnchantBrokerDescribeFn

@@ -34,6 +34,15 @@
 #include "enchant.h"
 
 static void
+enumerate_dicts (const char * name,
+		 const char * desc,
+		 const char * file,
+		 void * ud)
+{
+	printf ("%s: '%s' (%s)\n", name, desc, file);
+}
+
+static void
 run_dict_tests (EnchantDict * dict)
 {
 	char **suggs;
@@ -82,6 +91,7 @@ main (int argc, char **argv)
 		{
 			run_dict_tests (dict);
 			
+			enchant_broker_describe (broker, enumerate_dicts, NULL);
 			enchant_broker_release_dict (broker, dict);
 		}
 	
