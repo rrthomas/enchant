@@ -370,6 +370,12 @@ enchant_get_ordered_providers (EnchantBroker * broker,
 		g_strfreev (tokens);
 	}
 
+	/* providers not in the list need to be appended at the end */
+	for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter)) {
+		if (!g_slist_find (list, iter->data))
+			list = g_slist_append (list, iter->data);
+	}
+
 	return list;
 }
 
