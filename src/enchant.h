@@ -38,7 +38,10 @@ extern "C" {
 #endif
 
 #ifdef _WIN32
+#ifdef _ENCHANT_BUILD
 #define ENCHANT_MODULE_EXPORT(x) __declspec(dllexport) x
+#else
+#define ENCHANT_MODULE_EXPORT(x) __declspec(dllimport) x
 #else
 #define ENCHANT_MODULE_EXPORT(x) x
 #endif

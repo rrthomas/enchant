@@ -28,6 +28,9 @@
  * do so, delete this exception statement from your version.
  */
 
+/* for proper DLL import/export semantics on Win32 */
+#define _ENCHANT_BUILD 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
