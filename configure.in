@@ -82,6 +82,25 @@ fi
 ISPELL_CFLAGS="-DENCHANT_ISPELL_DICT_DIR='\"$ispell_dict_dir\"'"
 AC_SUBST(ISPELL_CFLAGS)
 
+build_myspell=yes
+
+AC_ARG_ENABLE(myspell, [  --disable-myspell     enable the myspell backend [default=auto]], build_myspell="$enableval", build_myspell=yes)
+
+if test "x$have_cxx" = "xno"; then
+   build_myspell=no
+fi
+AM_CONDITIONAL(WITH_MYSPELL, test "x$build_myspell" = "xyes")
+
+myspell_dict_dir=${datadir}/enchant/myspell
+AC_ARG_WITH(myspell-dir, [  --with-myspell-dir=PATH    path to installed myspell dicts ])
+
+if test "x$with_myspell_dict_dir" != "x" ; then
+   myspell_dict_dir=$with_myspell_dict_dir
+fi
+
+MYSPELL_CFLAGS="-DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dict_dir\"'"
+AC_SUBST(MYSPELL_CFLAGS)
+
 check_pspell=yes
 
 AC_ARG_ENABLE(pspell, [  --disable-pspell     enable the pspell backend [default=auto]], check_pspell="$enableval", check_pspell=yes)
@@ -136,6 +155,7 @@ src/Makefile
 src/aspell/Makefile
 src/ispell/Makefile
 src/uspell/Makefile
+src/myspell/Makefile
 tests/Makefile
 ])
 
@@ -149,4 +169,5 @@ $PACKAGE-$VERSION
 	Build Aspell/Pspell backend:    ${build_pspell}
 	Build Ispell backend:           ${build_ispell}
 	Build Uspell backend:           ${build_uspell}
+	Build Myspell backend:          ${build_myspell}
 "
