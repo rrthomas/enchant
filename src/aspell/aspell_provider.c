@@ -180,7 +180,7 @@ aspell_provider_dictionary_status (struct str_enchant_provider * me,
 {
 	/* TODO: get kevina to apply my patch */
 	g_warning ("pspell_provider_dictionary_status stub - unimplemented\n");
-	return ED_UNKNOWN;
+	return EDS_UNKNOWN;
 }
 
 static void

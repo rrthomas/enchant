@@ -279,7 +279,7 @@ EnchantDictStatus uspell_provider_dictionary_status(struct str_enchant_provider 
 {
 	// TODO: a g_file_exists check on the dictionary associated with the tag
 	g_warning ("uspell_provider_dictionary_status stub - unimplemented\n");
-	return(ED_UNKNOWN);
+	return(EDS_UNKNOWN);
 }
 
 static void

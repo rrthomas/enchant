@@ -49,9 +49,9 @@ typedef struct str_enchant_provider EnchantProvider;
 
 typedef enum
 	{
-		ED_EXISTS,
-		ED_DOESNT_EXIST,
-		ED_UNKNOWN
+		EDS_EXISTS, /* Dictionary definitely exists */
+		EDS_DOESNT_EXIST, /* Dictionary definitely doesn't exist */
+		EDS_UNKNOWN /* Unknown if dict exists or not */
 	} EnchantDictStatus;
 
 ENCHANT_MODULE_EXPORT (int)
@@ -86,6 +86,20 @@ ENCHANT_MODULE_EXPORT (EnchantDictStatus)
      enchant_broker_dictionary_status (EnchantBroker * broker,
 				       const char * const tag);
 
+ENCHANT_MODULE_EXPORT (void)
+enchant_broke_set_ordering (EnchantBroker * broker,
+			    const char * const tag,
+			    const char * const ordering);
+
+/**
+ * EnchantBrokerDescribeFn
+ * @name: The provider's identifier, such as "ispell" or "aspell"
+ * @desc: A description of the provider, such as "Aspell 0.53"
+ * @file: The provider's DLL filename
+ * @user_data: Supplied user_data, or %null if you don't care
+ *
+ * Callback used to enumerate and describe Enchant's various providers
+ */
 typedef void (*EnchantBrokerDescribeFn) (const char * name,
 					 const char * desc,
 					 const char * file,

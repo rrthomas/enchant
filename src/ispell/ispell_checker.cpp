@@ -584,7 +584,7 @@ ispell_provider_dictionary_status (struct str_enchant_provider * me,
 {
 	// TODO: use g_file_test to test existance
 	g_warning ("ispell_provider_dictionary_status stub - unimplemented\n");
-	return ED_UNKNOWN;
+	return EDS_UNKNOWN;
 }
 
 static void

@@ -501,16 +501,16 @@ enchant_broker_dictionary_status (EnchantBroker * broker,
 				  const char * const tag)
 {
 	/* start off pessimistic */
-	EnchantDictStatus best_status = ED_DOESNT_EXIST, status = ED_DOESNT_EXIST;
+	EnchantDictStatus best_status = EDS_DOESNT_EXIST, status = EDS_DOESNT_EXIST;
 	EnchantProvider *provider;
 	GSList *list;
 
-	g_return_val_if_fail (broker, ED_UNKNOWN);
-	g_return_val_if_fail (tag, ED_UNKNOWN);
+	g_return_val_if_fail (broker, EDS_UNKNOWN);
+	g_return_val_if_fail (tag, EDS_UNKNOWN);
 
 	/* don't query the providers if we can just do a quick map lookup */
 	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL)
-		return ED_EXISTS;
+		return EDS_EXISTS;
 
 	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
@@ -519,18 +519,43 @@ enchant_broker_dictionary_status (EnchantBroker * broker,
 			if (provider->dictionary_status)
 				{
 					status = (*provider->dictionary_status) (provider, tag);
-					if (status == ED_EXISTS)
-						return ED_EXISTS;
-					else if (status == ED_UNKNOWN)
-						best_status = ED_UNKNOWN;
+					if (status == EDS_EXISTS)
+						return EDS_EXISTS;
+					else if (status == EDS_UNKNOWN)
+						best_status = EDS_UNKNOWN;
 				}
 			else
 				{
 					/* no query routine implemented, return so-so value */
-					best_status = ED_UNKNOWN;
+					best_status = EDS_UNKNOWN;
 				}
 		}
 
 
 	return best_status;
+}
+
+/**
+ * enchant_broker_declare_ordering
+ * @broker: A non-null #EnchantBroker
+ * @tag: A non-null language tag (en_US)
+ * @ordering: A non-null ordering (aspell,myspell,ispell,uspell,hspell)
+ *
+ * Declares a preference of dictionaries to use for the language
+ * described/referred to by @tag. The ordering is a comma delimited
+ * list of provider names. As a special exception, the "*" tag can
+ * be used as a language tag to declare a default ordering for any
+ * language that does not explictly declare an ordering.
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_broke_set_ordering (EnchantBroker * broker,
+			    const char * const tag,
+			    const char * const ordering)
+{
+	g_return_if_fail (broker);
+	g_return_if_fail (tag);
+	g_return_if_fail (ordering);
+
+	g_hash_table_insert (broker->provider_ordering, (gpointer)tag,
+			     g_strdup (ordering));
 }
