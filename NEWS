@@ -1,1 +1,16 @@
-hi, I'm the news file (required file for make dist)
+0.2.0
+-------------------
+Myspell support
+Better Uspell support
+Ability to enumerate providers
+Win32 support
+
+0.1.0
+-------------------
+Initial Release
+Aspell/Pspell support
+Ispell support
+Uspell support
+Ability to order dictionaries/providers
+
+

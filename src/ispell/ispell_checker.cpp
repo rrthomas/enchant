@@ -606,9 +606,28 @@ static EnchantDictStatus
 ispell_provider_dictionary_status (struct str_enchant_provider * me,
 				   const char *const tag)
 {
-	// TODO: use g_file_test to test existance
-	g_warning ("ispell_provider_dictionary_status stub - unimplemented\n");
-	return EDS_UNKNOWN;
+	std::vector <std::string> names;
+
+	s_buildHashNames (names, tag);
+	for (size_t i = 0; i < names.size(); i++) {
+		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
+			return EDS_EXISTS;
+	}
+
+	std::string shortened_dict (tag);
+	size_t uscore_pos;
+	
+	if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
+		shortened_dict = shortened_dict.substr(0, uscore_pos);
+
+		s_buildHashNames (names, shortened_dict.c_str());
+		for (size_t i = 0; i < names.size(); i++) {
+			if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
+				return EDS_EXISTS;
+		}
+	}
+
+	return EDS_DOESNT_EXIST;
 }
 
 static void

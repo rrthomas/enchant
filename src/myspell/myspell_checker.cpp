@@ -139,33 +139,48 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 		return 0;
 }
 
+static void
+s_buildHashNames (std::vector<std::string> & names, const char * dict)
+{
+	char * tmp, * private_dir, * home_dir, * ispell_prefix;
+
+	names.clear ();
+
+	home_dir = enchant_get_user_home_dir ();
+
+	if (home_dir) {
+		private_dir = g_build_filename (home_dir, ".enchant", 
+						"myspell", NULL);
+		
+		tmp = g_build_filename (private_dir, dict, NULL);
+		names.push_back (tmp);
+		g_free (tmp);
+
+		g_free (private_dir);
+		g_free (home_dir);
+	}
+
+	ispell_prefix = myspell_checker_get_prefix ();
+	if (ispell_prefix) {
+		tmp = g_build_filename (ispell_prefix, dict, NULL);
+		names.push_back (tmp);
+		g_free (tmp);
+		g_free (ispell_prefix);
+	}
+}
+
 static char *
 myspell_request_dictionary (const char * tag) 
 {
 	char * dic = NULL;
 
-	char *home_dir = enchant_get_user_home_dir();
-	if (home_dir) {
-		char *priv_dic = g_build_filename (home_dir, ".enchant", 
-						   "myspell", tag, NULL);
-		if (g_file_test(priv_dic, G_FILE_TEST_EXISTS))
-			dic = priv_dic;
-		else
-			g_free(priv_dic);
+	std::vector<std::string> names;
 
-		g_free (home_dir);
-	}
+	s_buildHashNames (names, tag);
 
-	if (!dic) {
-		char * pub_dir = myspell_checker_get_prefix ();
-		if (pub_dir) {
-			char *pub_dic = g_build_filename(pub_dir, tag, NULL);
-			if (g_file_test(pub_dic, G_FILE_TEST_EXISTS))
-			dic = pub_dic;
-			else
-				g_free (pub_dic);
-			g_free (pub_dir);
-		}
+	for (size_t i = 0; i < names.size () && !dic; i++) {
+		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS))
+			dic = g_strdup (names[i].c_str());
 	}
 	
 	return dic;
@@ -304,11 +319,30 @@ myspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 
 static EnchantDictStatus
 myspell_provider_dictionary_status (struct str_enchant_provider * me,
-				   const char *const tag)
+				    const char *const tag)
 {
-	// TODO: use g_file_test to test existance
-	g_warning("myspell_provider_dictionary_status stub - unimplemented\n");
-	return EDS_UNKNOWN;
+	std::vector <std::string> names;
+
+	s_buildHashNames (names, tag);
+	for (size_t i = 0; i < names.size(); i++) {
+		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
+			return EDS_EXISTS;
+	}
+
+	std::string shortened_dict (tag);
+	size_t uscore_pos;
+	
+	if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
+		shortened_dict = shortened_dict.substr(0, uscore_pos);
+
+		s_buildHashNames (names, shortened_dict.c_str());
+		for (size_t i = 0; i < names.size(); i++) {
+			if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
+				return EDS_EXISTS;
+		}
+	}
+
+	return EDS_DOESNT_EXIST;
 }
 
 static void
