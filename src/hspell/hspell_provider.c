@@ -117,7 +117,7 @@ hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 		{
 			if (iso_word)
 				g_free (iso_word);
-			return TRUE;
+			return FALSE;
 		}
 
 	/* check */
