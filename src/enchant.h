@@ -99,19 +99,41 @@ enchant_broker_set_ordering (EnchantBroker * broker,
  * @name: The provider's identifier, such as "ispell" or "aspell"
  * @desc: A description of the provider, such as "Aspell 0.53"
  * @file: The provider's DLL filename
- * @user_data: Supplied user_data, or %null if you don't care
+ * @user_data: Supplied user data, or %null if you don't care
  *
  * Callback used to enumerate and describe Enchant's various providers
  */
-typedef void (*EnchantBrokerDescribeFn) (const char * name,
-					 const char * desc,
-					 const char * file,
+typedef void (*EnchantBrokerDescribeFn) (const char * const name,
+					 const char * const desc,
+					 const char * const file,
 					 void * user_data);
 	
 ENCHANT_MODULE_EXPORT (void)
      enchant_broker_describe (EnchantBroker * broker,
 			      EnchantBrokerDescribeFn fn,
 			      void * user_data);
+
+/**
+ * EnchantDictDescribeFn
+ * @lang_tag: The dictionary's language tag (eg: en_US, de_AT, ...)
+ * @provider_name: The provider's name (eg: Aspell)
+ * @provider_desc: The provider's description (eg: Aspell 0.50.3)
+ * @provider_file: The DLL/SO where this dict's provider was loaded from
+ * @user_data: Supplied user data, or %null if you don't care
+ *
+ * Callback used to describe an individual dictionary
+ */
+typedef void (*EnchantDictDescribeFn) (const char * const lang_tag,
+				       const char * const provider_name,
+				       const char * const provider_desc,
+				       const char * const provider_file,
+				       void * user_data);
+
+ENCHANT_MODULE_EXPORT (void)
+     enchant_dict_describe (EnchantDict * dict,
+			    EnchantDictDescribeFn fn,
+			    void * user_data);
+
 #ifdef __cplusplus
 }
 #endif

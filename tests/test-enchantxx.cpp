@@ -28,7 +28,6 @@
  * do so, delete this exception statement from your version.
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,12 +37,22 @@
 using namespace enchant;
 
 static void
-enumerate_dicts (const char * name,
-		 const char * desc,
-		 const char * file,
+enumerate_dicts (const char * const name,
+		 const char * const desc,
+		 const char * const file,
 		 void * ud)
 {
 	printf ("%s: '%s' (%s)\n", name, desc, file);
+}
+
+static void
+describe_dict (const char * const lang,
+	       const char * const name,
+	       const char * const desc,
+	       const char * const file,
+	       void * ud)
+{
+	printf ("%s: %s '%s' (%s)\n", lang, name, desc, file);
 }
 
 static void
@@ -101,9 +110,10 @@ main (int argc, char **argv)
 	
 	try {
 		dict = broker->request_dict ("en_US");
+		dict->describe (describe_dict);
 		run_dict_tests (dict);
 		
-		broker->describe (enumerate_dicts, NULL);
+		broker->describe (enumerate_dicts);
 		delete dict;
 	} catch (...) {
 		fprintf (stderr, "Couldn't create dictionary for en_US\n");

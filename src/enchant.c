@@ -145,6 +145,7 @@ typedef struct str_enchant_session
 	GHashTable *personal;
 
 	char * personal_filename;
+	char * language_tag;
 
 	EnchantProvider * provider;
 } EnchantSession;
@@ -166,6 +167,7 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 	session->session = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	session->personal = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	session->provider = provider;
+	session->language_tag = g_strdup (lang);
 
 	home_dir = enchant_get_user_home_dir ();
 	if (home_dir) {
@@ -253,6 +255,7 @@ enchant_session_destroy (EnchantSession * session)
 	g_hash_table_destroy (session->session);
 	g_hash_table_destroy (session->personal);
 	g_free (session->personal_filename);
+	g_free (session->language_tag);
 	g_free (session);
 }
 
@@ -795,6 +798,43 @@ enchant_broker_describe (EnchantBroker * broker,
 
 			(*fn) (name, desc, file, user_data);
 		}
+}
+
+/**
+ * enchant_dict_describe
+ * @broker: A non-null #EnchantDict
+ * @dict: A non-null #EnchantDictDescribeFn
+ * @user_data: Optional user-data
+ *
+ * Describes an individual dictionary
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_dict_describe (EnchantDict * dict,
+		       EnchantDictDescribeFn fn,
+		       void * user_data)
+{
+	EnchantSession * session;
+	EnchantProvider * provider;
+	GModule *module;
+
+	const char * tag, * name, * desc, * file;
+
+	g_return_if_fail (dict);
+	g_return_if_fail (fn);
+
+	session = (EnchantSession*)dict->enchant_private_data;
+	provider = session->provider;
+
+	module = (GModule *) provider->enchant_private_data;
+	
+	name = (*provider->identify) (provider);
+	desc = (*provider->describe) (provider);
+	file = g_module_name (module);	
+	tag = session->language_tag;
+
+	(*fn) (tag, name, desc, file, user_data);
+
+	return;
 }
 
 /**

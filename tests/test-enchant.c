@@ -34,12 +34,22 @@
 #include "enchant.h"
 
 static void
-enumerate_dicts (const char * name,
-		 const char * desc,
-		 const char * file,
+enumerate_dicts (const char * const name,
+		 const char * const desc,
+		 const char * const file,
 		 void * ud)
 {
 	printf ("%s: '%s' (%s)\n", name, desc, file);
+}
+
+static void
+describe_dict (const char * const lang,
+	       const char * const name,
+	       const char * const desc,
+	       const char * const file,
+	       void * ud)
+{
+	printf ("%s: %s '%s' (%s)\n", lang, name, desc, file);
 }
 
 static void
@@ -111,6 +121,7 @@ main (int argc, char **argv)
 		} 
 	else 
 		{
+			enchant_dict_describe (dict, describe_dict, NULL);
 			run_dict_tests (dict);
 			
 			enchant_broker_describe (broker, enumerate_dicts, NULL);

@@ -98,6 +98,10 @@ namespace enchant
 				suggest (utf8word, result);
 				return result;
 			}
+
+			void describe (EnchantDictDescribeFn fn, void * user_data = NULL) {
+				enchant_dict_describe (m_dict, fn, user_data);
+			}
 			
 		private:
 			
@@ -144,7 +148,7 @@ namespace enchant
 				enchant_broker_set_ordering (m_broker, tag.c_str(), ordering.c_str());
 			}
 			
-			void describe (EnchantBrokerDescribeFn fn, void * user_data) {
+			void describe (EnchantBrokerDescribeFn fn, void * user_data = NULL) {
 				enchant_broker_describe (m_broker, fn, user_data);
 			}
 			
@@ -169,7 +173,7 @@ namespace enchant
 			EnchantBroker * m_broker;
 		}; // class enchant::Broker
 	
-	// define the instance
+	// define the broker instance
 	Broker Broker::m_instance;
 	
 } // enchant namespace
