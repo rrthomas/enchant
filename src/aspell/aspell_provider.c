@@ -191,13 +191,21 @@ aspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
-static EnchantDictStatus
+static int
 aspell_provider_dictionary_status (struct str_enchant_provider * me,
 				   const char *const tag)
 {
 	/* TODO: get kevina to apply my patch */
-	g_warning ("pspell_provider_dictionary_status stub - unimplemented\n");
-	return EDS_UNKNOWN;
+	EnchantDict * dict;
+	int status = 0;
+
+	dict = aspell_provider_request_dict (me, tag);
+	if (dict)
+		status = 1;
+
+	aspell_provider_dispose_dict (me, dict);
+
+	return status;
 }
 
 static void

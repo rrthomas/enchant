@@ -291,7 +291,7 @@ myspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
-static EnchantDictStatus
+static int
 myspell_provider_dictionary_status (struct str_enchant_provider * me,
 				    const char *const tag)
 {
@@ -300,7 +300,7 @@ myspell_provider_dictionary_status (struct str_enchant_provider * me,
 	s_buildHashNames (names, tag);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
-			return EDS_EXISTS;
+			return 1;
 	}
 
 	std::string shortened_dict (tag);
@@ -312,11 +312,11 @@ myspell_provider_dictionary_status (struct str_enchant_provider * me,
 		s_buildHashNames (names, shortened_dict.c_str());
 		for (size_t i = 0; i < names.size(); i++) {
 			if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
-				return EDS_EXISTS;
+				return 1;
 		}
 	}
 
-	return EDS_DOESNT_EXIST;
+	return 0;
 }
 
 static void

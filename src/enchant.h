@@ -50,13 +50,6 @@ extern "C" {
 typedef struct str_enchant_broker   EnchantBroker;
 typedef struct str_enchant_dict     EnchantDict;
 
-typedef enum
-	{
-		EDS_EXISTS, /* Dictionary definitely exists */
-		EDS_DOESNT_EXIST, /* Dictionary definitely doesn't exist */
-		EDS_UNKNOWN /* Unknown if dict exists or not */
-	} EnchantDictStatus;
-
 ENCHANT_MODULE_EXPORT (int)
      enchant_dict_check (EnchantDict * dict, const char *const word, size_t len);
 ENCHANT_MODULE_EXPORT (char **)
@@ -91,9 +84,9 @@ ENCHANT_MODULE_EXPORT (EnchantDict *)
 ENCHANT_MODULE_EXPORT (void)
      enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict);
 
-ENCHANT_MODULE_EXPORT (EnchantDictStatus)
-     enchant_broker_dictionary_status (EnchantBroker * broker,
-				       const char * const tag);
+ENCHANT_MODULE_EXPORT (int)
+     enchant_broker_dict_exists (EnchantBroker * broker,
+				 const char * const tag);
 
 ENCHANT_MODULE_EXPORT (void)
      enchant_broker_set_ordering (EnchantBroker * broker,

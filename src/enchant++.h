@@ -182,8 +182,8 @@ namespace enchant
 				return new Dict (dict, m_broker);
 			}
 			
-			EnchantDictStatus dict_status (const std::string & lang) {
-				return enchant_broker_dictionary_status (m_broker, lang.c_str());
+			bool dict_exists (const std::string & lang) {
+				return (enchant_broker_dict_exists (m_broker, lang.c_str()) ? true : false);
 			}
 			
 			void set_ordering (const std::string & tag, const std::string & ordering) {

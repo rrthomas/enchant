@@ -1069,29 +1069,29 @@ enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 }
 
 /**
- * enchant_broker_dictionary_exists
+ * enchant_broker_dict_exists
  * @broker: A non-null #EnchantBroker
  * @tag: The non-null language tag you wish to request a dictionary for ("en_US", "de_DE", ...)
  *
- * Return existance of the requested dictionary
+ * Return existance of the requested dictionary (1 == true, 0 == false)
  */
-ENCHANT_MODULE_EXPORT (EnchantDictStatus)
-enchant_broker_dictionary_status (EnchantBroker * broker,
-				  const char * const tag)
+ENCHANT_MODULE_EXPORT (int)
+enchant_broker_dict_exist (EnchantBroker * broker,
+			   const char * const tag)
 {
 	/* start off pessimistic */
-	EnchantDictStatus best_status = EDS_DOESNT_EXIST, status = EDS_DOESNT_EXIST;
+	int status = 0;
 	EnchantProvider *provider;
 	GSList *list;
 
-	g_return_val_if_fail (broker, EDS_UNKNOWN);
-	g_return_val_if_fail (tag && strlen(tag), EDS_UNKNOWN);
+	g_return_val_if_fail (broker, 0);
+	g_return_val_if_fail (tag && strlen(tag), 0);
 
 	enchant_broker_clear_error (broker);
 
 	/* don't query the providers if we can just do a quick map lookup */
 	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL)
-		return EDS_EXISTS;
+		return 1;
 
 	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
@@ -1100,20 +1100,13 @@ enchant_broker_dictionary_status (EnchantBroker * broker,
 			if (provider->dictionary_status)
 				{
 					status = (*provider->dictionary_status) (provider, tag);
-					if (status == EDS_EXISTS)
-						return EDS_EXISTS;
-					else if (status == EDS_UNKNOWN)
-						best_status = EDS_UNKNOWN;
-				}
-			else
-				{
-					/* no query routine implemented, return so-so value */
-					best_status = EDS_UNKNOWN;
+					if (status == 1)
+						return 1;
 				}
 		}
 
 
-	return best_status;
+	return status;
 }
 
 /**
