@@ -142,7 +142,7 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 static void
 s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
-	char * tmp, * private_dir, * home_dir, * ispell_prefix, * dict_dic;
+	char * tmp, * private_dir, * home_dir, * myspell_prefix, * dict_dic;
 
 	names.clear ();
 
@@ -163,7 +163,7 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 
 	myspell_prefix = myspell_checker_get_prefix ();
 	if (myspell_prefix) {
-		tmp = g_build_filename (myspell_prefix, dict_dict, NULL);
+		tmp = g_build_filename (myspell_prefix, dict_dic, NULL);
 		names.push_back (tmp);
 		g_free (tmp);
 		g_free (myspell_prefix);
