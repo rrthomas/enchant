@@ -38,6 +38,8 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
+ENCHANT_PLUGIN_DECLARE("Pspell")
+
 static int
 aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {

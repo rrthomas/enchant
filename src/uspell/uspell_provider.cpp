@@ -45,6 +45,8 @@
 #include <uspell/uniprops.h>
 #include <uspell/uspell.h>
 
+ENCHANT_PLUGIN_DECLARE("Uspell")
+
 static const size_t MAXALTERNATIVE = 20; // we won't return more than this number of suggestions
 static const size_t MAXCHARS = 100; // maximum number of bytes of utf8 or chars of UCS4 in a word
 

@@ -40,10 +40,7 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#define WIN32_LEAN_AND_MEAN
-#endif
+ENCHANT_PLUGIN_DECLARE("Enchant")
 
 static char *
 enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key)

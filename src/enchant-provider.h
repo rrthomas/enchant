@@ -33,6 +33,14 @@
 
 #include <enchant.h>
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#define ENCHANT_PLUGIN_DECLARE(name) static HANDLE s_hModule = (HANDLE)(NULL); BOOL APIENTRY DllMain( HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved ) { s_hModule = hModule; return TRUE; } 
+#else
+#define ENCHANT_PLUGIN_DECLARE(name)
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

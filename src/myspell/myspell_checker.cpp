@@ -39,6 +39,8 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
+ENCHANT_PLUGIN_DECLARE("Myspell")
+
 #define G_ICONV_INVALID (GIConv)-1
 
 /***************************************************************************/

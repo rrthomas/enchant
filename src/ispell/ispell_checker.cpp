@@ -40,6 +40,8 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
+ENCHANT_PLUGIN_DECLARE("Ispell")
+
 #define G_ICONV_INVALID (GIConv)-1
 
 /***************************************************************************/
