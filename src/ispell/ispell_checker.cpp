@@ -207,6 +207,9 @@ ISpellChecker::ISpellChecker()
 
 ISpellChecker::~ISpellChecker()
 {
+	if (m_initialized)
+		lcleanup(); // only cleanup our mess if we were successfully initialized
+
 	clearindex (m_pflagindex);
 	clearindex (m_sflagindex);
 
