@@ -200,7 +200,12 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 ENCHANT_MODULE_EXPORT (char *)
 enchant_get_registry_value (const char * const prefix, const char * const key)
 {
-	return enchant_get_registry_value_ex (0, prefix, key);
+	char *val;
+	val = enchant_get_registry_value_ex(1, prefix, key);
+	if(val == NULL) {
+		val = enchant_get_registry_value_ex (0, prefix, key);
+	}
+	return val;
 }
 
 /**
