@@ -187,11 +187,29 @@ hspell_dict_free_suggestions (EnchantDict * me, char **str_list)
 	g_strfreev (str_list);
 }
 
+static int
+hspell_provider_dictionary_exists (struct str_enchant_provider *me,
+				   const char *const tag)
+{
+	/* cheak if tag is he[_IL.something] */
+	if ((strlen(tag) >= 2) && tag[0] == 'h' && tag[1] == 'e')
+		{
+			return TRUE;
+		}
+	else
+		{
+			return FALSE;
+		}
+}
+
 static EnchantDict *
 hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	EnchantDict *dict;
 	int dict_flag = 0;
+
+	if(!hspell_provider_dictionary_exists(me, tag))
+		return NULL;
 	
 	/* try to set a new session */
 	if (hspell_common_dict == NULL)
@@ -226,21 +244,6 @@ hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 			/* deleting the dict is not posible yet (hspell v.0.7) :-( */
 		}
 	g_free (dict);
-}
-
-static int
-hspell_provider_dictionary_exists (struct str_enchant_provider *me,
-				   const char *const tag)
-{
-	/* cheak if tag is he[_IL.something] */
-	if (tag[0] == 'h' && tag[1] == 'e')
-		{
-			return TRUE;
-		}
-	else
-		{
-			return FALSE;
-		}
 }
 
 static void
