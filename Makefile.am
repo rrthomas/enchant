@@ -7,4 +7,5 @@ EXTRA_DIST =		\
 	autogen.sh	\
 	libenchant.pc.in	\
 	libenchant.spec.in	\
+	libenchant.spec		\
 	README TODO HACKING NEWS BUGS ChangeLog MAINTAINERS AUTHORS COPYING.LIB
