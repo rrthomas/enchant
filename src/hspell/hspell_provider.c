@@ -50,8 +50,19 @@ ENCHANT_PLUGIN_DECLARE ("Hspell")
  */
 static int is_hebrew (const char *const iso_word)
 {
-	if (iso_word[0] < 'à' || iso_word[0] > 'ú')
-		return FALSE;
+	int i = 0;
+	
+	while ( iso_word[i] )
+		{
+			/* if not a hebrew alphabet or " ` ' */
+			if ( (iso_word[i] < 'à' || iso_word[i] > 'ú') && /* alef to tav */
+			     (iso_word[i] < (char)146 || iso_word[i] > (char)148 ) && /* ` etc... */
+			     ( iso_word[i] !=(char)34 ) && /* " */
+			     ( iso_word[i] !=(char)39 ) ) /* ' */
+				return FALSE;
+			i++;
+		}
+	
 	return TRUE;
 }
 
