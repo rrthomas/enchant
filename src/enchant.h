@@ -42,6 +42,7 @@ extern "C" {
 #define ENCHANT_MODULE_EXPORT(x) __declspec(dllexport) x
 #else
 #define ENCHANT_MODULE_EXPORT(x) __declspec(dllimport) x
+#endif
 #else
 #define ENCHANT_MODULE_EXPORT(x) x
 #endif
