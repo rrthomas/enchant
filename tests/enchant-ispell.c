@@ -256,8 +256,11 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
 	lang = g_strdup (setlocale (LC_ALL, NULL));
 #endif
 
-	if (!lang || !strcmp (lang, "C"))
+	if (!lang || !strcmp (lang, "C")) {
+		if (lang) /* lang might be "C" */
+			g_free (lang);
 		lang = g_strdup ("en");
+	}
 
 	/* Enchant will get rid of useless trailing garbage like de_DE@euro or de_DE.ISO-8859-15 */
 	
