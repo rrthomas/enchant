@@ -168,8 +168,8 @@ typedef struct {
 } Mapping;
 
 static const Mapping mapping [] = {
-	{"he",    "hebrew",  uSpell::hasCompounds | uSpell::hasComposition},
-	{"he_IL", "hebrew",  uSpell::hasCompounds | uSpell::hasComposition},
+	{"he",    "hebrew",  0},
+	{"he_IL", "hebrew",  0},
 	{"yi",    "yiddish", uSpell::hasCompounds | uSpell::hasComposition}
 };
 
