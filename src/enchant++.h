@@ -43,7 +43,7 @@ namespace enchant
 	class Exception : public std::exception
 		{
 		public:
-			Exception (const char * ex) 
+			explicit Exception (const char * ex) 
 				: std::exception (), m_ex ("") {
 				if (ex)
 					m_ex = ex;
@@ -57,6 +57,8 @@ namespace enchant
 			}
 
 		private:
+			Exception ();
+
 			std::string m_ex;
 		};
 
