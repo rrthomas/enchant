@@ -458,7 +458,26 @@ ISpellChecker::setDictionaryEncoding( const char * hashname, const char * encodi
 	try_autodetect_charset(encoding);
 
 	if (g_iconv_is_valid(m_translate_in) && g_iconv_is_valid(m_translate_out))
-		return; /* success */
+		{
+			/* We still have to setup prefstringchar*/
+			prefstringchar = findfiletype("utf8", 1, deftflag < 0 ? &deftflag
+						      : static_cast<int *>(NULL));
+			
+			if (prefstringchar < 0)
+				{
+					std::string teststring;
+					for(int n1 = 1; n1 <= 15; n1++)
+						{
+							teststring = "latin" + n1;
+							prefstringchar = findfiletype(teststring.c_str(), 1,				      
+										      deftflag < 0 ? &deftflag : static_cast<int *>(NULL));
+							if (prefstringchar >= 0) 
+								break;
+						}
+				}
+			
+			return; /* success */
+		}
 	
 	/* Test for UTF-8 first */
 	prefstringchar = findfiletype("utf8", 1, deftflag < 0 ? &deftflag : static_cast<int *>(NULL));
