@@ -85,11 +85,13 @@ consume_line (FILE * in, GString * str)
 		}
 	}
 
-	utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
-	g_free (str->str);
-
-	str->str = utf;
-	str->len = bytes_written;
+	if (str->len) {
+		utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
+		g_free (str->str);
+		
+		str->str = utf;
+		str->len = bytes_written;
+	}
 
 	return ret;
 }
@@ -112,7 +114,7 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
 	char ** suggs;
 
 	if (enchant_dict_check (dict, word->str, word->len) == 0)
-		fwrite ("*\n", 1, 3, out);
+		fwrite ("*\n", 1, 2, out);
 	else {
 		suggs = enchant_dict_suggest (dict, word->str, 
 					      word->len, &n_suggs);
@@ -144,8 +146,10 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
 static void
 do_mode_l (FILE * out, EnchantDict * dict, GString * word)
 {
-	if (enchant_dict_check (dict, word->str, word->len) != 0)
-		fprintf (out, "%s\n", word->str);
+	if (enchant_dict_check (dict, word->str, word->len) != 0) {
+		print_utf (out, word->str);
+		fwrite ("\n", 1, 1, out);
+	}
 }
 
 static int
