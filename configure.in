@@ -129,7 +129,7 @@ if test "x$check_aspell" != "xno"; then
        LDFLAGS="-L$with_aspell_prefix/lib "$LDFLAGS
        ASPELL_INC="-I$with_aspell_prefix/include"
        ASPELL_LIBS="-L$with_aspell_prefix/lib -laspell"
-       ASPELL_DICT_DIR="'\"$with_aspell_prefix/lib/aspell\"'"
+       ASPELL_CFLAGS="-DASPELL_DICT_DIR='\"$with_aspell_prefix/lib/aspell\"'"
    else
        aspell_prefix=${prefix}
        if test "x$prefix" = "xNONE"; then
@@ -145,7 +145,7 @@ if test "x$check_aspell" != "xno"; then
               LDFLAGS="-L`aspell config prefix`/lib "$LDFLAGS
 	      ASPELL_INC="-I`aspell config prefix`/include"
 	      ASPELL_LIBS="-L`aspell config prefix`/lib -laspell"
-	      ASPELL_DICT_DIR="'\"`aspell config dict-dir`\"'"
+	      ASPELL_CFLAGS="-DASPELL_0_50_0=1 -DASPELL_DICT_DIR='\"`aspell config dict-dir`\"'"
 
 	      AC_MSG_RESULT([yes])
 	  else
@@ -156,7 +156,7 @@ if test "x$check_aspell" != "xno"; then
       if test "x$ASPELL_DICT_DIR" = "x"; then
 	      AC_MSG_WARN([Didn't find aspell >= 0.50.0 and no explicit path aspell specified. Guessing at $aspell_prefix])
 	      ASPELL_LIBS="-L$aspell_prefix/lib -laspell"
-	      ASPELL_DICT_DIR="'\"$aspell_prefix/lib/aspell\"'"
+	      ASPELL_CFLAGS="-DASPELL_DICT_DIR='\"$aspell_prefix/lib/aspell\"'"
       fi
    fi
 
@@ -167,7 +167,7 @@ if test "x$check_aspell" != "xno"; then
    
    AC_SUBST(ASPELL_INC)
    AC_SUBST(ASPELL_LIBS)
-   AC_SUBST(ASPELL_DICT_DIR)
+   AC_SUBST(ASPELL_CFLAGS)
 fi
 
 AM_CONDITIONAL(WITH_ASPELL, test "$build_aspell" = yes)

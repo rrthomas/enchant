@@ -10,3 +10,5 @@ libenchant_la_SOURCES = enchant.c enchant.h
 
 libenchant_includedir = $(includedir)/enchant/
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
+
+EXTRA_DIST=enchant.i
