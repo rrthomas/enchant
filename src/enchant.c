@@ -32,7 +32,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* #include <sys/file.h> // only needed if we use flock() below */
+#if HAVE_FLOCK || HAVE_LOCKF
+#include <sys/file.h>
+#endif /* HAVE_FLOCK */
 
 #include <glib.h>
 #include <gmodule.h>
@@ -41,6 +43,30 @@
 #include "enchant-provider.h"
 
 ENCHANT_PLUGIN_DECLARE("Enchant")
+
+static void
+enchant_lock_file (FILE * f)
+{
+#if HAVE_FLOCK
+	flock (fileno (f), LOCK_EX);
+#elif HAVE_LOCKF
+	lockf (fileno (f), F_LOCK, 0);
+#else
+	/* TODO: win32, UNIX fcntl */
+#endif /* HAVE_FLOCK */
+}
+
+static void
+enchant_unlock_file (FILE * f)
+{
+#if HAVE_FLOCK
+	flock (fileno (f), LOCK_UN);
+#elif HAVE_LOCKF
+	lockf (fileno (f), F_ULOCK, 0);
+#else
+	/* TODO: win32, UNIX fcntl */
+#endif /* HAVE_FLOCK */
+}
 
 static char *
 enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key)
@@ -182,18 +208,13 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 		/* populate personal filename */
 		f = fopen (session->personal_filename, "r");
 		if (f) {
-#if 0
-			flock(fileno(f), LOCK_EX);
-#endif
-
+			enchant_lock_file (f);
+			
 			while (NULL != (fgets (line, sizeof (line), f))) {
 				g_hash_table_insert (session->personal, g_strdup (line), GINT_TO_POINTER(TRUE));
 			}
 
-#if 0
-			flock(fileno(f), LOCK_UN);
-#endif
-
+			enchant_unlock_file (f);
 			fclose (f);
 		}
 	}
@@ -218,17 +239,13 @@ enchant_session_add_personal (EnchantSession * session, const char * const word,
 		f = fopen (session->personal_filename, "a");
 
 		if (f) {
-#if 0
-			flock(fileno(f), LOCK_EX);
-#endif
-
+			enchant_lock_file (f);
+			
 			fwrite (word, sizeof(char), len, f);
 			fwrite ("\n", sizeof(char), 1, f);
 			fclose (f);
 
-#if 0
-			flock(fileno(f), LOCK_UN);
-#endif
+			enchant_unlock_file (f);
 		}
 	}
 }
