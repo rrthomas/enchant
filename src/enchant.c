@@ -502,11 +502,25 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
-	/* emulate a session backend if one is not provided for */
+	enchant_session_add (session, word, len);
 	if (dict->add_to_session)
 		(*dict->add_to_session) (dict, word, len);
-	else
-		enchant_session_add (session, word, len);
+}
+
+ENCHANT_MODULE_EXPORT (int)
+enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
+			    size_t len)
+{
+	EnchantSession * session;
+
+	g_return_val_if_fail (dict, 0);
+	g_return_val_if_fail (word, 0);
+	g_return_val_if_fail (len, 0);
+	
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
+
+	return enchant_session_contains (session, word, len);
 }
 
 /**

@@ -103,6 +103,9 @@ ENCHANT_MODULE_EXPORT (void)
 ENCHANT_MODULE_EXPORT (void)
      enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 				  size_t len);
+ENCHANT_MODULE_EXPORT (int)
+     enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
+				 size_t len);
 ENCHANT_MODULE_EXPORT (void)
      enchant_dict_store_replacement (EnchantDict * dict,
 				     const char *const mis, size_t mis_len,
