@@ -19,7 +19,7 @@
  *
  * In addition, as a special exception, Dom Lachowicz
  * gives permission to link the code of this program with
- * the non-LGPL Spelling Provider libraries (eg: a MSFT Office
+ * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
  * the two.  You must obey the GNU General Public License in all
  * respects for all of the code used other than said providers.  If you modify
@@ -73,6 +73,9 @@
 
 /*
  * $Log$
+ * Revision 1.3  2003/07/28 20:40:25  dom
+ * fix up the license clause, further win32-registry proof some directory getting functions
+ *
  * Revision 1.2  2003/07/16 22:52:37  dom
  * LGPL + exception license
  *

@@ -19,7 +19,7 @@
  *
  * In addition, as a special exception, Dom Lachowicz
  * gives permission to link the code of this program with
- * the non-LGPL Spelling Provider libraries (eg: a MSFT Office
+ * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
  * the two.  You must obey the GNU General Public License in all
  * respects for all of the code used other than said providers.  If you modify
@@ -61,13 +61,21 @@ enchant_get_user_home_dir (void)
 static char *
 enchant_get_module_dir (void)
 {
+#ifdef ENCHANT_GLOBAL_MODULE_DIR
 	return g_strdup (ENCHANT_GLOBAL_MODULE_DIR);
+#else
+	return NULL;
+#endif
 }
 
 static char *
 enchant_get_conf_dir (void)
 {
+#ifdef ENCHANT_GLOBAL_ORDERING
 	return g_strdup (ENCHANT_GLOBAL_ORDERING);
+#else
+	return NULL;
+#endif
 }
 
 /**
@@ -230,7 +238,7 @@ struct str_enchant_broker
 	GHashTable *provider_ordering; /* map of language tag -> provider order */
 };
 
-typedef EnchantProvider *(*EnchantProviderInitFunc) ();
+typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
 
 static void
 enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
@@ -354,14 +362,18 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 static void
 enchant_load_provider_ordering (EnchantBroker * broker)
 {
-	char * ordering_file, * home_dir;
+	char * ordering_file, * home_dir, * global_ordering;
 
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal,
 							   enchant_provider_order_destroyed, enchant_provider_order_destroyed);
 
-	ordering_file = g_build_filename (ENCHANT_GLOBAL_ORDERING, "enchant.ordering", NULL);
-	enchant_load_ordering_from_file (broker, ordering_file);
-	g_free (ordering_file);
+	global_ordering = enchant_get_conf_dir ();
+	if (global_ordering) {
+		ordering_file = g_build_filename (global_ordering, "enchant.ordering", NULL);
+		enchant_load_ordering_from_file (broker, ordering_file);
+		g_free (ordering_file);
+		g_free (global_ordering);
+	}
 
 	home_dir = enchant_get_user_home_dir ();
 
@@ -657,7 +669,7 @@ enchant_broker_dictionary_status (EnchantBroker * broker,
 }
 
 /**
- * enchant_broker_declare_ordering
+ * enchant_broker_set_ordering
  * @broker: A non-null #EnchantBroker
  * @tag: A non-null language tag (en_US)
  * @ordering: A non-null ordering (aspell,myspell,ispell,uspell,hspell)
