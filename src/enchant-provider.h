@@ -42,6 +42,9 @@ typedef struct str_enchant_provider EnchantProvider;
 ENCHANT_MODULE_EXPORT (char *)
 	enchant_get_user_home_dir (void);
 
+ENCHANT_MODULE_EXPORT (char *)
+	     enchant_get_registry_value (const char * const prefix, const char * const key);
+
 struct str_enchant_dict
 {
 	void *user_data;

@@ -42,11 +42,15 @@
 
 /***************************************************************************/
 
-/* in preparation for using win32 registry keys, if necessary */
-
 static char *
 myspell_checker_get_prefix (void)
 {
+	char * data_dir = NULL;
+
+	data_dir = enchant_get_registry_value ("Myspell", "Data_Dir");
+	if (data_dir)
+		return data_dir;
+
 #ifdef ENCHANT_MYSPELL_DICT_DIR
 	return g_strdup (ENCHANT_MYSPELL_DICT_DIR);
 #else

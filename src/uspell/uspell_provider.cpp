@@ -50,11 +50,15 @@
 static const size_t MAXALTERNATIVE = 20; // we won't return more than this number of suggestions
 static const size_t MAXCHARS = 100; // maximum number of bytes of utf8 or chars of UCS4 in a word
 
-/* in preparation for using win32 registry keys, if necessary */
-
 static char *
 uspell_checker_get_prefix (void)
 {
+	char * data_dir = NULL;
+
+	data_dir = enchant_get_registry_value ("Uspell", "Data_Dir");
+	if (data_dir)
+		return data_dir;
+
 #ifdef ENCHANT_USPELL_DICT_DIR
 	return g_strdup (ENCHANT_USPELL_DICT_DIR);
 #else

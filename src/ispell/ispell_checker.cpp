@@ -333,11 +333,15 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 	return sugg_arr;
 }
 
-/* in preparation for using win32 registry keys, if necessary */
-
 static char *
 ispell_checker_get_prefix (void)
 {
+	char * ispell_prefix = NULL;
+
+	ispell_prefix = enchant_get_registry_value ("Ispell", "Data_Dir");
+	if (ispell_prefix)
+		return ispell_prefix;
+
 #ifdef ENCHANT_ISPELL_DICT_DIR
 	return g_strdup (ENCHANT_ISPELL_DICT_DIR);
 #else

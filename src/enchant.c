@@ -38,9 +38,54 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
-/* TODO: use the win32 registry in these following functions PLUS the
- * macro, if it exists (registry gets precedence)
+#ifdef _WIN32
+#include <windows.h>
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+static char *
+enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key)
+{
+#ifndef _WIN32
+	return NULL;
+#else
+	HKEY hKey;
+	HKEY baseKey;
+	unsigned long lType;	
+	DWORD dwSize;
+	char* szValue = NULL;
+
+	if (current_user)
+		baseKey = HKEY_CURRENT_USER;
+	else
+		baseKey = HKEY_LOCAL_MACHINE;
+
+	if( ::RegOpenKeyEx( baseKey, "Software\\Enchant", 0, KEY_READ, &hKey) == ERROR_SUCCESS )
+		{
+			// Determine size of string
+			if( ::RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS )
+				{
+					szValue = g_new0(char, dwSize + 1);
+					::RegQueryValueEx( hKey, key, NULL, &lType, szValue, &dwSize);
+				}
+		}
+	
+	return szValue;
+#endif
+}
+
+/**
+ * enchant_get_registry_value
+ * @prefix:
+ * @key:
+ *
+ * Returns:
  */
+ENCHANT_MODULE_EXPORT (char *)
+enchant_get_registry_value (const char * const prefix, const char * const key)
+{
+	return enchant_get_registry_value_ex (0, prefix, key);
+}
 
 /**
  * enchant_get_user_home_dir
@@ -51,16 +96,27 @@
 ENCHANT_MODULE_EXPORT (char *)
 enchant_get_user_home_dir (void)
 {
-	const char * home_dir = g_get_home_dir ();
+	const char * home_dir = NULL;
 
-	if (!home_dir)
-		return NULL;
-	return g_strdup (home_dir);
+	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
+	if (home_dir)
+		return (char *)home_dir;
+
+	home_dir = g_get_home_dir ();
+	if (home_dir)
+		return g_strdup (home_dir);
+	return NULL;
 }
 
 static char *
 enchant_get_module_dir (void)
 {
+	char * module_dir = NULL;
+
+	module_dir = enchant_get_registry_value ("Config", "Module_Dir");
+	if (module_dir)
+		return module_dir;
+
 #ifdef ENCHANT_GLOBAL_MODULE_DIR
 	return g_strdup (ENCHANT_GLOBAL_MODULE_DIR);
 #else
@@ -71,6 +127,12 @@ enchant_get_module_dir (void)
 static char *
 enchant_get_conf_dir (void)
 {
+	char * ordering_dir = NULL;
+
+	ordering_dir = enchant_get_registry_value ("Config", "Data_Dir");
+	if (ordering_dir)
+		return ordering_dir;
+
 #ifdef ENCHANT_GLOBAL_ORDERING
 	return g_strdup (ENCHANT_GLOBAL_ORDERING);
 #else
