@@ -346,12 +346,10 @@ enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 		{
 			(*dict->add_to_personal) (dict, word, len);
 		}
-	else
-		{
-			/* emulate a personal dictionary backend if one is not provided for */
-			session = (EnchantSession*)dict->enchant_private_data;
-			enchant_session_add_personal (session, word, len);
-		}
+
+	/* add to enchant-specific backend regardless */
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_add_personal (session, word, len);
 }
 
 /**
