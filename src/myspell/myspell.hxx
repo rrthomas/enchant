@@ -1,3 +1,6 @@
+#ifndef _MYSPELLMGR_HXX_
+#define _MYSPELLMGR_HXX_
+
 #include "hashmgr.hxx"
 #include "affixmgr.hxx"
 #include "suggestmgr.hxx"
@@ -8,11 +11,13 @@
 #define ALLCAP  2
 #define HUHCAP  3
 
+#ifdef WINDOWS
+#define DLLSUPPORT __declspec(dllexport)
+#else
+#define DLLSUPPORT
+#endif
 
-#ifndef _MYSPELLMGR_HXX_
-#define _MYSPELLMGR_HXX_
-
-class MySpell
+class DLLSUPPORT MySpell
 {
   AffixMgr*       pAMgr;
   HashMgr*        pHMgr;

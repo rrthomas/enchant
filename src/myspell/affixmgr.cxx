@@ -7,7 +7,9 @@
 #include "affixmgr.hxx"
 #include "affentry.hxx"
 
+#ifndef WINDOWS
 using namespace std;
+#endif
 
 
 // First some base level utility routines
@@ -16,6 +18,7 @@ extern char * mystrdup(const char * s);
 extern char * myrevstrdup(const char * s);
 extern char * mystrsep(char ** sptr, const char delim);
 extern int    isSubset(const char * s1, const char * s2); 
+extern int    isRevSubset(const char * s1, const char * end_of_s2, int len_s2); 
 
 
 AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr) 
@@ -26,7 +29,11 @@ AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr)
   encoding=NULL;
   reptable = NULL;
   numrep = 0;
+  maptable = NULL;
+  nummap = 0;
   compound=NULL;
+  nosplitsugs= (0==1);
+
   cpdmin = 3;  // default value
   for (int i=0; i < SETSIZE; i++) {
      pStart[i] = NULL;
@@ -74,6 +81,16 @@ AffixMgr::~AffixMgr()
   trystring=NULL;
   if (encoding) free(encoding);
   encoding=NULL;
+  if (maptable) {  
+     for (int j=0; j < nummap; j++) {
+        free(maptable[j].set);
+        maptable[j].set = NULL;
+        maptable[j].len = 0;
+     }
+     free(maptable);  
+     maptable = NULL;
+  }
+  nummap = 0;
   if (reptable) {  
      for (int j=0; j < numrep; j++) {
         free(reptable[j].pattern);
@@ -155,6 +172,13 @@ int  AffixMgr::parse_file(const char * affpath)
           }
        }
 
+       /* parse in the related character map table */
+       if (strncmp(line,"MAP",3) == 0) {
+          if (parse_maptable(line, afflst)) {
+             return 1;
+          }
+       }
+
        // parse this affix: P - prefix, S - suffix
        ft = ' ';
        if (strncmp(line,"PFX",3) == 0) ft = 'P';
@@ -165,8 +189,16 @@ int  AffixMgr::parse_file(const char * affpath)
           }
        }
 
+       // handle NOSPLITSUGS
+       if (strncmp(line,"NOSPLITSUGS",11) == 0)
+		   nosplitsugs=(0==0);
+
     }
     fclose(afflst);
+
+    // convert affix trees to sorted list
+    process_pfx_tree_to_list();
+    process_sfx_tree_to_list();
 
     // now we can speed up performance greatly taking advantage of the 
     // relationship between the affixes and the idea of "subsets".
@@ -197,11 +229,12 @@ int  AffixMgr::parse_file(const char * affpath)
     return 0;
 }
 
+
 // we want to be able to quickly access prefix information
 // both by prefix flag, and sorted by prefix string itself 
 // so we need to set up two indexes
 
-int AffixMgr::build_pfxlist(AffEntry* pfxptr)
+int AffixMgr::build_pfxtree(AffEntry* pfxptr)
 {
   PfxEntry * ptr;
   PfxEntry * pptr;
@@ -217,8 +250,6 @@ int AffixMgr::build_pfxlist(AffEntry* pfxptr)
   pFlag[flg] = (AffEntry *) ep;
 
 
-  // next index by affix string
-
   // handle the special case of null affix string
   if (strlen(key) == 0) {
     // always inset them at head of list at element 0
@@ -228,25 +259,39 @@ int AffixMgr::build_pfxlist(AffEntry* pfxptr)
      return 0;
   }
 
-  // now handle the general case
+  // now handle the normal case
+  ep->setNextEQ(NULL);
+  ep->setNextNE(NULL);
+
   unsigned char sp = *((const unsigned char *)key);
   ptr = (PfxEntry*)pStart[sp];
   
-  /* handle the insert at top of list case */
-  if ((!ptr) || ( strcmp( ep->getKey() , ptr->getKey() ) <= 0)) {
-     ep->setNext(ptr);
+  // handle the first insert 
+  if (!ptr) {
      pStart[sp] = (AffEntry*)ep;
      return 0;
   }
 
-  /* otherwise find where it fits in order and insert it */
+
+  // otherwise use binary tree insertion so that a sorted
+  // list can easily be generated later
   pptr = NULL;
-  for (; ptr != NULL; ptr = ptr->getNext()) {
-    if (strcmp( ep->getKey() , ptr->getKey() ) <= 0) break;
+  for (;;) {
     pptr = ptr;
+    if (strcmp(ep->getKey(), ptr->getKey() ) <= 0) {
+       ptr = ptr->getNextEQ();
+       if (!ptr) {
+	  pptr->setNextEQ(ep);
+          break;
+       }
+    } else {
+       ptr = ptr->getNextNE();
+       if (!ptr) {
+	  pptr->setNextNE(ep);
+          break;
+       }
+    }
   }
-  pptr->setNext(ep);
-  ep->setNext(ptr);
   return 0;
 }
 
@@ -255,7 +300,7 @@ int AffixMgr::build_pfxlist(AffEntry* pfxptr)
 // we want to be able to quickly access suffix information
 // both by suffix flag, and sorted by the reverse of the
 // suffix string itself; so we need to set up two indexes
-int AffixMgr::build_sfxlist(AffEntry* sfxptr)
+int AffixMgr::build_sfxtree(AffEntry* sfxptr)
 {
   SfxEntry * ptr;
   SfxEntry * pptr;
@@ -283,30 +328,86 @@ int AffixMgr::build_sfxlist(AffEntry* sfxptr)
   }
 
   // now handle the normal case
+  ep->setNextEQ(NULL);
+  ep->setNextNE(NULL);
+
   unsigned char sp = *((const unsigned char *)key);
   ptr = (SfxEntry*)sStart[sp];
   
-  /* handle the insert at top of list case */
-  if ((!ptr) || ( strcmp( ep->getKey() , ptr->getKey() ) <= 0)) {
-     ep->setNext(ptr);
+  // handle the first insert 
+  if (!ptr) {
      sStart[sp] = (AffEntry*)ep;
      return 0;
   }
 
-  /* otherwise find where it fits in order and insert it */
+
+  // otherwise use binary tree insertion so that a sorted
+  // list can easily be generated later
   pptr = NULL;
-  for (; ptr != NULL; ptr = ptr->getNext()) {
-    if (strcmp( ep->getKey(), ptr->getKey() ) <= 0) break;
+  for (;;) {
     pptr = ptr;
+    if (strcmp(ep->getKey(), ptr->getKey() ) <= 0) {
+       ptr = ptr->getNextEQ();
+       if (!ptr) {
+	  pptr->setNextEQ(ep);
+          break;
+       }
+    } else {
+       ptr = ptr->getNextNE();
+       if (!ptr) {
+	  pptr->setNextNE(ep);
+          break;
+       }
+    }
   }
-  pptr->setNext(ep);
-  ep->setNext(ptr);
   return 0;
 }
 
 
+// convert from binary tree to sorted list
+int AffixMgr::process_pfx_tree_to_list()
+{
+  for (int i=1; i< SETSIZE; i++) {
+    pStart[i] = process_pfx_in_order(pStart[i],NULL);
+  }
+  return 0;
+}
 
-// initialize the PfxEntry links NextEQ and NextNE to speed searching
+
+AffEntry* AffixMgr::process_pfx_in_order(AffEntry* ptr, AffEntry* nptr)
+{
+  if (ptr) {
+    nptr = process_pfx_in_order(((PfxEntry*) ptr)->getNextNE(), nptr);
+    ((PfxEntry*) ptr)->setNext((PfxEntry*) nptr);
+    nptr = process_pfx_in_order(((PfxEntry*) ptr)->getNextEQ(), ptr);
+  }
+  return nptr;
+}
+
+
+// convert from binary tree to sorted list
+int AffixMgr:: process_sfx_tree_to_list()
+{
+  for (int i=1; i< SETSIZE; i++) {
+    sStart[i] = process_sfx_in_order(sStart[i],NULL);
+  }
+  return 0;
+}
+
+AffEntry* AffixMgr::process_sfx_in_order(AffEntry* ptr, AffEntry* nptr)
+{
+  if (ptr) {
+    nptr = process_sfx_in_order(((SfxEntry*) ptr)->getNextNE(), nptr);
+    ((SfxEntry*) ptr)->setNext((SfxEntry*) nptr);
+    nptr = process_sfx_in_order(((SfxEntry*) ptr)->getNextEQ(), ptr);
+  }
+  return nptr;
+}
+
+
+
+// reinitialize the PfxEntry links NextEQ and NextNE to speed searching
+// using the idea of leading subsets this time
 int AffixMgr::process_pfx_order()
 {
     PfxEntry* ptr;
@@ -356,7 +457,8 @@ int AffixMgr::process_pfx_order()
 
 
 
-// initialize the SfxEntry links NextEQ and NextNE to speed searching
+// reinitialize the SfxEntry links NextEQ and NextNE to speed searching
+// using the idea of leading subsets this time
 int AffixMgr::process_sfx_order()
 {
     SfxEntry* ptr;
@@ -602,15 +704,15 @@ struct hentry * AffixMgr::suffix_check (const char * word, int len,
     }
   
     // now handle the general case
-    char * tmpword = myrevstrdup(word);
-    unsigned char sp = *((const unsigned char *)tmpword);
+    unsigned char sp = *((const unsigned char *)(word + len - 1));
+
+
     SfxEntry * sptr = (SfxEntry *) sStart[sp];
 
     while (sptr) {
-        if (isSubset(sptr->getKey(),tmpword)) {
+        if (isRevSubset(sptr->getKey(),(word+len-1), len)) {
 	     rv = sptr->check(word,len, sfxopts, ppfx);
              if (rv) {
-                  free(tmpword);
                   return rv;
              }
              sptr = sptr->getNextEQ();
@@ -618,8 +720,6 @@ struct hentry * AffixMgr::suffix_check (const char * word, int len,
 	     sptr = sptr->getNextNE();
         }
     }
-    
-    free(tmpword);
     return NULL;
 }
 
@@ -737,6 +837,20 @@ struct replentry * AffixMgr::get_reptable()
   return reptable;
 }
 
+
+// return length of character map table
+int AffixMgr::get_nummap()
+{
+  return nummap;
+}
+
+// return character map table
+struct mapentry * AffixMgr::get_maptable()
+{
+  if (! maptable ) return NULL;
+  return maptable;
+}
+
 // return text encoding of dictionary
 char * AffixMgr::get_encoding()
 {
@@ -768,6 +882,11 @@ struct hentry * AffixMgr::lookup(const char * word)
   return pHMgr->lookup(word);
 }
 
+// return nosplitsugs
+bool AffixMgr::get_nosplitsugs(void)
+{
+  return nosplitsugs;
+}
 
 /* parse in the try string */
 int  AffixMgr::parse_try(char * line)
@@ -960,6 +1079,84 @@ int  AffixMgr::parse_reptable(char * line, FILE * af)
 }
 
 
+
+/* parse in the character map table */
+int  AffixMgr::parse_maptable(char * line, FILE * af)
+{
+   if (nummap != 0) {
+      fprintf(stderr,"error: duplicate MAP tables used\n");
+      return 1;
+   }
+   char * tp = line;
+   char * piece;
+   int i = 0;
+   int np = 0;
+   while ((piece=mystrsep(&tp,' '))) {
+       if (*piece != '\0') {
+          switch(i) {
+	     case 0: { np++; break; }
+             case 1: { 
+                       nummap = atoi(piece);
+	               if (nummap < 1) {
+			  fprintf(stderr,"incorrect number of entries in map table\n");
+			  free(piece);
+                          return 1;
+                       }
+                       maptable = (mapentry *) malloc(nummap * sizeof(struct mapentry));
+                       np++;
+                       break;
+	             }
+	     default: break;
+          }
+          i++;
+       }
+       free(piece);
+   }
+   if (np != 2) {
+      fprintf(stderr,"error: missing map table information\n");
+      return 1;
+   } 
+ 
+   /* now parse the nummap lines to read in the remainder of the table */
+   char * nl = line;
+   for (int j=0; j < nummap; j++) {
+        fgets(nl,MAXLNLEN,af);
+        mychomp(nl);
+        tp = nl;
+        i = 0;
+        maptable[j].set = NULL;
+        maptable[j].len = 0;
+        while ((piece=mystrsep(&tp,' '))) {
+           if (*piece != '\0') {
+               switch(i) {
+                  case 0: {
+		             if (strncmp(piece,"MAP",3) != 0) {
+		                 fprintf(stderr,"error: map table is corrupt\n");
+                                 free(piece);
+                                 return 1;
+                             }
+                             break;
+		          }
+                  case 1: { maptable[j].set = mystrdup(piece); 
+		            maptable[j].len = strlen(maptable[j].set);
+                            break; }
+		  default: break;
+               }
+               i++;
+           }
+           free(piece);
+        }
+	if ((!(maptable[j].set)) || (!(maptable[j].len))) {
+	     fprintf(stderr,"error: map table is corrupt\n");
+             return 1;
+        }
+   }
+   return 0;
+}
+
+
+
+
 int  AffixMgr::parse_affix(char * line, const char at, FILE * af)
 {
    int numents = 0;      // number of affentry structures to parse
@@ -1097,10 +1294,10 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af)
    for (int k = 0; k < numents; k++) {
       if (at == 'P') {
 	  PfxEntry * pfxptr = new PfxEntry(this,nptr);
-          build_pfxlist((AffEntry *)pfxptr);
+          build_pfxtree((AffEntry *)pfxptr);
       } else {
 	  SfxEntry * sfxptr = new SfxEntry(this,nptr);
-          build_sfxlist((AffEntry *)sfxptr); 
+          build_sfxtree((AffEntry *)sfxptr); 
       }
       nptr++;
    }      

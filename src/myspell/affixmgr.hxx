@@ -20,6 +20,10 @@ class AffixMgr
   int                 cpdmin;
   int                 numrep;
   replentry *         reptable;
+  int                 nummap;
+  mapentry *          maptable;
+  bool                nosplitsugs;
+
 
 public:
  
@@ -34,9 +38,12 @@ public:
   struct hentry *     lookup(const char * word);
   int                 get_numrep();
   struct replentry *  get_reptable();
+  int                 get_nummap();
+  struct mapentry *   get_maptable();
   char *              get_encoding();
   char *              get_try_string();
   char *              get_compound();
+  bool                get_nosplitsugs();
              
 private:
   int  parse_file(const char * affpath);
@@ -45,11 +52,16 @@ private:
   int  parse_cpdflag(char * line);
   int  parse_cpdmin(char * line);
   int  parse_reptable(char * line, FILE * af);
+  int  parse_maptable(char * line, FILE * af);
   int  parse_affix(char * line, const char at, FILE * af);
 
   void encodeit(struct affentry * ptr, char * cs);
-  int build_pfxlist(AffEntry* pfxptr);
-  int build_sfxlist(AffEntry* sfxptr);
+  int build_pfxtree(AffEntry* pfxptr);
+  int build_sfxtree(AffEntry* sfxptr);
+  AffEntry* process_sfx_in_order(AffEntry* ptr, AffEntry* nptr);
+  AffEntry* process_pfx_in_order(AffEntry* ptr, AffEntry* nptr);
+  int process_pfx_tree_to_list();
+  int process_sfx_tree_to_list();
   int process_pfx_order();
   int process_sfx_order();
 };

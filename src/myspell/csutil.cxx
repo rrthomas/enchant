@@ -3,7 +3,9 @@
 #include <cstdio>
 #include "csutil.hxx"
 
+#ifndef WINDOWS
 using namespace std;
+#endif
 
 // strip strings into token based on single char delimiter
 // acts like strsep() but only uses a delim char and not 
@@ -74,7 +76,7 @@ char * myrevstrdup(const char * s)
     return d; 
 }
 
-
+#if 0
 // return 1 if s1 is a leading subset of s2
 int isSubset(const char * s1, const char * s2)
 {
@@ -84,7 +86,30 @@ int isSubset(const char * s1, const char * s2)
   if (strncmp(s2,s1,l1) == 0) return 1;
   return 0;
 }
+#endif
 
+
+// return 1 if s1 is a leading subset of s2
+int isSubset(const char * s1, const char * s2)
+{
+  while( *s1 && *s2 && (*s1 == *s2) ) {
+    s1++;
+    s2++;
+  }
+  return (*s1 == '\0');
+}
+
+
+// return 1 if s1 (reversed) is a leading subset of end of s2
+int isRevSubset(const char * s1, const char * end_of_s2, int len)
+{
+  while( (len > 0) && *s1 && (*s1 == *end_of_s2) ) {
+    s1++;
+    end_of_s2--;
+    len --;
+  }
+  return (*s1 == '\0');
+}
 
 
 // convert null terminated string to all caps using encoding 

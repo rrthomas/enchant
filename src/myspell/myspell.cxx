@@ -6,7 +6,9 @@
 
 #include "myspell.hxx"
 
+#ifndef WINDOWS
 using namespace std;
+#endif
 
 
 MySpell::MySpell(const char * affpath, const char * dpath)
@@ -138,7 +140,23 @@ int MySpell::spell(const char * word)
                      break;
                    }
 
-     case ALLCAP:
+     case ALLCAP:  {
+                     memcpy(wspace,cw,(wl+1));
+                     mkallsmall(wspace, csconv);
+                     rv = check(wspace);
+                     if (!rv) {
+                        mkinitcap(wspace, csconv);
+                        rv = check(wspace);
+                     }
+                     if (!rv) rv = check(cw);
+                     if ((abbv) && !(rv)) {
+		         memcpy(wspace,cw,wl);
+                         *(wspace+wl) = '.';
+                         *(wspace+wl+1) = '\0';
+                         rv = check(wspace);
+                     }
+                     break; 
+                   }
      case INITCAP: { 
                      memcpy(wspace,cw,(wl+1));
                      mkallsmall(wspace, csconv);
@@ -247,8 +265,23 @@ int MySpell::suggest(char*** slst, const char * word)
   if (ns == 0) { 
      ns = pSMgr->ngsuggest(wlst, cw, pHMgr);
      if (ns) {
-       *slst = wlst;
-       return ns;
+         switch(captype) {
+	    case NOCAP:  break;
+            case HUHCAP: break; 
+            case INITCAP: { 
+                            for (int j=0; j < ns; j++)
+                              mkinitcap(wlst[j], csconv);
+                          }
+                          break;
+
+            case ALLCAP: { 
+                            for (int j=0; j < ns; j++)
+                              mkallcap(wlst[j], csconv);
+                         } 
+                         break;
+	 }
+         *slst = wlst;
+         return ns;
      }
   }
   if (ns < 0) {

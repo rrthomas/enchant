@@ -1,9 +1,7 @@
 #include "license.readme"
 
-#include <unistd.h>
 #include <cstdlib>
 #include <cstring>
-#include <fcntl.h>
 #include <cstdio>
 
 #include "hashmgr.hxx"
@@ -11,7 +9,9 @@
 extern void mychomp(char * s);
 extern char * mystrdup(const char *);
 
+#ifndef WINDOWS
 using namespace std;
+#endif
 
 
 // build a hash table from a munched word list

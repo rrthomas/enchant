@@ -8,7 +8,9 @@
 
 #include "affentry.hxx"
 
+#ifndef WINDOWS
 using namespace std;
+#endif
 
 extern char * mystrdup(const char * s);
 extern char *  myrevstrdup(const char * s);

@@ -19,6 +19,9 @@ char * mystrsep(char ** sptr, const char delim);
 // is one string a leading subset of another   
 int    isSubset(const char * s1, const char * s2);
 
+// is one reverse string a leading subset of the end of another   
+int    isRevSubset(const char * s1, const char * end_of_s2, int s2_len);
+
 
 // character encoding information
 
