@@ -92,6 +92,14 @@ consume_line (FILE * in, GString * str)
 		}
 	}
 
+	if (str->len) {
+		utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
+		g_string_truncate (str, 0);
+
+		if (utf)
+			g_string_assign (str, utf);	       
+	}
+
 	return ret;
 }
 
@@ -101,12 +109,11 @@ print_utf (FILE * out, const char * str)
 	gsize bytes_read, bytes_written;
 	gchar * native;
 
-	// fprintf(out, "[%s]", str);
-	fprintf(out, "%s", str);
-	return;
 	native = g_locale_from_utf8 (str, -1, &bytes_read, &bytes_written, NULL);
-	fwrite (native, 1, bytes_written, out);
-	g_free (native);
+	if (native) {
+		fwrite (native, 1, bytes_written, out);
+		g_free (native);
+	}
 }
 
 static void
