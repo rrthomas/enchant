@@ -1,6 +1,6 @@
 INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
-EXTRA_DIST=test.pwl
+EXTRA_DIST=test.pwl ispell
 
 DEPS= $(top_builddir)/src/libenchant.la
 ldadd= $(top_builddir)/src/libenchant.la  $(ENCHANT_LIBS)
