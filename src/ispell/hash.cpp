@@ -16,6 +16,16 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
+ *
+ * In addition, as a special exception, Dom Lachowicz
+ * gives permission to link the code of this program with
+ * the non-LGPL Spelling Provider libraries (eg: a MSFT Office
+ * spell checker backend) and distribute linked combinations including
+ * the two.  You must obey the GNU General Public License in all
+ * respects for all of the code used other than said providers.  If you modify
+ * this file, you may extend this exception to your version of the
+ * file, but you are not obligated to do so.  If you do not wish to
+ * do so, delete this exception statement from your version.
  */
 
 /*
@@ -62,6 +72,9 @@
 
 /*
  * $Log$
+ * Revision 1.2  2003/07/16 22:52:39  dom
+ * LGPL + exception license
+ *
  * Revision 1.1  2003/07/15 01:15:05  dom
  * ispell enchant backend
  *
