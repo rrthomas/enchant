@@ -66,10 +66,8 @@ g_iconv_is_valid(GIConv i)
 }
 
 MySpellChecker::MySpellChecker()
+	: myspell(0), m_translate_in(G_ICONV_INVALID), m_translate_out(G_ICONV_INVALID)
 {
-	myspell = 0;
-	m_translate_in = 0;
-	m_translate_out = 0;
 }
 
 MySpellChecker::~MySpellChecker()
@@ -77,10 +75,8 @@ MySpellChecker::~MySpellChecker()
 	delete myspell;
 	if (g_iconv_is_valid (m_translate_in ))
 		g_iconv_close(m_translate_in);
-	m_translate_in = G_ICONV_INVALID;
 	if (g_iconv_is_valid(m_translate_out))
 		g_iconv_close(m_translate_out);
-	m_translate_out = G_ICONV_INVALID;
 }
 
 bool
