@@ -31,7 +31,7 @@
 #ifndef ENCHANT_PLUS_PLUS_H
 #define ENCHANT_PLUS_PLUS_H
 
-#include <enchant/enchant.h>
+#include <enchant.h>
 #include <string>
 #include <vector>
 #include <exception>
