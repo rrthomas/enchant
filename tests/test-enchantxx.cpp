@@ -71,6 +71,24 @@ run_dict_tests (Dict * dict)
 					printf ("\t=>%s\n", suggs[j].c_str());
 				}
 		}
+
+	printf ("Adding 'helllo' to session\n");
+	dict->add_to_session ("helllo");
+	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
+		{
+			printf ("enchant_dict_check (%s): %d\n", check_checks[i],
+				dict->check (check_checks[i]) == false);
+		}
+
+#if 0
+	printf ("Adding 'helllo' to personal\n");
+	dict->add_to_personal ("helllo");
+	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
+		{
+			printf ("enchant_dict_check (%s): %d\n", check_checks[i],
+				dict->check (check_checks[i]) == false);
+		}
+#endif
 }
 
 int

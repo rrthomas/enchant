@@ -70,7 +70,29 @@ run_dict_tests (EnchantDict * dict)
 				{
 					printf ("\t=>%s\n", suggs[j]);
 				}
+
+			enchant_dict_free_suggestions (dict, suggs);
 		}
+
+	printf ("Adding 'helllo' to session\n");
+	enchant_dict_add_to_session (dict, "helllo", 6);
+	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
+		{
+			printf ("enchant_dict_check (%s): %d\n", check_checks[i],
+				enchant_dict_check (dict, check_checks[i],
+						    strlen (check_checks[i])));
+		}
+
+#if 0
+	printf ("Adding 'helllo' to personal\n");
+	enchant_dict_add_to_personal (dict, "helllo", 6);
+	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
+		{
+			printf ("enchant_dict_check (%s): %d\n", check_checks[i],
+				enchant_dict_check (dict, check_checks[i],
+						    strlen (check_checks[i])));
+		}
+#endif
 }
 
 int

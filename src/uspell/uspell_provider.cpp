@@ -38,8 +38,6 @@
 
 #include <glib.h>
 
-// #include <sys/file.h> // only needed if we use flock() below
-
 #include "enchant.h"
 #include "enchant-provider.h"
 
@@ -66,11 +64,6 @@ uspell_checker_get_prefix (void)
 #endif
 }
 
-typedef struct {
-	char *personalName; // name of file containing personal dictionary
-	uSpell *manager; // my uSpell instance
-} uspellData;
-
 static int
 uspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
@@ -85,7 +78,7 @@ uspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	myWord[len] = 0;
 	curBuf = buf1;
 	otherBuf = buf2;
-	manager = reinterpret_cast<uspellData *>(me->user_data)->manager;
+	manager = reinterpret_cast<uSpell *>(me->user_data);
 #ifdef DEBUG
 	fprintf(stdout, "Checking [%s]\n", word);
 #endif
@@ -139,7 +132,7 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 		return g_new0 (char *, 1); 
 	memcpy(reinterpret_cast<char *>(myWord), word, len);
 	myWord[len] = 0;
-	manager = reinterpret_cast<uspellData *>(me->user_data)->manager;
+	manager = reinterpret_cast<uSpell *>(me->user_data);
 	
 	list = reinterpret_cast<utf8_t **>(
 					   calloc(sizeof(char *), MAXALTERNATIVE));
@@ -161,43 +154,6 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 		}
 	free(list);
 	return sugg_arr;
-}
-
-static void
-uspell_dict_add_to_personal (EnchantDict * me,
-			     const char *const word, size_t len)
-{
-	uSpell *manager;
-	FILE *personalFile;
-	utf8_t myWord[MAXCHARS];
-	
-	if (len >= MAXCHARS) return; // too long; can't be right
-	memcpy(reinterpret_cast<char *>(myWord), word, len);
-	myWord[len] = 0;
-	manager = reinterpret_cast<uspellData *>(me->user_data)->manager;
-	manager->acceptWord(myWord);
-	if (!reinterpret_cast<uspellData *>(me->user_data)->personalName)
-			return; // no personal file
-	personalFile =
-		fopen(reinterpret_cast<uspellData *>(me->user_data)->personalName, "a");
-	if (personalFile) {
-#if 0 // if we ever want to close the race condition, port flock to win32
-		flock(fileno(personalFile), LOCK_EX);
-		fseek(personalFile, 0, SEEK_END);  // in case someone else intervened
-#endif
-		fprintf(personalFile, "%s\n", myWord);
-		fclose(personalFile);
-	}
-}
-
-static void
-uspell_dict_add_to_session (EnchantDict * me,
-			    const char *const word, size_t len)
-{
-	uSpell *manager;
-	
-	manager = reinterpret_cast<uspellData *>(me->user_data)->manager;
-	manager->acceptWord(reinterpret_cast<const utf8_t *>(word));
 }
 
 static void
@@ -262,13 +218,11 @@ s_buildHashNames (std::vector<std::string> & names, const char * tag)
 	}
 }
 
-static uspellData *
+static uSpell *
 uspell_request_dict (const char * base, const char * mapping, const int flags)
 {
-	char *fileName, *transName, *filePart, *transPart,
-		*personalPart, *home_dir, * personalName;
+	char *fileName, *transName, *filePart, *transPart;
 
-	uspellData * data;
 	uSpell *manager;
 
 	if (!base)
@@ -283,18 +237,6 @@ uspell_request_dict (const char * base, const char * mapping, const int flags)
 
 	try {
 		manager = new uSpell(fileName, transName, flags);
-		home_dir = enchant_get_user_home_dir ();
-		if (home_dir) {
-				char * private_dir = g_build_filename (home_dir, ".enchant",
-								       "uspell", NULL);
-				personalPart =  g_strconcat(mapping, ".uspell.personal", NULL);
-				personalName = g_build_filename (private_dir, personalPart,
-						NULL);
-				g_free(personalPart);	
-				(void) manager->assimilateFile(personalName);
-		} else {
-				personalName = NULL;
-		}
 	} 
 	catch (...) {
 		manager = NULL;
@@ -303,19 +245,15 @@ uspell_request_dict (const char * base, const char * mapping, const int flags)
 	g_free (fileName);
 	g_free (transName);
 
-	data = g_new0(uspellData, 1);
-	data->manager = manager;
-	data->personalName = personalName;
-
-	return data;
+	return manager;
 }
 
-static uspellData *
+static uSpell *
 uspell_request_manager (const char * private_dir, size_t mapIndex)
 {
 	char * uspell_prefix;
 
-	uspellData * manager = NULL;
+	uSpell * manager = NULL;
 
 	manager = uspell_request_dict (private_dir,
 				       mapping[mapIndex].corresponding_uspell_file_name,
@@ -339,7 +277,7 @@ static EnchantDict *
 uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	EnchantDict *dict = NULL;
-	uspellData *manager = NULL;
+	uSpell *manager = NULL;
 	int mapIndex;
 
 	char * private_dir = NULL, * home_dir;
@@ -389,16 +327,16 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = manager;
 	dict->check = uspell_dict_check;
 	dict->suggest = uspell_dict_suggest;
-	dict->add_to_personal = uspell_dict_add_to_personal;
-	dict->add_to_session = uspell_dict_add_to_session;
 	dict->store_replacement = 0;
 	dict->free_suggestions = uspell_dict_free_suggestions;
+	// don't use personal, session - let higher level implement that
 	
 	return dict;
 }
 
-EnchantDictStatus uspell_provider_dictionary_status(struct str_enchant_provider * me, 
-						    const char *const tag)
+static EnchantDictStatus 
+uspell_provider_dictionary_status(struct str_enchant_provider * me, 
+				  const char *const tag)
 {
 	std::vector <std::string> names;
 
@@ -427,12 +365,9 @@ EnchantDictStatus uspell_provider_dictionary_status(struct str_enchant_provider 
 static void
 uspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 {
-	uSpell *manager;
-	uspellData *myUspellData = reinterpret_cast<uspellData *>(dict->user_data);
-	delete myUspellData->manager;
-	if (myUspellData->personalName) 
-		g_free (myUspellData->personalName);
-	g_free (dict->user_data);
+	uSpell *manager = reinterpret_cast<uSpell *>(dict->user_data);
+	delete manager;
+
 	g_free (dict);
 }
 

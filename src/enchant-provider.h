@@ -48,7 +48,7 @@ ENCHANT_MODULE_EXPORT (char *)
 struct str_enchant_dict
 {
 	void *user_data;
-	EnchantProvider *owner;
+	void *enchant_private_data;
 	
 	int (*check) (struct str_enchant_dict * me, const char *const word,
 		      size_t len);

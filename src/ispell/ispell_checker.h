@@ -34,9 +34,6 @@
 #include "ispell.h"
 #include <glib.h>
 
-#include <map>
-#include <string>
-
 class ISpellChecker
 {
 public:
@@ -47,18 +44,6 @@ public:
 	char ** suggestWord(const char * const word, size_t len, size_t * out_n_suggs);
 
 	bool requestDictionary (const char * szLang);
-
-	void addToPersonal (const char * const utf8Word, size_t len)
-		{
-			std::string word (utf8Word, len);
-			m_personal[word] = true;
-	  }
-	
-	void addToSession (const char * const utf8Word, size_t len)
-		{
-			std::string word (utf8Word, len);
-			m_personal[word] = true;
-		}
 
 private:
 	ISpellChecker(const ISpellChecker&);	// no impl
@@ -279,9 +264,6 @@ private:
 
 	GIConv  m_translate_in; /* Selected translation from/to Unicode */
 	GIConv  m_translate_out;
-
-	std::map<std::string, bool> m_personal;
-	std::map<std::string, bool> m_session;
 };
 
 #endif /* ISPELL_CHECKER_H */

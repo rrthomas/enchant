@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* #include <sys/file.h> // only needed if we use flock() below */
+
 #include <glib.h>
 #include <gmodule.h>
 
@@ -60,13 +62,13 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 	else
 		baseKey = HKEY_LOCAL_MACHINE;
 
-	if( RegOpenKeyEx( baseKey, "Software\\Enchant", 0, KEY_READ, &hKey) == ERROR_SUCCESS )
+	if(RegOpenKeyEx(baseKey, "Software\\Enchant", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 		{
 			// Determine size of string
-			if( RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS )
+			if(RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
 				{
 					szValue = g_new0(BYTE, dwSize + 1);
-					RegQueryValueEx( hKey, key, NULL, &lType, szValue, &dwSize);
+					RegQueryValueEx(hKey, key, NULL, &lType, szValue, &dwSize);
 				}
 		}
 	
@@ -140,6 +142,123 @@ enchant_get_conf_dir (void)
 #endif
 }
 
+typedef struct str_enchant_session
+{
+	GHashTable *session;
+	GHashTable *personal;
+
+	char * personal_filename;
+
+	EnchantProvider * provider;
+} EnchantSession;
+
+#ifndef BUFSIZ
+#define BUFSIZ 1024
+#endif
+
+static EnchantSession *
+enchant_session_new (EnchantProvider *provider, const char * const lang)
+{
+	EnchantSession * session;
+	char * home_dir, * dic;
+	FILE * f;
+	char line[BUFSIZ];
+
+	session = g_new0 (EnchantSession, 1);
+
+	session->session = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	session->personal = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	session->provider = provider;
+
+	home_dir = enchant_get_user_home_dir ();
+	if (home_dir) {
+		dic = g_strdup_printf ("%s.dic", lang);
+		session->personal_filename = g_build_filename (home_dir,
+							       ".enchant",
+							       dic,
+							       NULL);
+		g_free (home_dir);
+		g_free (dic);
+
+		/* populate personal filename */
+		f = fopen (session->personal_filename, "r");
+		if (f) {
+#if 0
+			flock(fileno(f), LOCK_EX);
+#endif
+
+			while (NULL != (fgets (line, sizeof (line), f))) {
+				g_hash_table_insert (session->personal, g_strdup (line), GINT_TO_POINTER(TRUE));
+			}
+
+#if 0
+			flock(fileno(f), LOCK_UN);
+#endif
+
+			fclose (f);
+		}
+	}
+
+	return session;
+}
+
+static void
+enchant_session_add (EnchantSession * session, const char * const word, size_t len)
+{
+	g_hash_table_insert (session->session, g_strndup (word, len), GINT_TO_POINTER(TRUE));
+}
+
+static void
+enchant_session_add_personal (EnchantSession * session, const char * const word, size_t len)
+{
+	FILE * f;
+
+	g_hash_table_insert (session->session, g_strndup (word, len), GINT_TO_POINTER(TRUE));
+
+	if (session->personal_filename) {
+		f = fopen (session->personal_filename, "a");
+
+		if (f) {
+#if 0
+			flock(fileno(f), LOCK_EX);
+#endif
+
+			fwrite (word, sizeof(char), len, f);
+			fwrite ("\n", sizeof(char), 1, f);
+			fclose (f);
+
+#if 0
+			flock(fileno(f), LOCK_UN);
+#endif
+		}
+	}
+}
+
+static gboolean
+enchant_session_contains (EnchantSession * session, const char * const word, size_t len)
+{
+	gboolean result = FALSE;
+
+	char * utf = g_strndup (word, len);
+
+	if (g_hash_table_lookup (session->session, utf) ||
+	    g_hash_table_lookup (session->personal, utf))
+		result = TRUE;
+
+	g_free (utf);
+
+	return result;
+}
+
+static void
+enchant_session_destroy (EnchantSession * session)
+{
+	g_hash_table_destroy (session->session);
+	g_hash_table_destroy (session->personal);
+	g_free (session->personal_filename);
+	g_free (session);
+}
+
 /**
  * enchant_dict_check
  * @dict: A non-null #EnchantDict
@@ -154,10 +273,18 @@ enchant_get_conf_dir (void)
 ENCHANT_MODULE_EXPORT (int)
 enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
 {
+	EnchantSession * session;
+
 	g_return_val_if_fail (dict, 1);
 	g_return_val_if_fail (word, 1);
 	g_return_val_if_fail (len, 1);
 	
+	session = (EnchantSession*)dict->enchant_private_data;
+
+	/* first, see if it's in our session */
+	if (enchant_session_contains (session, word, len))
+		return 0;
+
 	if (dict->check)
 		{
 			return (*dict->check) (dict, word, len);
@@ -209,6 +336,8 @@ ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 			      size_t len)
 {
+	EnchantSession * session;
+
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
 	g_return_if_fail (len);
@@ -216,6 +345,12 @@ enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 	if (dict->add_to_personal)
 		{
 			(*dict->add_to_personal) (dict, word, len);
+		}
+	else
+		{
+			/* emulate a personal dictionary backend if one is not provided for */
+			session = (EnchantSession*)dict->enchant_private_data;
+			enchant_session_add_personal (session, word, len);
 		}
 }
 
@@ -232,6 +367,8 @@ ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 			     size_t len)
 {
+	EnchantSession * session;
+
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
 	g_return_if_fail (len);
@@ -239,6 +376,12 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 	if (dict->add_to_session)
 		{
 			(*dict->add_to_session) (dict, word, len);
+		}
+	else
+		{
+			/* emulate a session backend if one is not provided for */
+			session = (EnchantSession*)dict->enchant_private_data;
+			enchant_session_add (session, word, len);
 		}
 }
 
@@ -383,12 +526,6 @@ enchant_load_providers (EnchantBroker * broker)
 }
 
 static void
-enchant_provider_order_destroyed (gpointer data)
-{
-	g_free (data);
-}
-
-static void
 enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 {
 	char line [1024];
@@ -426,8 +563,7 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 {
 	char * ordering_file, * home_dir, * global_ordering;
 
-	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal,
-							   enchant_provider_order_destroyed, enchant_provider_order_destroyed);
+	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 	global_ordering = enchant_get_conf_dir ();
 	if (global_ordering) {
@@ -497,26 +633,24 @@ enchant_get_ordered_providers (EnchantBroker * broker,
 }
 
 static void
-enchant_dict_key_destroyed (gpointer data)
-{
-	g_free (data);
-}
-
-static void
 enchant_dict_destroyed (gpointer data)
 {
 	EnchantDict *dict;
 	EnchantProvider *owner;
+	EnchantSession *session;
 	
 	g_return_if_fail (data);
 	
 	dict = (EnchantDict *) data;
-	owner = dict->owner;
+	session = (EnchantSession*)dict->enchant_private_data;
+	owner = session->provider;
 	
 	if (owner->dispose_dict) 
 		{
 			(*owner->dispose_dict) (owner, dict);
 		}
+
+	enchant_session_destroy (session);
 }
 
 static void
@@ -556,7 +690,7 @@ enchant_broker_init (void)
 	broker = g_new0 (EnchantBroker, 1);
 	
 	broker->dict_map = g_hash_table_new_full (g_str_hash, g_str_equal,
-						  enchant_dict_key_destroyed, enchant_dict_destroyed);
+						  g_free, enchant_dict_destroyed);
 	
 	enchant_load_providers (broker);
 	
@@ -596,6 +730,7 @@ enchant_broker_term (EnchantBroker * broker)
 ENCHANT_MODULE_EXPORT (EnchantDict *)
 enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 {
+	EnchantSession *session;
 	EnchantProvider *provider;
 	EnchantDict *dict = NULL;
 	GSList *list = NULL;
@@ -619,7 +754,8 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 					
 					if (dict)
 						{
-							dict->owner = provider;
+							session = enchant_session_new (provider, tag);
+							dict->enchant_private_data = (void*)session;
 							g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (tag), dict);
 							break;
 						}
@@ -764,7 +900,7 @@ enchant_broker_set_ordering (EnchantBroker * broker,
 	    ordering_dupl && strlen(ordering_dupl)) {
 
 		g_hash_table_insert (broker->provider_ordering, (gpointer)tag_dupl,
-				     g_strdup (ordering_dupl));
+				     (gpointer)(ordering_dupl));
 
 		/* we will free ordering_dupl && tag_dupl when the hash is destroyed */
 	} else {

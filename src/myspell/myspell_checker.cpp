@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h> 
 
+#include <string>
 #include <vector>
 
 #include "myspell_checker.h"
@@ -87,12 +88,6 @@ MySpellChecker::checkWord(const char *utf8Word, size_t len)
 {
 	if (len > MAXWORDLEN || !g_iconv_is_valid(m_translate_in))
 		return false;
-
-	std::string word (utf8Word, len);
-	if (m_personal[word])
-		return true;
-	if (m_session[word])
-		return true;
 
 	char *in = (char*) utf8Word;
 	char word8[MAXWORDLEN + 1];
@@ -256,31 +251,6 @@ myspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static void
-myspell_dict_add_to_personal (EnchantDict * me,
-			     const char *const word, size_t len)
-{
-	MySpellChecker * checker;
-	
-	// emulate adding to a personal dictionary via a session-like
-	// interface
-
-	checker = (MySpellChecker *) me->user_data;
-	checker->addToPersonal(word, len);
-}
-
-static void
-myspell_dict_add_to_session(EnchantDict * me,
-			    const char *const word, size_t len)
-{
-	MySpellChecker * checker;
-	
-	// implement a session interface
-
-	checker = (MySpellChecker *) me->user_data;
-	checker->addToSession(word, len);
-}
-
-static void
 myspell_dict_free_suggestions (EnchantDict * me, char **str_list)
 {
 	g_strfreev (str_list);
@@ -306,9 +276,8 @@ myspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *) checker;
 	dict->check = myspell_dict_check;
 	dict->suggest = myspell_dict_suggest;
-	dict->add_to_personal = myspell_dict_add_to_personal;
-	dict->add_to_session = myspell_dict_add_to_session;
 	dict->free_suggestions = myspell_dict_free_suggestions;
+	// don't implement personal, session
 	
 	return dict;
 }
