@@ -200,10 +200,10 @@ aspell_provider_dictionary_status (struct str_enchant_provider * me,
 	int status = 0;
 
 	dict = aspell_provider_request_dict (me, tag);
-	if (dict)
-		status = 1;
-
-	aspell_provider_dispose_dict (me, dict);
+	if (dict) {
+		status = 1;       
+		aspell_provider_dispose_dict (me, dict);
+	}
 
 	return status;
 }
