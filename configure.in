@@ -40,6 +40,9 @@ AM_PROG_LIBTOOL
 
 AC_C_CONST
 
+have_cxx=yes
+AC_PROG_CXX(,have_cxx=no)
+
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 
 PKG_CHECK_MODULES(ENCHANT, [glib-2.0 gmodule-2.0])
@@ -57,9 +60,16 @@ case "$host" in
     ;;
 esac
 AC_MSG_RESULT([$native_win32])
-AM_CONDITIONAL(OS_WIN32, test "$native_win32" = yes)
+AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
 
-dnl TODO: pspell support
+build_ispell=yes
+
+AC_ARG_ENABLE(ispell, [  --disable-ispell     enable the ispell backend [default=auto]], build_ispell="$enableval", build_ispell=yes)
+
+if test "x$have_cxx" = "xno"; then
+   build_ispell=no
+fi
+AM_CONDITIONAL(WITH_ISPELL, test "x$build_ispell" = "xyes")
 
 check_pspell=yes
 
@@ -87,6 +97,7 @@ libenchant.pc
 libenchant.spec
 src/Makefile
 src/aspell/Makefile
+src/ispell/Makefile
 tests/Makefile
 ])
 
@@ -98,4 +109,5 @@ $PACKAGE-$VERSION
 	compiler:                       ${CC}
 	
 	Build Aspell/Pspell backend:    ${found_pspell}
+	Build Ispell backend:           ${build_ispell}
 "

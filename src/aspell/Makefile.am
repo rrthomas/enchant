@@ -18,8 +18,8 @@ endif
 
 INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
-enchant_LTLIBRARIES = $(target_lib)
-enchantdir= $(libdir)/enchant
+aspell_LTLIBRARIES = $(target_lib)
+aspelldir= $(libdir)/enchant
 
 libenchant_aspell_la_LIBADD= $(ENCHANT_LIBS) $(PSPELL_LIBS)
 libenchant_aspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined

@@ -361,7 +361,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	g_return_val_if_fail (tag, NULL);
 	g_return_val_if_fail (strlen (tag), NULL);
 	
-	dict = g_hash_table_lookup (broker->dict_map, (gpointer) tag);
+	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
 	if (dict)
 		{
 			return dict;
