@@ -42,6 +42,7 @@ AC_C_CONST
 
 have_cxx=yes
 AC_PROG_CXX(,have_cxx=no)
+AM_CONDITIONAL(WITH_CXX, test "x$have_cxx" = "xyes")
 
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 
