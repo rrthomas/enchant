@@ -34,7 +34,7 @@
 
 #if HAVE_FLOCK || HAVE_LOCKF
 #include <sys/file.h>
-#endif /* HAVE_FLOCK */
+#endif /* HAVE_FLOCK || HAVE_LOCKF */
 
 #include <glib.h>
 #include <gmodule.h>
@@ -52,7 +52,7 @@ enchant_lock_file (FILE * f)
 #elif HAVE_LOCKF
 	lockf (fileno (f), F_LOCK, 0);
 #else
-	/* TODO: win32, UNIX fcntl */
+	/* TODO: win32, UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
 }
 
@@ -64,7 +64,7 @@ enchant_unlock_file (FILE * f)
 #elif HAVE_LOCKF
 	lockf (fileno (f), F_ULOCK, 0);
 #else
-	/* TODO: win32, UNIX fcntl */
+	/* TODO: win32, UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
 }
 
@@ -867,7 +867,8 @@ enchant_broker_release_dict (EnchantBroker * broker, EnchantDict * dict)
 	g_return_if_fail (broker);
 	g_return_if_fail (dict);
 	
-	/* this will be a noop for now, perhaps indefinitely */
+	/* we currently don't really release the dictionary until
+	   the broker is shutdown due to possible race conditions */
 }
 
 /**
