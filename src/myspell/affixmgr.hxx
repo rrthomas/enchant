@@ -11,6 +11,8 @@ class AffixMgr
 
   AffEntry *          pStart[SETSIZE];
   AffEntry *          sStart[SETSIZE];
+  AffEntry *          pFlag[SETSIZE];
+  AffEntry *          sFlag[SETSIZE];
   HashMgr *           pHMgr;
   char *              trystring;
   char *              encoding;
@@ -26,6 +28,8 @@ public:
   struct hentry *     affix_check(const char * word, int len);
   struct hentry *     prefix_check(const char * word, int len);
   struct hentry *     suffix_check(const char * word, int len, int sfxopts, AffEntry* ppfx);
+  int                 expand_rootword(struct guessword * wlst, int maxn, 
+                             const char * ts, int wl, const char * ap, int al);
   struct hentry *     compound_check(const char * word, int len, char compound_flag);
   struct hentry *     lookup(const char * word);
   int                 get_numrep();

@@ -7,6 +7,8 @@
 
 #include "suggestmgr.hxx"
 
+using namespace std;
+
 extern char * mystrdup(const char *);
 
 
@@ -39,19 +41,18 @@ SuggestMgr::~SuggestMgr()
 // generate suggestions for a mispelled word
 //    pass in address of array of char * pointers
 
-int SuggestMgr::suggest(char*** slst, const char * word)
+int SuggestMgr::suggest(char** wlst, int ns, const char * word)
 {
     
-    int nsug = 0;
-    char ** wlst = (char **) calloc(maxSug, sizeof(char *));
-    if (wlst == NULL) return -1;
+    int nsug = ns;
 
     // perhaps we made a typical fault of spelling
-    nsug = replchars(wlst, word, nsug);
+    if ((nsug < maxSug) && (nsug > -1))
+      nsug = replchars(wlst, word, nsug);
 
     // did we forget to add a char
     if ((nsug < maxSug) && (nsug > -1))
-    nsug = forgotchar(wlst, word, nsug);
+      nsug = forgotchar(wlst, word, nsug);
 
     // did we swap the order of chars by mistake
     if ((nsug < maxSug) && (nsug > -1))
@@ -69,14 +70,6 @@ int SuggestMgr::suggest(char*** slst, const char * word)
     if ((nsug < maxSug) && (nsug > -1))
       nsug = twowords(wlst, word, nsug);
 
-    if (nsug < 0) {
-       for (int i=0;i<maxSug; i++)
-	 if (wlst[i] != NULL) free(wlst[i]);
-       free(wlst);
-       return -1;
-    }
-
-    *slst = wlst;
     return nsug;
 }
 
@@ -114,10 +107,7 @@ int SuggestMgr::replchars(char** wlst, const char * word, int ns)
           if ((cwrd) && check(candidate,strlen(candidate))) {
 	      if (ns < maxSug) {
 		  wlst[ns] = mystrdup(candidate);
-		  if (wlst[ns] == NULL) {
-		      for (int j=0; j<ns; j++) free(wlst[j]);
-		      return -1;
-		  }
+		  if (wlst[ns] == NULL) return -1;
 		  ns++;
 	      } else return ns;
 	  }
@@ -303,6 +293,109 @@ int SuggestMgr::swapchar(char ** wlst, const char * word, int ns)
 }
 
 
+// generate a set of suggestions for very poorly spelled words
+int SuggestMgr::ngsuggest(char** wlst, char * word, HashMgr* pHMgr)
+{
+
+  int i, j;
+  int lval;
+  int sc;
+  int lp;
+
+  if (! pHMgr) return 0;
+
+  // exhaustively search through all root words
+  // keeping track of the MAX_ROOTS most similar root words
+  struct hentry * roots[MAX_ROOTS];
+  int scores[MAX_ROOTS];
+  for (i = 0; i < MAX_ROOTS; i++) {
+    roots[i] = NULL;
+    scores[i] = -100 * i;
+  }
+  lp = MAX_ROOTS - 1;
+
+  struct hentry* hp = NULL;
+  int col = -1;
+  while ((hp = pHMgr->walk_hashtable(col, hp))) {
+    sc = ngram(3, word, hp->word, (1 == 0));
+    if (sc > scores[lp]) {
+      scores[lp] = sc;
+      roots[lp] = hp;
+      int lval = sc;
+      for (j=0; j < MAX_ROOTS; j++)
+	if (scores[j] < lval) {
+	  lp = j;
+          lval = scores[j];
+	}
+    }  
+  }
+
+  // now expand affixes on each of these root words and
+  // and use length adjusted ngram scores to select
+  // possible suggestions
+  char * guess[MAX_GUESS];
+  int gscore[MAX_GUESS];
+  for(i=0;i<MAX_GUESS;i++) {
+     guess[i] = NULL;
+     gscore[i] = -100 * i;
+  }
+
+  lp = MAX_GUESS - 1;
+
+  struct guessword * glst;
+  glst = (struct guessword *) calloc(MAX_WORDS,sizeof(struct guessword));
+  if (! glst) return 0;
+
+  for (i = 0; i < MAX_ROOTS; i++) {
+
+      if (roots[i]) {
+        struct hentry * rp = roots[i];
+	int nw = pAMgr->expand_rootword(glst, MAX_WORDS, rp->word, rp->wlen,
+                                        rp->astr, rp->alen);
+        for (int k = 0; k < nw; k++) {
+           sc = ngram(3, word, glst[k].word, (1==1));
+           if (sc > gscore[lp]) {
+	      if (guess[lp]) free (guess[lp]);
+              gscore[lp] = sc;
+              guess[lp] = glst[k].word;
+              lval = sc;
+              for (j=0; j < MAX_GUESS; j++)
+	         if (gscore[j] < lval) {
+	            lp = j;
+                    lval = gscore[j];
+	         }
+	   } else {
+              free (glst[k].word);  
+           }            
+	}
+      }
+
+  }
+  if (glst) free(glst);
+
+  // now we are done generating guesses
+  // sort in order of decreasing score and copy over
+  bubblesort(&guess[0], &gscore[0], MAX_GUESS);
+  int ns = 0;
+  for (i=0; i < MAX_GUESS; i++) {
+    if (guess[i]) {
+      int unique = 1;
+      for (j=i+1; j < MAX_GUESS; j++)
+	if (guess[j]) 
+	    if (!strcmp(guess[i], guess[j])) unique = 0;
+      if (unique) {
+         wlst[ns++] = guess[i];
+      } else {
+	 free(guess[i]);
+      }
+    }
+  }
+  return ns;
+}
+
+
+
+
 // see if a candidate suggestion is spelled correctly
 // needs to check both root words and words with affixes
 int SuggestMgr::check(const char * word, int len)
@@ -314,4 +407,52 @@ int SuggestMgr::check(const char * word, int len)
   }
   if (rv) return 1;
   return 0;
+}
+
+
+
+// generate an n-gram score comparing s1 and s2
+int SuggestMgr::ngram(int n, char * s1, const char * s2, bool uselen)
+{
+  int nscore = 0;
+  int l1 = strlen(s1);
+  int l2 = l1;
+  if (uselen) l2 = strlen(s2);
+  int ns;
+  for (int j=1;j<=n;j++) {
+    ns = 0;
+    for (int i=0;i<=(l1-j);i++) {
+      char c = *(s1 + i + j);
+      *(s1 + i + j) = '\0';
+      if (strstr(s2,(s1+i))) ns++;
+      *(s1 + i + j ) = c;
+    }
+    nscore = nscore + ns;
+    if (ns < 2) break;
+  }
+  ns = abs(l1-l2) - 2;
+  return (nscore - ((ns > 0) ? ns : 0));
+}
+
+
+// sort in decreasing order of score
+void SuggestMgr::bubblesort(char** rword, int* rsc, int n )
+{
+      int m = 1;
+      while (m < n) {
+	  int j = m;
+	  while (j > 0) {
+	    if (rsc[j-1] < rsc[j]) {
+	        int sctmp = rsc[j-1];
+                char * wdtmp = rword[j-1];
+	        rsc[j-1] = rsc[j];
+                rword[j-1] = rword[j];
+                rsc[j] = sctmp;
+                rword[j] = wdtmp;
+	        j--;
+	    } else break;
+	  }
+          m++;
+      }
+      return;
 }

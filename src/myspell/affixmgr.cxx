@@ -7,6 +7,9 @@
 #include "affixmgr.hxx"
 #include "affentry.hxx"
 
+using namespace std;
+
+
 // First some base level utility routines
 extern void   mychomp(char * s);
 extern char * mystrdup(const char * s);
@@ -28,6 +31,8 @@ AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr)
   for (int i=0; i < SETSIZE; i++) {
      pStart[i] = NULL;
      sStart[i] = NULL;
+     pFlag[i] = NULL;
+     sFlag[i] = NULL;
   }
   if (parse_file(affpath)) {
      fprintf(stderr,"Failure loading aff file %s\n",affpath);
@@ -41,6 +46,7 @@ AffixMgr::~AffixMgr()
  
   // pass through linked prefix entries and clean up
   for (int i=0; i < SETSIZE ;i++) {
+       pFlag[i] = NULL;
        PfxEntry * ptr = (PfxEntry *)pStart[i];
        PfxEntry * nptr = NULL;
        while (ptr) {
@@ -53,6 +59,7 @@ AffixMgr::~AffixMgr()
 
   // pass through linked suffix entries and clean up
   for (int j=0; j < SETSIZE ; j++) {
+       sFlag[j] = NULL;
        SfxEntry * ptr = (SfxEntry *)sStart[j];
        SfxEntry * nptr = NULL;
        while (ptr) {
@@ -190,16 +197,27 @@ int  AffixMgr::parse_file(const char * affpath)
     return 0;
 }
 
+// we want to be able to quickly access prefix information
+// both by prefix flag, and sorted by prefix string itself 
+// so we need to set up two indexes
 
-// build a sort order linked list of prefix entries
 int AffixMgr::build_pfxlist(AffEntry* pfxptr)
 {
   PfxEntry * ptr;
   PfxEntry * pptr;
   PfxEntry * ep = (PfxEntry*) pfxptr;
 
-  /* get the right starting point */
+  // get the right starting points
   const char * key = ep->getKey();
+  const unsigned char flg = ep->getFlag();
+
+  // first index by flag which must exist
+  ptr = (PfxEntry*)pFlag[flg];
+  ep->setFlgNxt(ptr);
+  pFlag[flg] = (AffEntry *) ep;
+
+
+  // next index by affix string
 
   // handle the special case of null affix string
   if (strlen(key) == 0) {
@@ -234,7 +252,9 @@ int AffixMgr::build_pfxlist(AffEntry* pfxptr)
 
 
 
-// build a sort order linked list of suffix entries (affix reveresed)
+// we want to be able to quickly access suffix information
+// both by suffix flag, and sorted by the reverse of the
+// suffix string itself; so we need to set up two indexes
 int AffixMgr::build_sfxlist(AffEntry* sfxptr)
 {
   SfxEntry * ptr;
@@ -243,6 +263,15 @@ int AffixMgr::build_sfxlist(AffEntry* sfxptr)
 
   /* get the right starting point */
   const char * key = ep->getKey();
+  const unsigned char flg = ep->getFlag();
+
+  // first index by flag which must exist
+  ptr = (SfxEntry*)sFlag[flg];
+  ep->setFlgNxt(ptr);
+  sFlag[flg] = (AffEntry *) ep;
+
+
+  // next index by affix string
 
   // handle the special case of null affix string
   if (strlen(key) == 0) {
@@ -609,6 +638,91 @@ struct hentry * AffixMgr::affix_check (const char * word, int len)
     rv = suffix_check(word, len, 0, NULL);
     return rv;
 }
+
+
+int AffixMgr::expand_rootword(struct guessword * wlst, int maxn, 
+                       const char * ts, int wl, const char * ap, int al)
+{
+
+    int nh=0;
+
+    // first add root word to list
+
+    if (nh < maxn) {
+       wlst[nh].word = mystrdup(ts);
+       wlst[nh].allow = (1 == 0);
+       nh++;
+    }
+
+    // handle suffixes
+    for (int i = 0; i < al; i++) {
+       unsigned char c = (unsigned char) ap[i];
+       SfxEntry * sptr = (SfxEntry *)sFlag[c];
+       while (sptr) {
+	 char * newword = sptr->add(ts, wl);
+         if (newword) {
+           if (nh < maxn) {
+	      wlst[nh].word = newword;
+              wlst[nh].allow = sptr->allowCross();
+              nh++;
+	   } else {
+	      free(newword);
+           }
+	 }
+         sptr = (SfxEntry *)sptr ->getFlgNxt();
+       }
+    }
+
+    int n = nh;
+
+    // handle cross products of prefixes and suffixes
+    for (int j=1;j<n ;j++)
+       if (wlst[j].allow) {
+          for (int k = 0; k < al; k++) {
+             unsigned char c = (unsigned char) ap[k];
+             PfxEntry * cptr = (PfxEntry *) pFlag[c];
+             while (cptr) {
+                if (cptr->allowCross()) {
+	            int l1 = strlen(wlst[j].word);
+	            char * newword = cptr->add(wlst[j].word, l1);
+                    if (newword) {
+		       if (nh < maxn) {
+	                  wlst[nh].word = newword;
+                          wlst[nh].allow = cptr->allowCross();
+                          nh++;
+		       } else {
+			  free(newword);
+                       }
+	            }
+                }
+                cptr = (PfxEntry *)cptr ->getFlgNxt();
+             }
+	  }
+       }
+
+
+    // now handle pure prefixes
+    for (int m = 0; m < al; m ++) {
+       unsigned char c = (unsigned char) ap[m];
+       PfxEntry * ptr = (PfxEntry *) pFlag[c];
+       while (ptr) {
+	 char * newword = ptr->add(ts, wl);
+         if (newword) {
+	     if (nh < maxn) {
+	        wlst[nh].word = newword;
+                wlst[nh].allow = ptr->allowCross();
+                nh++;
+             } else {
+	        free(newword);
+	     } 
+	 }
+         ptr = (PfxEntry *)ptr ->getFlgNxt();
+       }
+    }
+
+    return nh;
+}
+
 
 // return length of replacing table
 int AffixMgr::get_numrep()
@@ -993,4 +1107,3 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af)
    free(ptr);
    return 0;
 }
-

@@ -6,6 +6,8 @@
 
 #include "myspell.hxx"
 
+using namespace std;
+
 
 MySpell::MySpell(const char * affpath, const char * dpath)
 {
@@ -26,7 +28,9 @@ MySpell::MySpell(const char * affpath, const char * dpath)
     csconv = get_current_cs(encoding);
 
     /* and finally set up the suggestion manager */
-    pSMgr = new SuggestMgr(try_string, 15, pAMgr);
+    maxSug = 15;
+    pSMgr = new SuggestMgr(try_string, maxSug, pAMgr);
+    if (try_string) free(try_string);
 }
 
 
@@ -55,11 +59,7 @@ int MySpell::cleanword(char * dest, const char * src, int * pcaptype, int * pabb
 { 
 
   // with the new breakiterator code this should not be needed anymore
-#if 0
-   const char * special_chars = ".!_#$%&()* +,-/:;<=>?[]\\^`{|}~\t \x0a\x0d\x0ab\x0bb\x01\x0a1\'\"";
-#else
-   const char * special_chars = ".!_#$%&()* +,-/:;<=>?[]\\^`{|}~\t \x0a\x0d\x01\'\"";
-#endif
+   const char * special_chars = "._#$%&()* +,-/:;<=>[]\\^`{|}~\t \x0a\x0d\x01\'\"";
 
    unsigned char * p = (unsigned char *) dest;
    const unsigned char * q = (const unsigned char * ) src;
@@ -192,42 +192,73 @@ int MySpell::suggest(char*** slst, const char * word)
   int abbv = 0;
   wl = cleanword(cw, word, &captype, &abbv);
   if (wl == 0) return 0;
+
   int ns = 0;
+  char ** wlst = (char **) calloc(maxSug, sizeof(char *));
+  if (wlst == NULL) return 0;
+
   switch(captype) {
      case NOCAP:   { 
-                     ns = pSMgr->suggest(slst, cw); 
+                     ns = pSMgr->suggest(wlst, ns, cw); 
                      break;
                    }
 
      case INITCAP: { 
+
                      memcpy(wspace,cw,(wl+1));
                      mkallsmall(wspace, csconv);
-                     ns = pSMgr->suggest(slst, wspace);
-                     for (int j=0; j < ns; j++)
-                       mkinitcap((*slst)[j], csconv);
+                     ns = pSMgr->suggest(wlst, ns, wspace);
+                     if (ns > 0) {
+                       for (int j=0; j < ns; j++)
+                         mkinitcap(wlst[j], csconv);
+                     }
+                     ns = pSMgr->suggest(wlst,ns,cw); 
                      break;
                    }
 
      case HUHCAP: { 
-                     ns = pSMgr->suggest(slst, cw);
-                     if (ns == 0) {
-                        memcpy(wspace,cw,(wl+1));
-                        mkallsmall(wspace, csconv);
-                        ns = pSMgr->suggest(slst, wspace);
-		     }
+                     ns = pSMgr->suggest(wlst, ns, cw);
+                     if (ns != -1) {
+                       memcpy(wspace,cw,(wl+1));
+                       mkallsmall(wspace, csconv);
+                       ns = pSMgr->suggest(wlst, ns, wspace);
+                     } 
                      break;
                    }
 
      case ALLCAP: { 
                      memcpy(wspace,cw,(wl+1));
                      mkallsmall(wspace, csconv);
-                     ns = pSMgr->suggest(slst, wspace);
-                     for (int j=0; j < ns; j++)
-                       mkallcap((*slst)[j], csconv);
+                     ns = pSMgr->suggest(wlst, ns, wspace);
+                     if (ns > 0) {
+                       for (int j=0; j < ns; j++)
+                         mkallcap(wlst[j], csconv);
+                     } 
+                     if (ns != -1) 
+                         ns = pSMgr->suggest(wlst, ns , cw);
                      break;
                    }
   }
-  return ns;
+  if (ns > 0) {
+       *slst = wlst;
+       return ns;
+  }
+  // try ngram approach since found nothing
+  if (ns == 0) { 
+     ns = pSMgr->ngsuggest(wlst, cw, pHMgr);
+     if (ns) {
+       *slst = wlst;
+       return ns;
+     }
+  }
+  if (ns < 0) {
+     // we ran out of memory - we should free up as much as possible
+     for (int i=0;i<maxSug; i++)
+	 if (wlst[i] != NULL) free(wlst[i]);
+  }
+  if (wlst) free(wlst);
+  *slst = NULL;
+  return 0;
 }
 
 

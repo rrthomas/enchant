@@ -27,6 +27,11 @@ struct replentry {
   char * replacement;
 };
 
+struct guessword {
+  char * word;
+  bool allow;
+};
+
 #endif
 
 

@@ -8,6 +8,9 @@
 
 #include "affentry.hxx"
 
+using namespace std;
+
+extern char * mystrdup(const char * s);
 extern char *  myrevstrdup(const char * s);
 
 PfxEntry::PfxEntry(AffixMgr* pmgr, affentry* dp)
@@ -34,12 +37,43 @@ PfxEntry::PfxEntry(AffixMgr* pmgr, affentry* dp)
 PfxEntry::~PfxEntry()
 {
     achar = '\0';
-    free(appnd);
-    free(strip);
+    if (appnd) free(appnd);
+    if (strip)free(strip);
     pmyMgr = NULL;
     appnd = NULL;
     strip = NULL;    
 }
+
+
+
+// add prefix to this word assuming conditions hold
+char * PfxEntry::add(const char * word, int len)
+{
+    int			cond;
+    char	        tword[MAXWORDLEN+1];
+
+     /* make sure all conditions match */
+     if ((len > stripl) && (len >= numconds)) {
+            unsigned char * cp = (unsigned char *) word;
+            for (cond = 0;  cond < numconds;  cond++) {
+	       if ((conds[*cp++] & (1 << cond)) == 0)
+	          break;
+            }
+            if (cond >= numconds) {
+	      /* we have a match so add prefix */
+              int tlen = 0;
+              if (appndl) {
+	          strcpy(tword,appnd);
+                  tlen += appndl;
+               } 
+               char * pp = tword + tlen;
+               strcpy(pp, (word + stripl));
+               return mystrdup(tword);
+	    }
+     }
+     return NULL;    
+}
+
 
 
 
@@ -126,11 +160,45 @@ SfxEntry::SfxEntry(AffixMgr * pmgr, affentry* dp)
 SfxEntry::~SfxEntry()
 {
     achar = '\0';
-    free(appnd);
-    free(strip);
+    if (appnd) free(appnd);
+    if (rappnd) free(rappnd);
+    if (strip) free(strip);
     pmyMgr = NULL;
     appnd = NULL;
     strip = NULL;    
+}
+
+
+
+// add suffix to this word assuming conditions hold
+char * SfxEntry::add(const char * word, int len)
+{
+    int			cond;
+    char	        tword[MAXWORDLEN+1];
+
+     /* make sure all conditions match */
+     if ((len > stripl) && (len >= numconds)) {
+            unsigned char * cp = (unsigned char *) (word + len);
+            for (cond = numconds; --cond >=0; ) {
+	       if ((conds[*--cp] & (1 << cond)) == 0)
+	          break;
+            }
+            if (cond < 0) {
+	      /* we have a match so add suffix */
+              strcpy(tword,word);
+              int tlen = len;
+              if (stripl) {
+		 tlen -= stripl;
+              }
+              char * pp = (tword + tlen);
+              if (appndl) {
+	          strcpy(pp,appnd);
+                  tlen += appndl;
+	      } else *pp = '\0';
+               return mystrdup(tword);
+	    }
+     }
+     return NULL;
 }
 
 

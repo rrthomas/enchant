@@ -19,6 +19,7 @@ class MySpell
   SuggestMgr*     pSMgr;
   char *          encoding;
   struct cs_info * csconv;
+  int             maxSug;
 
 public:
   MySpell(const char * affpath, const char * dpath);
