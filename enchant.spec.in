@@ -23,7 +23,7 @@ A library that wraps other spell checking backends.
 %package devel
 Summary: Support files necessary to compile applications with libenchant.
 Group: Development/Libraries
-Requires: libenchant
+Requires: enchant
 
 %description devel
 Libraries, headers, and support files necessary to compile applications using libenchant.
