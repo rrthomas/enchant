@@ -315,7 +315,7 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 			{
 				int l = strlen(m_possibilities[c]);
 				
-				char *utf8Sugg = g_new0(char, l + 1);
+				char *utf8Sugg = g_new0(char, INPUTWORDLEN + MAXAFFIXLEN + 1);
 				
 				if (!g_iconv_is_valid(m_translate_out))
 					{
@@ -333,7 +333,7 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 						char *Out = reinterpret_cast<char *>(utf8Sugg);
 						
 						len_in = l;
-						len_out = (l+1);
+						len_out = INPUTWORDLEN + MAXAFFIXLEN;
 						if ((size_t)-1 == g_iconv(m_translate_out, &In, &len_in, &Out, &len_out)) {
 							*out_n_suggestions = c;
 							return sugg_arr;
