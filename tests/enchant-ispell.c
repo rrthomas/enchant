@@ -52,6 +52,8 @@ typedef enum
 		MODE_FILE
 	} IspellMode_t;
 
+static int countLines = 0, lineCount = 0;
+
 static void 
 print_version (FILE * to)
 {
@@ -61,7 +63,11 @@ print_version (FILE * to)
 static void
 print_help (FILE * to, const char * prog)
 {
-	fprintf (to, "Usage: %s [options] -a|-l|-v[v]|<file>\n", prog);
+	fprintf (to, "Usage: %s [options] -a|-l|-L|-v[v]|<file>\n", prog);
+	fprintf (to, "\t-a lists alternatives.\n", prog);
+	fprintf (to, "\t-l lists misspelings.\n", prog);
+	fprintf (to, "\t-L displays line numbers.\n", prog);
+	fprintf (to, "\t-v displays program version.\n", prog);
 }
 
 static gboolean
@@ -72,6 +78,7 @@ consume_line (FILE * in, GString * str)
 	gchar * utf;
 	gboolean ret = TRUE;
 
+	lineCount++;
 	g_string_truncate (str, 0);
 
 	while (ret && (ch = fgetc (in)) != EOF) {
@@ -85,14 +92,6 @@ consume_line (FILE * in, GString * str)
 		}
 	}
 
-	if (str->len) {
-		utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
-		g_free (str->str);
-		
-		str->str = utf;
-		str->len = bytes_written;
-	}
-
 	return ret;
 }
 
@@ -102,6 +101,9 @@ print_utf (FILE * out, const char * str)
 	gsize bytes_read, bytes_written;
 	gchar * native;
 
+	// fprintf(out, "[%s]", str);
+	fprintf(out, "%s", str);
+	return;
 	native = g_locale_from_utf8 (str, -1, &bytes_read, &bytes_written, NULL);
 	fwrite (native, 1, bytes_written, out);
 	g_free (native);
@@ -114,12 +116,19 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
 	char ** suggs;
 
 	if (enchant_dict_check (dict, word->str, word->len) == 0)
-		fwrite ("*\n", 1, 2, out);
+		if (countLines) {
+			fprintf (out, "* %d\n", lineCount);
+		} else {
+			fwrite ("*\n", 1, 2, out);
+		}
 	else {
 		suggs = enchant_dict_suggest (dict, word->str, 
 					      word->len, &n_suggs);
 		if (!n_suggs || !suggs) {
 			fwrite ("# ", 1, 2, out);
+			if (countLines) {
+				fprintf (out, "%d ", lineCount);
+			}
 			print_utf (out, word->str);
 			fprintf (out, " %ld\n", start_pos+1);
 		}
@@ -127,6 +136,9 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
 			size_t i = 0;
 			
 			fwrite ("& ", 1, 2, out);
+			if (countLines) {
+				fprintf (out, "%d ", lineCount);
+			}
 			print_utf (out, word->str);
 			fprintf (out, " %ld %ld:", n_suggs, start_pos);
 			
@@ -147,6 +159,9 @@ static void
 do_mode_l (FILE * out, EnchantDict * dict, GString * word)
 {
 	if (enchant_dict_check (dict, word->str, word->len) != 0) {
+		if (countLines) {
+			fprintf (out, "%d ", lineCount);
+		}
 		print_utf (out, word->str);
 		fwrite ("\n", 1, 1, out);
 	}
@@ -170,35 +185,42 @@ tokenize_line (GString * line)
 	while (cur_pos < line->len && *utf) {
 		uc = g_utf8_get_char (utf); 
 		
-		if (g_unichar_isalpha (uc)) {
-			g_string_append_unichar (word, uc);
-			cur_pos++;
-		}
-		else if (g_unichar_ispunct (uc)) {
-			if (uc == '\'') {
+		// fprintf(stdout, "type of %s is %d\n", utf, g_unichar_type(uc));
+		switch (g_unichar_type(uc)) {
+			case G_UNICODE_MODIFIER_LETTER:
+			case G_UNICODE_LOWERCASE_LETTER:
+			case G_UNICODE_TITLECASE_LETTER:
+			case G_UNICODE_UPPERCASE_LETTER:
+			case G_UNICODE_OTHER_LETTER:
+			case G_UNICODE_COMBINING_MARK:
+			case G_UNICODE_ENCLOSING_MARK:
+			case G_UNICODE_NON_SPACING_MARK:
+			case G_UNICODE_DECIMAL_NUMBER:
+			case G_UNICODE_LETTER_NUMBER:
+			case G_UNICODE_OTHER_NUMBER:
+			case G_UNICODE_CONNECT_PUNCTUATION:
 				g_string_append_unichar (word, uc);
 				cur_pos++;
-			} else {
+				break;
+			case G_UNICODE_OTHER_PUNCTUATION:
+				if (uc == '\'') {
+					g_string_append_unichar (word, uc);
+					cur_pos++;
+					break;
+				}
+				// else fall through
+			default: // some sort of non-word character
 				if (word->len) {
-					tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
-					tokens = g_slist_append (tokens, GINT_TO_POINTER(start_pos));
+					tokens = g_slist_append (tokens,
+						g_string_new_len (word->str, word->len));
+					tokens = g_slist_append (tokens,
+						GINT_TO_POINTER(start_pos));
 					g_string_truncate (word, 0);
 				}
-
-				start_pos = ++cur_pos;
-			}
-		} else {
-			if (word->len) {
-				tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
-				tokens = g_slist_append (tokens, GINT_TO_POINTER(start_pos));
-				g_string_truncate (word, 0);
-			}
-
-			start_pos = ++cur_pos;
-		}
-
+		} // switch
+		start_pos = ++cur_pos;
 		utf = g_utf8_next_char (utf);
-	}
+	} // while
 
 	g_string_free (word, TRUE);
 
@@ -236,6 +258,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 	str = g_string_new (NULL);
 	
 	while (!was_last_line) {
+		str = g_string_new (NULL); // wasteful, but avoids segfault
 		was_last_line = consume_line (in, str);
 
 		if (str->len) {
@@ -299,6 +322,8 @@ int main (int argc, char ** argv)
 					mode = MODE_L;
 				else if (arg[1] == 'v')
 					mode = MODE_VERSION;
+				else if (arg[1] == 'L')
+					countLines++;
 			} 
 			else if (strlen (arg) > 2) {
 				fprintf (stderr, "-%c does not take any parameters.\n", arg[1]);
