@@ -33,6 +33,7 @@
 #include <string.h>
 
 #if defined(HAVE_FLOCK) || defined(HAVE_LOCKF)
+#include <unistd.h>
 #include <sys/file.h>
 #endif /* HAVE_FLOCK || HAVE_LOCKF */
 
