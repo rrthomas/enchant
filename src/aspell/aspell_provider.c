@@ -205,7 +205,7 @@ aspell_provider_dictionary_exists (struct str_enchant_provider * me,
 	/* hack for a quick existence test */
 
 	ext = g_strdup_printf ("%s.multi", tag);
-	file = g_build_filename (ASPELL_DICT_DIR, ext);
+	file = g_build_filename (ASPELL_DICT_DIR, ext, NULL);
 	if (g_file_test (file, G_FILE_TEST_EXISTS))
 		exists = 1;
 	g_free (file);
@@ -213,7 +213,7 @@ aspell_provider_dictionary_exists (struct str_enchant_provider * me,
 
 	if (strlen (tag) > 2 && tag[2] == '_') {
 		ext = g_strdup_printf ("%c%c.multi", tag[0], tag[1]);
-		file = g_build_filename (ASPELL_DICT_DIR, ext);
+		file = g_build_filename (ASPELL_DICT_DIR, ext, NULL);
 		if (g_file_test (file, G_FILE_TEST_EXISTS))
 			exists = 1;
 		g_free (file);
