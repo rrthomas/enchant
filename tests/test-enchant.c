@@ -49,8 +49,8 @@ run_dict_tests (EnchantDict * dict)
 	size_t n_suggs;
 	size_t i, j;
 	
-	const char *check_checks[] = { "hallo", "halllo" };
-	const char *sugg_checks[] = { "halllo", "taag" };
+	const char *check_checks[] = { "hello", "helllo" };
+	const char *sugg_checks[] = { "helllo", "taag" };
 	
 	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
 		{
@@ -81,11 +81,11 @@ main (int argc, char **argv)
 	
 	broker = enchant_broker_init ();
 	
-	dict = enchant_broker_request_dict (broker, "de_DE");
+	dict = enchant_broker_request_dict (broker, "en_US");
 	
 	if (!dict) 
 		{
-			fprintf (stderr, "Couldn't create dictionary for de_DE\n");
+			fprintf (stderr, "Couldn't create dictionary for en_US\n");
 		} 
 	else 
 		{

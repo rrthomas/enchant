@@ -267,8 +267,7 @@ enchant_load_providers (EnchantBroker * broker)
 	/* load USER providers first. since the GSList is ordered,
 	   this intentionally gives preference to USER providers */
 
-	user_dir = g_strdup_printf ("%s%s.enchant", g_get_home_dir (), 
-				    G_DIR_SEPARATOR_S);
+	user_dir = g_build_filename (g_get_home_dir (), ".enchant", NULL);
 	enchant_load_providers_in_dir (broker, user_dir);
 	g_free (user_dir);
 
@@ -302,7 +301,7 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 
 		if (i < len) {
 			tag = g_strndup (line, i);
-			ordering = g_strndup (line+(i+1), len - i);
+			ordering = g_strndup (line+(i+1), len - i);			
 
 			enchant_broker_set_ordering (broker, tag, ordering);
 
@@ -320,7 +319,7 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 	char * ordering_file;
 
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal,
-							   NULL, enchant_provider_order_destroyed);
+							   enchant_provider_order_destroyed, enchant_provider_order_destroyed);
 
 	ordering_file = g_build_filename (ENCHANT_GLOBAL_ORDERING, "enchant.ordering", NULL);
 	enchant_load_ordering_from_file (broker, ordering_file);
@@ -335,16 +334,49 @@ static GSList *
 enchant_get_ordered_providers (EnchantBroker * broker,
 			       const char * const tag)
 {
+	EnchantProvider *provider;
 	GSList * list = NULL, * iter = NULL;
 
-	for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter))
-		{
-			list = g_slist_append (list, iter->data);
+	char * ordering = NULL, ** tokens, *token;
+	size_t i;
+
+	ordering = (char *)g_hash_table_lookup (broker->provider_ordering, (gpointer)tag);
+	if (!ordering)
+		ordering = (char *)g_hash_table_lookup (broker->provider_ordering, (gpointer)"*");
+
+	if (!ordering) {
+		/* return an unordered copy of the list */
+		for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter))
+			{
+				list = g_slist_append (list, iter->data);
+			}
+		return list;
+	}
+
+	tokens = g_strsplit (ordering, ",", 0);
+	if (tokens) {
+		for (i = 0; tokens[i]; i++) {
+			token = tokens[i];
+
+			for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter)) {
+				provider = (EnchantProvider*)iter->data;
+ 
+				if (provider && !strcmp (token, (*provider->identify)(provider))) {
+					list = g_slist_append (list, (gpointer)provider);
+				}
+			}
 		}
 
-	/* STUB TODO: sort + order said list */
+		g_strfreev (tokens);
+	}
 
 	return list;
+}
+
+static void
+enchant_dict_key_destroyed (gpointer data)
+{
+	g_free (data);
 }
 
 static void
@@ -401,7 +433,7 @@ enchant_broker_init (void)
 	broker = g_new0 (EnchantBroker, 1);
 	
 	broker->dict_map = g_hash_table_new_full (g_str_hash, g_str_equal,
-						  NULL, enchant_dict_destroyed);
+						  enchant_dict_key_destroyed, enchant_dict_destroyed);
 	
 	enchant_load_providers (broker);
 	
@@ -465,7 +497,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 					if (dict)
 						{
 							dict->owner = provider;
-							g_hash_table_insert (broker->dict_map, (gpointer) tag, dict);
+							g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (tag), dict);
 							break;
 						}
 				}
@@ -607,11 +639,11 @@ enchant_broker_set_ordering (EnchantBroker * broker,
 
 	if (tag_dupl && strlen(tag_dupl) &&
 	    ordering_dupl && strlen(ordering_dupl)) {
+
 		g_hash_table_insert (broker->provider_ordering, (gpointer)tag_dupl,
 				     g_strdup (ordering_dupl));
 
-		/* we will free ordering_dupl when the hash is destroyed */
-		g_free (tag_dupl);
+		/* we will free ordering_dupl && tag_dupl when the hash is destroyed */
 	} else {
 		g_free (tag_dupl);
 		g_free (ordering_dupl);

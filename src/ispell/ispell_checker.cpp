@@ -49,7 +49,7 @@ typedef struct str_ispell_map
 	char * enc;
 } IspellMap;
 
-static const IspellMap ispall_map [] = {
+static const IspellMap ispell_map [] = {
 	{"ca"    ,"catala.hash"         ,"iso-8859-1" },
 	{"ca_ES" ,"catala.hash"         ,"iso-8859-1" },
 	{"cs"    ,"czech.hash"          ,"iso-8859-2" },
@@ -146,7 +146,7 @@ static const IspellMap ispall_map [] = {
 	{"yi"    ,"yiddish-yivo.hash"   ,"UTF-8" }
 };
 
-static const size_t size_ispall_map = G_N_ELEMENTS(ispall_map);
+static const size_t size_ispell_map = G_N_ELEMENTS(ispell_map);
 
 static bool
 g_iconv_is_valid(GIConv i)
@@ -360,7 +360,7 @@ ISpellChecker::loadDictionary (const char * szdict)
 
 	for (size_t i = 0; i < dict_names.size(); i++)
 		{
-			if (linit(const_cast<char*>(dict_names[i].c_str())) > 0)
+			if (linit(const_cast<char*>(dict_names[i].c_str())) >= 0)
 				return g_strdup (dict_names[i].c_str());
 		}
 
@@ -381,9 +381,9 @@ ISpellChecker::loadDictionaryForLanguage ( const char * szLang )
 	char * encoding = NULL;
 	char * szFile = NULL;
 	
-	for (size_t i = 0; i < size_ispall_map; i++)
+	for (size_t i = 0; i < size_ispell_map; i++)
 		{
-			const IspellMap * mapping = (const IspellMap *)(&ispall_map[i]);
+			const IspellMap * mapping = (const IspellMap *)(&(ispell_map[i]));
 			if (!strcmp (szLang, mapping->lang))
 				{
 					szFile = mapping->dict;
