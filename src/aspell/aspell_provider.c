@@ -148,8 +148,10 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	
 	if (pspell_error_number (spell_error) != 0)
 		{
-			g_warning ("Aspell Enchant backend error when requesting '%s' dictionary: %s\n",
-				   tag, pspell_error_message(spell_error));
+			/*
+			  g_warning ("Aspell Enchant backend error when requesting '%s' dictionary: %s\n",
+			  tag, pspell_error_message(spell_error));
+			*/
 			return NULL;
 		}
 	

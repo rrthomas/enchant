@@ -81,19 +81,16 @@ main (int argc, char **argv)
 	
 	broker = Broker::instance ();
 	
-	dict = broker->request_dict ("en_US");
-	
-	if (!dict) 
-		{
-			fprintf (stderr, "Couldn't create dictionary for en_US\n");
-		} 
-	else 
-		{
-			run_dict_tests (dict);
-			
-			broker->describe (enumerate_dicts, NULL);
-			delete dict;
-		}
-	
+	try {
+		dict = broker->request_dict ("en_US");
+		run_dict_tests (dict);
+		
+		broker->describe (enumerate_dicts, NULL);
+		delete dict;
+	} catch (...) {
+		fprintf (stderr, "Couldn't create dictionary for en_US\n");
+		return 1;
+	}
+
 	return 0;
 }
