@@ -34,13 +34,11 @@
 #include "enchant.h"
 #include "enchant++.h"
 
-using namespace enchant;
-
 static void
-enumerate_dicts_fn (const char * const name,
-		    const char * const desc,
-		    const char * const file,
-		    void * ud)
+enumerate_providers_fn (const char * const name,
+			const char * const desc,
+			const char * const file,
+			void * ud)
 {
 	printf ("%s: '%s' (%s)\n", name, desc, file);
 }
@@ -56,7 +54,7 @@ describe_dict_fn (const char * const lang,
 }
 
 static void
-run_dict_tests (Dict * dict)
+run_dict_tests (enchant::Dict * dict)
 {
 	std::vector<std::string> suggs;
 	size_t i, j;
@@ -103,22 +101,28 @@ run_dict_tests (Dict * dict)
 int
 main (int argc, char **argv)
 {
-	Broker *broker;
-	Dict *dict;
+	enchant::Broker *broker;
+	enchant::Dict *dict;
 	
-	broker = Broker::instance ();
+	broker = enchant::Broker::instance ();
 	
 	try {
 		dict = broker->request_dict ("en_US");
 		dict->describe (describe_dict_fn);
-		run_dict_tests (dict);
-		
-		broker->describe (enumerate_dicts_fn);
+		run_dict_tests (dict);		
 		delete dict;
-	} catch (Exception & ex) {
+
+		// test personal wordlist dictionaries
+		dict = broker->request_pwl_dict ("test.pwl");
+		dict->describe (describe_dict_fn);
+		run_dict_tests (dict);
+		delete dict;
+	} catch (enchant::Exception & ex) {
 		fprintf (stderr, "Couldn't create dictionary for en_US: %s\n", ex.what());
 		return 1;
 	}
+
+	broker->describe (enumerate_providers_fn);
 
 	return 0;
 }

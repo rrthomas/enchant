@@ -86,6 +86,8 @@ ENCHANT_MODULE_EXPORT (void)
 
 ENCHANT_MODULE_EXPORT (EnchantDict *)
      enchant_broker_request_dict (EnchantBroker * broker, const char *const tag);
+ENCHANT_MODULE_EXPORT (EnchantDict *)
+     enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl);
 ENCHANT_MODULE_EXPORT (void)
      enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict);
 

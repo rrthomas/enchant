@@ -191,45 +191,82 @@ typedef struct str_enchant_session
 #define BUFSIZ 1024
 #endif
 
+static void
+enchant_session_destroy (EnchantSession * session)
+{
+	g_hash_table_destroy (session->session);
+	g_hash_table_destroy (session->personal);
+	g_free (session->personal_filename);
+	g_free (session->language_tag);
+
+	if (session->error)
+		g_free (session->error);
+
+	g_free (session);
+}
+
 static EnchantSession *
-enchant_session_new (EnchantProvider *provider, const char * const lang)
+enchant_session_new_with_pwl (EnchantProvider * provider, const char * const pwl, const char * const lang,
+			      gboolean fail_if_no_pwl)
 {
 	EnchantSession * session;
-	char * home_dir, * dic;
 	FILE * f;
 	char line[BUFSIZ];
 
 	session = g_new0 (EnchantSession, 1);
-
 	session->session = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	session->personal = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	session->provider = provider;
 	session->language_tag = g_strdup (lang);
 
-	home_dir = enchant_get_user_home_dir ();
-	if (home_dir) {
-		dic = g_strdup_printf ("%s.dic", lang);
-		session->personal_filename = g_build_filename (home_dir,
-							       ".enchant",
-							       dic,
-							       NULL);
-		g_free (home_dir);
-		g_free (dic);
+	if (pwl) {
+		session->personal_filename = g_strdup (pwl);
 
 		/* populate personal filename */
-		f = fopen (session->personal_filename, "r");
+		f = fopen (pwl, "r");
 		if (f) {
 			enchant_lock_file (f);
 			
 			while (NULL != (fgets (line, sizeof (line), f))) {
 				g_hash_table_insert (session->personal, g_strdup (line), GINT_TO_POINTER(TRUE));
 			}
-
+			
 			enchant_unlock_file (f);
 			fclose (f);
+		} else if (fail_if_no_pwl) {
+			enchant_session_destroy (session);
+			return NULL;
 		}
+	} else if (fail_if_no_pwl) {
+		enchant_session_destroy (session);
+		return NULL;
 	}
 
+	return session;
+}
+
+static EnchantSession *
+enchant_session_new (EnchantProvider *provider, const char * const lang)
+{
+	EnchantSession * session;
+	char * home_dir, * dic = NULL, * filename;
+
+	home_dir = enchant_get_user_home_dir ();
+	if (home_dir) {
+		filename = g_strdup_printf ("%s.dic", lang);
+		dic = g_build_filename (home_dir,
+					".enchant",
+					filename,
+					NULL);
+		g_free (filename);
+		g_free (home_dir);
+	}
+
+	session = enchant_session_new_with_pwl (provider, dic, lang, FALSE);	
+
+	if (dic)
+		g_free (dic);
+	
 	return session;
 }
 
@@ -275,19 +312,6 @@ enchant_session_contains (EnchantSession * session, const char * const word, siz
 	g_free (utf);
 
 	return result;
-}
-
-static void
-enchant_session_destroy (EnchantSession * session)
-{
-	g_hash_table_destroy (session->session);
-	g_hash_table_destroy (session->personal);
-	g_free (session->personal_filename);
-	g_free (session->language_tag);
-	g_free (session);
-
-	if (session->error)
-		g_free (session->error);
 }
 
 static void
@@ -767,7 +791,7 @@ enchant_dict_destroyed (gpointer data)
 	session = (EnchantSession*)dict->enchant_private_data;
 	owner = session->provider;
 	
-	if (owner->dispose_dict) 
+	if (owner && owner->dispose_dict) 
 		{
 			(*owner->dispose_dict) (owner, dict);
 		}
@@ -852,6 +876,44 @@ enchant_broker_free (EnchantBroker * broker)
 }
 
 /**
+ * enchant_broker_request_pwl_dict
+ *
+ * PWL is a personal wordlist file, 1 entry per line
+ *
+ * Returns: 
+ */
+ENCHANT_MODULE_EXPORT (EnchantDict *)
+enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
+{
+	EnchantSession *session;
+	EnchantDict *dict = NULL;
+	
+	g_return_val_if_fail (broker, NULL);
+	g_return_val_if_fail (pwl && strlen(pwl), NULL);
+
+	enchant_broker_clear_error (broker);
+
+	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) pwl);
+	if (dict)
+		{
+			return dict;
+		}
+
+	session = enchant_session_new_with_pwl (NULL, pwl, "Personal WordList", TRUE);
+	if (!session) {
+		broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
+		return NULL;
+	}
+
+	dict = g_new0 (EnchantDict, 1);
+	dict->enchant_private_data = (void *)session;
+
+	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (pwl), dict);
+
+	return dict;
+}
+
+/**
  * enchant_broker_request_dict
  * @broker: A non-null #EnchantBroker
  * @tag: The non-null language tag you wish to request a dictionary for ("en_US", "de_DE", ...)
@@ -930,11 +992,11 @@ enchant_broker_describe (EnchantBroker * broker,
 		{
 			provider = (EnchantProvider *) list->data;
 			module = (GModule *) provider->enchant_private_data;
-
+			
 			name = (*provider->identify) (provider);
 			desc = (*provider->describe) (provider);
 			file = g_module_name (module);
-
+			
 			(*fn) (name, desc, file, user_data);
 		}
 }
@@ -964,13 +1026,18 @@ enchant_dict_describe (EnchantDict * dict,
 	session = (EnchantSession*)dict->enchant_private_data;
 	provider = session->provider;
 
-	module = (GModule *) provider->enchant_private_data;
-	
-	name = (*provider->identify) (provider);
-	desc = (*provider->describe) (provider);
-	file = g_module_name (module);	
-	tag = session->language_tag;
+	if (provider) {
+		module = (GModule *) provider->enchant_private_data;
+		file = g_module_name (module);	
+		name = (*provider->identify) (provider);
+		desc = (*provider->describe) (provider);
+	} else {
+		file = session->personal_filename;
+		name = "Personal Wordlist";
+		desc = "Personal Wordlist";
+	}
 
+	tag = session->language_tag;
 	(*fn) (tag, name, desc, file, user_data);
 
 	return;
@@ -995,7 +1062,10 @@ enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	
-	g_hash_table_remove (broker->dict_map, session->language_tag);
+	if (session->provider)
+		g_hash_table_remove (broker->dict_map, session->language_tag);
+	else
+		g_hash_table_remove (broker->dict_map, session->personal_filename);
 }
 
 /**

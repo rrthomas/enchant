@@ -34,20 +34,20 @@
 #include "enchant.h"
 
 static void
-enumerate_dicts (const char * const name,
-		 const char * const desc,
-		 const char * const file,
-		 void * ud)
+enumerate_providers_fn (const char * const name,
+			const char * const desc,
+			const char * const file,
+			void * ud)
 {
 	printf ("%s: '%s' (%s)\n", name, desc, file);
 }
 
 static void
-describe_dict (const char * const lang,
-	       const char * const name,
-	       const char * const desc,
-	       const char * const file,
-	       void * ud)
+describe_dict_fn (const char * const lang,
+		  const char * const name,
+		  const char * const desc,
+		  const char * const file,
+		  void * ud)
 {
 	printf ("%s: %s '%s' (%s)\n", lang, name, desc, file);
 }
@@ -81,7 +81,8 @@ run_dict_tests (EnchantDict * dict)
 					printf ("\t=>%s\n", suggs[j]);
 				}
 
-			enchant_dict_free_suggestions (dict, suggs);
+			if (suggs && n_suggs)
+				enchant_dict_free_suggestions (dict, suggs);
 		}
 
 	printf ("Adding 'helllo' to session\n");
@@ -126,13 +127,28 @@ main (int argc, char **argv)
 		} 
 	else 
 		{
-			enchant_dict_describe (dict, describe_dict, NULL);
-			run_dict_tests (dict);
-			
-			enchant_broker_describe (broker, enumerate_dicts, NULL);
+			enchant_dict_describe (dict, describe_dict_fn, NULL);
+			run_dict_tests (dict);			
 			enchant_broker_free_dict (broker, dict);
 		}
 	
+	dict = enchant_broker_request_pwl_dict (broker, "test.pwl");
+	if (!dict) 
+		{
+			err = enchant_broker_get_error (broker);
+			if (err)
+				fprintf (stderr, "Couldn't create personal wordlist dictionary: %s\n", err);
+			else
+				fprintf (stderr, "Couldn't create personal wordlist dictionary\n");
+		} 
+	else 
+		{
+			enchant_dict_describe (dict, describe_dict_fn, NULL);
+			run_dict_tests (dict);
+			enchant_broker_free_dict (broker, dict);
+		}
+
+	enchant_broker_describe (broker, enumerate_providers_fn, NULL);
 	enchant_broker_free (broker);
 	
 	return 0;

@@ -170,6 +170,17 @@ namespace enchant
 				
 				return new Dict (dict, m_broker);
 			}
+
+			Dict * request_pwl_dict (const std::string & pwl) {
+				EnchantDict * dict = enchant_broker_request_pwl_dict (m_broker, pwl.c_str());
+				
+				if (!dict) {
+					throw Exception (enchant_broker_get_error (m_broker));
+					return 0; // not actually reached
+				}
+				
+				return new Dict (dict, m_broker);
+			}
 			
 			EnchantDictStatus dict_status (const std::string & lang) {
 				return enchant_broker_dictionary_status (m_broker, lang.c_str());
