@@ -249,14 +249,17 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	gchar *user_dir;
+	gchar *user_dir;       
 	
-	enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
-	
+	/* load USER providers first. since the GSList is ordered,
+	   this intentionally gives preference to USER providers */
+
 	user_dir = g_strdup_printf ("%s%s.enchant", g_get_home_dir (), 
 				    G_DIR_SEPARATOR_S);
 	enchant_load_providers_in_dir (broker, user_dir);
 	g_free (user_dir);
+
+	enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
 }
 
 static void

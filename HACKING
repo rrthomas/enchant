@@ -6,12 +6,9 @@ Working in libenchant
 
    When writing libenchant our priorities are
 
-	1) Correctness.
+	1) Portable
 	2) Maintainable & Documented
 	3) Modular and well designed
-	and a distant
-	4) portable
-	5) Fast
 
     When you submit code to inclusion in libenchant, or when you modify the sources
 directly on the CVS repository, please keep those things in mind.  While
