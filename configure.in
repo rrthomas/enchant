@@ -202,10 +202,10 @@ build_hspell=no
 check_hspell=yes
 AC_ARG_ENABLE(hspell, [  --disable-hspell     enable the hspell backend [default=auto]], check_hspell="$enableval", check_hspell=yes)
 
-dnl change to pkg-config when hspell will provide an hspell.pc file
+dnl change to pkg-config when hspell provides a hspell.pc file
 
 if test "x$check_hspell" != "xno"; then
-   AC_CHECK_LIB(hspell,hspell_check_word,build_hspell=yes, build_hspell=no)
+   AC_CHECK_LIB(hspell,hspell_check_word,build_hspell=yes, build_hspell=no, -lz)
 fi
 
 hspell_dir=${datadir}/enchant/hspell
