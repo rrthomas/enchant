@@ -138,7 +138,6 @@ if test "x$check_aspell" != "xno"; then
 
        AC_CHECK_PROG(HAVE_ASPELL, aspell, yes, no)
        if test "x$HAVE_ASPELL" = "xyes"; then
-          #perl -e 'if (<STDIN> =~ /(.*) Aspell 0\.(.*)\.(.*)/) { print "$2\n"; } else { print "0\n"; }'`;
 	  AC_MSG_CHECKING([For Aspell >= 0.50.0])
 	  aspell_major=`aspell -v | awk -F. '{print $4;}'`
 	  if test "$aspell_major" -ge "50"; then
@@ -153,7 +152,7 @@ if test "x$check_aspell" != "xno"; then
 	  fi
       fi
 
-      if test "x$ASPELL_DICT_DIR" = "x"; then
+      if test "x$ASPELL_CFLAGS" = "x"; then
 	      AC_MSG_WARN([Didn't find aspell >= 0.50.0 and no explicit path aspell specified. Guessing at $aspell_prefix])
 	      ASPELL_LIBS="-L$aspell_prefix/lib -laspell"
 	      ASPELL_CFLAGS="-DASPELL_DICT_DIR='\"$aspell_prefix/lib/aspell\"'"

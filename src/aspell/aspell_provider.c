@@ -204,7 +204,7 @@ aspell_provider_dictionary_exists (struct str_enchant_provider * me,
 
 	/* hack for a quick existence test */
 
-	ext = g_strdup_printf ("%s.multi", tag);
+	ext = g_strdup_printf ("%s.dat", tag);
 	file = g_build_filename (ASPELL_DICT_DIR, ext, NULL);
 	if (g_file_test (file, G_FILE_TEST_EXISTS))
 		exists = 1;
@@ -212,7 +212,7 @@ aspell_provider_dictionary_exists (struct str_enchant_provider * me,
 	g_free (ext);
 
 	if (strlen (tag) > 2 && tag[2] == '_') {
-		ext = g_strdup_printf ("%c%c.multi", tag[0], tag[1]);
+		ext = g_strdup_printf ("%c%c.dat", tag[0], tag[1]);
 		file = g_build_filename (ASPELL_DICT_DIR, ext, NULL);
 		if (g_file_test (file, G_FILE_TEST_EXISTS))
 			exists = 1;
@@ -232,20 +232,56 @@ aspell_provider_dictionary_exists (struct str_enchant_provider * me,
 	return exists;
 }
 
-#if 0
-    AspellDictInfoEnumeration * dels;
-    AspellDictInfoList * dlist;
-    const AspellDictInfo * entry;
+static char ** 
+aspell_provider_list_dicts (EnchantProvider * me, 
+			    size_t * out_n_dicts)
+{
+#if ASPELL_0_50_0
+	PspellConfig * spell_config;
+	AspellDictInfoList * dlist;
+	char ** out_list = NULL;
+	
+	spell_config = new_pspell_config ();
 
-    dlist = get_aspell_dict_info_list(m_spellConfig);
-    dels = aspell_dict_info_list_elements(dlist);
+	dlist = get_aspell_dict_info_list (spell_config);
+	*out_n_dicts = aspell_dict_info_list_size (dlist);
 
-    while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0) {
-        dict_choice->Append(entry->name);
-    }
+	if (*out_n_dicts) {
+		AspellDictInfoEnumeration * dels;
+		size_t i;		
 
-    delete_aspell_dict_info_enumeration(dels);
+		out_list = g_new0 (char *, *out_n_dicts + 1);
+		dels = aspell_dict_info_list_elements (dlist);
+		
+		for (i = 0; i < *out_n_dicts; i++) {
+			const AspellDictInfo * entry;
+			
+			entry = aspell_dict_info_enumeration_next (dels);			
+			out_list[i] = g_strdup (entry->code);
+		}
+		
+		delete_aspell_dict_info_enumeration (dels);
+	}
+	
+	delete_pspell_config (spell_config);
+	
+	return out_list;
+#else
+
+#ifdef __GNUC__
+#warning "You're using an ancient aspell. aspell_provider_list_dicts() is not implemented."
 #endif
+
+	*out_n_dicts = 0;
+	return NULL;
+#endif
+}
+
+static void
+aspell_provider_free_string_list (EnchantProvider * me, char **str_list)
+{
+	g_strfreev (str_list);
+}
 
 static void
 aspell_provider_dispose (EnchantProvider * me)

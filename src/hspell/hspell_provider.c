@@ -246,6 +246,28 @@ hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
+static char ** 
+hspell_provider_list_dicts (EnchantProvider * me, 
+			    size_t * out_n_dicts)
+{
+	char ** out_list;
+
+	*out_n_dicts = 2;
+
+	out_list = g_new0 (char *, 3);
+
+	out_list[0] = g_strdup ("he_IL");
+	out_list[1] = g_strdup ("he");
+
+	return out_list;
+}
+
+static void
+hspell_provider_free_string_list (EnchantProvider * me, char **str_list)
+{
+	g_strfreev (str_list);
+}
+
 static void
 hspell_provider_dispose (EnchantProvider * me)
 {

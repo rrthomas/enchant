@@ -414,6 +414,35 @@ uspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
+static char **
+uspell_provider_list_dictionaries (EnchantProvider * me,
+				   size_t * out_n_dicts)
+{
+	size_t i, nb;
+
+	nb = 0;
+	for (i = 0; i < n_mappings; i++)
+		if (uspell_provider_dictionary_exists (me, mapping[i].language_tag))
+			nb++;
+	
+	*out_n_dicts = nb;
+	if(nb == 0)
+		return NULL;
+
+	char ** out_dicts = g_new (char *, nb + 1);
+	for (i = 0; i < n_mappings; i++)
+		if (uspell_provider_dictionary_exists (me, mapping[i].language_tag))
+			out_dicts[i] = g_strdup (mapping[i].language_tag);
+
+	return out_dicts;
+}
+
+static void
+uspell_provider_free_string_list (EnchantProvider * me, char **str_list)
+{
+	g_strfreev (str_list);
+}
+
 static void
 uspell_provider_dispose (EnchantProvider * me)
 {
