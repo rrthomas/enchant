@@ -28,12 +28,20 @@
  * do so, delete this exception statement from your version.
  */
 
+/**
+ * This is a rough approximation of an "ispell compatibility mode"
+ * for Enchant.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
 
 #include "enchant.h"
+
+/* has to be bigger than this to be checked */
+#define MIN_WORD_LENGTH 1
 
 typedef enum 
 	{
@@ -56,12 +64,59 @@ print_help (FILE * to, const char * prog)
 	fprintf (to, "Usage: %s [options] -a|-l|-v[v]|<file>\n", prog);
 }
 
-static char *
-consume_next_word (FILE * in, size_t * start_pos)
+static gboolean
+consume_line (FILE * in, GString * str)
 {
-	/* TODO: the word parsing routine - use glib's unicode functions */
-	*start_pos = 0;
-	return NULL;
+	int ch;
+
+	g_string_truncate (str, 0);
+
+	while ((ch = fgetc (in)) != EOF) {
+		if (ch == '\r')
+			continue;
+		else {
+			g_string_append_c (str, ch);
+			if (ch == '\n')
+				return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+static void
+do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos)
+{
+	size_t n_suggs;
+	char ** suggs;
+
+	if (enchant_dict_check (dict, word->str, word->len) == 0)
+		fprintf (out, "*\n");
+	else {
+		suggs = enchant_dict_suggest (dict, word->str, 
+					      word->len, &n_suggs);
+		if (!n_suggs || !suggs)
+			fprintf (out, "# %s %ld\n", word->str, start_pos+1);
+		else {
+			size_t i = 0;
+			
+			fprintf (out, "& %s %ld %ld:", word->str, n_suggs, start_pos);
+			
+			for (i = 0; i < n_suggs; i++) {
+				if (i != (n_suggs - 1))
+					fprintf (out, " %s,", suggs[i]);
+				else
+					fprintf (out, " %s\n", suggs[i]);
+			}
+		}
+	}
+}
+
+static void
+do_mode_l (FILE * out, EnchantDict * dict, GString * word)
+{
+	if (enchant_dict_check (dict, word->str, word->len) != 0)
+		fprintf (out, "%s\n", word->str);
 }
 
 static int
@@ -70,14 +125,20 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 	EnchantBroker * broker;
 	EnchantDict * dict;
 	
-	const gchar * lang;
+	GString * str, * word;
+	const gchar * lang, * utf;
+	gunichar uc;
+
+	size_t start_pos, cur_pos;
 	
-	char * word = NULL;
-	size_t start_pos = 0, word_count = 0;
-	
+	gboolean was_last_line = FALSE;
+
 	if (mode == MODE_A)
 		print_version (out);
 	
+	str = g_string_new (NULL);
+	word = g_string_new (NULL);
+
 	lang = g_getenv ("LANG");
 	if (!lang || !strcmp (lang, "C"))
 		lang = "en";
@@ -89,43 +150,47 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode)
 		enchant_broker_term (broker);
 	}
 	
-	while ((word = consume_next_word (in, &start_pos)) != NULL) {
-		word_count++;
-		if (mode == MODE_A) {
-			if (enchant_dict_check (dict, word, strlen (word)) == 0)
-				fprintf (out, "*\n");
-			else {
-				size_t n_suggs;
-				char ** suggs;
-				
-				suggs = enchant_dict_suggest (dict, word, 
-							      strlen (word), &n_suggs);
-				if (!n_suggs || !suggs)
-					fprintf (out, "# %s %ld\n", word, start_pos);
-				else {
-					size_t i = 0;
-					
-					fprintf (out, "& %s %ld %ld:", word, n_suggs, start_pos);
-					
-					for (i = 0; i < n_suggs; i++) {
-						if (i != (n_suggs - 1))
-							fprintf (out, " %s,", word);
-						else
-							fprintf (out, " %s\n", word);
+	while (!was_last_line) {
+		was_last_line = consume_line (in, str);
+
+		if (str->len) {
+
+			utf = (gchar *)str->str;
+			start_pos = cur_pos = 0;
+
+			while (cur_pos < str->len && *utf) {
+				uc = g_utf8_get_char (utf); 
+
+				if (g_unichar_isalpha (uc) || uc == '\'') {
+					g_string_append_unichar (word, uc);
+					cur_pos++;
+				} else {
+					if (word->len > MIN_WORD_LENGTH) {
+						if (mode == MODE_A) {
+							do_mode_a (out, dict, word, start_pos);
+						} 
+						else if (mode == MODE_L) {
+							do_mode_l (out, dict, word);
+						}
 					}
+					
+					start_pos = ++cur_pos;
+					g_string_truncate (word, 0);					
 				}
+
+				utf = g_utf8_next_char (utf);
 			}
-		} 
-		else if (mode == MODE_L) {
-			if (enchant_dict_check (dict, word, strlen (word)) != 0)
-				fprintf (out, "%s\n", word);
 		}
-		
-		g_free (word);
+
+		if (mode == MODE_A)
+			fprintf (out, "\n");
 	}
 	
 	enchant_broker_release_dict (broker, dict);
 	enchant_broker_term (broker);
+
+	g_string_free (word, TRUE);
+	g_string_free (str, TRUE);
 
 	return 0;
 }
