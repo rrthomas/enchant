@@ -129,7 +129,12 @@ if test "x$check_aspell" != "xno"; then
        LDFLAGS="-L$with_aspell_prefix/lib "$LDFLAGS
        ASPELL_INC="-I$with_aspell_prefix/include"
        ASPELL_LIBS="-L$with_aspell_prefix/lib -laspell"
-       ASPELL_CFLAGS="-DASPELL_DICT_DIR='\"$with_aspell_prefix/lib/aspell\"'"
+       aspell_major=`$with_aspell_prefix/bin/aspell -v | awk -F. '{print $4;}' | awk -F")" '{print $1;}'`
+       if test "$aspell_major" -ge "50"; then
+          ASPELL_CFLAGS="-DASPELL_0_50_0=1 -DASPELL_DICT_DIR='\"$with_aspell_prefix/lib/aspell\"'"
+       else
+          ASPELL_CFLAGS="-DASPELL_DICT_DIR='\"$with_aspell_prefix/lib/aspell\"'"
+       fi
    else
        aspell_prefix=${prefix}
        if test "x$prefix" = "xNONE"; then
@@ -139,7 +144,7 @@ if test "x$check_aspell" != "xno"; then
        AC_CHECK_PROG(HAVE_ASPELL, aspell, yes, no)
        if test "x$HAVE_ASPELL" = "xyes"; then
 	  AC_MSG_CHECKING([For Aspell >= 0.50.0])
-	  aspell_major=`aspell -v | awk -F. '{print $4;}'`
+	  aspell_major=`aspell -v | awk -F. '{print $4;}' | awk -F")" '{print $1;}'`
 	  if test "$aspell_major" -ge "50"; then
               LDFLAGS="-L`aspell config prefix`/lib "$LDFLAGS
 	      ASPELL_INC="-I`aspell config prefix`/include"
