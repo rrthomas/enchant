@@ -60,13 +60,13 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 	else
 		baseKey = HKEY_LOCAL_MACHINE;
 
-	if( ::RegOpenKeyEx( baseKey, "Software\\Enchant", 0, KEY_READ, &hKey) == ERROR_SUCCESS )
+	if( RegOpenKeyEx( baseKey, "Software\\Enchant", 0, KEY_READ, &hKey) == ERROR_SUCCESS )
 		{
 			// Determine size of string
-			if( ::RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS )
+			if( RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS )
 				{
 					szValue = g_new0(char, dwSize + 1);
-					::RegQueryValueEx( hKey, key, NULL, &lType, szValue, &dwSize);
+					RegQueryValueEx( hKey, key, NULL, &lType, szValue, &dwSize);
 				}
 		}
 	
