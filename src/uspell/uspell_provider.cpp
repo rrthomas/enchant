@@ -279,7 +279,7 @@ uspell_request_dict (const char * base, const char * mapping, const int flags)
 static uSpell *
 uspell_request_manager (const char * private_dir, size_t mapIndex)
 {
-	char * uspell_prefix;
+	char * uspell_prefix, * home_dir;
 
 	uSpell * manager = NULL;
 
@@ -298,6 +298,21 @@ uspell_request_manager (const char * private_dir, size_t mapIndex)
 		}
 	}
 
+	if (!manager) return NULL;
+	// look for a supplementary private dictionary
+	home_dir = enchant_get_user_home_dir ();
+	if (home_dir) {
+		gchar * auxFileName, * transPart;
+		transPart = g_strconcat (mapping[mapIndex].language_tag, ".dic", NULL);
+		auxFileName = g_build_filename (home_dir, ".enchant", transPart, NULL);
+		g_free (transPart);
+		g_free (home_dir);
+#ifdef DEBUG
+		fprintf(stdout, "Trying to assimilate file [%s]\n", auxFileName);
+#endif
+		(void) manager->assimilateFile (auxFileName);
+		g_free (auxFileName);
+	}
 	return manager;
 }
 
