@@ -107,6 +107,9 @@ fi
 AM_CONDITIONAL(WITH_SYSTEM_MYSPELL, test "x$with_system_myspell" = "xyes")
 
 MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dir\"'"
+if test "x$with_system_myspell" != "xno"; then
+   MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DWITH_SYSTEM_MYSPELL=1"
+fi
 
 AC_SUBST(MYSPELL_CFLAGS)
 AC_SUBST(MYSPELL_LIBS)

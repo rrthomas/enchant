@@ -1,6 +1,6 @@
 /* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
- * Copyright (C) 2003 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
+ * Copyright (C) 2003-2004 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -35,13 +35,39 @@
 #include <string>
 #include <vector>
 
-#include "myspell_checker.h"
 #include "enchant.h"
 #include "enchant-provider.h"
+
+#ifdef WITH_SYSTEM_MYSPELL
+#include <myspell.hxx>
+#else
+#include "enchant_myspell.hxx"
+#endif
 
 ENCHANT_PLUGIN_DECLARE("Myspell")
 
 #define G_ICONV_INVALID (GIConv)-1
+
+#include <glib.h>
+
+/***************************************************************************/
+
+class MySpellChecker
+{
+public:
+	MySpellChecker();
+	~MySpellChecker();
+
+	bool checkWord (const char *word, size_t len);
+	char **suggestWord (const char* const word, size_t len, size_t *out_n_suggs);
+
+	bool requestDictionary (const char * szLang);
+
+private:
+	GIConv  m_translate_in; /* Selected translation from/to Unicode */
+	GIConv  m_translate_out;
+	MySpell *myspell;
+};
 
 /***************************************************************************/
 

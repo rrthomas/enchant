@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "myspell.hxx"
+#include "enchant_myspell.hxx"
 
 #ifndef WINDOWS
 using namespace std;
