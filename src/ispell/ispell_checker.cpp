@@ -252,7 +252,8 @@ ISpellChecker::checkWord(const char * const utf8Word, size_t length)
 			
 			len_in = length * sizeof(char);
 			len_out = sizeof( szWord ) - 1;
-			g_iconv(m_translate_in, &In, &len_in, &Out, &len_out);
+			if ((size_t)-1 == g_iconv(m_translate_in, &In, &len_in, &Out, &len_out))
+				return false;
 			*Out = '\0';
 		}
 	
@@ -294,7 +295,8 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 			char *Out = word8;
 			len_in = length;
 			len_out = sizeof( word8 ) - 1;
-			g_iconv(m_translate_in, &In, &len_in, &Out, &len_out);
+			if ((size_t)-1 == g_iconv(m_translate_in, &In, &len_in, &Out, &len_out))
+				return NULL;
 			*Out = '\0';
 		}
 	

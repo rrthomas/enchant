@@ -92,7 +92,8 @@ MySpellChecker::checkWord(const char *utf8Word, size_t len)
 	char *out = word8;
 	size_t len_in = len * sizeof(char);
 	size_t len_out = sizeof( word8 ) - 1;
-	g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
+	if ((size_t)-1 == g_iconv(m_translate_in, &in, &len_in, &out, &len_out))
+		return false;
 	*out = '\0';
 	if (myspell->spell(word8))
 		return true;
@@ -107,12 +108,15 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 		|| !g_iconv_is_valid(m_translate_in)
 		|| !g_iconv_is_valid(m_translate_out))
 		return 0;
+
 	char *in = (char*) utf8Word;
 	char word8[MAXWORDLEN + 1];
 	char *out = word8;
 	size_t len_in = len;
 	size_t len_out = sizeof(word8) - 1;
-	g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
+	if ((size_t)-1 == g_iconv(m_translate_in, &in, &len_in, &out, &len_out))
+		return NULL;
+
 	*out = '\0';
 	char **sugMS;
 	*nsug = myspell->suggest(&sugMS, word8);
