@@ -92,8 +92,10 @@ consume_line (FILE * in, GString * str)
 		utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
 		g_string_truncate (str, 0);
 
-		if (utf)
-			g_string_assign (str, utf);	       
+		if (utf) {
+			g_string_assign (str, utf);
+			g_free (utf);
+		}
 	}
 
 	return ret;
