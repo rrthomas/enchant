@@ -37,6 +37,7 @@
 
 #include <glib.h>
 #include "enchant.h"
+#include "enchant-provider.h"
 
 #include <uspell/utf8convert.h>
 #include <uspell/uniprops.h>

@@ -36,6 +36,35 @@
 #include <gmodule.h>
 
 #include "enchant.h"
+#include "enchant-provider.h"
+
+/* TODO: maybe a registry hack on win32 for these following fns 
+ * TODO: use these functions
+ */
+
+/**
+ * enchant_get_user_home_dir
+ *
+ * Returns the user's home directory, or %null. Returned value
+ * must be free'd
+ */
+ENCHANT_MODULE_EXPORT (char *)
+enchant_get_user_home_dir (void)
+{
+	return g_strdup (g_get_home_dir ());
+}
+
+static char *
+enchant_get_module_dir (void)
+{
+	return g_strdup (ENCHANT_GLOBAL_MODULE_DIR);
+}
+
+static char *
+enchant_get_conf_dir (void)
+{
+	return g_strdup (ENCHANT_GLOBAL_ORDERING);
+}
 
 /**
  * enchant_dict_check

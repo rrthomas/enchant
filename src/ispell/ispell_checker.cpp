@@ -37,6 +37,7 @@
 #include "sp_spell.h"
 #include "ispell_checker.h"
 #include "enchant.h"
+#include "enchant-provider.h"
 
 #define G_ICONV_INVALID (GIConv)-1
 
