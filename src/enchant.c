@@ -1076,8 +1076,8 @@ enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
  * Return existance of the requested dictionary (1 == true, 0 == false)
  */
 ENCHANT_MODULE_EXPORT (int)
-enchant_broker_dict_exist (EnchantBroker * broker,
-			   const char * const tag)
+enchant_broker_dict_exists (EnchantBroker * broker,
+			    const char * const tag)
 {
 	/* start off pessimistic */
 	int status = 0;
