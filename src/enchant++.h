@@ -130,6 +130,11 @@ namespace Enchant
       
       return new Broker::Dict (dict, this);
     }
+
+    EnchantDictStatus dict_status (const std::string & lang) {
+      return enchant_broker_dictionary_status (m_broker,
+					       lang.c_str());
+    }
     
   private:
     

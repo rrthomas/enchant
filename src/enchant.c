@@ -384,13 +384,17 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
 			provider = (EnchantProvider *) list->data;
-			dict = (*provider->request_dict) (provider, tag);
 			
-			if (dict)
+			if (provider->request_dict)
 				{
-					dict->owner = provider;
-					g_hash_table_insert (broker->dict_map, (gpointer) tag, dict);
-					return dict;
+					dict = (*provider->request_dict) (provider, tag);
+					
+					if (dict)
+						{
+							dict->owner = provider;
+							g_hash_table_insert (broker->dict_map, (gpointer) tag, dict);
+							return dict;
+						}
 				}
 		}
 	
@@ -412,4 +416,50 @@ enchant_broker_release_dict (EnchantBroker * broker, EnchantDict * dict)
 	g_return_if_fail (dict);
 	
 	/* this will be a noop for now, perhaps indefinitely */
+}
+
+/**
+ * enchant_broker_dictionary_exists
+ * @broker: A non-null #EnchantBroker
+ * @tag: The non-null language tag you wish to request a dictionary for ("en_US", "de_DE", ...)
+ *
+ * Return existance of the requested dictionary
+ */
+ENCHANT_MODULE_EXPORT (EnchantDictStatus)
+enchant_broker_dictionary_status (EnchantBroker * broker,
+				  const char * const tag)
+{
+	/* start off pessimistic */
+	EnchantDictStatus best_status = ED_DOESNT_EXIST, status = ED_DOESNT_EXIST;
+	EnchantProvider *provider;
+	GSList *list;
+
+	g_return_if_fail (broker);
+	g_return_if_fail (tag);
+
+	/* don't query the providers if we can just do a quick map lookup */
+	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL)
+		return ED_EXISTS;
+
+	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
+		{
+			provider = (EnchantProvider *) list->data;
+
+			if (provider->dictionary_status)
+				{
+					status = (*provider->dictionary_status) (provider, tag);
+					if (status == ED_EXISTS)
+						return ED_EXISTS;
+					else if (status == ED_UNKNOWN)
+						best_status = ED_UNKNOWN;
+				}
+			else
+				{
+					/* no query routine implemented, return so-so value */
+					best_status = ED_UNKNOWN;
+				}
+		}
+
+
+	return best_status;
 }

@@ -47,6 +47,13 @@ typedef struct str_enchant_broker EnchantBroker;
 typedef struct str_enchant_dict EnchantDict;
 typedef struct str_enchant_provider EnchantProvider;
 
+typedef enum
+	{
+		ED_EXISTS,
+		ED_DOESNT_EXIST,
+		ED_UNKNOWN
+	} EnchantDictStatus;
+
 ENCHANT_MODULE_EXPORT (int)
      enchant_dict_check (EnchantDict * dict, const char *const word, size_t len);
 ENCHANT_MODULE_EXPORT (char **)
@@ -75,6 +82,10 @@ ENCHANT_MODULE_EXPORT (EnchantDict *)
      enchant_broker_request_dict (EnchantBroker * broker, const char *const tag);
 ENCHANT_MODULE_EXPORT (void)
      enchant_broker_release_dict (EnchantBroker * broker, EnchantDict * dict);
+
+ENCHANT_MODULE_EXPORT (EnchantDictStatus)
+     enchant_broker_dictionary_status (EnchantBroker * broker,
+				       const char * const tag);
 
 struct str_enchant_dict
 {
@@ -121,6 +132,9 @@ struct str_enchant_provider
 	void (*dispose_dict) (struct str_enchant_provider * me,
 			      EnchantDict * dict);
 	
+	EnchantDictStatus (*dictionary_status) (struct str_enchant_provider * me,
+						const char *const tag);
+
 	void (*_reserved_func1) (void);
 	void (*_reserved_func2) (void);
 	void (*_reserved_func3) (void);
