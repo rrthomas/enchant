@@ -334,7 +334,10 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 						
 						len_in = l;
 						len_out = (l+1);
-						g_iconv(m_translate_out, &In, &len_in, &Out, &len_out);
+						if ((size_t)-1 == g_iconv(m_translate_out, &In, &len_in, &Out, &len_out)) {
+							*out_n_suggestions = c;
+							return sugg_arr;
+						}
 						*(Out) = 0;
 					}
 				

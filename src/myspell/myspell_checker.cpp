@@ -128,7 +128,14 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 			len_out = sizeof(char) * (len_in + 1);
 			char *word = g_new0(char, len_out);
 			out = reinterpret_cast<char *>(word);
-			g_iconv(m_translate_out, &in, &len_in, &out, &len_out);
+			if ((size_t)-1 == g_iconv(m_translate_out, &in, &len_in, &out, &len_out)) {
+				for (size_t j = i; j < *nsug; j++)
+					free(sugMS[j]);
+				free(sugMS);
+
+				*nsug = i;
+				return sug;
+			}
 			*(out) = 0;
 			sug[i] = word;
 			free(sugMS[i]);
