@@ -34,6 +34,17 @@
 #include "enchant.h"
 
 static void
+describe_dict (const char * const lang_tag,
+	       const char * const provider_name,
+	       const char * const provider_desc,
+	       const char * const provider_file,
+	       void * ud)
+{
+	(void)ud;
+	printf ("%s: %s = %s (%s)\n", lang_tag, provider_name, provider_desc, provider_file);
+}
+
+static void
 enumerate_dicts (const char * name,
 		 const char * desc,
 		 const char * file,
@@ -48,11 +59,48 @@ main (int argc, char **argv)
 {
 	EnchantBroker *broker;
 	EnchantDict *dict;
+	char * lang_tag = NULL;
+	
+	int mode = 0, i;
+
+	for (i = 1; i < argc; i++) {
+		if (!strcmp (argv[i], "-lang")) {
+			if (i < argc) {
+				lang_tag = argv[i+1];
+				i++;
+			}
+			mode = 1;
+		} else if (!strcmp (argv[i], "-h") || !strcmp(argv[i], "-help")) {
+			printf ("%s [-lang language_tag] [-h] [-v]\n", argv[0]);
+			return 0;
+		} else if (!strcmp (argv[i], "-v")) {
+			printf ("%s %s\n", argv[0], VERSION);
+			return 0;
+		}
+	}
 	
 	broker = enchant_broker_init ();
 	
-	enchant_broker_describe (broker, enumerate_dicts, NULL);
-	
+	if (mode == 0) {
+		enchant_broker_describe (broker, enumerate_dicts, NULL);
+	} else if (mode == 1) {
+
+		if (!lang_tag) {
+			printf ("Error: language tag not specified\n");
+			return 1;
+		}
+
+		dict = enchant_broker_request_dict (broker, lang_tag);
+		
+		if (!dict) {
+			printf ("No dictionary available for '%s'\n", lang_tag);
+			return 1;
+		} else {
+			enchant_dict_describe (dict, describe_dict, NULL);
+			enchant_broker_free_dict (broker, dict);
+		}
+	}
+
 	enchant_broker_free (broker);
 	
 	return 0;
