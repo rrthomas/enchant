@@ -334,21 +334,26 @@ static void
 s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
 	char * tmp, * private_dir;
+	const char * home_dir;
 
 	names.clear ();
 
-	private_dir = g_build_filename (g_get_home_dir(), ".enchant", 
-					"ispell", NULL);
+	home_dir = g_get_home_dir ();
 
-	tmp = g_build_filename (private_dir, dict, NULL);
-	names.push_back (tmp);
-	g_free (tmp);
+	if (home_dir) {
+		private_dir = g_build_filename (home_dir, ".enchant", 
+						"ispell", NULL);
+		
+		tmp = g_build_filename (private_dir, dict, NULL);
+		names.push_back (tmp);
+		g_free (tmp);
+
+		g_free (private_dir);
+	}
 
 	tmp = g_build_filename (ENCHANT_ISPELL_DICT_DIR, dict, NULL);
 	names.push_back (tmp);
 	g_free (tmp);
-
-	g_free (private_dir);
 }
 
 char *

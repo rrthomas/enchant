@@ -182,6 +182,9 @@ uspell_request_dict (const char * base, const char * mapping, const int flags)
 
 	uSpell *manager;
 
+	if (!base)
+		return NULL;
+
 	filePart =  g_strconcat(mapping, ".uspell.dat", NULL);
 	transPart =  g_strconcat(mapping, ".uspell.trans", NULL);
 	fileName = g_build_filename (base, filePart, NULL);
@@ -226,8 +229,15 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	uSpell *manager = NULL;
 	int mapIndex;
 
-	char * private_dir = g_build_filename (g_get_home_dir(), ".enchant",
-					       "uspell", NULL);
+	char * private_dir = NULL;
+	const char * home_dir;
+
+	home_dir = g_get_home_dir ();
+
+	if (home_dir) {
+		private_dir = g_build_filename (home_dir, ".enchant",
+						"uspell", NULL);
+	}
 
 	for (mapIndex = 0; mapIndex < n_mappings; mapIndex++) {
 		if (!strcmp(tag, mapping[mapIndex].language_tag)) 

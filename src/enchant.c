@@ -262,14 +262,19 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	gchar *user_dir;       
+	gchar *user_dir;
+	const char * home_dir;       
 	
 	/* load USER providers first. since the GSList is ordered,
 	   this intentionally gives preference to USER providers */
 
-	user_dir = g_build_filename (g_get_home_dir (), ".enchant", NULL);
-	enchant_load_providers_in_dir (broker, user_dir);
-	g_free (user_dir);
+	home_dir = g_get_home_dir ();
+
+	if (home_dir) {
+		user_dir = g_build_filename (home_dir, ".enchant", NULL);
+		enchant_load_providers_in_dir (broker, user_dir);
+		g_free (user_dir);
+	}
 
 	enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
 }
@@ -317,6 +322,7 @@ static void
 enchant_load_provider_ordering (EnchantBroker * broker)
 {
 	char * ordering_file;
+	const char * home_dir;
 
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal,
 							   enchant_provider_order_destroyed, enchant_provider_order_destroyed);
@@ -325,9 +331,13 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 	enchant_load_ordering_from_file (broker, ordering_file);
 	g_free (ordering_file);
 
-	ordering_file = g_build_filename (g_get_home_dir (), ".enchant", "enchant.ordering", NULL);
-	enchant_load_ordering_from_file (broker, ordering_file);
-	g_free (ordering_file);
+	home_dir = g_get_home_dir ();
+
+	if (home_dir) {
+		ordering_file = g_build_filename (home_dir, ".enchant", "enchant.ordering", NULL);
+		enchant_load_ordering_from_file (broker, ordering_file);
+		g_free (ordering_file);
+	}
 }
 
 static GSList *
