@@ -165,6 +165,7 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 	HKEY baseKey;
 	unsigned long lType;	
 	DWORD dwSize;
+	char* keyName;
 	BYTE* szValue = NULL;
 
 	if (current_user)
@@ -172,7 +173,8 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 	else
 		baseKey = HKEY_LOCAL_MACHINE;
 
-	if(RegOpenKeyEx(baseKey, "Software\\Enchant", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+	keyName = g_strdup_printf("Software\\Enchant\\%s", prefix);
+	if(RegOpenKeyEx(baseKey, keyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 		{
 			// Determine size of string
 			if(RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
@@ -181,7 +183,7 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 					RegQueryValueEx(hKey, key, NULL, &lType, szValue, &dwSize);
 				}
 		}
-	
+	g_free(keyName);
 	return (char *)szValue;
 #endif
 }
