@@ -194,6 +194,7 @@ struct str_enchant_broker
 {
 	GSList *provider_list;	/* list of all of the spelling backend providers */
 	GHashTable *dict_map;		/* map of language tag -> dictionary */
+	GHashTable *provider_ordering; /* map of language tag -> provider order */
 };
 
 typedef EnchantProvider *(*EnchantProviderInitFunc) ();
@@ -222,13 +223,11 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 	while ((dir_entry = g_dir_read_name (dir)) != NULL)
 		{
 			entry_len = strlen (dir_entry);
-			if (/* g_file_test (dir_entry, G_FILE_TEST_EXISTS) &&
-			       !g_file_test (dir_entry,G_FILE_TEST_IS_DIR) && */
-			    (entry_len > g_module_suffix_len) && !strcmp(dir_entry+(entry_len-g_module_suffix_len), G_MODULE_SUFFIX))
+			if ((entry_len > g_module_suffix_len) && 
+			    !strcmp(dir_entry+(entry_len-g_module_suffix_len), G_MODULE_SUFFIX))
 				{
 					filename = g_build_filename (dir_name, dir_entry, NULL);
 					
-					/* this is a module we can try to load */
 					module = g_module_open (filename, (GModuleFlags) 0);
 					if (module) 
 						{
@@ -274,6 +273,37 @@ enchant_load_providers (EnchantBroker * broker)
 	g_free (user_dir);
 
 	enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
+}
+
+static void
+enchant_provider_order_destroyed (gpointer data)
+{
+	g_free (data);
+}
+
+static void
+enchant_load_provider_ordering (EnchantBroker * broker)
+{
+	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal,
+							   NULL, enchant_provider_order_destroyed);
+
+	/* STUB TODO: load the global and user-local provider ordering files */
+}
+
+static GSList *
+enchant_get_ordered_providers (EnchantBroker * broker,
+			       const char * const tag)
+{
+	GSList * list = NULL, * iter = NULL;
+
+	for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter))
+		{
+			list = g_slist_append (list, iter->data);
+		}
+
+	/* STUB TODO: sort + order said list */
+
+	return list;
 }
 
 static void
@@ -334,6 +364,8 @@ enchant_broker_init (void)
 	
 	enchant_load_providers (broker);
 	
+	enchant_load_provider_ordering (broker);
+
 	return broker;
 }
 
@@ -350,6 +382,7 @@ enchant_broker_term (EnchantBroker * broker)
 	
 	/* will destroy the dictionaries for us */
 	g_hash_table_destroy (broker->dict_map);
+	g_hash_table_destroy (broker->provider_ordering);
 	
 	g_slist_foreach (broker->provider_list, enchant_provider_free, NULL);
 	g_slist_free (broker->provider_list);
@@ -368,8 +401,8 @@ ENCHANT_MODULE_EXPORT (EnchantDict *)
 enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 {
 	EnchantProvider *provider;
-	EnchantDict *dict;
-	GSList *list;
+	EnchantDict *dict = NULL;
+	GSList *list = NULL;
 	
 	g_return_val_if_fail (broker, NULL);
 	g_return_val_if_fail (tag, NULL);
@@ -381,7 +414,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 			return dict;
 		}
 	
-	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
+	for (list = enchant_get_ordered_providers (broker, tag); list != NULL; list = g_slist_next (list))
 		{
 			provider = (EnchantProvider *) list->data;
 			
@@ -393,13 +426,15 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 						{
 							dict->owner = provider;
 							g_hash_table_insert (broker->dict_map, (gpointer) tag, dict);
-							return dict;
+							break;
 						}
 				}
 		}
+
+	g_slist_free (list);
 	
 	/* Nothing found */
-	return NULL;
+	return dict;
 }
 
 /**
