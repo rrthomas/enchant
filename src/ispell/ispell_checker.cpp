@@ -592,7 +592,7 @@ ispell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 }
 
 static int
-ispell_provider_dictionary_status (struct str_enchant_provider * me,
+ispell_provider_dictionary_exists (struct str_enchant_provider * me,
 				   const char *const tag)
 {
 	std::vector <std::string> names;
@@ -648,7 +648,7 @@ init_enchant_provider (void)
 	provider->dispose = ispell_provider_dispose;
 	provider->request_dict = ispell_provider_request_dict;
 	provider->dispose_dict = ispell_provider_dispose_dict;
-	provider->dictionary_status = ispell_provider_dictionary_status;
+	provider->dictionary_exists = ispell_provider_dictionary_exists;
 	provider->identify = ispell_provider_identify;
 	provider->describe = ispell_provider_describe;
 

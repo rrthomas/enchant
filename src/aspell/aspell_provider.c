@@ -192,20 +192,20 @@ aspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 }
 
 static int
-aspell_provider_dictionary_status (struct str_enchant_provider * me,
+aspell_provider_dictionary_exists (struct str_enchant_provider * me,
 				   const char *const tag)
 {
 	/* TODO: get kevina to apply my patch */
 	EnchantDict * dict;
-	int status = 0;
+	int exists = 0;
 
 	dict = aspell_provider_request_dict (me, tag);
 	if (dict) {
-		status = 1;       
+		exists = 1;       
 		aspell_provider_dispose_dict (me, dict);
 	}
 
-	return status;
+	return exists;
 }
 
 static void
@@ -239,7 +239,7 @@ init_enchant_provider (void)
 	provider->dispose = aspell_provider_dispose;
 	provider->request_dict = aspell_provider_request_dict;
 	provider->dispose_dict = aspell_provider_dispose_dict;
-	provider->dictionary_status = aspell_provider_dictionary_status;
+	provider->dictionary_exists = aspell_provider_dictionary_exists;
 	provider->identify = aspell_provider_identify;
 	provider->describe = aspell_provider_describe;
 

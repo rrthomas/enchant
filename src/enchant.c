@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if HAVE_FLOCK || HAVE_LOCKF
+#if defined(HAVE_FLOCK) || defined(HAVE_LOCKF)
 #include <sys/file.h>
 #endif /* HAVE_FLOCK || HAVE_LOCKF */
 
@@ -44,12 +44,46 @@
 
 ENCHANT_PLUGIN_DECLARE("Enchant")
 
+/********************************************************************************/
+/********************************************************************************/
+
+struct str_enchant_broker
+{
+	GSList *provider_list;	/* list of all of the spelling backend providers */
+	GHashTable *dict_map;		/* map of language tag -> dictionary */
+	GHashTable *provider_ordering; /* map of language tag -> provider order */
+
+	gchar * error;
+};
+
+typedef struct str_enchant_session
+{
+	GHashTable *session;
+	GHashTable *personal;
+
+	char * personal_filename;
+	char * language_tag;
+
+	char * error;
+
+	EnchantProvider * provider;
+} EnchantSession;
+
+typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
+
+#ifndef BUFSIZ
+#define BUFSIZ 1024
+#endif
+
+/********************************************************************************/
+/********************************************************************************/
+
 static void
 enchant_lock_file (FILE * f)
 {
-#if HAVE_FLOCK
+#if defined(HAVE_FLOCK)
 	flock (fileno (f), LOCK_EX);
-#elif HAVE_LOCKF
+#elif defined(HAVE_LOCKF)
 	lockf (fileno (f), F_LOCK, 0);
 #else
 	/* TODO: win32, UNIX fcntl. This race condition probably isn't too bad. */
@@ -59,78 +93,13 @@ enchant_lock_file (FILE * f)
 static void
 enchant_unlock_file (FILE * f)
 {
-#if HAVE_FLOCK
+#if defined(HAVE_FLOCK)
 	flock (fileno (f), LOCK_UN);
-#elif HAVE_LOCKF
+#elif defined(HAVE_LOCKF)
 	lockf (fileno (f), F_ULOCK, 0);
 #else
 	/* TODO: win32, UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
-}
-
-static char *
-enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key)
-{
-#ifndef _WIN32
-	return NULL;
-#else
-	HKEY hKey;
-	HKEY baseKey;
-	unsigned long lType;	
-	DWORD dwSize;
-	BYTE* szValue = NULL;
-
-	if (current_user)
-		baseKey = HKEY_CURRENT_USER;
-	else
-		baseKey = HKEY_LOCAL_MACHINE;
-
-	if(RegOpenKeyEx(baseKey, "Software\\Enchant", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
-		{
-			// Determine size of string
-			if(RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
-				{
-					szValue = g_new0(BYTE, dwSize + 1);
-					RegQueryValueEx(hKey, key, NULL, &lType, szValue, &dwSize);
-				}
-		}
-	
-	return (char *)szValue;
-#endif
-}
-
-/**
- * enchant_get_registry_value
- * @prefix: Your category, such as "Ispell" or "Myspell"
- * @key: The tag within your category that you're interested in
- *
- * Returns: the value if it exists, or %null otherwise. Must be free'd
- */
-ENCHANT_MODULE_EXPORT (char *)
-enchant_get_registry_value (const char * const prefix, const char * const key)
-{
-	return enchant_get_registry_value_ex (0, prefix, key);
-}
-
-/**
- * enchant_get_user_home_dir
- *
- * Returns the user's home directory, or %null. Returned value
- * must be free'd
- */
-ENCHANT_MODULE_EXPORT (char *)
-enchant_get_user_home_dir (void)
-{
-	const char * home_dir = NULL;
-
-	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
-	if (home_dir)
-		return (char *)home_dir;
-
-	home_dir = g_get_home_dir ();
-	if (home_dir)
-		return g_strdup (home_dir);
-	return NULL;
 }
 
 static char *
@@ -165,31 +134,78 @@ enchant_get_conf_dir (void)
 #endif
 }
 
-struct str_enchant_broker
+static char *
+enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key)
 {
-	GSList *provider_list;	/* list of all of the spelling backend providers */
-	GHashTable *dict_map;		/* map of language tag -> dictionary */
-	GHashTable *provider_ordering; /* map of language tag -> provider order */
+#ifndef _WIN32
+	/* TODO: GConf? KConfig? */
+	return NULL;
+#else
+	HKEY hKey;
+	HKEY baseKey;
+	unsigned long lType;	
+	DWORD dwSize;
+	BYTE* szValue = NULL;
 
-	gchar * error;
-};
+	if (current_user)
+		baseKey = HKEY_CURRENT_USER;
+	else
+		baseKey = HKEY_LOCAL_MACHINE;
 
-typedef struct str_enchant_session
-{
-	GHashTable *session;
-	GHashTable *personal;
-
-	char * personal_filename;
-	char * language_tag;
-
-	char * error;
-
-	EnchantProvider * provider;
-} EnchantSession;
-
-#ifndef BUFSIZ
-#define BUFSIZ 1024
+	if(RegOpenKeyEx(baseKey, "Software\\Enchant", 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+		{
+			// Determine size of string
+			if(RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
+				{
+					szValue = g_new0(BYTE, dwSize + 1);
+					RegQueryValueEx(hKey, key, NULL, &lType, szValue, &dwSize);
+				}
+		}
+	
+	return (char *)szValue;
 #endif
+}
+
+/**
+ * enchant_get_registry_value
+ * @prefix: Your category, such as "Ispell" or "Myspell"
+ * @key: The tag within your category that you're interested in
+ *
+ * Returns: the value if it exists, or %null otherwise. Must be free'd.
+ *
+ * This API is private to the providers.
+ */
+ENCHANT_MODULE_EXPORT (char *)
+enchant_get_registry_value (const char * const prefix, const char * const key)
+{
+	return enchant_get_registry_value_ex (0, prefix, key);
+}
+
+/**
+ * enchant_get_user_home_dir
+ *
+ * Returns: the user's home directory, or %null. Returned value
+ * must be free'd.
+ *
+ * This API is private to the providers.
+ */
+ENCHANT_MODULE_EXPORT (char *)
+enchant_get_user_home_dir (void)
+{
+	const char * home_dir = NULL;
+
+	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
+	if (home_dir)
+		return (char *)home_dir;
+
+	home_dir = g_get_home_dir ();
+	if (home_dir)
+		return g_strdup (home_dir);
+	return NULL;
+}
+
+/********************************************************************************/
+/********************************************************************************/
 
 static void
 enchant_session_destroy (EnchantSession * session)
@@ -219,29 +235,34 @@ enchant_session_new_with_pwl (EnchantProvider * provider, const char * const pwl
 	session->provider = provider;
 	session->language_tag = g_strdup (lang);
 
-	if (pwl) {
-		session->personal_filename = g_strdup (pwl);
-
-		/* populate personal filename */
-		f = fopen (pwl, "r");
-		if (f) {
-			enchant_lock_file (f);
+	if (pwl) 
+		{
+			session->personal_filename = g_strdup (pwl);
 			
-			while (NULL != (fgets (line, sizeof (line), f))) {
-				g_hash_table_insert (session->personal, g_strdup (line), GINT_TO_POINTER(TRUE));
-			}
-			
-			enchant_unlock_file (f);
-			fclose (f);
-		} else if (fail_if_no_pwl) {
+			/* populate personal filename */
+			f = fopen (pwl, "r");
+			if (f) 
+				{
+					enchant_lock_file (f);
+					
+					while (NULL != (fgets (line, sizeof (line), f)))
+						g_hash_table_insert (session->personal, g_strdup (line), GINT_TO_POINTER(TRUE));
+					
+					enchant_unlock_file (f);
+					fclose (f);
+				} 
+			else if (fail_if_no_pwl) 
+				{
+					enchant_session_destroy (session);
+					return NULL;
+				}
+		} 
+	else if (fail_if_no_pwl) 
+		{
 			enchant_session_destroy (session);
 			return NULL;
 		}
-	} else if (fail_if_no_pwl) {
-		enchant_session_destroy (session);
-		return NULL;
-	}
-
+	
 	return session;
 }
 
@@ -252,18 +273,19 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 	char * home_dir, * dic = NULL, * filename;
 
 	home_dir = enchant_get_user_home_dir ();
-	if (home_dir) {
-		filename = g_strdup_printf ("%s.dic", lang);
-		dic = g_build_filename (home_dir,
-					".enchant",
-					filename,
-					NULL);
-		g_free (filename);
-		g_free (home_dir);
-	}
-
+	if (home_dir) 
+		{
+			filename = g_strdup_printf ("%s.dic", lang);
+			dic = g_build_filename (home_dir,
+						".enchant",
+						filename,
+						NULL);
+			g_free (filename);
+			g_free (home_dir);
+		}
+	
 	session = enchant_session_new_with_pwl (provider, dic, lang, FALSE);	
-
+	
 	if (dic)
 		g_free (dic);
 	
@@ -283,32 +305,34 @@ enchant_session_add_personal (EnchantSession * session, const char * const word,
 
 	g_hash_table_insert (session->session, g_strndup (word, len), GINT_TO_POINTER(TRUE));
 
-	if (session->personal_filename) {
-		f = fopen (session->personal_filename, "a");
-
-		if (f) {
-			enchant_lock_file (f);
+	if (session->personal_filename) 
+		{
+			f = fopen (session->personal_filename, "a");
 			
-			fwrite (word, sizeof(char), len, f);
-			fwrite ("\n", sizeof(char), 1, f);
-			fclose (f);
-
-			enchant_unlock_file (f);
+			if (f) 
+				{
+					enchant_lock_file (f);
+					
+					fwrite (word, sizeof(char), len, f);
+					fwrite ("\n", sizeof(char), 1, f);
+					fclose (f);
+					
+					enchant_unlock_file (f);
+				}
 		}
-	}
 }
 
 static gboolean
 enchant_session_contains (EnchantSession * session, const char * const word, size_t len)
 {
 	gboolean result = FALSE;
-
+	
 	char * utf = g_strndup (word, len);
-
+	
 	if (g_hash_table_lookup (session->session, utf) ||
 	    g_hash_table_lookup (session->personal, utf))
 		result = TRUE;
-
+	
 	g_free (utf);
 
 	return result;
@@ -317,16 +341,23 @@ enchant_session_contains (EnchantSession * session, const char * const word, siz
 static void
 enchant_session_clear_error (EnchantSession * session)
 {
-	if (session->error) {
-		g_free (session->error);
-		session->error = NULL;
-	}
+	if (session->error) 
+		{
+			g_free (session->error);
+			session->error = NULL;
+		}
 }
+
+/********************************************************************************/
+/********************************************************************************/
 
 /**
  * enchant_dict_set_error
+ * @dict: A non-null dictionary
+ * @err: A non-null error message
  *
- * Sets the current runtime error to @err
+ * Sets the current runtime error to @err. This API is private to the
+ * providers.
  */
 ENCHANT_MODULE_EXPORT(void)
 enchant_dict_set_error (EnchantDict * dict, const char * const err)
@@ -334,6 +365,7 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 	EnchantSession * session;
 
 	g_return_if_fail (dict);
+	g_return_if_fail (err);
 	
 	session = (EnchantSession*)dict->enchant_private_data;
 
@@ -343,9 +375,13 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 
 /**
  * enchant_dict_get_error
+ * @dict: A non-null dictionary
  *
  * Returns a const char string or NULL describing the last exception.
- * WARNING: error is cleared as soon as the next dictionary operation is called
+ * WARNING: error is transient. It will likely be cleared as soon as 
+ * the next dictionary operation is called
+ *
+ * Returns: an error message
  */
 ENCHANT_MODULE_EXPORT(char *)
 enchant_dict_get_error (EnchantDict * dict)
@@ -357,48 +393,6 @@ enchant_dict_get_error (EnchantDict * dict)
 	session = (EnchantSession*)dict->enchant_private_data;
 
 	return session->error;
-}
-
-static void
-enchant_broker_clear_error (EnchantBroker * broker)
-{
-	if (broker->error) {
-		g_free (broker->error);
-		broker->error = NULL;
-	}
-}
-
-/**
- * enchant_provider_set_error
- *
- * Sets the current runtime error to @err
- */
-ENCHANT_MODULE_EXPORT(void)
-enchant_provider_set_error (EnchantProvider * provider, const char * const err)
-{
-	EnchantBroker * broker;
-
-	g_return_if_fail (provider);
-
-	broker = provider->owner;
-	g_return_if_fail (broker);
-	
-	enchant_broker_clear_error (broker);
-	broker->error = g_strdup (err);	
-}
-
-/**
- * enchant_broker_get_error
- *
- * Returns a const char string or NULL describing the last exception.
- * WARNING: error is cleared as soon as the next broker operation is called
- */
-ENCHANT_MODULE_EXPORT(char *)
-enchant_broker_get_error (EnchantBroker * broker)
-{
-	g_return_val_if_fail (broker, NULL);
-	
-	return broker->error;
 }
 
 /**
@@ -417,9 +411,9 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
 {
 	EnchantSession * session;
 
-	g_return_val_if_fail (dict, 1);
-	g_return_val_if_fail (word, 1);
-	g_return_val_if_fail (len, 1);
+	g_return_val_if_fail (dict, -1);
+	g_return_val_if_fail (word, -1);
+	g_return_val_if_fail (len, -1);
 	
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
@@ -429,11 +423,9 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
 		return 0;
 
 	if (dict->check)
-		{
-			return (*dict->check) (dict, word, len);
-		}
+		return (*dict->check) (dict, word, len);
 	
-	return 1;
+	return -1;
 }
 
 /**
@@ -458,9 +450,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 	g_return_val_if_fail (out_n_suggs, NULL);
 	
 	if (dict->suggest)
-		{
-			return (*dict->suggest) (dict, word, len, out_n_suggs);
-		}
+		return (*dict->suggest) (dict, word, len, out_n_suggs);
 	
 	*out_n_suggs = 0;
 	return NULL;
@@ -483,15 +473,13 @@ enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 	g_return_if_fail (word);
 	g_return_if_fail (len);
 
-	/* add to enchant-specific backend regardless */
+	/* add to session backend regardless */
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 	enchant_session_add_personal (session, word, len);
 	
 	if (dict->add_to_personal)
-		{
-			(*dict->add_to_personal) (dict, word, len);
-		}
+		(*dict->add_to_personal) (dict, word, len);
 }
 
 /**
@@ -514,15 +502,11 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
+	/* emulate a session backend if one is not provided for */
 	if (dict->add_to_session)
-		{
-			(*dict->add_to_session) (dict, word, len);
-		}
+		(*dict->add_to_session) (dict, word, len);
 	else
-		{
-			/* emulate a session backend if one is not provided for */
-			enchant_session_add (session, word, len);
-		}
+		enchant_session_add (session, word, len);
 }
 
 /**
@@ -555,9 +539,7 @@ enchant_dict_store_replacement (EnchantDict * dict,
 	
 	/* if it's not implemented, it's not worth emulating */
 	if (dict->store_replacement)
-		{
-			(*dict->store_replacement) (dict, mis, mis_len, cor, cor_len);
-		}
+		(*dict->store_replacement) (dict, mis, mis_len, cor, cor_len);
 }
 
 /**
@@ -580,15 +562,67 @@ enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions)
 	enchant_session_clear_error (session);
 	
 	if (dict->free_suggestions)
+		(*dict->free_suggestions) (dict, suggestions);
+}
+
+/**
+ * enchant_dict_describe
+ * @broker: A non-null #EnchantDict
+ * @dict: A non-null #EnchantDictDescribeFn
+ * @user_data: Optional user-data
+ *
+ * Describes an individual dictionary
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_dict_describe (EnchantDict * dict,
+		       EnchantDictDescribeFn fn,
+		       void * user_data)
+{
+	EnchantSession * session;
+	EnchantProvider * provider;
+	GModule *module;
+
+	const char * tag, * name, * desc, * file;
+
+	g_return_if_fail (dict);
+	g_return_if_fail (fn);
+
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
+	provider = session->provider;
+
+	if (provider) 
 		{
-			(*dict->free_suggestions) (dict, suggestions);
+			module = (GModule *) provider->enchant_private_data;
+			file = g_module_name (module);	
+			name = (*provider->identify) (provider);
+			desc = (*provider->describe) (provider);
+		} 
+	else 
+		{
+			file = session->personal_filename;
+			name = "Personal Wordlist";
+			desc = "Personal Wordlist";
 		}
+	
+	tag = session->language_tag;
+	(*fn) (tag, name, desc, file, user_data);
+	
+	return;
 }
 
 /***********************************************************************************/
 /***********************************************************************************/
 
-typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
+static void
+enchant_broker_clear_error (EnchantBroker * broker)
+{
+	if (broker->error) 
+		{
+			g_free (broker->error);
+			broker->error = NULL;
+		}
+}
 
 static void
 enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
@@ -605,9 +639,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 	
 	dir = g_dir_open (dir_name, 0, NULL);
 	if (!dir) 
-		{
-			return;
-		}
+		return;
 	
 	g_module_suffix_len = strlen (G_MODULE_SUFFIX);
 
@@ -661,13 +693,14 @@ enchant_load_providers (EnchantBroker * broker)
 
 	home_dir = enchant_get_user_home_dir ();
 
-	if (home_dir) {
-		user_dir = g_build_filename (home_dir, ".enchant", NULL);
-		enchant_load_providers_in_dir (broker, user_dir);
-		g_free (user_dir);
-		g_free (home_dir);
-	}
-
+	if (home_dir) 
+		{
+			user_dir = g_build_filename (home_dir, ".enchant", NULL);
+			enchant_load_providers_in_dir (broker, user_dir);
+			g_free (user_dir);
+			g_free (home_dir);
+		}
+	
 	enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
 }
 
@@ -686,21 +719,21 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 		return;
 
 	while (NULL != fgets (line, sizeof(line), f)) {
-		for (i = 0, len = strlen(line); i < len && line[i] != ':'; i++) {
+		for (i = 0, len = strlen(line); i < len && line[i] != ':'; i++) 
 			;
-		}
 
-		if (i < len) {
-			tag = g_strndup (line, i);
-			ordering = g_strndup (line+(i+1), len - i);			
-
-			enchant_broker_set_ordering (broker, tag, ordering);
-
-			g_free (tag);
-			g_free (ordering);
-		}
+		if (i < len) 
+			{
+				tag = g_strndup (line, i);
+				ordering = g_strndup (line+(i+1), len - i);			
+				
+				enchant_broker_set_ordering (broker, tag, ordering);
+				
+				g_free (tag);
+				g_free (ordering);
+			}
 	}
-
+	
 	fclose (f);
 }
 
@@ -712,21 +745,23 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 	global_ordering = enchant_get_conf_dir ();
-	if (global_ordering) {
-		ordering_file = g_build_filename (global_ordering, "enchant.ordering", NULL);
-		enchant_load_ordering_from_file (broker, ordering_file);
-		g_free (ordering_file);
-		g_free (global_ordering);
-	}
-
+	if (global_ordering) 
+		{
+			ordering_file = g_build_filename (global_ordering, "enchant.ordering", NULL);
+			enchant_load_ordering_from_file (broker, ordering_file);
+			g_free (ordering_file);
+			g_free (global_ordering);
+		}
+	
 	home_dir = enchant_get_user_home_dir ();
-
-	if (home_dir) {
-		ordering_file = g_build_filename (home_dir, ".enchant", "enchant.ordering", NULL);
-		enchant_load_ordering_from_file (broker, ordering_file);
-		g_free (ordering_file);
-		g_free (home_dir);
-	}
+	
+	if (home_dir) 
+		{
+			ordering_file = g_build_filename (home_dir, ".enchant", "enchant.ordering", NULL);
+			enchant_load_ordering_from_file (broker, ordering_file);
+			g_free (ordering_file);
+			g_free (home_dir);
+		}
 }
 
 static GSList *
@@ -743,37 +778,39 @@ enchant_get_ordered_providers (EnchantBroker * broker,
 	if (!ordering)
 		ordering = (char *)g_hash_table_lookup (broker->provider_ordering, (gpointer)"*");
 
-	if (!ordering) {
-		/* return an unordered copy of the list */
-		for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter))
-			{
-				list = g_slist_append (list, iter->data);
-			}
-		return list;
-	}
-
-	tokens = g_strsplit (ordering, ",", 0);
-	if (tokens) {
-		for (i = 0; tokens[i]; i++) {
-			token = tokens[i];
-
-			for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter)) {
-				provider = (EnchantProvider*)iter->data;
- 
-				if (provider && !strcmp (token, (*provider->identify)(provider))) {
-					list = g_slist_append (list, (gpointer)provider);
-				}
-			}
+	if (!ordering) 
+		{
+			/* return an unordered copy of the list */
+			for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter))
+					list = g_slist_append (list, iter->data);
+			return list;
 		}
-
-		g_strfreev (tokens);
-	}
-
+	
+	tokens = g_strsplit (ordering, ",", 0);
+	if (tokens) 
+		{
+			for (i = 0; tokens[i]; i++) 
+				{
+					token = tokens[i];
+					
+					for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter)) 
+						{
+							provider = (EnchantProvider*)iter->data;
+							
+							if (provider && !strcmp (token, (*provider->identify)(provider)))
+								list = g_slist_append (list, (gpointer)provider);
+						}
+				}
+			
+			g_strfreev (tokens);
+		}
+	
 	/* providers not in the list need to be appended at the end */
-	for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter)) {
-		if (!g_slist_find (list, iter->data))
-			list = g_slist_append (list, iter->data);
-	}
+	for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter)) 
+		{
+			if (!g_slist_find (list, iter->data))
+				list = g_slist_append (list, iter->data);
+		}
 
 	return list;
 }
@@ -792,9 +829,7 @@ enchant_dict_destroyed (gpointer data)
 	owner = session->provider;
 	
 	if (owner && owner->dispose_dict) 
-		{
-			(*owner->dispose_dict) (owner, dict);
-		}
+		(*owner->dispose_dict) (owner, dict);
 
 	enchant_session_destroy (session);
 }
@@ -807,14 +842,11 @@ enchant_provider_free (gpointer data, gpointer user_data)
 	
 	g_return_if_fail (data);
 	
-	provider = (EnchantProvider *) data;
-	
+	provider = (EnchantProvider *) data;	
 	module = (GModule *) provider->enchant_private_data;
 	
 	if (provider->dispose) 
-		{
-			(*provider->dispose) (provider);
-		}
+		(*provider->dispose) (provider);
 	
 	/* close module only after invoking dispose */
 	g_module_close (module);
@@ -838,8 +870,7 @@ enchant_broker_init (void)
 	broker->dict_map = g_hash_table_new_full (g_str_hash, g_str_equal,
 						  g_free, enchant_dict_destroyed);
 	
-	enchant_load_providers (broker);
-	
+	enchant_load_providers (broker);	
 	enchant_load_provider_ordering (broker);
 
 	return broker;
@@ -859,9 +890,10 @@ enchant_broker_free (EnchantBroker * broker)
 	g_return_if_fail (broker);       
 
 	n_remaining = g_hash_table_size (broker->dict_map);
-	if (n_remaining) {
-		g_warning ("%u dictionaries weren't free'd.\n", n_remaining);
-	}
+	if (n_remaining) 
+		{
+			g_warning ("%u dictionaries weren't free'd.\n", n_remaining);
+		}
 
 	/* will destroy any remaining dictionaries for us */
 	g_hash_table_destroy (broker->dict_map);
@@ -895,15 +927,14 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 
 	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) pwl);
 	if (dict)
-		{
-			return dict;
-		}
+		return dict;
 
 	session = enchant_session_new_with_pwl (NULL, pwl, "Personal WordList", TRUE);
-	if (!session) {
-		broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
-		return NULL;
-	}
+	if (!session) 
+		{
+			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
+			return NULL;
+		}
 
 	dict = g_new0 (EnchantDict, 1);
 	dict->enchant_private_data = (void *)session;
@@ -935,9 +966,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	
 	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
 	if (dict)
-		{
-			return dict;
-		}
+		return dict;
 	
 	for (list = enchant_get_ordered_providers (broker, tag); list != NULL; list = g_slist_next (list))
 		{
@@ -1002,48 +1031,6 @@ enchant_broker_describe (EnchantBroker * broker,
 }
 
 /**
- * enchant_dict_describe
- * @broker: A non-null #EnchantDict
- * @dict: A non-null #EnchantDictDescribeFn
- * @user_data: Optional user-data
- *
- * Describes an individual dictionary
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_dict_describe (EnchantDict * dict,
-		       EnchantDictDescribeFn fn,
-		       void * user_data)
-{
-	EnchantSession * session;
-	EnchantProvider * provider;
-	GModule *module;
-
-	const char * tag, * name, * desc, * file;
-
-	g_return_if_fail (dict);
-	g_return_if_fail (fn);
-
-	session = (EnchantSession*)dict->enchant_private_data;
-	provider = session->provider;
-
-	if (provider) {
-		module = (GModule *) provider->enchant_private_data;
-		file = g_module_name (module);	
-		name = (*provider->identify) (provider);
-		desc = (*provider->describe) (provider);
-	} else {
-		file = session->personal_filename;
-		name = "Personal Wordlist";
-		desc = "Personal Wordlist";
-	}
-
-	tag = session->language_tag;
-	(*fn) (tag, name, desc, file, user_data);
-
-	return;
-}
-
-/**
  * enchant_broker_free_dict
  * @broker: A non-null #EnchantBroker
  * @dict: A non-null #EnchantDict
@@ -1079,8 +1066,6 @@ ENCHANT_MODULE_EXPORT (int)
 enchant_broker_dict_exists (EnchantBroker * broker,
 			    const char * const tag)
 {
-	/* start off pessimistic */
-	int status = 0;
 	EnchantProvider *provider;
 	GSList *list;
 
@@ -1097,16 +1082,14 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 		{
 			provider = (EnchantProvider *) list->data;
 
-			if (provider->dictionary_status)
+			if (provider->dictionary_exists)
 				{
-					status = (*provider->dictionary_status) (provider, tag);
-					if (status == 1)
+					if ((*provider->dictionary_exists) (provider, tag))
 						return 1;
 				}
 		}
 
-
-	return status;
+	return 0;
 }
 
 /**
@@ -1142,14 +1125,54 @@ enchant_broker_set_ordering (EnchantBroker * broker,
 	ordering_dupl = g_strstrip (ordering_dupl);
 
 	if (tag_dupl && strlen(tag_dupl) &&
-	    ordering_dupl && strlen(ordering_dupl)) {
+	    ordering_dupl && strlen(ordering_dupl)) 
+		{			
+			/* we will free ordering_dupl && tag_dupl when the hash is destroyed */
+			g_hash_table_insert (broker->provider_ordering, (gpointer)tag_dupl,
+					     (gpointer)(ordering_dupl));		       
+		} 
+	else 
+		{
+			g_free (tag_dupl);
+			g_free (ordering_dupl);
+		}
+}
 
-		g_hash_table_insert (broker->provider_ordering, (gpointer)tag_dupl,
-				     (gpointer)(ordering_dupl));
+/**
+ * enchant_provider_set_error
+ * @provider: A non-null provider
+ * @err: A non-null error message
+ * 
+ * Sets the current runtime error to @err. This API is private to
+ * the providers.
+ */
+ENCHANT_MODULE_EXPORT(void)
+enchant_provider_set_error (EnchantProvider * provider, const char * const err)
+{
+	EnchantBroker * broker;
 
-		/* we will free ordering_dupl && tag_dupl when the hash is destroyed */
-	} else {
-		g_free (tag_dupl);
-		g_free (ordering_dupl);
-	}
+	g_return_if_fail (provider);
+	g_return_if_fail (err);
+
+	broker = provider->owner;
+	g_return_if_fail (broker);
+	
+	enchant_broker_clear_error (broker);
+	broker->error = g_strdup (err);	
+}
+
+/**
+ * enchant_broker_get_error
+ * @broker: A non-null broker
+ *
+ * Returns a const char string or NULL describing the last exception.
+ * WARNING: error is transient and is likely cleared as soon as the 
+ * next broker operation happens
+ */
+ENCHANT_MODULE_EXPORT(char *)
+enchant_broker_get_error (EnchantBroker * broker)
+{
+	g_return_val_if_fail (broker, NULL);
+	
+	return broker->error;
 }

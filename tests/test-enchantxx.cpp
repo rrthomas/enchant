@@ -44,13 +44,10 @@ enumerate_providers_fn (const char * const name,
 }
 
 static void
-describe_dict_fn (const char * const lang,
-		  const char * const name,
-		  const char * const desc,
-		  const char * const file,
-		  void * ud)
+describe_dict (enchant::Dict * dict)
 {
-	printf ("%s: %s '%s' (%s)\n", lang, name, desc, file);
+	printf ("%s: %s '%s' (%s)\n", dict->get_lang().c_str(), dict->get_provider_name().c_str(), 
+		dict->get_provider_desc().c_str(), dict->get_provider_file().c_str());
 }
 
 static void
@@ -108,13 +105,13 @@ main (int argc, char **argv)
 	
 	try {
 		dict = broker->request_dict ("en_US");
-		dict->describe (describe_dict_fn);
+		describe_dict (dict);
 		run_dict_tests (dict);		
 		delete dict;
 
 		// test personal wordlist dictionaries
 		dict = broker->request_pwl_dict ("test.pwl");
-		dict->describe (describe_dict_fn);
+		describe_dict (dict);
 		run_dict_tests (dict);
 		delete dict;
 	} catch (enchant::Exception & ex) {

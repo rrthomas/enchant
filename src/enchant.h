@@ -31,6 +31,7 @@
 #ifndef ENCHANT_H
 #define ENCHANT_H
 
+/* for size_t */
 #include <sys/types.h>
 
 #ifdef __cplusplus
@@ -47,8 +48,49 @@ extern "C" {
 #define ENCHANT_MODULE_EXPORT(x) x
 #endif
 
-typedef struct str_enchant_broker   EnchantBroker;
-typedef struct str_enchant_dict     EnchantDict;
+typedef struct str_enchant_broker EnchantBroker;
+typedef struct str_enchant_dict   EnchantDict;
+
+ENCHANT_MODULE_EXPORT (EnchantBroker *) 
+     enchant_broker_init (void);
+ENCHANT_MODULE_EXPORT (void)
+     enchant_broker_free (EnchantBroker * broker);
+
+ENCHANT_MODULE_EXPORT (EnchantDict *)
+     enchant_broker_request_dict (EnchantBroker * broker, const char *const tag);
+ENCHANT_MODULE_EXPORT (EnchantDict *)
+     enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl);
+ENCHANT_MODULE_EXPORT (void)
+     enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict);
+ENCHANT_MODULE_EXPORT (int)
+     enchant_broker_dict_exists (EnchantBroker * broker,
+				 const char * const tag);
+ENCHANT_MODULE_EXPORT (void)
+     enchant_broker_set_ordering (EnchantBroker * broker,
+				  const char * const tag,
+				  const char * const ordering);
+/* const */
+ENCHANT_MODULE_EXPORT(char *)
+     enchant_broker_get_error (EnchantBroker * broker);
+
+/**
+ * EnchantBrokerDescribeFn
+ * @provider_name: The provider's identifier, such as "ispell" or "aspell"
+ * @provider_desc: A description of the provider, such as "Aspell 0.53"
+ * @provider_dll_file: The provider's DLL filename
+ * @user_data: Supplied user data, or %null if you don't care
+ *
+ * Callback used to enumerate and describe Enchant's various providers
+ */
+typedef void (*EnchantBrokerDescribeFn) (const char * const provider_name,
+					 const char * const provider_desc,
+					 const char * const provider_dll_file,
+					 void * user_data);
+	
+ENCHANT_MODULE_EXPORT (void)
+     enchant_broker_describe (EnchantBroker * broker,
+			      EnchantBrokerDescribeFn fn,
+			      void * user_data);
 
 ENCHANT_MODULE_EXPORT (int)
      enchant_dict_check (EnchantDict * dict, const char *const word, size_t len);
@@ -71,50 +113,6 @@ ENCHANT_MODULE_EXPORT (void)
 /* const */
 ENCHANT_MODULE_EXPORT(char *)
      enchant_dict_get_error (EnchantDict * dict);
-
-ENCHANT_MODULE_EXPORT (EnchantBroker *) 
-     enchant_broker_init (void);
-ENCHANT_MODULE_EXPORT (void)
-     enchant_broker_free (EnchantBroker * broker);
-
-ENCHANT_MODULE_EXPORT (EnchantDict *)
-     enchant_broker_request_dict (EnchantBroker * broker, const char *const tag);
-ENCHANT_MODULE_EXPORT (EnchantDict *)
-     enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl);
-ENCHANT_MODULE_EXPORT (void)
-     enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict);
-
-ENCHANT_MODULE_EXPORT (int)
-     enchant_broker_dict_exists (EnchantBroker * broker,
-				 const char * const tag);
-
-ENCHANT_MODULE_EXPORT (void)
-     enchant_broker_set_ordering (EnchantBroker * broker,
-				  const char * const tag,
-				  const char * const ordering);
-
-/* const */
-ENCHANT_MODULE_EXPORT(char *)
-     enchant_broker_get_error (EnchantBroker * broker);
-
-/**
- * EnchantBrokerDescribeFn
- * @name: The provider's identifier, such as "ispell" or "aspell"
- * @desc: A description of the provider, such as "Aspell 0.53"
- * @file: The provider's DLL filename
- * @user_data: Supplied user data, or %null if you don't care
- *
- * Callback used to enumerate and describe Enchant's various providers
- */
-typedef void (*EnchantBrokerDescribeFn) (const char * const name,
-					 const char * const desc,
-					 const char * const file,
-					 void * user_data);
-	
-ENCHANT_MODULE_EXPORT (void)
-     enchant_broker_describe (EnchantBroker * broker,
-			      EnchantBrokerDescribeFn fn,
-			      void * user_data);
 
 /**
  * EnchantDictDescribeFn

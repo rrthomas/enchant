@@ -104,7 +104,7 @@ struct str_enchant_provider
 	void (*dispose_dict) (struct str_enchant_provider * me,
 			      EnchantDict * dict);
 	
-	int (*dictionary_status) (struct str_enchant_provider * me,
+	int (*dictionary_exists) (struct str_enchant_provider * me,
 				  const char *const tag);
 
 	/* const */ char * (*identify) (struct str_enchant_provider * me);

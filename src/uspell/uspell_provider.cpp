@@ -337,8 +337,8 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 }
 
 static int
-uspell_provider_dictionary_status(struct str_enchant_provider * me, 
-				  const char *const tag)
+uspell_provider_dictionary_exists (struct str_enchant_provider * me, 
+				   const char *const tag)
 {
 	std::vector <std::string> names;
 
@@ -402,7 +402,7 @@ init_enchant_provider (void)
 	provider->dispose = uspell_provider_dispose;
 	provider->request_dict = uspell_provider_request_dict;
 	provider->dispose_dict = uspell_provider_dispose_dict;
-	provider->dictionary_status = uspell_provider_dictionary_status;
+	provider->dictionary_exists = uspell_provider_dictionary_exists;
 	provider->identify = uspell_provider_identify;
 	provider->describe = uspell_provider_describe;
 	

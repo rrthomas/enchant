@@ -44,15 +44,13 @@ namespace enchant
 		{
 		public:
 			Exception (const char * ex) 
-				: std::exception ()
-				{
-					if (ex)
-						m_ex = ex;
-				}
+				: std::exception (), m_ex ("") {
+				if (ex)
+					m_ex = ex;
+			}
 
-			virtual ~Exception () throw()
-				{
-				}
+			virtual ~Exception () throw() {
+			}
 			
 			virtual const char * what () throw() {
 				return m_ex.c_str();
@@ -82,8 +80,35 @@ namespace enchant
 				else if (val > 0)
 					return false;
 				else {
-					throw Exception (enchant_dict_get_error (m_dict));
+					throw enchant::Exception (enchant_dict_get_error (m_dict));
 				}
+
+				return false; // never reached
+			}
+
+			void suggest (const std::string & utf8word, 
+				      std::vector<std::string> & out_suggestions) {
+				size_t n_suggs;
+				char ** suggs;
+				
+				out_suggestions.clear ();
+				
+				suggs = enchant_dict_suggest (m_dict, utf8word.c_str(), 
+							      utf8word.size(), &n_suggs);
+				
+				if (suggs && n_suggs) {
+					for (size_t i = 0; i < n_suggs; i++) {
+						out_suggestions.push_back (suggs[i]);
+					}
+					
+					enchant_dict_free_suggestions (m_dict, suggs);
+				}
+			}
+						
+			std::vector<std::string> suggest (const std::string & utf8word) {
+				std::vector<std::string> result;
+				suggest (utf8word, result);
+				return result;
 			}
 			
 			void add_to_personal (const std::string & utf8word) {
@@ -103,45 +128,45 @@ namespace enchant
 								utf8good.c_str(), utf8good.size());
 			}
 			
-			void suggest (const std::string & utf8word, 
-				      std::vector<std::string> & out_suggestions) {
-				size_t n_suggs;
-				char ** suggs;
-				
-				out_suggestions.clear ();
-				
-				suggs = enchant_dict_suggest (m_dict, utf8word.c_str(), 
-							      utf8word.size(), &n_suggs);
-				
-				if (suggs && n_suggs) {
-					for (size_t i = 0; i < n_suggs; i++) {
-						out_suggestions.push_back (suggs[i]);
-					}
-					
-					enchant_dict_free_suggestions (m_dict, suggs);
-				}
-			}
-			
-			std::vector<std::string> suggest (const std::string & utf8word) {
-				std::vector<std::string> result;
-				suggest (utf8word, result);
-				return result;
+			const std::string & get_lang () const {
+				return m_lang;
 			}
 
-			void describe (EnchantDictDescribeFn fn, void * user_data = NULL) {
-				enchant_dict_describe (m_dict, fn, user_data);
+			const std::string & get_provider_name () const {
+				return m_provider_name;
 			}
-			
+
+			const std::string & get_provider_desc () const {
+				return m_provider_desc;
+			}
+
+			const std::string & get_provider_file () const {
+				return m_provider_file;
+			}
+
 		private:
 
 			// space reserved for API/ABI expansion
-			void * _private[5];
-			
+			void * _private[5];		       
+
+			static void s_describe_fn (const char * const lang,
+						   const char * const provider_name,
+						   const char * const provider_desc,
+						   const char * const provider_file,
+						   void * user_data) {
+				enchant::Dict * dict = static_cast<enchant::Dict *> (user_data);
+				
+				dict->m_lang = lang;
+				dict->m_provider_name = provider_name;
+				dict->m_provider_desc = provider_desc;
+				dict->m_provider_file = provider_file;
+			}
+
 			Dict (EnchantDict * dict, EnchantBroker * broker)
-				: m_dict (dict), m_broker (broker)
-				{
-				}
-			
+				: m_dict (dict), m_broker (broker) {
+				enchant_dict_describe (m_dict, s_describe_fn, this);
+			}
+
 			// private, unimplemented
 			Dict ();
 			Dict (const Dict & rhs);
@@ -149,6 +174,11 @@ namespace enchant
 			
 			EnchantDict * m_dict;
 			EnchantBroker * m_broker;
+
+			std::string m_lang;
+			std::string m_provider_name;
+			std::string m_provider_desc;
+			std::string m_provider_file;
 		}; // class enchant::Dict
 	
 	class Broker
@@ -164,8 +194,8 @@ namespace enchant
 				EnchantDict * dict = enchant_broker_request_dict (m_broker, lang.c_str());
 				
 				if (!dict) {
-					throw Exception (enchant_broker_get_error (m_broker));
-					return 0; // not actually reached
+					throw enchant::Exception (enchant_broker_get_error (m_broker));
+					return 0; // never reached
 				}
 				
 				return new Dict (dict, m_broker);
@@ -175,15 +205,17 @@ namespace enchant
 				EnchantDict * dict = enchant_broker_request_pwl_dict (m_broker, pwl.c_str());
 				
 				if (!dict) {
-					throw Exception (enchant_broker_get_error (m_broker));
-					return 0; // not actually reached
+					throw enchant::Exception (enchant_broker_get_error (m_broker));
+					return 0; // never reached
 				}
 				
 				return new Dict (dict, m_broker);
 			}
 			
 			bool dict_exists (const std::string & lang) {
-				return (enchant_broker_dict_exists (m_broker, lang.c_str()) ? true : false);
+				if (enchant_broker_dict_exists (m_broker, lang.c_str()))
+					return true;
+				return false;
 			}
 			
 			void set_ordering (const std::string & tag, const std::string & ordering) {
@@ -195,11 +227,13 @@ namespace enchant
 			}
 			
 		private:
+
+			// space reserved for API/ABI expansion
+			void * _private[5];
 			
 			Broker ()
-				: m_broker (0)
+				: m_broker (enchant_broker_init ())
 				{
-					m_broker = enchant_broker_init ();
 				}
 			
 			~Broker () {
