@@ -28,6 +28,7 @@
  * do so, delete this exception statement from your version.
  */
 
+#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,20 +39,20 @@ describe_dict (const char * const lang_tag,
 	       const char * const provider_name,
 	       const char * const provider_desc,
 	       const char * const provider_file,
-	       void * ud)
+	       void * user_data)
 {
-	(void)ud;
-	printf ("%s: %s = %s (%s)\n", lang_tag, provider_name, provider_desc, provider_file);
+	FILE * out = (FILE *)user_data;
+	fprintf (out, "%s: %s = %s (%s)\n", lang_tag, provider_name, provider_desc, provider_file);
 }
 
 static void
 enumerate_dicts (const char * name,
 		 const char * desc,
 		 const char * file,
-		 void * ud)
+		 void * user_data)
 {
-	(void)ud;
-	printf ("%s: '%s' (%s)\n", name, desc, file);
+	FILE * out = (FILE *)user_data;
+	fprintf (out, "%s: '%s' (%s)\n", name, desc, file);
 }
 
 int
@@ -65,16 +66,22 @@ main (int argc, char **argv)
 
 	for (i = 1; i < argc; i++) {
 		if (!strcmp (argv[i], "-lang")) {
-			if (i < argc) {
-				lang_tag = argv[i+1];
+			if (i < (argc - 1)) {
+				lang_tag = g_strdup (argv[i+1]);
 				i++;
+			} else {
+				lang_tag = g_strdup (g_getenv ("LANG"));
 			}
 			mode = 1;
-		} else if (!strcmp (argv[i], "-h") || !strcmp(argv[i], "-help")) {
-			printf ("%s [-lang language_tag] [-h] [-v]\n", argv[0]);
+		} else if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "-?") || !strcmp(argv[i], "-help")) {
+			printf ("%s [-lang [language_tag]] [-h] [-v]\n", argv[0]);
+			if (lang_tag)
+				g_free (lang_tag);
 			return 0;
-		} else if (!strcmp (argv[i], "-v")) {
+		} else if (!strcmp (argv[i], "-v") || !strcmp (argv[i], "-version")) {
 			printf ("%s %s\n", argv[0], VERSION);
+			if (lang_tag)
+				g_free (lang_tag);
 			return 0;
 		}
 	}
@@ -82,11 +89,11 @@ main (int argc, char **argv)
 	broker = enchant_broker_init ();
 	
 	if (mode == 0) {
-		enchant_broker_describe (broker, enumerate_dicts, NULL);
+		enchant_broker_describe (broker, enumerate_dicts, stdout);
 	} else if (mode == 1) {
 
 		if (!lang_tag) {
-			printf ("Error: language tag not specified\n");
+			printf ("Error: language tag not specified and environment variable $LANG not set\n");
 			enchant_broker_free (broker);
 			return 1;
 		}
@@ -95,14 +102,21 @@ main (int argc, char **argv)
 		
 		if (!dict) {
 			printf ("No dictionary available for '%s'\n", lang_tag);
+
+			if (lang_tag)
+				g_free (lang_tag);
+
 			enchant_broker_free (broker);
 			return 1;
 		} else {
-			enchant_dict_describe (dict, describe_dict, NULL);
+			enchant_dict_describe (dict, describe_dict, stdout);
 			enchant_broker_free_dict (broker, dict);
 		}
 	}
 
+	if (lang_tag)
+		g_free (lang_tag);
+	
 	enchant_broker_free (broker);
 	
 	return 0;
