@@ -120,10 +120,33 @@ if test "x$check_aspell" != "xno"; then
        ASPELL_LIBS="-L$with_aspell_prefix/lib -laspell"
        ASPELL_DICT_DIR="'\"$with_aspell_prefix/lib/aspell\"'"
    else
-       LDFLAGS="-L`aspell config prefix`/lib "$LDFLAGS
-       ASPELL_INC="-I`aspell config prefix`/include"
-       ASPELL_LIBS="-L`aspell config prefix`/lib -laspell"
-       ASPELL_DICT_DIR="'\"`aspell config dict-dir`\"'"
+       aspell_prefix=${prefix}
+       if test "x$prefix" = "xNONE"; then
+	  aspell_prefix="/usr/local"
+       fi
+
+       AC_CHECK_PROG(HAVE_ASPELL, aspell, yes, no)
+       if test "x$HAVE_ASPELL" = "xyes"; then
+          #perl -e 'if (<STDIN> =~ /(.*) Aspell 0\.(.*)\.(.*)/) { print "$2\n"; } else { print "0\n"; }'`;
+	  AC_MSG_CHECKING([For Aspell >= 0.50.0])
+	  aspell_major=`aspell -v | awk -F. '{print $4;}'`
+	  if test "$aspell_major" -ge "50"; then
+              LDFLAGS="-L`aspell config prefix`/lib "$LDFLAGS
+	      ASPELL_INC="-I`aspell config prefix`/include"
+	      ASPELL_LIBS="-L`aspell config prefix`/lib -laspell"
+	      ASPELL_DICT_DIR="'\"`aspell config dict-dir`\"'"
+
+	      AC_MSG_RESULT([yes])
+	  else
+	      AC_MSG_RESULT([no])
+	  fi
+      fi
+
+      if test "x$ASPELL_DICT_DIR" = "x"; then
+	      AC_MSG_WARN([Didn't find aspell >= 0.50.0 and no explicit path aspell specified. Guessing at $aspell_prefix])
+	      ASPELL_LIBS="-L$aspell_prefix/lib -laspell"
+	      ASPELL_DICT_DIR="\"$aspell_prefix/lib/aspell\""
+      fi
    fi
 
    AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,AC_MSG_WARN([Enchant building without the aspell library]),)
