@@ -201,8 +201,15 @@ ISpellChecker::ISpellChecker()
 
 ISpellChecker::~ISpellChecker()
 {
-	lcleanup();
-	
+        // lcleanup(); // replaced this with functions for Win32 brokeness
+	clearindex (m_pflagindex);
+	clearindex (m_sflagindex);
+
+	FREEP(m_hashtbl);
+	FREEP(m_hashstrings);
+	FREEP(m_sflaglist);
+	FREEP(m_chartypes);
+	                                                	
 	if (g_iconv_is_valid (m_translate_in ))
 		g_iconv_close(m_translate_in);
 	m_translate_in = G_ICONV_INVALID;
