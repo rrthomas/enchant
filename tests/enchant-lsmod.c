@@ -46,13 +46,24 @@ describe_dict (const char * const lang_tag,
 }
 
 static void
-enumerate_dicts (const char * name,
-		 const char * desc,
-		 const char * file,
-		 void * user_data)
+enumerate_providers (const char * name,
+		     const char * desc,
+		     const char * file,
+		     void * user_data)
 {
 	FILE * out = (FILE *)user_data;
 	fprintf (out, "%s: '%s' (%s)\n", name, desc, file);
+}
+
+static void
+enumerate_dicts (const char * const lang_tag,
+		 const char * const provider_name,
+		 const char * const provider_desc,
+		 const char * const provider_file,
+		 void * user_data)
+{
+	FILE * out = (FILE *)user_data;
+	fprintf (out, "%s: '%s' (%s)\n", lang_tag, provider_name, provider_desc);
 }
 
 int
@@ -74,7 +85,7 @@ main (int argc, char **argv)
 			}
 			mode = 1;
 		} else if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "-?") || !strcmp(argv[i], "-help")) {
-			printf ("%s [-lang [language_tag]] [-h] [-v]\n", argv[0]);
+			printf ("%s [-lang [language_tag]] [-list-dicts] [-h] [-v]\n", argv[0]);
 			if (lang_tag)
 				g_free (lang_tag);
 			return 0;
@@ -83,13 +94,15 @@ main (int argc, char **argv)
 			if (lang_tag)
 				g_free (lang_tag);
 			return 0;
+		} else if (!strcmp (argv[i], "-list-dicts")) {
+			mode = 2;
 		}
 	}
 	
 	broker = enchant_broker_init ();
 	
 	if (mode == 0) {
-		enchant_broker_describe (broker, enumerate_dicts, stdout);
+		enchant_broker_describe (broker, enumerate_providers, stdout);
 	} else if (mode == 1) {
 
 		if (!lang_tag) {
@@ -112,6 +125,8 @@ main (int argc, char **argv)
 			enchant_dict_describe (dict, describe_dict, stdout);
 			enchant_broker_free_dict (broker, dict);
 		}
+	} else if (mode == 2) {
+		enchant_broker_list_dicts (broker, enumerate_dicts, stdout);
 	}
 
 	if (lang_tag)
