@@ -91,12 +91,13 @@ consume_line (FILE * in, GString * str)
 
 	if (str->len) {
 		utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
-		g_string_truncate (str, 0);
 
 		if (utf) {
 			g_string_assign (str, utf);
 			g_free (utf);
-		}
+		} 
+		/* else str->str stays the same. we'll assume that it's 
+		   already utf8 and glib is just being stupid */
 	}
 
 	return ret;
@@ -112,6 +113,8 @@ print_utf (FILE * out, const char * str)
 	if (native) {
 		fwrite (native, 1, bytes_written, out);
 		g_free (native);
+	} else {
+		fwrite (str, 1, strlen (str), out);
 	}
 }
 
