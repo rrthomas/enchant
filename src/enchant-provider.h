@@ -84,7 +84,7 @@ struct str_enchant_dict
 				   const char *const mis, size_t mis_len,
 				   const char *const cor, size_t cor_len);
 	
-	void (*free_suggestions) (struct str_enchant_dict * me,
+	void (*free_string_list) (struct str_enchant_dict * me,
 				  char **str_list);
 
 	void * _reserved[5];

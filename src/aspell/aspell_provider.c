@@ -1,6 +1,6 @@
 /* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
- * Copyright (C) 2003 Dom Lachowicz
+ * Copyright (C) 2003,2004 Dom Lachowicz
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -136,7 +136,7 @@ aspell_dict_store_replacement (struct str_enchant_dict * me,
 }
 
 static void
-aspell_dict_free_suggestions (EnchantDict * me, char **str_list)
+aspell_dict_free_string_list (EnchantDict * me, char **str_list)
 {
 	g_strfreev (str_list);
 }
@@ -175,7 +175,7 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->add_to_personal = aspell_dict_add_to_personal;
 	dict->add_to_session = aspell_dict_add_to_session;
 	dict->store_replacement = aspell_dict_store_replacement;
-	dict->free_suggestions = aspell_dict_free_suggestions;
+	dict->free_string_list = aspell_dict_free_string_list;
 	
 	return dict;
 }
@@ -231,6 +231,21 @@ aspell_provider_dictionary_exists (struct str_enchant_provider * me,
 
 	return exists;
 }
+
+#if 0
+    AspellDictInfoEnumeration * dels;
+    AspellDictInfoList * dlist;
+    const AspellDictInfo * entry;
+
+    dlist = get_aspell_dict_info_list(m_spellConfig);
+    dels = aspell_dict_info_list_elements(dlist);
+
+    while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0) {
+        dict_choice->Append(entry->name);
+    }
+
+    delete_aspell_dict_info_enumeration(dels);
+#endif
 
 static void
 aspell_provider_dispose (EnchantProvider * me)

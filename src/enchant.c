@@ -1,6 +1,6 @@
 /* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
- * Copyright (C) 2003 Dom Lachowicz
+ * Copyright (C) 2003, 2004 Dom Lachowicz
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -247,8 +247,14 @@ enchant_session_new_with_pwl (EnchantProvider * provider, const char * const pwl
 					enchant_lock_file (f);
 					
 					while (NULL != (fgets (line, sizeof (line), f)))
-						g_hash_table_insert (session->personal, g_strdup (line), GINT_TO_POINTER(TRUE));
-					
+						{
+							size_t l = strlen(line)-1;
+							if (line[l]=='\n') 
+								line[l] = '\0';
+
+							g_hash_table_insert (session->personal, g_strdup (line), GINT_TO_POINTER(TRUE));
+						}
+
 					enchant_unlock_file (f);
 					fclose (f);
 				} 
@@ -350,6 +356,21 @@ enchant_session_clear_error (EnchantSession * session)
 /********************************************************************************/
 /********************************************************************************/
 
+static void
+enchant_dict_free_string_list_impl (EnchantDict * dict, char **string_list)
+{
+	EnchantSession * session;
+
+	g_return_if_fail (dict);
+	g_return_if_fail (string_list);
+
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
+	
+	if (dict->free_string_list)
+		(*dict->free_string_list) (dict, string_list);
+}
+
 /**
  * enchant_dict_set_error
  * @dict: A non-null dictionary
@@ -423,8 +444,10 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
 
 	if (dict->check)
 		return (*dict->check) (dict, word, len);
-	
-	return -1;
+	else
+		return -1;
+
+	return 1;
 }
 
 /**
@@ -432,7 +455,7 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to find suggestions for, in UTF-8 encoding
  * @len: The non-zero byte length of @word
- * @out_n_suggs: The non-null location to store the # of suggestions returned
+ * @out_n_suggs: The location to store the # of suggestions returned, or %null
  *
  * Will return an %null value if any of those pre-conditions
  * are not met.
@@ -443,16 +466,45 @@ ENCHANT_MODULE_EXPORT (char **)
 enchant_dict_suggest (EnchantDict * dict, const char *const word,
 		      size_t len, size_t * out_n_suggs)
 {
+	size_t n_suggs;
+	char ** suggs;
+
 	g_return_val_if_fail (dict, NULL);
 	g_return_val_if_fail (word, NULL);
 	g_return_val_if_fail (len, NULL);
-	g_return_val_if_fail (out_n_suggs, NULL);
 	
-	if (dict->suggest)
-		return (*dict->suggest) (dict, word, len, out_n_suggs);
+	if (dict->suggest) 
+		{
+			char ** tmp_suggs;
+			
+			tmp_suggs = (*dict->suggest) (dict, word, len, &n_suggs);
+			
+			/* clone the suggestion array */
+			if (tmp_suggs) 
+				{
+					size_t i;
+					
+					suggs = g_new0 (char *, n_suggs + 1);
+					for (i = 0; i < n_suggs; i++)
+						suggs[i] = g_strdup (tmp_suggs[i]);
+					
+					enchant_dict_free_string_list_impl (dict, tmp_suggs);
+				} 
+			else 
+				{
+					suggs = NULL;
+				}
+		}
+	else 
+		{
+			suggs = NULL;
+			n_suggs = 0;
+		}
 	
-	*out_n_suggs = 0;
-	return NULL;
+	if (out_n_suggs)
+		*out_n_suggs = n_suggs;
+
+	return suggs;
 }
 
 /**
@@ -558,26 +610,32 @@ enchant_dict_store_replacement (EnchantDict * dict,
 }
 
 /**
+ * enchant_dict_free_string_list
+ * @dict: A non-null #EnchantDict
+ * @string_list: 
+ *
+ * Releases the string list
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
+{
+	g_return_if_fail (string_list);
+	g_strfreev (string_list);
+}
+
+/**
  * enchant_dict_free_suggestions
  * @dict: A non-null #EnchantDict
  * @suggestions: The non-null suggestion list returned by
  *               'enchant_dict_suggest'
  *
  * Releases the suggestions
+ * This function is DEPRECATED. Please use enchant_dict_free_string_list() instead.
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions)
 {
-	EnchantSession * session;
-
-	g_return_if_fail (dict);
-	g_return_if_fail (suggestions);
-
-	session = (EnchantSession*)dict->enchant_private_data;
-	enchant_session_clear_error (session);
-	
-	if (dict->free_suggestions)
-		(*dict->free_suggestions) (dict, suggestions);
+	enchant_dict_free_string_list (dict, suggestions);
 }
 
 /**

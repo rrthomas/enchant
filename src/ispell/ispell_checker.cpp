@@ -574,7 +574,7 @@ ispell_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static void
-ispell_dict_free_suggestions (EnchantDict * me, char **str_list)
+ispell_dict_free_string_list (EnchantDict * me, char **str_list)
 {
 	g_strfreev (str_list);
 }
@@ -601,7 +601,7 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *) checker;
 	dict->check = ispell_dict_check;
 	dict->suggest = ispell_dict_suggest;
-	dict->free_suggestions = ispell_dict_free_suggestions;
+	dict->free_string_list = ispell_dict_free_string_list;
 	// don't implement session or personal
 	
 	return dict;

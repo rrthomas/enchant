@@ -182,7 +182,7 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 static void
-hspell_dict_free_suggestions (EnchantDict * me, char **str_list)
+hspell_dict_free_string_list (EnchantDict * me, char **str_list)
 {
 	g_strfreev (str_list);
 }
@@ -230,7 +230,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict = g_new0 (EnchantDict, 1);
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
-	dict->free_suggestions = hspell_dict_free_suggestions;
+	dict->free_string_list = hspell_dict_free_string_list;
 	
 	return dict;
 }
