@@ -53,7 +53,7 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 	HKEY baseKey;
 	unsigned long lType;	
 	DWORD dwSize;
-	char* szValue = NULL;
+	BYTE* szValue = NULL;
 
 	if (current_user)
 		baseKey = HKEY_CURRENT_USER;
@@ -65,12 +65,12 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 			// Determine size of string
 			if( RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS )
 				{
-					szValue = g_new0(char, dwSize + 1);
+					szValue = g_new0(BYTE, dwSize + 1);
 					RegQueryValueEx( hKey, key, NULL, &lType, szValue, &dwSize);
 				}
 		}
 	
-	return szValue;
+	return (char *)szValue;
 #endif
 }
 
