@@ -87,6 +87,7 @@ main (int argc, char **argv)
 
 		if (!lang_tag) {
 			printf ("Error: language tag not specified\n");
+			enchant_broker_free (broker);
 			return 1;
 		}
 
@@ -94,6 +95,7 @@ main (int argc, char **argv)
 		
 		if (!dict) {
 			printf ("No dictionary available for '%s'\n", lang_tag);
+			enchant_broker_free (broker);
 			return 1;
 		} else {
 			enchant_dict_describe (dict, describe_dict, NULL);
