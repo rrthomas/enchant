@@ -69,12 +69,8 @@ struct str_enchant_dict
 	
 	void (*free_suggestions) (struct str_enchant_dict * me,
 				  char **str_list);
-	
-	void (*_reserved_func1) (void);
-	void (*_reserved_func2) (void);
-	void (*_reserved_func3) (void);
-	void (*_reserved_func4) (void);
-	void (*_reserved_func5) (void);
+
+	void * _reserved[5];
 };
 	
 struct str_enchant_provider
@@ -96,11 +92,7 @@ struct str_enchant_provider
 	/* const */ char * (*identify) (struct str_enchant_provider * me);
 	/* const */ char * (*describe) (struct str_enchant_provider * me);
 
-	void (*_reserved_func1) (void);
-	void (*_reserved_func2) (void);
-	void (*_reserved_func3) (void);
-	void (*_reserved_func4) (void);
-	void (*_reserved_func5) (void);
+	void * _reserved[5];
 };
 
 #ifdef __cplusplus
