@@ -6,7 +6,7 @@ endif
 
 EXTRA_DIST=license.readme
 
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(MYSPELL_CFLAGS)
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(MYSPELL_CFLAGS) -D_ENCHANT_BUILD=1
 
 myspell_LTLIBRARIES = $(target_lib)
 myspelldir= $(libdir)/enchant
