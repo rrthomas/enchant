@@ -403,6 +403,42 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 }
 
 /**
+ * enchant_broker_describe
+ * @broker: A non-null #EnchantBroker
+ * @dict: A non-null #EnchantBrokerDescribeFn
+ * @user_data: Optional user-data
+ *
+ * Enumerates the Enchant providers and tells
+ * you some rudimentary information about them.
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_broker_describe (EnchantBroker * broker,
+			 EnchantBrokerDescribeFn fn,
+			 void * user_data)
+{
+	GSList *list;
+	EnchantProvider *provider;
+	GModule *module;
+
+	const char * name, * desc, * file;
+
+	g_return_if_fail (broker);
+	g_return_if_fail (fn);
+
+	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
+		{
+			provider = (EnchantProvider *) list->data;
+			module = (GModule *) provider->enchant_private_data;
+
+			name = (*provider->identify) (provider);
+			desc = (*provider->describe) (provider);
+			file = g_module_name (module);
+
+			(*fn) (name, desc, file, user_data);
+		}
+}
+
+/**
  * enchant_broker_release_dict
  * @broker: A non-null #EnchantBroker
  * @dict: A non-null #EnchantDict

@@ -583,6 +583,7 @@ ispell_provider_dictionary_status (struct str_enchant_provider * me,
 				   const char *const tag)
 {
 	// TODO: use g_file_test to test existance
+	g_warning ("ispell_provider_dictionary_status stub - unimplemented\n");
 	return ED_UNKNOWN;
 }
 
@@ -590,6 +591,18 @@ static void
 ispell_provider_dispose (EnchantProvider * me)
 {
 	g_free (me);
+}
+
+static char *
+ispell_provider_identify (EnchantProvider * me)
+{
+	return "ispell";
+}
+
+static char *
+ispell_provider_describe (EnchantProvider * me)
+{
+	return "Ispell Provider";
 }
 
 extern "C" {
@@ -604,6 +617,8 @@ init_enchant_provider (void)
 	provider->request_dict = ispell_provider_request_dict;
 	provider->dispose_dict = ispell_provider_dispose_dict;
 	provider->dictionary_status = ispell_provider_dictionary_status;
+	provider->identify = ispell_provider_identify;
+	provider->describe = ispell_provider_describe;
 
 	return provider;
 }

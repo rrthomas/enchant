@@ -74,7 +74,6 @@ ENCHANT_MODULE_EXPORT (void)
 
 ENCHANT_MODULE_EXPORT (EnchantBroker *) 
      enchant_broker_init (void);
-
 ENCHANT_MODULE_EXPORT (void)
      enchant_broker_term (EnchantBroker * broker);
 
@@ -86,6 +85,16 @@ ENCHANT_MODULE_EXPORT (void)
 ENCHANT_MODULE_EXPORT (EnchantDictStatus)
      enchant_broker_dictionary_status (EnchantBroker * broker,
 				       const char * const tag);
+
+typedef void (*EnchantBrokerDescribeFn) (const char * name,
+					 const char * desc,
+					 const char * file,
+					 void * user_data);
+	
+ENCHANT_MODULE_EXPORT (void)
+     enchant_broker_describe (EnchantBroker * broker,
+			      EnchantBrokerDescribeFn fn,
+			      void * user_data);
 
 struct str_enchant_dict
 {
@@ -134,6 +143,9 @@ struct str_enchant_provider
 	
 	EnchantDictStatus (*dictionary_status) (struct str_enchant_provider * me,
 						const char *const tag);
+
+	/* const */ char * (*identify) (struct str_enchant_provider * me);
+	/* const */ char * (*describe) (struct str_enchant_provider * me);
 
 	void (*_reserved_func1) (void);
 	void (*_reserved_func2) (void);

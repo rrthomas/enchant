@@ -37,7 +37,7 @@
 #include "enchant.h"
 
 static int
-pspell_dict_check (EnchantDict * me, const char *const word, size_t len)
+aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	PspellManager *manager;
 	
@@ -50,7 +50,7 @@ pspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static char **
-pspell_dict_suggest (EnchantDict * me, const char *const word,
+aspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
 	PspellManager *manager;
@@ -92,7 +92,7 @@ pspell_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 static void
-pspell_dict_add_to_personal (EnchantDict * me,
+aspell_dict_add_to_personal (EnchantDict * me,
 			     const char *const word, size_t len)
 {
 	PspellManager *manager;
@@ -102,7 +102,7 @@ pspell_dict_add_to_personal (EnchantDict * me,
 }
 
 static void
-pspell_dict_add_to_session (EnchantDict * me,
+aspell_dict_add_to_session (EnchantDict * me,
 			    const char *const word, size_t len)
 {
 	PspellManager *manager;
@@ -112,7 +112,7 @@ pspell_dict_add_to_session (EnchantDict * me,
 }
 
 static void
-pspell_dict_store_replacement (struct str_enchant_dict * me,
+aspell_dict_store_replacement (struct str_enchant_dict * me,
 			       const char *const mis, size_t mis_len,
 			       const char *const cor, size_t cor_len)
 {
@@ -124,13 +124,13 @@ pspell_dict_store_replacement (struct str_enchant_dict * me,
 }
 
 static void
-pspell_dict_free_suggestions (EnchantDict * me, char **str_list)
+aspell_dict_free_suggestions (EnchantDict * me, char **str_list)
 {
 	g_strfreev (str_list);
 }
 
 static EnchantDict *
-pspell_provider_request_dict (EnchantProvider * me, const char *const tag)
+aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	EnchantDict *dict;
 	PspellManager *manager;
@@ -153,18 +153,18 @@ pspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	
 	dict = g_new0 (EnchantDict, 1);
 	dict->user_data = (void *) manager;
-	dict->check = pspell_dict_check;
-	dict->suggest = pspell_dict_suggest;
-	dict->add_to_personal = pspell_dict_add_to_personal;
-	dict->add_to_session = pspell_dict_add_to_session;
-	dict->store_replacement = pspell_dict_store_replacement;
-	dict->free_suggestions = pspell_dict_free_suggestions;
+	dict->check = aspell_dict_check;
+	dict->suggest = aspell_dict_suggest;
+	dict->add_to_personal = aspell_dict_add_to_personal;
+	dict->add_to_session = aspell_dict_add_to_session;
+	dict->store_replacement = aspell_dict_store_replacement;
+	dict->free_suggestions = aspell_dict_free_suggestions;
 	
 	return dict;
 }
 
 static void
-pspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
+aspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 {
 	PspellManager *manager;
 	
@@ -175,17 +175,30 @@ pspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 }
 
 static EnchantDictStatus
-pspell_provider_dictionary_status (struct str_enchant_provider * me,
+aspell_provider_dictionary_status (struct str_enchant_provider * me,
 				   const char *const tag)
 {
 	/* TODO: get kevina to apply my patch */
+	g_warning ("pspell_provider_dictionary_status stub - unimplemented\n");
 	return ED_UNKNOWN;
 }
 
 static void
-pspell_provider_dispose (EnchantProvider * me)
+aspell_provider_dispose (EnchantProvider * me)
 {
 	g_free (me);
+}
+
+static char *
+aspell_provider_identify (EnchantProvider * me)
+{
+	return "aspell";
+}
+
+static char *
+aspell_provider_describe (EnchantProvider * me)
+{
+	return "Aspell Provider";
 }
 
 #ifdef __cplusplus
@@ -198,11 +211,13 @@ init_enchant_provider (void)
 	EnchantProvider *provider;
 	
 	provider = g_new0 (EnchantProvider, 1);
-	provider->dispose = pspell_provider_dispose;
-	provider->request_dict = pspell_provider_request_dict;
-	provider->dispose_dict = pspell_provider_dispose_dict;
-	provider->dictionary_status = pspell_provider_dictionary_status;
-	
+	provider->dispose = aspell_provider_dispose;
+	provider->request_dict = aspell_provider_request_dict;
+	provider->dispose_dict = aspell_provider_dispose_dict;
+	provider->dictionary_status = aspell_provider_dictionary_status;
+	provider->identify = aspell_provider_identify;
+	provider->describe = aspell_provider_describe;
+
 	return provider;
 }
 

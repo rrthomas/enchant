@@ -278,6 +278,7 @@ EnchantDictStatus uspell_provider_dictionary_status(struct str_enchant_provider 
 						    const char *const tag)
 {
 	// TODO: a g_file_exists check on the dictionary associated with the tag
+	g_warning ("uspell_provider_dictionary_status stub - unimplemented\n");
 	return(ED_UNKNOWN);
 }
 
@@ -298,9 +299,19 @@ uspell_provider_dispose (EnchantProvider * me)
 	g_free (me);
 }
 
-#ifdef __cplusplus
+static char *
+uspell_provider_identify (EnchantProvider * me)
+{
+	return "uspell";
+}
+
+static char *
+uspell_provider_describe (EnchantProvider * me)
+{
+	return "Uspell Provider";
+}
+
 extern "C" {
-#endif
 
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
 init_enchant_provider (void)
@@ -312,10 +323,11 @@ init_enchant_provider (void)
 	provider->request_dict = uspell_provider_request_dict;
 	provider->dispose_dict = uspell_provider_dispose_dict;
 	provider->dictionary_status = uspell_provider_dictionary_status;
+	provider->identify = uspell_provider_identify;
+	provider->describe = uspell_provider_describe;
 	
 	return provider;
 }
 
-#ifdef __cplusplus
 }
-#endif
+
