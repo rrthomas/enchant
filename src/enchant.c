@@ -303,8 +303,6 @@ enchant_session_add_personal (EnchantSession * session, const char * const word,
 {
 	FILE * f;
 
-	g_hash_table_insert (session->session, g_strndup (word, len), GINT_TO_POINTER(TRUE));
-
 	if (session->personal_filename) 
 		{
 			f = fopen (session->personal_filename, "a");
@@ -474,6 +472,8 @@ enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 	g_return_if_fail (len);
 
 	/* add to session backend regardless */
+	enchant_dict_add_to_session (dict, word, len);
+
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 	enchant_session_add_personal (session, word, len);
