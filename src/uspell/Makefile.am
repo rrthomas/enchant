@@ -10,7 +10,7 @@ install-libtool-import-lib:
 uninstall-libtool-import-lib:
 endif
 
-if WITH_PSPELL
+if WITH_USPELL
 target_lib = libenchant_uspell.la
 else
 target_lib =
@@ -23,7 +23,7 @@ uspelldir= $(libdir)/enchant
 
 libenchant_uspell_la_LIBADD= $(ENCHANT_LIBS) $(USPELL_LIBS)
 libenchant_uspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
-libenchant_uspell_la_SOURCES = uspell_provider.c
+libenchant_uspell_la_SOURCES = uspell_provider.cpp
 libenchant_uspell_lalibdir=$(libdir)/enchant
 
 install-data-local: install-libtool-import-lib

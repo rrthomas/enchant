@@ -28,10 +28,9 @@
 #include <glib.h>
 #include "enchant.h"
 
-// from uspell
-#include "utf8convert.h"
-#include "uniprops.h"
-#include "uspell.h"
+#include <uspell/utf8convert.h>
+#include <uspell/uniprops.h>
+#include <uspell/uspell.h>
 
 static const size_t MAXALTERNATIVE = 20; // we won't return more than this number of suggests
 
@@ -148,12 +147,12 @@ uspell_request_dict (const char * base, const char * mapping)
 
 	class uSpell *manager;
 
-	filename = g_build_filename (base, mapping, ".uspell.dat");
+	fileName = g_build_filename (base, mapping, ".uspell.dat");
 	transName = g_build_filename (base, mapping, ".uspell.trans");
 
 	manager = new uSpell(fileName, transName, uSpell::expandPrecomposed);
 
-	g_free (filename);
+	g_free (fileName);
 	g_free (transName);
 
 	return manager;
