@@ -1,10 +1,15 @@
 if OS_WIN32
 
+if WITH_ISPELL
 install-libtool-import-lib:
 	$(INSTALL) .libs/libenchant_ispell.dll.a $(DESTDIR)$(libdir)
 
 uninstall-libtool-import-lib:
 	-rm $(DESTDIR)$(libdir)/libenchant_ispell.dll.a
+else
+install-libtool-import-lib:
+uninstall-libtool-import-lib:
+endif
 else
 install-libtool-import-lib:
 uninstall-libtool-import-lib:

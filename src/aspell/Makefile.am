@@ -1,10 +1,16 @@
 if OS_WIN32
 
+if WITH_PSPELL
 install-libtool-import-lib:
 	$(INSTALL) .libs/libenchant_aspell.dll.a $(DESTDIR)$(libdir)
 
 uninstall-libtool-import-lib:
 	-rm $(DESTDIR)$(libdir)/libenchant_aspell.dll.a
+else
+install-libtool-import-lib:
+uninstall-libtool-import-lib:
+endif
+
 else
 install-libtool-import-lib:
 uninstall-libtool-import-lib:
