@@ -295,7 +295,7 @@ init_enchant_provider (void)
 	provider->identify = hspell_provider_identify;
 	provider->describe = hspell_provider_describe;
 	provider->list_dicts = hspell_provider_list_dicts;
-	provider->free_string_list = uspell_provider_free_string_list;
+	provider->free_string_list = hspell_provider_free_string_list;
 
 	return provider;
 }
