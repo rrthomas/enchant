@@ -64,6 +64,7 @@ find $RPM_BUILD_ROOT/%{_libdir} -name \*.la -exec rm -f \{\} \;
 %doc AUTHORS COPYING.LIB README
 %attr(755,root,root)%{_bindir}/*
 %{_libdir}/lib*.so*
+%{_prefix}/man/man1/enchant.1.gz
 %{!?_without_ispell:%{_libdir}/enchant/*ispell.so*}
 %{!?_without_myspell:%{_libdir}/enchant/*myspell.so*}
 %{!?_without_aspell:%{_libdir}/enchant/*aspell.so*}

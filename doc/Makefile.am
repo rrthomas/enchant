@@ -1,7 +1,3 @@
-manonedir = $(prefix)/man/man1
+man_MANS = enchant.1
 
-MANPAGES = enchant.1
-
-manone_DATA = $(MANPAGES)
-
-EXTRA_DIST = $(MANPAGES)
+EXTRA_DIST = $(man_MANS)
