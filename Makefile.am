@@ -1,11 +1,11 @@
 SUBDIRS=src tests
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libenchant.pc
+pkgconfig_DATA = enchant.pc
 
 EXTRA_DIST =		\
 	autogen.sh	\
-	libenchant.pc.in	\
-	libenchant.spec.in	\
-	libenchant.spec		\
+	enchant.pc.in	\
+	enchant.spec.in	\
+	enchant.spec		\
 	README TODO HACKING NEWS BUGS ChangeLog MAINTAINERS AUTHORS COPYING.LIB
