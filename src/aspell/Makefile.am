@@ -1,15 +1,15 @@
-if WITH_PSPELL
+if WITH_ASPELL
 target_lib = libenchant_aspell.la
 else
 target_lib =
 endif
 
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -D_ENCHANT_BUILD=1
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -I@ASPELL_INC@ -D_ENCHANT_BUILD=1 -DASPELL_DICT_DIR=@ASPELL_DICT_DIR@ 
 
 aspell_LTLIBRARIES = $(target_lib)
 aspelldir= $(libdir)/enchant
 
-libenchant_aspell_la_LIBADD= $(ENCHANT_LIBS) $(PSPELL_LIBS) $(top_builddir)/src/libenchant.la
+libenchant_aspell_la_LIBADD= $(ENCHANT_LIBS) $(ASPELL_LIBS) $(top_builddir)/src/libenchant.la
 libenchant_aspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
 libenchant_aspell_la_SOURCES = aspell_provider.c
 libenchant_aspell_lalibdir=$(libdir)/enchant

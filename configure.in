@@ -103,25 +103,39 @@ fi
 MYSPELL_CFLAGS="-DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dict_dir\"'"
 AC_SUBST(MYSPELL_CFLAGS)
 
-check_pspell=yes
+check_aspell=yes
+build_aspell=no
 
-AC_ARG_ENABLE(pspell, [  --disable-pspell     enable the pspell backend [default=auto]], check_pspell="$enableval", check_pspell=yes)
+AC_ARG_ENABLE(aspell, [  --disable-aspell     enable the aspell backend [default=auto]], check_aspell="$enableval", check_aspell=yes)
 
-build_pspell=no
+AC_ARG_WITH(aspell-prefix, [  --with-aspell-prefix=DIR
+                          specify under which prefix aspell is installed.], with_aspell_prefix="$withval", )
 
-if test "x$check_pspell" != "xno"; then
-   AC_CHECK_LIB(pspell, pspell_manager_add_to_personal,
-		[build_pspell=yes
-		PSPELL_LIBS=-lpspell AC_SUBST(PSPELL_LIBS)])
-
-   if test "$build_pspell" = "no"; then
-	AC_CHECK_LIB(aspell, aspell_speller_add_to_personal,
-	     	     [build_pspell=yes
-	     	      PSPELL_LIBS=-laspell AC_SUBST(PSPELL_LIBS)])
+if test "x$check_aspell" != "xno"; then
+   if test "x$with_aspell_prefix" != "x"; then
+       saved_LDFLAGS=$LDFLAGS
+       LDFLAGS="-L$with_aspell_prefix/lib "$LDFLAGS
+       ASPELL_INC="-I$with_aspell_prefix/include"
+       ASPELL_LIBS="-L$with_aspell_prefix/lib -laspell"
+       ASPELL_DICT_DIR="'\"$with_aspell_prefix/lib/aspell\"'"
+   else
+       LDFLAGS="-L`aspell config prefix`/lib "$LDFLAGS
+       ASPELL_INC="-I`aspell config prefix`/include"
+       ASPELL_LIBS="-L`aspell config prefix`/lib -laspell"
+       ASPELL_DICT_DIR="'\"`aspell config dict-dir`\"'"
    fi
+
+   AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,AC_MSG_WARN([Enchant building without the aspell library]),)
+   if test "x$with_aspell_prefix" != "x"; then
+          LDFLAGS=$saved_LDFLAGS
+   fi
+
+   AC_SUBST(ASPELL_INC)
+   AC_SUBST(ASPELL_LIBS)
+   AC_SUBST(ASPELL_DICT_DIR)
 fi
 
-AM_CONDITIONAL(WITH_PSPELL, test "$build_pspell" = yes)
+AM_CONDITIONAL(WITH_ASPELL, test "$build_aspell" = yes)
 
 build_uspell=no
 
@@ -168,7 +182,7 @@ $PACKAGE-$VERSION
 	prefix:                         ${prefix}
 	compiler:                       ${CC}
 	
-	Build Aspell/Pspell backend:    ${build_pspell}
+	Build Aspell backend:           ${build_aspell}
 	Build Ispell backend:           ${build_ispell}
 	Build Uspell backend:           ${build_uspell}
 	Build Myspell backend:          ${build_myspell}
