@@ -206,19 +206,39 @@ uspell_request_dict (const char * base, const char * mapping, const int flags)
 	return manager;
 }
 
+/* in preparation for using win32 registry keys, if necessary */
+
+static char *
+uspell_checker_get_prefix (void)
+{
+#ifdef ENCHANT_USPELL_DICT_DIR
+	return g_strdup (ENCHANT_USPELL_DICT_DIR);
+#else
+	return NULL;
+#endif
+}
+
 static uSpell *
 uspell_request_manager (const char * private_dir, size_t mapIndex)
 {
+	char * uspell_prefix;
+
 	uSpell * manager = NULL;
 
 	manager = uspell_request_dict (private_dir,
 				       mapping[mapIndex].corresponding_uspell_file_name,
 				       mapping[mapIndex].language_flags);
 
-	if (!manager)
-		manager = uspell_request_dict (ENCHANT_USPELL_DICT_DIR,
-					       mapping[mapIndex].corresponding_uspell_file_name,
-					       mapping[mapIndex].language_flags);
+	if (!manager) {
+		uspell_prefix = uspell_checker_get_prefix ();
+
+		if (uspell_prefix) {
+			manager = uspell_request_dict (uspell_prefix,
+						       mapping[mapIndex].corresponding_uspell_file_name,
+						       mapping[mapIndex].language_flags);
+			g_free (uspell_prefix);
+		}
+	}
 
 	return manager;
 }
@@ -230,14 +250,14 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	uSpell *manager = NULL;
 	int mapIndex;
 
-	char * private_dir = NULL;
-	const char * home_dir;
+	char * private_dir = NULL, * home_dir;
 
-	home_dir = g_get_home_dir ();
+	home_dir = enchant_get_user_home_dir ();
 
 	if (home_dir) {
 		private_dir = g_build_filename (home_dir, ".enchant",
 						"uspell", NULL);
+		g_free (home_dir);
 	}
 
 	for (mapIndex = 0; mapIndex < n_mappings; mapIndex++) {

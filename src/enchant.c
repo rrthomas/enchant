@@ -38,8 +38,8 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
-/* TODO: maybe a registry hack on win32 for these following fns 
- * TODO: use these functions
+/* TODO: use the win32 registry in these following functions PLUS the
+ * macro, if it exists (registry gets precedence)
  */
 
 /**
@@ -51,7 +51,11 @@
 ENCHANT_MODULE_EXPORT (char *)
 enchant_get_user_home_dir (void)
 {
-	return g_strdup (g_get_home_dir ());
+	const char * home_dir = g_get_home_dir ();
+
+	if (!home_dir)
+		return NULL;
+	return g_strdup (home_dir);
 }
 
 static char *
@@ -291,18 +295,18 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	gchar *user_dir;
-	const char * home_dir;       
+	gchar *user_dir, *home_dir;       
 	
 	/* load USER providers first. since the GSList is ordered,
 	   this intentionally gives preference to USER providers */
 
-	home_dir = g_get_home_dir ();
+	home_dir = enchant_get_user_home_dir ();
 
 	if (home_dir) {
 		user_dir = g_build_filename (home_dir, ".enchant", NULL);
 		enchant_load_providers_in_dir (broker, user_dir);
 		g_free (user_dir);
+		g_free (home_dir);
 	}
 
 	enchant_load_providers_in_dir (broker, ENCHANT_GLOBAL_MODULE_DIR);
@@ -350,8 +354,7 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 static void
 enchant_load_provider_ordering (EnchantBroker * broker)
 {
-	char * ordering_file;
-	const char * home_dir;
+	char * ordering_file, * home_dir;
 
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal,
 							   enchant_provider_order_destroyed, enchant_provider_order_destroyed);
@@ -360,12 +363,13 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 	enchant_load_ordering_from_file (broker, ordering_file);
 	g_free (ordering_file);
 
-	home_dir = g_get_home_dir ();
+	home_dir = enchant_get_user_home_dir ();
 
 	if (home_dir) {
 		ordering_file = g_build_filename (home_dir, ".enchant", "enchant.ordering", NULL);
 		enchant_load_ordering_from_file (broker, ordering_file);
 		g_free (ordering_file);
+		g_free (home_dir);
 	}
 }
 

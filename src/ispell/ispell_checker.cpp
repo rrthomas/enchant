@@ -331,15 +331,26 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 	return sugg_arr;
 }
 
+/* in preparation for using win32 registry keys, if necessary */
+
+static char *
+ispell_checker_get_prefix (void)
+{
+#ifdef ENCHANT_ISPELL_DICT_DIR
+	return g_strdup (ENCHANT_ISPELL_DICT_DIR);
+#else
+	return NULL;
+#endif
+}
+
 static void
 s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
-	char * tmp, * private_dir;
-	const char * home_dir;
+	char * tmp, * private_dir, * home_dir, * ispell_prefix;
 
 	names.clear ();
 
-	home_dir = g_get_home_dir ();
+	home_dir = enchant_get_user_home_dir ();
 
 	if (home_dir) {
 		private_dir = g_build_filename (home_dir, ".enchant", 
@@ -350,11 +361,16 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 		g_free (tmp);
 
 		g_free (private_dir);
+		g_free (home_dir);
 	}
 
-	tmp = g_build_filename (ENCHANT_ISPELL_DICT_DIR, dict, NULL);
-	names.push_back (tmp);
-	g_free (tmp);
+	ispell_prefix = ispell_checker_get_prefix ();
+	if (ispell_prefix) {
+		tmp = g_build_filename (ispell_prefix, dict, NULL);
+		names.push_back (tmp);
+		g_free (tmp);
+		g_free (ispell_prefix);
+	}
 }
 
 char *
