@@ -509,7 +509,8 @@ ISpellChecker::requestDictionary(const char *szLang)
 				shortened_dict = shortened_dict.substr(0, uscore_pos);
 				if (!loadDictionaryForLanguage (shortened_dict.c_str()))
 					return false;
-			}
+			} else
+				return false;
 		}
 	
 	m_bSuccessfulInit = true;
