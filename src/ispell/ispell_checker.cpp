@@ -207,11 +207,12 @@ ISpellChecker::ISpellChecker()
 
 ISpellChecker::~ISpellChecker()
 {
-	if (m_initialized)
-		lcleanup(); // only cleanup our mess if we were successfully initialized
-
-	clearindex (m_pflagindex);
-	clearindex (m_sflagindex);
+	if (m_bSuccessfulInit) {
+		// only cleanup our mess if we were successfully initialized
+		
+		clearindex (m_pflagindex);
+		clearindex (m_sflagindex);
+	}
 
 	FREEP(m_hashtbl);
 	FREEP(m_hashstrings);

@@ -721,9 +721,16 @@ enchant_broker_init (void)
 ENCHANT_MODULE_EXPORT (void) 
 enchant_broker_term (EnchantBroker * broker)
 {
-	g_return_if_fail (broker);
-	
-	/* will destroy the dictionaries for us */
+	guint n_remaining;
+
+	g_return_if_fail (broker);       
+
+	n_remaining = g_hash_table_size (broker->dict_map);
+	if (n_remaining) {
+		g_warning ("%u dictionaries weren't free'd.\n", n_remaining);
+	}
+
+	/* will destroy any remaining dictionaries for us */
 	g_hash_table_destroy (broker->dict_map);
 	g_hash_table_destroy (broker->provider_ordering);
 	
@@ -864,11 +871,14 @@ enchant_dict_describe (EnchantDict * dict,
 ENCHANT_MODULE_EXPORT (void)
 enchant_broker_release_dict (EnchantBroker * broker, EnchantDict * dict)
 {
+	EnchantSession * session;
+
 	g_return_if_fail (broker);
 	g_return_if_fail (dict);
+
+	session = (EnchantSession*)dict->enchant_private_data;
 	
-	/* we currently don't really release the dictionary until
-	   the broker is shutdown due to possible race conditions */
+	g_hash_table_remove (broker->dict_map, session->language_tag);
 }
 
 /**

@@ -72,6 +72,9 @@
 
 /*
  * $Log$
+ * Revision 1.6  2003/08/26 13:20:40  dom
+ * ispell crasher fix, implement enchant_dictionary_release
+ *
  * Revision 1.5  2003/08/26 13:08:03  uwog
  * Fix segfault when the requested dictionary couldn't be found.
  *
@@ -555,7 +558,6 @@ int ISpellChecker::linit (char *hashname)
 	}
 
     initckch(NULL);   
-    m_initialized = true;    
    
     return (0);
 }
