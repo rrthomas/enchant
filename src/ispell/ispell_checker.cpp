@@ -205,7 +205,6 @@ ISpellChecker::ISpellChecker()
 
 ISpellChecker::~ISpellChecker()
 {
-        // lcleanup(); // replaced this with functions for Win32 brokeness
 	clearindex (m_pflagindex);
 	clearindex (m_sflagindex);
 

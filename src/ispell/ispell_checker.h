@@ -97,7 +97,6 @@ private:
 	int good (ichar_t* w, int ignoreflagbits, int allhits, int pfxopts, int sfxopts);
 	void chk_aff (ichar_t* word, ichar_t* ucword, int len, int ignoreflagbits, int allhits, int pfxopts, int sfxopts);
 	int linit(char*);
-	void lcleanup();
 	struct dent * ispell_lookup (ichar_t* s, int dotree);
 	int strtoichar (ichar_t* out, char* in, int outlen, int canonical);
 	int ichartostr (char* out, ichar_t* in, int outlen, int canonical);

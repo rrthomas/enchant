@@ -329,8 +329,6 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
  * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
  * @len: The non-zero byte length of @word
  *
- * An implementation of "add_to_personal" is not guaranteed to work in all cases.
- * This function's implementation may vary by provider.
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
@@ -358,8 +356,6 @@ enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
  * @word: The non-null word you wish to add to this spell-checking session, in UTF-8 encoding
  * @len: The non-zero byte length of @word
  *
- * An implementation of "add_to_session" is not guaranteed to work in all cases.
- * This function's implementation may vary by provider.
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
@@ -384,7 +380,7 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 }
 
 /**
- * enchant_dict_add_to_session
+ * enchant_dict_store_replacement
  * @dict: A non-null #EnchantDict
  * @mis: The non-null word you wish to add a correction for, in UTF-8 encoding
  * @mis_len: The non-zero byte length of @mis

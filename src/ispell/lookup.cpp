@@ -72,6 +72,9 @@
 
 /*
  * $Log$
+ * Revision 1.4  2003/08/14 16:27:36  dom
+ * update some documentation
+ *
  * Revision 1.3  2003/07/28 20:40:27  dom
  * fix up the license clause, further win32-registry proof some directory getting functions
  *
@@ -640,17 +643,6 @@ void ISpellChecker::initckch (char *wchars)
 			}
 		}
     }
-}
-
-void ISpellChecker::lcleanup()
-{
-	clearindex (m_pflagindex);
-	clearindex (m_sflagindex);
-
-	FREEP(m_hashtbl);
-	FREEP(m_hashstrings);
-	FREEP(m_sflaglist);
-	FREEP(m_chartypes);
 }
 
 /*
