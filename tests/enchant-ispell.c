@@ -157,6 +157,8 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, siz
 				else
 					fwrite ("\n", 1, 1, out);
 			}
+
+			enchant_dict_free_string_list (dict, suggs);
 		}
 	}
 }

@@ -86,7 +86,7 @@ run_dict_tests (enchant::Dict * dict)
 
 #if 0
 	printf ("Adding 'helllo' to personal\n");
-	dict->add_to_personal ("helllo");
+	dict->add_to_pwl ("helllo");
 	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
 		{
 			printf ("enchant_dict_check (%s): %d\n", check_checks[i],

@@ -98,9 +98,6 @@ ENCHANT_MODULE_EXPORT (char **)
      enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			   size_t len, size_t * out_n_suggs);
 ENCHANT_MODULE_EXPORT (void)
-     enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
-				   size_t len);
-ENCHANT_MODULE_EXPORT (void)
      enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 				  size_t len);
 ENCHANT_MODULE_EXPORT (int)
@@ -111,7 +108,18 @@ ENCHANT_MODULE_EXPORT (void)
 				     const char *const mis, size_t mis_len,
 				     const char *const cor, size_t cor_len);
 ENCHANT_MODULE_EXPORT (void)
+     enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
+			      size_t len);
+ENCHANT_MODULE_EXPORT (void)
+	     enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
+
+#ifndef ENCHANT_DISABLE_DEPRECATED
+ENCHANT_MODULE_EXPORT (void)
      enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions);
+ENCHANT_MODULE_EXPORT (void)
+     enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
+				   size_t len);
+#endif /* ENCHANT_DISABLE_DEPRECATED */
 
 /* const */
 ENCHANT_MODULE_EXPORT(char *)

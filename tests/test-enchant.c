@@ -82,7 +82,7 @@ run_dict_tests (EnchantDict * dict)
 				}
 
 			if (suggs && n_suggs)
-				enchant_dict_free_suggestions (dict, suggs);
+				enchant_dict_free_string_list (dict, suggs);
 		}
 
 	printf ("Adding 'helllo' to session\n");
@@ -96,7 +96,7 @@ run_dict_tests (EnchantDict * dict)
 
 #if 0
 	printf ("Adding 'helllo' to personal\n");
-	enchant_dict_add_to_personal (dict, "helllo", 6);
+	enchant_dict_add_to_pwl (dict, "helllo", 6);
 	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
 		{
 			printf ("enchant_dict_check (%s): %d\n", check_checks[i],

@@ -534,15 +534,15 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 }
 
 /**
- * enchant_dict_add_to_personal
+ * enchant_dict_add_to_pwl
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
  * @len: The non-zero byte length of @word
  *
  */
 ENCHANT_MODULE_EXPORT (void)
-enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
-			      size_t len)
+enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
+			 size_t len)
 {
 	EnchantSession * session;
 
@@ -559,6 +559,21 @@ enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 	
 	if (dict->add_to_personal)
 		(*dict->add_to_personal) (dict, word, len);
+}
+
+/**
+ * enchant_dict_add_to_personal
+ * @dict: A non-null #EnchantDict
+ * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
+ * @len: The non-zero byte length of @word
+ *
+ * DEPRECATED. Please use enchant_dict_add_to_pwl() instead.
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
+			      size_t len)
+{
+	enchant_dict_add_to_pwl (dict, word, len);
 }
 
 /**

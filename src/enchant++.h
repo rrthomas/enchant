@@ -103,7 +103,7 @@ namespace enchant
 						out_suggestions.push_back (suggs[i]);
 					}
 					
-					enchant_dict_free_suggestions (m_dict, suggs);
+					enchant_dict_free_string_list (m_dict, suggs);
 				}
 			}
 						
@@ -113,9 +113,9 @@ namespace enchant
 				return result;
 			}
 			
-			void add_to_personal (const std::string & utf8word) {
-				enchant_dict_add_to_personal (m_dict, utf8word.c_str(), 
-							      utf8word.size());
+			void add_to_pwl (const std::string & utf8word) {
+				enchant_dict_add_to_pwl (m_dict, utf8word.c_str(), 
+							 utf8word.size());
 			}
 			
 			void add_to_session (const std::string & utf8word) {
@@ -144,6 +144,11 @@ namespace enchant
 
 			const std::string & get_provider_file () const {
 				return m_provider_file;
+			}
+
+			/* deprecated */
+			void add_to_personal (const std::string & utf8word) {
+				return add_to_pwl (utf8word);
 			}
 
 		private:
@@ -228,6 +233,10 @@ namespace enchant
 				enchant_broker_describe (m_broker, fn, user_data);
 			}
 			
+			void list_dicts (EnchantDictDescribeFn fn, void * user_data = NULL) {
+				enchant_broker_list_dicts (m_broker, fn, user_data);
+			}
+
 		private:
 
 			// space reserved for API/ABI expansion
