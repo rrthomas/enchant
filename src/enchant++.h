@@ -140,7 +140,7 @@ namespace enchant
 				return enchant_broker_dictionary_status (m_broker, lang.c_str());
 			}
 			
-			void set_ordering (const std::string tag, const std::string & ordering) {
+			void set_ordering (const std::string & tag, const std::string & ordering) {
 				enchant_broker_set_ordering (m_broker, tag.c_str(), ordering.c_str());
 			}
 			
