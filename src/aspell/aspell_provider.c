@@ -135,12 +135,6 @@ aspell_dict_store_replacement (struct str_enchant_dict * me,
 	pspell_manager_save_all_word_lists (manager);
 }
 
-static void
-aspell_dict_free_string_list (EnchantDict * me, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
 static EnchantDict *
 aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
@@ -175,7 +169,6 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->add_to_personal = aspell_dict_add_to_personal;
 	dict->add_to_session = aspell_dict_add_to_session;
 	dict->store_replacement = aspell_dict_store_replacement;
-	dict->free_string_list = aspell_dict_free_string_list;
 	
 	return dict;
 }
@@ -239,24 +232,30 @@ aspell_provider_list_dicts (EnchantProvider * me,
 #if ASPELL_0_50_0
 	PspellConfig * spell_config;
 	AspellDictInfoList * dlist;
+	AspellDictInfoEnumeration * dels;
+	const AspellDictInfo * entry;
 	char ** out_list = NULL;
 	
 	spell_config = new_pspell_config ();
 
 	dlist = get_aspell_dict_info_list (spell_config);
-	*out_n_dicts = aspell_dict_info_list_size (dlist);
+
+	*out_n_dicts = 0;
+	dels = aspell_dict_info_list_elements (dlist);
+
+	/* TODO: Use aspell_dict_info_list_size() once it is implemented and returns non-zero. */
+	while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0)
+		(*out_n_dicts)++;
 
 	if (*out_n_dicts) {
-		AspellDictInfoEnumeration * dels;
 		size_t i;		
 
 		out_list = g_new0 (char *, *out_n_dicts + 1);
 		dels = aspell_dict_info_list_elements (dlist);
 		
 		for (i = 0; i < *out_n_dicts; i++) {
-			const AspellDictInfo * entry;
-			
 			entry = aspell_dict_info_enumeration_next (dels);			
+			/* XXX: should this be entry->code or entry->name ? */
 			out_list[i] = g_strdup (entry->code);
 		}
 		
@@ -317,6 +316,8 @@ init_enchant_provider (void)
 	provider->dictionary_exists = aspell_provider_dictionary_exists;
 	provider->identify = aspell_provider_identify;
 	provider->describe = aspell_provider_describe;
+	provider->list_dicts = aspell_provider_list_dicts;
+	provider->free_string_list = aspell_provider_free_string_list;
 
 	return provider;
 }

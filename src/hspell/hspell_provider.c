@@ -181,12 +181,6 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	return sugg_arr;	
 }
 
-static void
-hspell_dict_free_string_list (EnchantDict * me, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
 static int
 hspell_provider_dictionary_exists (struct str_enchant_provider *me,
 				   const char *const tag)
@@ -225,7 +219,6 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *) hspell_dict;
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
-	dict->free_string_list = hspell_dict_free_string_list;
 	
 	return dict;
 }
@@ -301,7 +294,9 @@ init_enchant_provider (void)
 	provider->dictionary_exists = hspell_provider_dictionary_exists;
 	provider->identify = hspell_provider_identify;
 	provider->describe = hspell_provider_describe;
-	
+	provider->list_dicts = hspell_provider_list_dicts;
+	provider->free_string_list = uspell_provider_free_string_list;
+
 	return provider;
 }
 

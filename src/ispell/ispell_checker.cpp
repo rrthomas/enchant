@@ -584,12 +584,6 @@ ispell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	return 1;
 }
 
-static void
-ispell_dict_free_string_list (EnchantDict * me, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
 static EnchantDict *
 ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
@@ -612,7 +606,6 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *) checker;
 	dict->check = ispell_dict_check;
 	dict->suggest = ispell_dict_suggest;
-	dict->free_string_list = ispell_dict_free_string_list;
 	// don't implement session or personal
 	
 	return dict;
@@ -669,13 +662,14 @@ ispell_provider_list_dictionaries (EnchantProvider * me,
 			nb++;
 	
 	*out_n_dicts = nb;
-	if(nb == 0)
+	if (nb == 0)
 		return NULL;
 
 	char ** out_dicts = g_new (char *, nb + 1);
+	nb = 0;
 	for (i = 0; i < size_ispell_map; i++)
 		if (ispell_provider_dictionary_exists (me, ispell_map[i].lang))
-			out_dicts[i] = g_strdup (ispell_map[i].lang);
+			out_dicts[nb++] = g_strdup (ispell_map[i].lang);
 
 	return out_dicts;
 }
@@ -718,6 +712,8 @@ init_enchant_provider (void)
 	provider->dictionary_exists = ispell_provider_dictionary_exists;
 	provider->identify = ispell_provider_identify;
 	provider->describe = ispell_provider_describe;
+	provider->list_dicts = ispell_provider_list_dictionaries;
+	provider->free_string_list = ispell_provider_free_string_list;
 
 	return provider;
 }

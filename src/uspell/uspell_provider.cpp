@@ -183,12 +183,6 @@ uspell_dict_add_to_session (EnchantDict * me, const char *const word,
 	manager->acceptWord(myWord);
 } // uspell_dict_add_to_session
 
-static void
-uspell_dict_free_string_list (EnchantDict * me, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
 typedef struct {
 	char * language_tag;
 	char * corresponding_uspell_file_name;
@@ -371,7 +365,6 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->check = uspell_dict_check;
 	dict->suggest = uspell_dict_suggest;
 	dict->add_to_session = uspell_dict_add_to_session;
-	dict->free_string_list = uspell_dict_free_string_list;
 	// don't use personal, session - let higher level implement that
 	
 	return dict;
@@ -426,7 +419,7 @@ uspell_provider_list_dictionaries (EnchantProvider * me,
 			nb++;
 	
 	*out_n_dicts = nb;
-	if(nb == 0)
+	if (nb == 0)
 		return NULL;
 
 	char ** out_dicts = g_new (char *, nb + 1);
@@ -475,7 +468,9 @@ init_enchant_provider (void)
 	provider->dictionary_exists = uspell_provider_dictionary_exists;
 	provider->identify = uspell_provider_identify;
 	provider->describe = uspell_provider_describe;
-	
+	provider->list_dicts = uspell_provider_list_dictionaries;
+	provider->free_string_list = uspell_provider_free_string_list;
+
 	return provider;
 }
 

@@ -138,6 +138,11 @@ ENCHANT_MODULE_EXPORT (void)
 			    EnchantDictDescribeFn fn,
 			    void * user_data);
 
+ENCHANT_MODULE_EXPORT (void)
+     enchant_broker_list_dicts (EnchantBroker * broker,
+				EnchantDictDescribeFn fn,
+				void * user_data);
+
 #ifdef __cplusplus
 }
 #endif

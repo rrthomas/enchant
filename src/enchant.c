@@ -378,6 +378,13 @@ enchant_session_clear_error (EnchantSession * session)
 /********************************************************************************/
 
 static void
+enchant_provider_free_string_list (EnchantProvider * provider, char ** string_list)
+{
+	if (provider && provider->free_string_list)
+		(*provider->free_string_list) (provider, string_list);
+}
+
+static void
 enchant_dict_free_string_list_impl (EnchantDict * dict, char **string_list)
 {
 	EnchantSession * session;
@@ -387,9 +394,7 @@ enchant_dict_free_string_list_impl (EnchantDict * dict, char **string_list)
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
-	
-	if (dict->free_string_list)
-		(*dict->free_string_list) (dict, string_list);
+	enchant_provider_free_string_list (session->provider, string_list);
 }
 
 /**
@@ -701,8 +706,6 @@ enchant_dict_describe (EnchantDict * dict,
 	
 	tag = session->language_tag;
 	(*fn) (tag, name, desc, file, user_data);
-	
-	return;
 }
 
 /***********************************************************************************/
@@ -1110,7 +1113,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 /**
  * enchant_broker_describe
  * @broker: A non-null #EnchantBroker
- * @dict: A non-null #EnchantBrokerDescribeFn
+ * @fn: A non-null #EnchantBrokerDescribeFn
  * @user_data: Optional user-data
  *
  * Enumerates the Enchant providers and tells
@@ -1143,6 +1146,66 @@ enchant_broker_describe (EnchantBroker * broker,
 			
 			(*fn) (name, desc, file, user_data);
 		}
+}
+
+/**
+ * enchant_broker_list_dicts
+ * @broker: A non-null #EnchantBroker
+ * @fn: A non-null #EnchantDictDescribeFn
+ * @user_data: Optional user-data
+ *
+ * Enumerates the dictionaries available from
+ * all Enchant providers.
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_broker_list_dicts (EnchantBroker * broker,
+			   EnchantDictDescribeFn fn,
+			   void * user_data)
+{
+	GSList *list;
+	GHashTable *tags;
+	
+	g_return_if_fail (broker);
+	g_return_if_fail (fn);
+
+	tags = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+
+	enchant_broker_clear_error (broker);
+
+	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
+		{
+			EnchantProvider *provider;
+			GModule *module;
+
+			provider = (EnchantProvider *) list->data;
+			module = (GModule *) provider->enchant_private_data;
+
+			if (provider->list_dicts)
+				{
+					const char * tag, * name, * desc, * file;
+					size_t n_dicts, i;
+					char ** dicts;				       
+
+					dicts = (*provider->list_dicts) (provider, &n_dicts);
+					name = (*provider->identify) (provider);
+					desc = (*provider->describe) (provider);
+					file = g_module_name (module);
+
+					for (i = 0; i < n_dicts; i++)
+						{
+							tag = dicts[i];
+							if (!g_hash_table_lookup (tags, tag))
+								{
+									g_hash_table_insert (tags, g_strdup (tag), GINT_TO_POINTER(TRUE));
+									(*fn) (tag, name, desc, file, user_data);
+								}
+						}
+
+					enchant_provider_free_string_list (provider, dicts);
+				}	
+		}
+
+	g_hash_table_destroy (tags);
 }
 
 /**

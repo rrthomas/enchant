@@ -84,9 +84,6 @@ struct str_enchant_dict
 				   const char *const mis, size_t mis_len,
 				   const char *const cor, size_t cor_len);
 	
-	void (*free_string_list) (struct str_enchant_dict * me,
-				  char **str_list);
-
 	void * _reserved[5];
 };
 	
@@ -109,6 +106,12 @@ struct str_enchant_provider
 
 	/* const */ char * (*identify) (struct str_enchant_provider * me);
 	/* const */ char * (*describe) (struct str_enchant_provider * me);
+
+	void (*free_string_list) (struct str_enchant_provider * me,
+				  char **str_list);
+
+	char ** (*list_dicts) (struct str_enchant_provider * me,
+                               size_t * out_n_dicts);
 
 	void * _reserved[5];
 };
