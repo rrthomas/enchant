@@ -67,6 +67,8 @@ typedef struct str_enchant_session
 
 	char * error;
 
+	gboolean is_pwl;
+
 	EnchantProvider * provider;
 } EnchantSession;
 
@@ -444,10 +446,10 @@ enchant_dict_check (EnchantDict * dict, const char *const word, size_t len)
 
 	if (dict->check)
 		return (*dict->check) (dict, word, len);
-	else
-		return -1;
+	else if (session->is_pwl)
+		return 1;
 
-	return 1;
+	return -1;
 }
 
 /**
@@ -1008,6 +1010,8 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
 			return NULL;
 		}
+
+	session->is_pwl = 1;
 
 	dict = g_new0 (EnchantDict, 1);
 	dict->enchant_private_data = (void *)session;
