@@ -141,7 +141,7 @@ pspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	
 	manager = to_pspell_manager (spell_error);
 	
-	dict = g_new (EnchantDict, 1);
+	dict = g_new0 (EnchantDict, 1);
 	dict->user_data = (void *) manager;
 	dict->check = pspell_dict_check;
 	dict->suggest = pspell_dict_suggest;

@@ -518,7 +518,7 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 	
-	dict = g_new (EnchantDict, 1);
+	dict = g_new0 (EnchantDict, 1);
 	dict->user_data = (void *) checker;
 	dict->check = ispell_dict_check;
 	dict->suggest = ispell_dict_suggest;
