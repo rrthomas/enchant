@@ -10,6 +10,7 @@ cxx_progs =
 endif
 
 noinst_PROGRAMS = test-enchant $(cxx_progs)
+bin_PROGRAMS= enchant-lsmod
 
 test_enchant_SOURCES = test-enchant.c
 test_enchant_LDFLAGS =
@@ -21,3 +22,7 @@ test_enchantxx_LDFLAGS =
 test_enchantxx_DEPENDENCIES = $(DEPS)
 test_enchantxx_LDADD = $(ldadd)
 
+enchant_lsmod_SOURCES = enchant-lsmod.c
+enchant_lsmod_LDFLAGS =
+enchant_lsmod_DEPENDENCIES = $(DEPS)
+enchant_lsmod_LDADD = $(ldadd)
