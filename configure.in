@@ -215,7 +215,7 @@ if test "x$with_hspell_dir" != "x" ; then
    hspell_dir=$with_hspell_dir
 fi
 
-HSPELL_LIBS=" -lhspell"
+HSPELL_LIBS=" -lhspell -lz"
 HSPELL_CFLAGS="$HSPELL_CFLAGS -DENCHANT_HSPELL_DICT_DIR='\"$hspell_dict_dir\"'"
 AC_SUBST(HSPELL_CFLAGS)
 AC_SUBST(HSPELL_LIBS)
