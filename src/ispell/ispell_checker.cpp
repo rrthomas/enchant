@@ -115,6 +115,7 @@ static const IspellMap ispell_map [] = {
 	{"ga_IE" ,"irish.hash"          ,"iso-8859-1" },
 	{"gl"    ,"galician.hash"       ,"iso-8859-1" },
 	{"gl_ES" ,"galician.hash"       ,"iso-8859-1" },
+	{"ia"    ,"interlingua.hash"    ,"iso-8859-1" },
 	{"it"    ,"italian.hash"        ,"iso-8859-1" },
 	{"it_IT" ,"italian.hash"        ,"iso-8859-1" },
 	{"it_CH" ,"italian.hash"        ,"iso-8859-1" },
@@ -147,7 +148,7 @@ static const IspellMap ispell_map [] = {
 	{"sv_SE" ,"svenska.hash"        ,"iso-8859-1" },
 	{"uk"    ,"ukrainian.hash"      ,"koi8-u" },
 	{"uk_UA" ,"ukrainian.hash"      ,"koi8-u" },
-	{"yi"    ,"yiddish-yivo.hash"   ,"UTF-8" }
+	{"yi"    ,"yiddish-yivo.hash"   ,"utf-8" }
 };
 
 static const size_t size_ispell_map = G_N_ELEMENTS(ispell_map);
