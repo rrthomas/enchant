@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 #include "enchant.h"
 
 static void
@@ -78,10 +79,19 @@ main (int argc, char **argv)
 	for (i = 1; i < argc; i++) {
 		if (!strcmp (argv[i], "-lang")) {
 			if (i < (argc - 1)) {
-				lang_tag = g_strdup (argv[i+1]);
-				i++;
+				lang_tag = g_strdup (argv[++i]);
 			} else {
+#if defined(G_OS_WIN32)
+				lang_tag = g_win32_getlocale ();
+#else
 				lang_tag = g_strdup (g_getenv ("LANG"));
+#endif
+
+				if (!lang_tag || !strcmp (lang_tag, "C")) {
+					if (lang_tag) /* lang might be "C" */
+						g_free (lang_tag);
+					lang_tag = g_strdup ("en");
+				}
 			}
 			mode = 1;
 		} else if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "-?") || !strcmp(argv[i], "-help")) {

@@ -368,7 +368,7 @@ int main (int argc, char ** argv)
 		if (file) {
 			fp = fopen (file, "rb");
 			if (!fp) {
-				fprintf (stderr, "Couldn't open '%s' to spellcheck\n", file);
+				fprintf (stderr, "Error: Could not open the file \"%s\" for reading.\n", file);
 				exit (1);
 			}
 		}
