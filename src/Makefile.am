@@ -4,9 +4,13 @@ INCLUDES=-I$(top_srcdir) $(ENCHANT_CFLAGS) -DENCHANT_GLOBAL_MODULE_DIR=\"$(libdi
 
 lib_LTLIBRARIES = libenchant.la
 
+if WITH_BINRELOC
+libenchant_la_LIBADD= $(ENCHANT_LIBS) -lpthread
+else
 libenchant_la_LIBADD= $(ENCHANT_LIBS)
+endif
 libenchant_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
-libenchant_la_SOURCES = enchant.c enchant.h
+libenchant_la_SOURCES = prefix.c enchant.c enchant.h
 
 libenchant_includedir = $(includedir)/enchant/
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h

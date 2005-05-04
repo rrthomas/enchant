@@ -1,0 +1,53 @@
+# -*-shell-script-*-
+
+[Meta]
+RootName: @abisource.org/enchant:@VERSION@
+DisplayName: An Enchanting Spell Checking Library
+ShortName: enchant
+Maintainer: Dom Lachowicz - http://www.abisource.org/
+Packager: Robert Staudinger <robsta@stereolyzer.net>
+Summary: A library that wraps other spell checking backends.
+SoftwareVersion: @VERSION@
+AutopackageTarget: 1.0
+PackageVersion: 3
+
+# Only uncomment InterfaceVersion if your package exposes interfaces to other software,
+# for instance if it includes DSOs or python/perl modules. See the developer guide for more info,
+# or ask on autopackage-dev if you don't understand interface versioning in autopackage.
+
+# FIXME set this automatically
+# but VERSION has 3 digits
+InterfaceVersion: 1.1
+
+[Description]
+Enchant is meant to provide a generic interface into various existing
+spell checking libaries. These include, but are not limited to:
+* Aspell/Pspell
+* Ispell
+* Hspell
+* Uspell
+
+[BuildPrepare]
+prepareBuild --prefix=/bail/if/binreloc/bails --enable-ispell --enable-myspell --enable-aspell --enable-uspell --enable-hspell   
+
+[BuildUnprepare]
+unprepareBuild
+
+[Imports]
+echo '*' | import
+
+[Prepare]
+require @gtk.org/glib 0
+require @gtk.org/gmodule 0
+
+[Install]
+# Put your installation script here
+installExe ./bin/*
+installLib ./lib/*.so.*.*.*
+mkdir -p "$PREFIX/lib/enchant"
+mv ./lib/enchant/libenchant_*so* "$PREFIX/lib/enchant"
+installMan 1 man/man1/*
+
+[Uninstall]
+rm -R -f "$PREFIX/lib/enchant"
+uninstallFromLog

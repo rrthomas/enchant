@@ -53,6 +53,10 @@
 #define ENCHANT_USER_PATH_EXTENSION ".enchant"
 #endif
 
+#ifdef ENABLE_BINRELOC
+#include "prefix.h"
+#endif
+
 ENCHANT_PLUGIN_DECLARE("Enchant")
 
 /********************************************************************************/
@@ -128,7 +132,9 @@ enchant_get_module_dir (void)
 	if (module_dir)
 		return module_dir;
 
-#ifdef ENCHANT_GLOBAL_MODULE_DIR
+#ifdef ENABLE_BINRELOC
+	return g_strdup (BR_LIBDIR ("/enchant"));
+#elif ENCHANT_GLOBAL_MODULE_DIR
 	return g_strdup (ENCHANT_GLOBAL_MODULE_DIR);
 #else
 	return NULL;
@@ -147,7 +153,9 @@ enchant_get_conf_dir (void)
 	if (ordering_dir)
 		return ordering_dir;
 
-#ifdef ENCHANT_GLOBAL_ORDERING
+#ifdef ENABLE_BINRELOC
+	return g_strdup (BR_DATADIR ("/enchant"));
+#elif ENCHANT_GLOBAL_ORDERING
 	return g_strdup (ENCHANT_GLOBAL_ORDERING);
 #else
 	return NULL;
