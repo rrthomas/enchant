@@ -134,7 +134,7 @@ enchant_get_module_dir (void)
 
 #ifdef ENABLE_BINRELOC
 	return g_strdup (BR_LIBDIR ("/enchant"));
-#elif ENCHANT_GLOBAL_MODULE_DIR
+#elif defined(ENCHANT_GLOBAL_MODULE_DIR)
 	return g_strdup (ENCHANT_GLOBAL_MODULE_DIR);
 #else
 	return NULL;
@@ -155,7 +155,7 @@ enchant_get_conf_dir (void)
 
 #ifdef ENABLE_BINRELOC
 	return g_strdup (BR_DATADIR ("/enchant"));
-#elif ENCHANT_GLOBAL_ORDERING
+#elif defined(ENCHANT_GLOBAL_ORDERING)
 	return g_strdup (ENCHANT_GLOBAL_ORDERING);
 #else
 	return NULL;
