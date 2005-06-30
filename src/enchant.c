@@ -1102,25 +1102,21 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 {
 	EnchantSession *session;
 	EnchantDict *dict = NULL;
-	char * normalized_pwl;
 
 	g_return_val_if_fail (broker, NULL);
 	g_return_val_if_fail (pwl && strlen(pwl), NULL);
 
 	enchant_broker_clear_error (broker);
 
-	normalized_pwl = enchant_normalize_dictionary_tag (pwl);
-	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) normalized_pwl);
+	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) pwl);
 	if (dict) {
-		g_free (normalized_pwl);
 		return dict;
 	}
 
 	session = enchant_session_new_with_pwl (NULL, pwl, "Personal WordList", TRUE);
 	if (!session) 
 		{
-			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", normalized_pwl);
-			g_free (normalized_pwl);
+			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
 			return NULL;
 		}
 
@@ -1129,7 +1125,7 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 	dict = g_new0 (EnchantDict, 1);
 	dict->enchant_private_data = (void *)session;
 
-	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (normalized_pwl), dict);
+	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (pwl), dict);
 
 	return dict;
 }
