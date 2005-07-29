@@ -23,15 +23,33 @@ Includes the line number in the output
 .I "\-v"
 Prints the program's version
 .SH ENCHANT ORDERING FILE
-Enchant has a global and a local ordering file. It lets the user specify
-which spelling backend to use for individual languages if you really care
-which backend gets used. It takes the form of:
+Enchant has a global and a per-user ordering file called enchant.ordering. 
+It lets the user specify which spelling backend to use for individual 
+languages in the case when you care which backend gets used. This global file 
+is located in $(datadir)/enchant; the per-user file is located in ~/.enchant.
+The per-user file takes precedence, if found.
+.PP
+The ordering file takes the form language_tag:<comma-separated list of spelling
+backends>. I am currently aware of the following backends: aspell, myspell, ispell, uspell, hspell. The comma-separated list may not include spaces. '*' is
+used to mean "use this ordering for all languages, unless instructed otherwise." For example:
 .PP
 *:aspell,myspell,ispell
 .br
 en:aspell,myspell,ispell
 .br
+en_UK:myspell,aspell,ispell
+.br
 fr:myspell,ispell:aspell
+.SH DIRECTORIES IMPORTANT TO ENCHANT
+Unless configured otherwise, Enchant's Myspell, Ispell, and Uspell backends will look
+for dictionaries in directories specific to Enchant, and will not use your 
+system-wide installed dictionaries. This is for pragmatic reasons - every
+distribution installs these dictionaries into different places.
+.PP
+Like the enchant.ordering file described above, Enchant will look in a global
+directory for these dictionaries and a per-user directory. The per-user directory takes precedence, if found. Enchant looks for Myspell dictionaries in $(datadir)/enchant/myspell and ~/.enchant/myspell. Enchant looks for Ispell dictionaries in $(datadir)/enchant/ispell and ~/.enchant/ispell. Enchant looks for Uspell dictionaries in $(datadir)/enchant/uspell and ~/.enchant/uspell
+.PP
+Packagers and users may wish to make symbolic links to the system-wide dictionary directories. Or, preferably, use the --with-myspell-dir, --with-ispell-dir, and --with-uspell-dir 'configure' arguments.
 .SH MORE INFORMATION
 http://www.abisource.com/enchant/
 .SH "SEE ALSO"
