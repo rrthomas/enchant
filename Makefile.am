@@ -1,4 +1,4 @@
-SUBDIRS=src tests doc
+SUBDIRS=src tests doc data
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = enchant.pc

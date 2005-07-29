@@ -246,6 +246,7 @@ src/hspell/Makefile
 src/applespell/Makefile
 tests/Makefile
 doc/Makefile
+data/Makefile
 autopackage/default.apspec
 ])
 
