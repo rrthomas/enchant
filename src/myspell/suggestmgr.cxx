@@ -118,7 +118,7 @@ int SuggestMgr::map_related(const char * word, int i, char** wlst, int ns, const
   for (int j = 0; j < nummap; j++) {
     if (strchr(maptable[j].set,c) != 0) {
       in_map = 1;
-      char * newword = strdup(word);
+      char * newword = mystrdup(word);
       for (int k = 0; k < maptable[j].len; k++) {
 	*(newword + i) = *(maptable[j].set + k);
 	ns = map_related(newword, (i+1), wlst, ns, maptable, nummap);
@@ -398,7 +398,7 @@ int SuggestMgr::ngsuggest(char** wlst, char * word, HashMgr* pHMgr)
   int thresh = 0;
   char * mw = NULL;
   for (int sp = 1; sp < 4; sp++) {
-     mw = strdup(word);
+     mw = mystrdup(word);
      for (int k=sp; k < n; k+=4) *(mw + k) = '*';
      thresh = thresh + ngram(n, word, mw, NGRAM_ANY_MISMATCH);
      free(mw);
@@ -431,21 +431,28 @@ int SuggestMgr::ngsuggest(char** wlst, char * word, HashMgr* pHMgr)
                                         rp->astr, rp->alen);
         for (int k = 0; k < nw; k++) {
            sc = ngram(n, word, glst[k].word, NGRAM_ANY_MISMATCH);
-           if (sc > thresh) {
-              if (sc > gscore[lp]) {
-	         if (guess[lp]) free (guess[lp]);
-                 gscore[lp] = sc;
-                 guess[lp] = glst[k].word;
-                 lval = sc;
-                 for (j=0; j < MAX_GUESS; j++)
-	            if (gscore[j] < lval) {
-	               lp = j;
-                       lval = gscore[j];
-	            }
-	      } else {
-                 free (glst[k].word);  
-              }
-	   }            
+	   if (sc > thresh)
+	   {
+		if (sc > gscore[lp])
+		{
+			if (guess[lp]) free(guess[lp]);
+			gscore[lp] = sc;
+			guess[lp] = glst[k].word;
+			glst[k].word = NULL;
+			lval = sc;
+			for (j=0; j < MAX_GUESS; j)
+			{
+				if (gscore[j] < lval)
+				{
+					lp = j;
+					lval = gscore[j];
+				}
+			}
+		}
+	   }
+	   free (glst[k].word);
+	   glst[k].word = NULL;
+	   glst[k].allow = 0;
 	}
       }
   }

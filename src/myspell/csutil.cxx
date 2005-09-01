@@ -3836,7 +3836,7 @@ struct cs_info * get_current_cs(const char * es) {
     }
   }
   return ccs;
-};
+}
 
 
 
@@ -3869,5 +3869,5 @@ const char * get_default_enc(const char * lang) {
     }
   }
   return NULL;
-};
+}
 

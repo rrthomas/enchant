@@ -872,7 +872,7 @@ char * AffixMgr::get_try_string()
 char * AffixMgr::get_compound()
 {
   if (! compound ) return NULL;
-  return mystrdup(compound);
+  return compound;
 }
 
 // utility method to look up root words in hash table
