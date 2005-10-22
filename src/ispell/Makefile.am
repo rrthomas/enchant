@@ -16,12 +16,12 @@ libenchant_ispell_la_SOURCES =	\
 	correct.cpp		\
 	good.cpp		\
 	hash.cpp		\
-	lookup.cpp		\
-	makedent.cpp		\
-	tgood.cpp		\
+	ispell_checker.cpp	\
 	ispell_checker.h	\
 	ispell_def.h		\
 	ispell.h		\
+	lookup.cpp		\
+	makedent.cpp		\
 	msgs.h			\
 	sp_spell.h		\
-	ispell_checker.cpp
+	tgood.cpp
