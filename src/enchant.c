@@ -39,6 +39,7 @@
 
 #include <glib.h>
 #include <gmodule.h>
+#include <locale.h>
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -1433,4 +1434,34 @@ enchant_broker_get_error (EnchantBroker * broker)
 	g_return_val_if_fail (broker, NULL);
 	
 	return broker->error;
+}
+
+/* private */ 
+ENCHANT_MODULE_EXPORT(char *)
+_enchant_get_user_language(void)
+{
+	char * locale = NULL;
+	
+#if defined(G_OS_WIN32)
+	if(!locale)
+		locale = g_win32_getlocale ();
+#endif       
+	
+	if(!locale)
+		locale = g_strdup (g_getenv ("LANG"));
+	
+#if defined(HAVE_LC_MESSAGES)
+	if(!locale)
+		locale = g_strdup (setlocale (LC_MESSAGES, NULL));
+#endif
+
+	if(!locale)
+		locale = g_strdup (setlocale (LC_ALL, NULL));
+
+	if(!locale || strcmp(locale, "C") == 0) {
+		g_free(locale);
+		locale = g_strdup("en");
+	}
+		
+	return locale;
 }

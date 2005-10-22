@@ -33,13 +33,13 @@
  * for Enchant.
  */
 
-#include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
 
 #include "enchant.h"
+#include "enchant-provider.h"
 
 /* word has to be bigger than this to be checked */
 #define MIN_WORD_LENGTH 1
@@ -250,17 +250,9 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
 	if (mode == MODE_A)
 		print_version (out);
 
-#if defined(G_OS_WIN32)
-	lang = g_win32_getlocale ();
-#else
-	lang = g_strdup (setlocale (LC_ALL, NULL));
-#endif
-
-	if (!lang || !strcmp (lang, "C")) {
-		if (lang) /* lang might be "C" */
-			g_free (lang);
-		lang = g_strdup ("en");
-	}
+	lang = _enchant_get_user_language();
+	if(!lang)
+		return 1;
 
 	/* Enchant will get rid of useless trailing garbage like de_DE@euro or de_DE.ISO-8859-15 */
 	

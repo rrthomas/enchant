@@ -32,8 +32,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <locale.h>
+
 #include "enchant.h"
+#include "enchant-provider.h"
 
 static void
 describe_dict (const char * const lang_tag,
@@ -81,11 +82,7 @@ main (int argc, char **argv)
 			if (i < (argc - 1)) {
 				lang_tag = g_strdup (argv[++i]);
 			} else {
-#if defined(G_OS_WIN32)
-				lang_tag = g_win32_getlocale ();
-#else
-				lang_tag = g_strdup (g_getenv ("LANG"));
-#endif
+				lang_tag = _enchant_get_user_language();
 
 				if (!lang_tag || !strcmp (lang_tag, "C")) {
 					if (lang_tag) /* lang might be "C" */

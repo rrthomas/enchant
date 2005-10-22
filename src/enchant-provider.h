@@ -42,6 +42,10 @@
 extern "C" {
 #endif
 
+/* private */ 
+ENCHANT_MODULE_EXPORT(char *) 
+	     _enchant_get_user_language(void);
+
 #ifdef _WIN32
 #define ENCHANT_PLUGIN_DECLARE(name) static HANDLE s_hModule = (HANDLE)(NULL); BOOL APIENTRY DllMain( HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved ) { s_hModule = hModule; return TRUE; } 
 #else
