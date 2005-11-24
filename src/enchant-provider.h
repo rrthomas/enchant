@@ -44,7 +44,7 @@ extern "C" {
 
 /* private */ 
 ENCHANT_MODULE_EXPORT(char *) 
-	     _enchant_get_user_language(void);
+	     enchant_get_user_language(void);
 
 #ifdef _WIN32
 #define ENCHANT_PLUGIN_DECLARE(name) static HANDLE s_hModule = (HANDLE)(NULL); BOOL APIENTRY DllMain( HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved ) { s_hModule = hModule; return TRUE; } 
@@ -59,6 +59,9 @@ ENCHANT_MODULE_EXPORT (char *)
 
 ENCHANT_MODULE_EXPORT (char *)
 	enchant_get_registry_value (const char * const prefix, const char * const key);
+
+ENCHANT_MODULE_EXPORT(char *)
+	enchant_get_prefix_dir(void);
 
 ENCHANT_MODULE_EXPORT(void)
 	enchant_dict_set_error (EnchantDict * dict, const char * const err);

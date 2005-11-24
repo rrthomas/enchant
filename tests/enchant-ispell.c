@@ -250,7 +250,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
 	if (mode == MODE_A)
 		print_version (out);
 
-	lang = _enchant_get_user_language();
+	lang = enchant_get_user_language();
 	if(!lang)
 		return 1;
 

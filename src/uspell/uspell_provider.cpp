@@ -59,6 +59,15 @@ uspell_checker_get_prefix (void)
 	if (data_dir)
 		return data_dir;
 
+	/* Dynamically locate library and search for modules relative to it. */
+	char * enchant_prefix = _enchant_get_prefix_dir();
+	if(enchant_prefix)
+		{
+			uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
+			g_free(enchant_prefix);
+			return uspell_prefix;
+		}
+
 #ifdef ENCHANT_USPELL_DICT_DIR
 	return g_strdup (ENCHANT_USPELL_DICT_DIR);
 #else
@@ -81,9 +90,7 @@ uspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	curBuf = buf1;
 	otherBuf = buf2;
 	manager = reinterpret_cast<uSpell *>(me->user_data);
-#ifdef DEBUG
-	fprintf(stdout, "Checking [%s]\n", word);
-#endif
+
 	length = utf8_wide(curBuf, myWord, MAXCHARS);
 	if (manager->isSpelledRight(curBuf, length)) {
 		return 0; // correct the first time
@@ -301,9 +308,7 @@ uspell_request_manager (const char * private_dir, size_t mapIndex)
 		auxFileName = g_build_filename (home_dir, ".enchant", transPart, NULL);
 		g_free (transPart);
 		g_free (home_dir);
-#ifdef DEBUG
-		fprintf(stdout, "Trying to assimilate file [%s]\n", auxFileName);
-#endif
+
 		(void) manager->assimilateFile (auxFileName);
 		g_free (auxFileName);
 	}

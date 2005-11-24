@@ -82,7 +82,7 @@ main (int argc, char **argv)
 			if (i < (argc - 1)) {
 				lang_tag = g_strdup (argv[++i]);
 			} else {
-				lang_tag = _enchant_get_user_language();
+				lang_tag = enchant_get_user_language();
 
 				if (!lang_tag || !strcmp (lang_tag, "C")) {
 					if (lang_tag) /* lang might be "C" */

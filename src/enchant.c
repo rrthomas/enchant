@@ -124,18 +124,28 @@ enchant_unlock_file (FILE * f)
 static char *
 enchant_get_module_dir (void)
 {
+	char * module_dir = NULL;
+
 #ifdef XP_TARGET_COCOA
 	return g_strdup ([[EnchantResourceProvider instance] moduleFolder]);
 #endif
-	char * module_dir = NULL;
 
+	/* Look for explicitly set registry values */
 	module_dir = enchant_get_registry_value ("Config", "Module_Dir");
 	if (module_dir)
 		return module_dir;
 
-#ifdef ENABLE_BINRELOC
-	return g_strdup (BR_LIBDIR ("/enchant"));
-#elif defined(ENCHANT_GLOBAL_MODULE_DIR)
+	/* Dynamically locate library and search for modules relative to it. */
+	char * prefix = NULL;
+	prefix = enchant_get_prefix_dir();
+	if(prefix)
+		{
+			module_dir = g_build_filename(prefix,"lib","enchant",NULL);
+			g_free(prefix);
+			return module_dir;
+		}
+
+#if defined(ENCHANT_GLOBAL_MODULE_DIR)
 	return g_strdup (ENCHANT_GLOBAL_MODULE_DIR);
 #else
 	return NULL;
@@ -148,15 +158,23 @@ enchant_get_conf_dir (void)
 #ifdef XP_TARGET_COCOA
 	return g_strdup ([[EnchantResourceProvider instance] configFolder]);
 #endif
-	char * ordering_dir = NULL;
+	char * ordering_dir = NULL, * prefix = NULL;;
 
+	/* Look for explicitly set registry values */
 	ordering_dir = enchant_get_registry_value ("Config", "Data_Dir");
 	if (ordering_dir)
 		return ordering_dir;
 
-#ifdef ENABLE_BINRELOC
-	return g_strdup (BR_DATADIR ("/enchant"));
-#elif defined(ENCHANT_GLOBAL_ORDERING)
+	/* Dynamically locate library and search for files relative to it. */
+	prefix = enchant_get_prefix_dir();
+	if(prefix)
+		{
+			ordering_dir = g_build_filename(prefix,"share","enchant",NULL);
+			g_free(prefix);
+			return ordering_dir;
+		}
+
+#if defined(ENCHANT_GLOBAL_ORDERING)
 	return g_strdup (ENCHANT_GLOBAL_ORDERING);
 #else
 	return NULL;
@@ -1103,21 +1121,25 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 {
 	EnchantSession *session;
 	EnchantDict *dict = NULL;
+	char * normalized_pwl;
 
 	g_return_val_if_fail (broker, NULL);
 	g_return_val_if_fail (pwl && strlen(pwl), NULL);
 
 	enchant_broker_clear_error (broker);
 
-	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) pwl);
+	normalized_pwl = enchant_normalize_dictionary_tag (pwl);
+	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) normalized_pwl);
 	if (dict) {
+		g_free (normalized_pwl);
 		return dict;
 	}
 
 	session = enchant_session_new_with_pwl (NULL, pwl, "Personal WordList", TRUE);
 	if (!session) 
 		{
-			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
+			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", normalized_pwl);
+			g_free (normalized_pwl);
 			return NULL;
 		}
 
@@ -1126,7 +1148,7 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 	dict = g_new0 (EnchantDict, 1);
 	dict->enchant_private_data = (void *)session;
 
-	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (pwl), dict);
+	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (normalized_pwl), dict);
 
 	return dict;
 }
@@ -1438,7 +1460,7 @@ enchant_broker_get_error (EnchantBroker * broker)
 
 /* private */ 
 ENCHANT_MODULE_EXPORT(char *)
-_enchant_get_user_language(void)
+enchant_get_user_language(void)
 {
 	char * locale = NULL;
 	
@@ -1464,4 +1486,40 @@ _enchant_get_user_language(void)
 	}
 		
 	return locale;
+}
+
+
+/**
+ * enchant_get_prefix_dir
+ *
+ * Returns a string giving the location of the base directory
+ * of the enchant installation.  This corresponds roughly to 
+ * the --prefix option given to ./configure when enchant is
+ * compiled, except it is determined at runtime based on the location
+ * of the enchant library.
+ *
+ * This API is private to the providers.
+ *
+ */
+ENCHANT_MODULE_EXPORT (char *)
+enchant_get_prefix_dir(void)
+{
+	char * prefix = NULL;
+
+#ifdef _WIN32
+	/* Dynamically locate library and return containing directory */
+	HINSTANCE hInstance = GetModuleHandle("libenchant-1");
+	if(hInstance != NULL)
+		{
+			char dll_path[MAX_PATH];
+
+			if(GetModuleFileName(hInstance,dll_path,MAX_PATH))
+				prefix = g_path_get_dirname(dll_path);
+		}
+#elif defined(ENABLE_BINRELOC)
+	/* Use standard binreloc PREFIX macro */
+	prefix = g_strdup (PREFIX);
+#endif
+
+	return prefix;
 }

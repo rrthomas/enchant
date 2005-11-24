@@ -76,9 +76,20 @@ myspell_checker_get_prefix (void)
 {
 	char * data_dir = NULL;
 
+	/* Look for explicitly set registry values */
 	data_dir = enchant_get_registry_value ("Myspell", "Data_Dir");
 	if (data_dir)
 		return data_dir;
+
+	/* Dynamically locate library and search for modules relative to it. */
+	char * prefix = enchant_get_prefix_dir();
+	if(prefix)
+		{
+			data_dir = g_build_filename(prefix, "share", "enchant", "myspell", NULL);
+			g_free(prefix);
+			return data_dir;
+		}
+
 
 #ifdef ENCHANT_MYSPELL_DICT_DIR
 	return g_strdup (ENCHANT_MYSPELL_DICT_DIR);

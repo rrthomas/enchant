@@ -363,10 +363,21 @@ ispell_checker_get_prefix (void)
 #ifndef XP_TARGET_COCOA
 	char * ispell_prefix = NULL;
 
+	/* Look for explicitly set registry values */
 	ispell_prefix = enchant_get_registry_value ("Ispell", "Data_Dir");
 	if (ispell_prefix)
 		return ispell_prefix;
 #endif
+
+	/* Dynamically locate library and search for modules relative to it. */
+	char * enchant_prefix = enchant_get_prefix_dir();
+	if(enchant_prefix)
+		{
+			ispell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "ispell", NULL);
+			g_free(enchant_prefix);
+			return ispell_prefix;
+		}
+
 #ifdef ENCHANT_ISPELL_DICT_DIR
 	return g_strdup (ENCHANT_ISPELL_DICT_DIR);
 #else
