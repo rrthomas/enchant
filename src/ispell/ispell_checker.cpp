@@ -397,7 +397,7 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 #ifndef XP_TARGET_COCOA
 	home_dir = enchant_get_user_home_dir ();
 #else
-	home_dir = getenv ("HOME");
+	home_dir = g_strdup (g_getenv ("HOME"));
 #endif
 	if (home_dir) {
 		private_dir = g_build_filename (home_dir, ENCHANT_ISPELL_HOME_DIR, NULL);

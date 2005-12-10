@@ -239,7 +239,6 @@ MySpellChecker::requestDictionary(const char *szLang)
 {
 	const char *dictBase = NULL;
 	char *dic = NULL, *aff = NULL;
-	char *home_dir = enchant_get_user_home_dir();
 
 	dic = myspell_request_dictionary (szLang);
 	if (!dic) {
