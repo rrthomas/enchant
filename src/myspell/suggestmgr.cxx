@@ -440,7 +440,7 @@ int SuggestMgr::ngsuggest(char** wlst, char * word, HashMgr* pHMgr)
 			guess[lp] = glst[k].word;
 			glst[k].word = NULL;
 			lval = sc;
-			for (j=0; j < MAX_GUESS; j)
+			for (j=0; j < MAX_GUESS; j++)
 			{
 				if (gscore[j] < lval)
 				{
