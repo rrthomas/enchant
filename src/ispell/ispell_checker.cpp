@@ -634,28 +634,15 @@ ispell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 }
 
 static int
-ispell_provider_dictionary_exists (EnchantProvider * me,
-				   const char *const tag)
+_ispell_provider_dictionary_exists (EnchantProvider * me,
+				   const char *const szFile)
 {
 	std::vector <std::string> names;
 
-	s_buildHashNames (names, tag);
+	s_buildHashNames (names, szFile);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
 			return 1;
-	}
-
-	std::string shortened_dict (tag);
-	size_t uscore_pos;
-	
-	if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
-		shortened_dict = shortened_dict.substr(0, uscore_pos);
-
-		s_buildHashNames (names, shortened_dict.c_str());
-		for (size_t i = 0; i < names.size(); i++) {
-			if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
-				return 1;
-		}
 	}
 
 	return 0;
@@ -667,20 +654,17 @@ ispell_provider_list_dictionaries (EnchantProvider * me,
 {
 	size_t i, nb;
 
+	char ** out_dicts = g_new (char *, size_ispell_map + 1);
 	nb = 0;
 	for (i = 0; i < size_ispell_map; i++)
-		if (ispell_provider_dictionary_exists (me, ispell_map[i].lang))
-			nb++;
-	
-	*out_n_dicts = nb;
-	if (nb == 0)
-		return NULL;
-
-	char ** out_dicts = g_new (char *, nb + 1);
-	nb = 0;
-	for (i = 0; i < size_ispell_map; i++)
-		if (ispell_provider_dictionary_exists (me, ispell_map[i].lang))
+		if (_ispell_provider_dictionary_exists (me, ispell_map[i].dict))
 			out_dicts[nb++] = g_strdup (ispell_map[i].lang);
+
+	*out_n_dicts = nb;
+	if (nb == 0) {
+		g_free (out_dicts);
+		out_dicts = NULL;
+	}
 
 	return out_dicts;
 }
@@ -720,7 +704,6 @@ init_enchant_provider (void)
 	provider->dispose = ispell_provider_dispose;
 	provider->request_dict = ispell_provider_request_dict;
 	provider->dispose_dict = ispell_provider_dispose_dict;
-	provider->dictionary_exists = ispell_provider_dictionary_exists;
 	provider->identify = ispell_provider_identify;
 	provider->describe = ispell_provider_describe;
 	provider->list_dicts = ispell_provider_list_dictionaries;
