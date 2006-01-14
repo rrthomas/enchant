@@ -325,8 +325,6 @@ myspell_provider_list_dicts (EnchantProvider * me,
 			    size_t * out_n_dicts)
 {
 	char ** dictionary_list = NULL;
-	*out_n_dicts = 0;
-
 	std::vector<std::string> dicts;
        	
 	char * home_dir = enchant_get_user_home_dir ();
@@ -349,13 +347,11 @@ myspell_provider_list_dicts (EnchantProvider * me,
 	if (dicts.size () > 0) {
 		dictionary_list = g_new0 (char *, dicts.size() + 1);
 
-		for (int i = 0; i < dicts.size(); i++) {
+		for (int i = 0; i < dicts.size(); i++)
 			dictionary_list[i] = g_strdup (dicts[i].c_str());
-		}
-
-		*out_n_dicts = dicts.size ();
 	}
 
+	*out_n_dicts = dicts.size ();
 	return dictionary_list;
 }
 
