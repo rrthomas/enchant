@@ -184,52 +184,11 @@ aspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
-static int
-aspell_provider_dictionary_exists (struct str_enchant_provider * me,
-				   const char *const tag)
-{
-	/* TODO: get kevina to apply my patch */
-	EnchantDict * dict;
-	int exists = 0;
-
-#ifdef ASPELL_DICT_DIR
-	char * file, * ext;
-
-	/* hack for a quick existence test */
-
-	ext = g_strdup_printf ("%s.dat", tag);
-	file = g_build_filename (ASPELL_DICT_DIR, ext, NULL);
-	if (g_file_test (file, G_FILE_TEST_EXISTS))
-		exists = 1;
-	g_free (file);
-	g_free (ext);
-
-	if (strlen (tag) > 2 && tag[2] == '_') {
-		ext = g_strdup_printf ("%c%c.dat", tag[0], tag[1]);
-		file = g_build_filename (ASPELL_DICT_DIR, ext, NULL);
-		if (g_file_test (file, G_FILE_TEST_EXISTS))
-			exists = 1;
-		g_free (file);
-		g_free (ext);
-	}
-#endif
-
-	if (!exists) {
-		dict = aspell_provider_request_dict (me, tag);
-		if (dict) {
-			exists = 1;       
-			aspell_provider_dispose_dict (me, dict);
-		}
-	}
-
-	return exists;
-}
-
+#if ASPELL_0_50_0
 static char ** 
 aspell_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
 {
-#if ASPELL_0_50_0
 	PspellConfig * spell_config;
 	AspellDictInfoList * dlist;
 	AspellDictInfoEnumeration * dels;
@@ -265,16 +224,8 @@ aspell_provider_list_dicts (EnchantProvider * me,
 	delete_pspell_config (spell_config);
 	
 	return out_list;
-#else
-
-#ifdef __GNUC__
-#warning "You're using an ancient aspell. aspell_provider_list_dicts() is not implemented."
-#endif
-
-	*out_n_dicts = 0;
-	return NULL;
-#endif
 }
+#endif
 
 static void
 aspell_provider_free_string_list (EnchantProvider * me, char **str_list)
@@ -313,10 +264,16 @@ init_enchant_provider (void)
 	provider->dispose = aspell_provider_dispose;
 	provider->request_dict = aspell_provider_request_dict;
 	provider->dispose_dict = aspell_provider_dispose_dict;
-	provider->dictionary_exists = aspell_provider_dictionary_exists;
 	provider->identify = aspell_provider_identify;
 	provider->describe = aspell_provider_describe;
+
+#if ASPELL_0_50_0
 	provider->list_dicts = aspell_provider_list_dicts;
+#else
+#  ifdef __GNUC__
+#    warning "You're using an ancient aspell. aspell_provider_list_dicts() is not implemented."
+#  endif
+#endif
 	provider->free_string_list = aspell_provider_free_string_list;
 
 	return provider;

@@ -1283,8 +1283,8 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 					char ** dicts;				       
 
 					dicts = (*provider->list_dicts) (provider, &n_dicts);
-					name = (*provider->identify) (provider);
-					desc = (*provider->describe) (provider);
+					name = (provider->identify ? (*provider->identify) (provider) : "");
+					desc = (provider->describe ? (*provider->describe) (provider) : "");
 					file = g_module_name (module);
 
 					for (i = 0; i < n_dicts; i++)
@@ -1329,6 +1329,51 @@ enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 		g_hash_table_remove (broker->dict_map, session->personal_filename);
 }
 
+static int
+_enchant_provider_dictionary_exists (EnchantProvider * provider,
+				     const char * const tag)
+{
+	int exists = 0;
+
+	if (provider->dictionary_exists)
+		{
+			exists = (*provider->dictionary_exists) (provider, tag);
+		}
+	else if (provider->list_dicts)
+		{
+			const char * tag, * name, * desc, * file;
+			size_t n_dicts, i;
+			char ** dicts;				       
+			
+			dicts = (*provider->list_dicts) (provider, &n_dicts);
+			
+			for (i = 0; i < n_dicts; i++)
+				{
+					if (!strcmp(dicts[i], tag)) 
+						{
+							exists = 1;
+							break;
+						}
+				}
+			
+			enchant_provider_free_string_list (provider, dicts);
+		}
+	else if (provider->request_dict)
+		{
+			EnchantDict *dict = NULL;
+
+			dict = (*provider->request_dict) (provider, tag);
+			if (dict)
+				{
+					if (provider->dispose) 
+						(*provider->dispose) (provider);
+					exists = 1;
+				}
+		}
+
+	return exists;
+}
+
 /**
  * enchant_broker_dict_exists
  * @broker: A non-null #EnchantBroker
@@ -1361,12 +1406,10 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 		{
 			provider = (EnchantProvider *) list->data;
 
-			if (provider->dictionary_exists)
+			if (_enchant_provider_dictionary_exists (provider, normalized_tag))
 				{
-					if ((*provider->dictionary_exists) (provider, normalized_tag)) {
-						g_free (normalized_tag);
-						return 1;
-					}
+					g_free (normalized_tag);
+					return 1;
 				}
 		}
 
