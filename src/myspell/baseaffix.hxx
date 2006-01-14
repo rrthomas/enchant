@@ -3,15 +3,29 @@
 
 class AffEntry
 {
+public:
+
 protected:
        char *       appnd;
        char *       strip;
-       short        appndl;
-       short        stripl;
-       short        numconds;
-       short        xpflg;
-       char         achar;
-       char         conds[SETSIZE];
+       unsigned char  appndl;
+       unsigned char  stripl;
+       char         numconds;
+       char  opts;
+       unsigned short aflag;
+       union {
+   	 char   base[SETSIZE];
+	 struct {
+		char  ascii[SETSIZE/2];
+                char neg[8];
+                char all[8];
+                w_char * wchars[8];
+		int wlen[8];
+	 } utf8;
+       } conds;
+       char *       morphcode;
+       unsigned short * contclass;
+       short        contclasslen;
 };
 
 #endif

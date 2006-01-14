@@ -13,43 +13,33 @@ libenchant_myspell_lalibdir=$(libdir)/enchant
 libenchant_myspell_la_LIBADD= $(MYSPELL_LIBS) $(ENCHANT_LIBS) $(top_builddir)/src/libenchant.la
 libenchant_myspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
 
-if WITH_SYSTEM_MYSPELL
 libenchant_myspell_la_SOURCES =	\
-	myspell_checker.cpp
-else
-libenchant_myspell_la_SOURCES =	\
-	affentry.cxx		\
 	affentry.hxx		\
-	affixmgr.cxx		\
 	affixmgr.hxx		\
 	atypes.hxx		\
 	baseaffix.hxx		\
-	csutil.cxx		\
 	csutil.hxx		\
-	hashmgr.cxx		\
+	dictmgr.hxx		\
 	hashmgr.hxx		\
 	htypes.hxx		\
-	myspell.cxx		\
-	enchant_myspell.hxx	\
-	suggestmgr.cxx		\
+	hunspell.hxx		\
+	langnum.hxx		\
 	suggestmgr.hxx		\
+	affentry.cxx		\
+	affixmgr.cxx		\
+	csutil.cxx		\
+	dictmgr.cxx		\
+	hashmgr.cxx		\
+	hunspell.cxx		\
+	suggestmgr.cxx		\
 	myspell_checker.cpp
-endif
 
 EXTRA_DIST=			\
 	license.readme		\
-	affentry.hxx		\
-	affixmgr.hxx		\
-	atypes.hxx		\
-	baseaffix.hxx		\
-	csutil.hxx		\
-	hashmgr.hxx		\
-	htypes.hxx		\
-	enchant_myspell.hxx	\
-	suggestmgr.hxx		\
-	affentry.cxx		\
-	affixmgr.cxx		\
-	csutil.cxx		\
-	hashmgr.cxx		\
-	myspell.cxx		\
-	suggestmgr.cxx
+	utf_info.cxx		\
+	README			\
+	license.hunspell	\
+	license.myspell		\
+	license.readme		\
+	hunspell.dsp
+

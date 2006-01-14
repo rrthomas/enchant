@@ -5,7 +5,6 @@
 #include "baseaffix.hxx"
 #include "affixmgr.hxx"
 
-
 /* A Prefix Entry  */
 
 class PfxEntry : public AffEntry
@@ -22,12 +21,28 @@ public:
   PfxEntry(AffixMgr* pmgr, affentry* dp );
   ~PfxEntry();
 
-  struct hentry *      check(const char * word, int len);
+  inline bool          allowCross() { return ((opts & aeXPRODUCT) != 0); }
+  struct hentry *      check(const char * word, int len, char in_compound, 
+                            const FLAG needflag = FLAG_NULL);
 
-  inline bool          allowCross() { return ((xpflg & XPRODUCT) != 0); }
-  inline unsigned char getFlag()   { return achar;   }
+  struct hentry *      check_twosfx(const char * word, int len, char in_compound, const FLAG needflag = NULL);
+
+  char *      check_morph(const char * word, int len, char in_compound,
+                            const FLAG needflag = FLAG_NULL);
+
+  char *      check_twosfx_morph(const char * word, int len,
+                  char in_compound, const FLAG needflag = FLAG_NULL);
+
+  inline FLAG getFlag()   { return aflag;   }
   inline const char *  getKey()    { return appnd;  } 
   char *               add(const char * word, int len);
+
+  inline short getKeyLen() { return appndl; } 
+
+  inline const char *  getMorph()    { return morphcode;  } 
+
+  inline const unsigned short * getCont()    { return contclass;  } 
+  inline short           getContLen()    { return contclasslen;  } 
 
   inline PfxEntry *    getNext()   { return next;   }
   inline PfxEntry *    getNextNE() { return nextne; }
@@ -38,6 +53,8 @@ public:
   inline void   setNextNE(PfxEntry * ptr) { nextne = ptr; }
   inline void   setNextEQ(PfxEntry * ptr) { nexteq = ptr; }
   inline void   setFlgNxt(PfxEntry * ptr) { flgnxt = ptr; }
+  
+  inline int    test_condition(const char * st);
 };
 
 
@@ -54,23 +71,50 @@ class SfxEntry : public AffEntry
        SfxEntry *   nexteq;
        SfxEntry *   nextne;
        SfxEntry *   flgnxt;
+	   
+       SfxEntry *   l_morph;
+       SfxEntry *   r_morph;
+       SfxEntry *   eq_morph;
 
 public:
 
   SfxEntry(AffixMgr* pmgr, affentry* dp );
   ~SfxEntry();
 
+  inline bool          allowCross() { return ((opts & aeXPRODUCT) != 0); }
   struct hentry *   check(const char * word, int len, int optflags, 
-                                                       AffEntry* ppfx);
+                    AffEntry* ppfx, char ** wlst, int maxSug, int * ns,
+                    const FLAG cclass = FLAG_NULL, const FLAG needflag = FLAG_NULL);
 
-  inline bool          allowCross() { return ((xpflg & XPRODUCT) != 0); }
-  inline unsigned char getFlag()   { return achar;   }
+  struct hentry *   check_twosfx(const char * word, int len, int optflags, AffEntry* ppfx, const FLAG needflag = NULL);
+
+  char *      check_twosfx_morph(const char * word, int len, int optflags,
+                 AffEntry* ppfx, const FLAG needflag = FLAG_NULL);
+  struct hentry * get_next_homonym(struct hentry * he);
+  struct hentry * get_next_homonym(struct hentry * word, int optflags, AffEntry* ppfx, 
+    const FLAG cclass, const FLAG needflag);
+
+
+  inline FLAG getFlag()   { return aflag;   }
   inline const char *  getKey()    { return rappnd; } 
   char *               add(const char * word, int len);
+
+
+  inline const char *  getMorph()    { return morphcode;  } 
+
+  inline const unsigned short * getCont()    { return contclass;  } 
+  inline short           getContLen()    { return contclasslen;  } 
+  inline const char *  getAffix()    { return appnd; } 
+
+  inline short getKeyLen() { return appndl; } 
 
   inline SfxEntry *    getNext()   { return next;   }
   inline SfxEntry *    getNextNE() { return nextne; }
   inline SfxEntry *    getNextEQ() { return nexteq; }
+
+  inline SfxEntry *    getLM() { return l_morph; }
+  inline SfxEntry *    getRM() { return r_morph; }
+  inline SfxEntry *    getEQM() { return eq_morph; }
   inline SfxEntry *    getFlgNxt() { return flgnxt; }
 
   inline void   setNext(SfxEntry * ptr)   { next = ptr;   }
@@ -78,8 +122,8 @@ public:
   inline void   setNextEQ(SfxEntry * ptr) { nexteq = ptr; }
   inline void   setFlgNxt(SfxEntry * ptr) { flgnxt = ptr; }
 
+  inline int    test_condition(const char * st, const char * begin);
 };
-
 
 #endif
 

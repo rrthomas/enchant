@@ -123,12 +123,6 @@ if test "x$with_myspell_dir" != "x" ; then
    myspell_dir=$with_myspell_dir
 fi
 
-with_system_myspell=no
-if test "x$build_myspell" != "xno"; then
-   PKG_CHECK_MODULES(MYSPELL, myspell, with_system_myspell=yes, with_system_myspell=no)
-fi
-AM_CONDITIONAL(WITH_SYSTEM_MYSPELL, test "x$with_system_myspell" = "xyes")
-
 MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dir\"'"
 if test "x$with_system_myspell" != "xno"; then
    MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DWITH_SYSTEM_MYSPELL=1"
@@ -273,7 +267,6 @@ $PACKAGE-$VERSION
 	Build Ispell backend:           ${build_ispell}
 	Build Uspell backend:           ${build_uspell}
 	Build Hspell backend:           ${build_hspell}
-	Build Myspell backend:          ${build_myspell}
-	Build against system Myspell:   ${with_system_myspell}
+	Build Myspell/Hunspell backend: ${build_myspell}
 	Build with Binreloc		$br_cv_binreloc
 "

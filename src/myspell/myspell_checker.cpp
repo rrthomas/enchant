@@ -38,11 +38,8 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
-#ifdef WITH_SYSTEM_MYSPELL
-#include <myspell.hxx>
-#else
-#include "enchant_myspell.hxx"
-#endif
+/* built against hunspell 1.1.3 on January 13, 2006 */
+#include "hunspell.hxx"
 
 ENCHANT_PLUGIN_DECLARE("Myspell")
 
@@ -66,7 +63,7 @@ public:
 private:
 	GIConv  m_translate_in; /* Selected translation from/to Unicode */
 	GIConv  m_translate_out;
-	MySpell *myspell;
+	Hunspell *myspell;
 };
 
 /***************************************************************************/
@@ -257,7 +254,7 @@ MySpellChecker::requestDictionary(const char *szLang)
 	aff = g_strdup(dic);
 	int len_dic = strlen(dic);
 	strcpy(aff+len_dic-3, "aff");
-	myspell = new MySpell(aff, dic);
+	myspell = new Hunspell(aff, dic);
 	g_free(dic);
 	g_free(aff);
 	char *enc = myspell->get_dic_encoding();
