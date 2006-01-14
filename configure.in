@@ -148,16 +148,11 @@ AC_ARG_WITH(aspell-prefix, [  --with-aspell-prefix=DIR
 if test "x$check_aspell" != "xno"; then
    saved_LDFLAGS=$LDFLAGS
 
+   ASPELL_CFLAGS=
    if test "x$with_aspell_prefix" != "x"; then       
        LDFLAGS="-L$with_aspell_prefix/lib "$LDFLAGS
        ASPELL_INC="-I$with_aspell_prefix/include"
        ASPELL_LIBS="-L$with_aspell_prefix/lib -laspell"
-       aspell_major=`$with_aspell_prefix/bin/aspell -v | awk -F. '{print $4;}' | awk -F")" '{print $1;}'`
-       if test "$aspell_major" -ge "50"; then
-          ASPELL_CFLAGS="-DASPELL_0_50_0=1 -DASPELL_DICT_DIR='\"$with_aspell_prefix/lib/aspell\"'"
-       else
-          ASPELL_CFLAGS="-DASPELL_DICT_DIR='\"$with_aspell_prefix/lib/aspell\"'"
-       fi
    else
        aspell_prefix=${prefix}
        if test "x$prefix" = "xNONE"; then
@@ -172,24 +167,22 @@ if test "x$check_aspell" != "xno"; then
               LDFLAGS="-L`aspell config prefix`/lib "$LDFLAGS
 	      ASPELL_INC="-I`aspell config prefix`/include"
 	      ASPELL_LIBS="-L`aspell config prefix`/lib -laspell"
-	      ASPELL_CFLAGS="-DASPELL_0_50_0=1 -DASPELL_DICT_DIR='\"`aspell config dict-dir`\"'"
-
 	      AC_MSG_RESULT([yes])
 	  else
-	      AC_MSG_RESULT([no])
+	      AC_MSG_RESULT([unknown])
 	  fi
       fi
 
-      if test "x$ASPELL_CFLAGS" = "x"; then
+      if test "x$HAVE_ASPELL" != "xyes"; then
 	      AC_MSG_WARN([Didn't find aspell >= 0.50.0 and no explicit path aspell specified. Guessing at $aspell_prefix])
 	      ASPELL_LIBS="-L$aspell_prefix/lib -laspell"
-	      ASPELL_CFLAGS="-DASPELL_DICT_DIR='\"$aspell_prefix/lib/aspell\"'"
       fi
    fi
 
    AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,
       [AC_CHECK_LIB(pspell, new_pspell_config, build_aspell=yes, AC_MSG_WARN([Enchant building without the aspell library]))]
       ,)
+   AC_CHECK_LIB(aspell,get_aspell_dict_info_list,ASPELL_CFLAGS="-DASPELL_0_50_0=1",)
    LDFLAGS=$saved_LDFLAGS
    
    AC_SUBST(ASPELL_INC)
