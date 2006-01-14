@@ -2,7 +2,7 @@
 
 # Ispell compatibility script for Enchant
 
-exec_prefix=/usr
+exec_prefix=@prefix@
 bindir=${exec_prefix}/bin
 command=""
 
