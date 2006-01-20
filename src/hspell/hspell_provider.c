@@ -181,21 +181,6 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	return sugg_arr;	
 }
 
-static int
-hspell_provider_dictionary_exists (struct str_enchant_provider *me,
-				   const char *const tag)
-{
-	/* cheak if tag is he[_IL.something] */
-	if ((strlen(tag) >= 2) && tag[0] == 'h' && tag[1] == 'e')
-		{
-			return TRUE;
-		}
-	else
-		{
-			return FALSE;
-		}
-}
-
 static EnchantDict *
 hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
@@ -203,7 +188,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	int dict_flag = 0;
 	struct dict_radix *hspell_dict = NULL;
 
-	if(!hspell_provider_dictionary_exists(me, tag))
+	if(!((strlen(tag) >= 2) && tag[0] == 'h' && tag[1] == 'e'))
 		return NULL;
 	
 	/* try to set a new session */
@@ -237,18 +222,32 @@ hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
+/* test for the existence of, then return $prefix/share/hspell/hebrew.wgz */
+
 static char ** 
 hspell_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
 {
-	char ** out_list;
+	char ** out_list = NULL;
+	*out_n_dicts = 0;
 
-	*out_n_dicts = 2;
+#ifdef ENCHANT_HSPELL_DICT_DIR
 
-	out_list = g_new0 (char *, 3);
+	{
+		char * hspell_dictionary;
 
-	out_list[0] = g_strdup ("he_IL");
-	out_list[1] = g_strdup ("he");
+		hspell_dictionary = g_build_filename(ENCHANT_HSPELL_DICT_DIR, "hebrew.wgz");
+		if(hspell_dictionary && g_file_test (hspell_dictionary, G_FILE_TEST_EXISTS)) {
+			*out_n_dicts = 2;
+			
+			out_list = g_new0 (char *, 3);
+			
+			out_list[0] = g_strdup ("he_IL");
+			out_list[1] = g_strdup ("he");
+		}
+
+		g_free(hspell_dictionary);
+#endif
 
 	return out_list;
 }
@@ -291,7 +290,6 @@ init_enchant_provider (void)
 	provider->dispose = hspell_provider_dispose;
 	provider->request_dict = hspell_provider_request_dict;
 	provider->dispose_dict = hspell_provider_dispose_dict;
-	provider->dictionary_exists = hspell_provider_dictionary_exists;
 	provider->identify = hspell_provider_identify;
 	provider->describe = hspell_provider_describe;
 	provider->list_dicts = hspell_provider_list_dicts;

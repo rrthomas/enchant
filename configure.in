@@ -223,7 +223,7 @@ if test "x$check_hspell" != "xno"; then
    AC_CHECK_LIB(hspell,hspell_check_word,build_hspell=yes, build_hspell=no, -lz)
 fi
 
-hspell_dir=${datadir}/enchant/hspell
+hspell_dir=${datadir}/hspell
 AC_ARG_WITH(hspell-dir, [  --with-hspell-dir=PATH    path to installed hspell dicts ])
 
 if test "x$with_hspell_dir" != "x" ; then
@@ -231,7 +231,7 @@ if test "x$with_hspell_dir" != "x" ; then
 fi
 
 HSPELL_LIBS=" -lhspell -lz"
-HSPELL_CFLAGS="$HSPELL_CFLAGS -DENCHANT_HSPELL_DICT_DIR='\"$hspell_dict_dir\"'"
+HSPELL_CFLAGS="$HSPELL_CFLAGS -DENCHANT_HSPELL_DICT_DIR='\"$hspell_dir\"'"
 AC_SUBST(HSPELL_CFLAGS)
 AC_SUBST(HSPELL_LIBS)
 
