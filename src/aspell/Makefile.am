@@ -10,6 +10,6 @@ aspell_LTLIBRARIES = $(target_lib)
 aspelldir= $(libdir)/enchant
 
 libenchant_aspell_la_LIBADD= $(ENCHANT_LIBS) $(ASPELL_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_aspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
+libenchant_aspell_la_LDFLAGS = -avoid-version -no-undefined
 libenchant_aspell_la_SOURCES = aspell_provider.c
 libenchant_aspell_lalibdir=$(libdir)/enchant

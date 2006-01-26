@@ -10,6 +10,6 @@ hspell_LTLIBRARIES = $(target_lib)
 hspelldir= $(libdir)/enchant
 
 libenchant_hspell_la_LIBADD= $(ENCHANT_LIBS) $(HSPELL_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_hspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
+libenchant_hspell_la_LDFLAGS = -avoid-version -no-undefined
 libenchant_hspell_la_SOURCES = hspell_provider.c
 libenchant_hspell_lalibdir=$(libdir)/enchant

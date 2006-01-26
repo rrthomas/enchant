@@ -11,7 +11,7 @@ myspelldir= $(libdir)/enchant
 
 libenchant_myspell_lalibdir=$(libdir)/enchant
 libenchant_myspell_la_LIBADD= $(MYSPELL_LIBS) $(ENCHANT_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_myspell_la_LDFLAGS = -version-info $(VERSION_INFO) -no-undefined
+libenchant_myspell_la_LDFLAGS = -avoid-version -no-undefined
 
 libenchant_myspell_la_SOURCES =	\
 	affentry.hxx		\
