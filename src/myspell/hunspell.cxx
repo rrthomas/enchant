@@ -1,5 +1,7 @@
+#if 0
 #include "license.hunspell"
 #include "license.myspell"
+#endif
 
 #include <cstring>
 #include <cstdlib>
