@@ -4,7 +4,7 @@ else
 target_lib =
 endif
 
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -I@ASPELL_INC@ -D_ENCHANT_BUILD=1 @ASPELL_CFLAGS@
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) @ASPELL_INC@ -D_ENCHANT_BUILD=1 @ASPELL_CFLAGS@
 
 aspell_LTLIBRARIES = $(target_lib)
 aspelldir= $(libdir)/enchant
