@@ -106,9 +106,9 @@ hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	gsize length;
 	int preflen;
 	struct dict_radix *hspell_dict;
-
+	
 	hspell_dict = (struct dict_radix *)me->user_data;
-
+	
 	/* convert to iso 8859-8 */
 	iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
 	
@@ -119,7 +119,7 @@ hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 				g_free (iso_word);
 			return FALSE;
 		}
-
+	
 	/* check */
 	res = hspell_check_word (hspell_dict, iso_word, &preflen);
 	
@@ -148,7 +148,7 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	char **sugg_arr = NULL;
 	struct corlist cl;
 	struct dict_radix *hspell_dict;
-
+	
 	hspell_dict = (struct dict_radix *)me->user_data;
 	
 	/* convert to iso 8859-8 */
@@ -187,7 +187,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	EnchantDict *dict;
 	int dict_flag = 0;
 	struct dict_radix *hspell_dict = NULL;
-
+	
 	if(!((strlen(tag) >= 2) && tag[0] == 'h' && tag[1] == 'e'))
 		return NULL;
 	
@@ -212,9 +212,9 @@ static void
 hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 {
 	struct dict_radix *hspell_dict;
-
+	
 	hspell_dict = (struct dict_radix *)dict->user_data;
-
+	
 	/* deleting the dict is not posible on hspell ver. < v.0.8 */
 #if (HSPELL_VERSION_MAJOR > 0) || (HSPELL_VERSION_MINOR >= 8)
 	hspell_uninit (hspell_dict);
@@ -230,12 +230,12 @@ hspell_provider_list_dicts (EnchantProvider * me,
 {
 	char ** out_list = NULL;
 	*out_n_dicts = 0;
-
+	
 #ifdef ENCHANT_HSPELL_DICT_DIR
-
+	
 	{
 		char * hspell_dictionary;
-
+		
 		hspell_dictionary = g_build_filename(ENCHANT_HSPELL_DICT_DIR, "hebrew.wgz");
 		if(hspell_dictionary && g_file_test (hspell_dictionary, G_FILE_TEST_EXISTS)) {
 			*out_n_dicts = 2;
@@ -245,10 +245,11 @@ hspell_provider_list_dicts (EnchantProvider * me,
 			out_list[0] = g_strdup ("he_IL");
 			out_list[1] = g_strdup ("he");
 		}
-
+		
 		g_free(hspell_dictionary);
+	}
 #endif
-
+		
 	return out_list;
 }
 
