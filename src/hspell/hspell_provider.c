@@ -228,27 +228,20 @@ static char **
 hspell_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
 {
+	char * dictionary_path;
 	char ** out_list = NULL;
 	*out_n_dicts = 0;
 	
-#ifdef ENCHANT_HSPELL_DICT_DIR
+	dictionary_path = hspell_get_dictionary_path();
 	
-	{
-		char * hspell_dictionary;
+	if(dictionary_path && *dictionary_path && g_file_test (dictionary_path, G_FILE_TEST_EXISTS)) {
+		*out_n_dicts = 2;
 		
-		hspell_dictionary = g_build_filename(ENCHANT_HSPELL_DICT_DIR, "hebrew.wgz");
-		if(hspell_dictionary && g_file_test (hspell_dictionary, G_FILE_TEST_EXISTS)) {
-			*out_n_dicts = 2;
-			
-			out_list = g_new0 (char *, 3);
-			
-			out_list[0] = g_strdup ("he_IL");
-			out_list[1] = g_strdup ("he");
-		}
+		out_list = g_new0 (char *, 3);
 		
-		g_free(hspell_dictionary);
-	}
-#endif
+		out_list[0] = g_strdup ("he_IL");
+		out_list[1] = g_strdup ("he");
+	}		
 		
 	return out_list;
 }
