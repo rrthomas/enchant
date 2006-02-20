@@ -360,9 +360,9 @@ ispell_checker_get_prefix (void)
 {
 	/* until I work out how to link the modules against enchant in MacOSX - fjf
 	 */
-#ifndef XP_TARGET_COCOA
 	char * ispell_prefix = NULL;
 
+#ifndef XP_TARGET_COCOA
 	/* Look for explicitly set registry values */
 	ispell_prefix = enchant_get_registry_value ("Ispell", "Data_Dir");
 	if (ispell_prefix)
