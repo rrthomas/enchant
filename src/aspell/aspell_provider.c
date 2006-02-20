@@ -152,10 +152,6 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	
 	if (pspell_error_number (spell_error) != 0)
 		{
-			/*
-			  g_warning ("Aspell Enchant backend error when requesting '%s' dictionary: %s\n",
-			  tag, pspell_error_message(spell_error));
-			*/
 			enchant_provider_set_error (me, pspell_error_message(spell_error));
 			return NULL;
 		}
@@ -271,7 +267,7 @@ init_enchant_provider (void)
 	provider->list_dicts = aspell_provider_list_dicts;
 #else
 #  ifdef __GNUC__
-#    warning "You're using an ancient aspell. aspell_provider_list_dicts() is not implemented."
+#    warning "You're using an ancient version of Aspell. Some things won't work properly."
 #  endif
 #endif
 	provider->free_string_list = aspell_provider_free_string_list;

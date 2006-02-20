@@ -859,7 +859,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 						} 
 					else 
 						{
-							g_warning ("Module error: %s\n", g_module_error());
+							g_warning ("Error loading plugin: %s\n", g_module_error());
 						}
 					
 					g_free (filename);
