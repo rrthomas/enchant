@@ -360,14 +360,13 @@ ispell_checker_get_prefix (void)
 {
 	/* until I work out how to link the modules against enchant in MacOSX - fjf
 	 */
+#ifndef XP_TARGET_COCOA
 	char * ispell_prefix = NULL;
 
-#ifndef XP_TARGET_COCOA
 	/* Look for explicitly set registry values */
 	ispell_prefix = enchant_get_registry_value ("Ispell", "Data_Dir");
 	if (ispell_prefix)
 		return ispell_prefix;
-#endif
 
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
@@ -377,6 +376,7 @@ ispell_checker_get_prefix (void)
 			g_free(enchant_prefix);
 			return ispell_prefix;
 		}
+#endif
 
 #ifdef ENCHANT_ISPELL_DICT_DIR
 	return g_strdup (ENCHANT_ISPELL_DICT_DIR);
