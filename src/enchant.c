@@ -1337,7 +1337,6 @@ _enchant_provider_dictionary_exists (EnchantProvider * provider,
 		}
 	else if (provider->list_dicts)
 		{
-			const char * name, * desc, * file;
 			size_t n_dicts, i;
 			char ** dicts;				       
 			
