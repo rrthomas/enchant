@@ -63,7 +63,7 @@ uspell_checker_get_prefix (void)
 	char * enchant_prefix = _enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
+			char * uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
 			g_free(enchant_prefix);
 			return uspell_prefix;
 		}
