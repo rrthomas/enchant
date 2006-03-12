@@ -60,7 +60,7 @@ uspell_checker_get_prefix (void)
 		return data_dir;
 
 	/* Dynamically locate library and search for modules relative to it. */
-	char * enchant_prefix = _enchant_get_prefix_dir();
+	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
 			char * uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
