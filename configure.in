@@ -264,7 +264,7 @@ autopackage/default.apspec
 
 dnl ===========================================================================================
 
-relocatable_library = "no"
+relocatable_library="no"
 if test "x$native_win32" = "xyes" || test "x$br_cv_binreloc" = "xyes"; then
    relocatable_library="yes"
 fi
