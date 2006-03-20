@@ -1,2 +1,10 @@
+2006-03-20 Dom Lachowicz <cinamod@hotmail.com>
+
+	* configure.in: elocatable_library undefined command in configure;
+	Bug 10134, from Pierre Joye <pierre.php@gmail.com>
+
+	* configure.in: configure does not check if aspell/pspell headers exist;
+	Bug 10135, based on a patch from Pierre Joye
+	
 2003-07-13 Dom Lachowicz <cinamod@hotmail.com>
 	* Initial import
