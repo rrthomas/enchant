@@ -427,7 +427,7 @@ uspell_provider_list_dictionaries (EnchantProvider * me,
 	if (nb == 0)
 		return NULL;
 
-	char ** out_dicts = g_new (char *, nb + 1);
+	char ** out_dicts = g_new0 (char *, nb + 1);
 	for (i = 0; i < n_mappings; i++)
 		if (uspell_provider_dictionary_exists (me, mapping[i].language_tag))
 			out_dicts[i] = g_strdup (mapping[i].language_tag);

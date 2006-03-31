@@ -277,6 +277,10 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	if ((needle = strchr (new_tag, '.')) != NULL)
 		*needle = '\0';
 
+	/* turn en-GB into en_GB */
+	if ((needle = strchr (new_tag, '-')) != NULL)
+		*needle = '_';
+
 	return new_tag;
 }
 

@@ -654,7 +654,7 @@ ispell_provider_list_dictionaries (EnchantProvider * me,
 {
 	size_t i, nb;
 
-	char ** out_dicts = g_new (char *, size_ispell_map + 1);
+	char ** out_dicts = g_new0 (char *, size_ispell_map + 1);
 	nb = 0;
 	for (i = 0; i < size_ispell_map; i++)
 		if (_ispell_provider_dictionary_exists (me, ispell_map[i].dict))
