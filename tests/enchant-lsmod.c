@@ -44,7 +44,7 @@ describe_dict (const char * const lang_tag,
 	       void * user_data)
 {
 	FILE * out = (FILE *)user_data;
-	fprintf (out, "%s: %s = %s (%s)\n", lang_tag, provider_name, provider_desc, provider_file);
+	fprintf (out, "%s (%s)\n", lang_tag, provider_name);
 }
 
 static void
@@ -54,7 +54,7 @@ enumerate_providers (const char * name,
 		     void * user_data)
 {
 	FILE * out = (FILE *)user_data;
-	fprintf (out, "%s: '%s' (%s)\n", name, desc, file);
+	fprintf (out, "%s (%s)\n", name, desc);
 }
 
 static void
@@ -65,7 +65,7 @@ enumerate_dicts (const char * const lang_tag,
 		 void * user_data)
 {
 	FILE * out = (FILE *)user_data;
-	fprintf (out, "%s: '%s' (%s)\n", lang_tag, provider_name, provider_desc);
+	fprintf (out, "%s (%s)\n", lang_tag, provider_name);
 }
 
 int
@@ -113,7 +113,7 @@ main (int argc, char **argv)
 	} else if (mode == 1) {
 
 		if (!lang_tag) {
-			printf ("Error: language tag not specified and environment variable $LANG not set\n");
+			printf ("Error: language tag not specified and environment variable $LANG not set.\n");
 			enchant_broker_free (broker);
 			return 1;
 		}
@@ -121,7 +121,7 @@ main (int argc, char **argv)
 		dict = enchant_broker_request_dict (broker, lang_tag);
 		
 		if (!dict) {
-			printf ("No dictionary available for '%s'\n", lang_tag);
+			printf ("No dictionary available for '%s'.\n", lang_tag);
 
 			if (lang_tag)
 				g_free (lang_tag);
