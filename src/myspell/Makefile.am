@@ -37,7 +37,6 @@ libenchant_myspell_la_SOURCES =	\
 EXTRA_DIST=			\
 	license.readme		\
 	utf_info.cxx		\
-	README			\
 	license.hunspell	\
 	license.myspell		\
 	license.readme		\
