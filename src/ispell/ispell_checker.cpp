@@ -634,8 +634,7 @@ ispell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 }
 
 static int
-_ispell_provider_dictionary_exists (EnchantProvider * me,
-				   const char *const szFile)
+_ispell_provider_dictionary_exists (const char *const szFile)
 {
 	std::vector <std::string> names;
 
@@ -653,11 +652,13 @@ ispell_provider_list_dictionaries (EnchantProvider * me,
 				   size_t * out_n_dicts)
 {
 	size_t i, nb;
-
 	char ** out_dicts = g_new0 (char *, size_ispell_map + 1);
+
+	(void)me;
+
 	nb = 0;
 	for (i = 0; i < size_ispell_map; i++)
-		if (_ispell_provider_dictionary_exists (me, ispell_map[i].dict))
+		if (_ispell_provider_dictionary_exists (ispell_map[i].dict))
 			out_dicts[nb++] = g_strdup (ispell_map[i].lang);
 
 	*out_n_dicts = nb;
@@ -682,7 +683,7 @@ ispell_provider_dictionary_exists (struct str_enchant_provider * me,
 		{
 			const IspellMap * mapping = (const IspellMap *)(&(ispell_map[i]));
 			if (!strcmp (tag, mapping->lang) || !strcmp (shortened_dict.c_str(), mapping->lang)) 
-				return _ispell_provider_dictionary_exists(me, mapping->dict);
+				return _ispell_provider_dictionary_exists(mapping->dict);
 		}
 	
 	return 0;
