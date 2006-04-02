@@ -228,7 +228,7 @@ static char **
 hspell_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
 {
-	char * dictionary_path;
+	const char * dictionary_path;
 	char ** out_list = NULL;
 	*out_n_dicts = 0;
 	
@@ -244,6 +244,14 @@ hspell_provider_list_dicts (EnchantProvider * me,
 	}		
 		
 	return out_list;
+}
+
+static int
+hspell_provider_dictionary_exists (struct str_enchant_provider * me,
+				   const char *const tag)
+{
+	(void)me;
+	return (!strcmp ("he", tag) || !strcmp ("he_IL", tag));
 }
 
 static void
@@ -284,6 +292,7 @@ init_enchant_provider (void)
 	provider->dispose = hspell_provider_dispose;
 	provider->request_dict = hspell_provider_request_dict;
 	provider->dispose_dict = hspell_provider_dispose_dict;
+	provider->dictionary_exists = hspell_provider_dictionary_exists;
 	provider->identify = hspell_provider_identify;
 	provider->describe = hspell_provider_describe;
 	provider->list_dicts = hspell_provider_list_dicts;

@@ -669,6 +669,25 @@ ispell_provider_list_dictionaries (EnchantProvider * me,
 	return out_dicts;
 }
 
+static int
+ispell_provider_dictionary_exists (struct str_enchant_provider * me,
+				   const char *const tag)
+{
+	std::string shortened_dict (tag);
+	size_t uscore_pos;
+	if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1))
+		shortened_dict = shortened_dict.substr(0, uscore_pos);
+	
+	for (size_t i = 0; i < size_ispell_map; i++)
+		{
+			const IspellMap * mapping = (const IspellMap *)(&(ispell_map[i]));
+			if (!strcmp (tag, mapping->lang) || !strcmp (shortened_dict.c_str(), mapping->lang)) 
+				return _ispell_provider_dictionary_exists(me, mapping->dict);
+		}
+	
+	return 0;
+}
+
 static void
 ispell_provider_free_string_list (EnchantProvider * me, char **str_list)
 {
@@ -704,6 +723,7 @@ init_enchant_provider (void)
 	provider->dispose = ispell_provider_dispose;
 	provider->request_dict = ispell_provider_request_dict;
 	provider->dispose_dict = ispell_provider_dispose_dict;
+	provider->dictionary_exists = ispell_provider_dictionary_exists;
 	provider->identify = ispell_provider_identify;
 	provider->describe = ispell_provider_describe;
 	provider->list_dicts = ispell_provider_list_dictionaries;
