@@ -1,6 +1,10 @@
+2006-04-32 Dom Lachowicz <cinamod@hotmail.com>
+
+	* configure.in: --with-aspell-prefix didn't work
+	
 2006-03-20 Dom Lachowicz <cinamod@hotmail.com>
 
-	* configure.in: elocatable_library undefined command in configure;
+	* configure.in: relocatable_library undefined command in configure;
 	Bug 10134, from Pierre Joye <pierre.php@gmail.com>
 
 	* configure.in: configure does not check if aspell/pspell headers exist;
