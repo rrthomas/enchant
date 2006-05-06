@@ -1,4 +1,11 @@
-2006-04-32 Dom Lachowicz <cinamod@hotmail.com>
+2006-05-06 Dom Lachowicz <cinamod@hotmail.com>
+
+	* configure.in: Bump version number to indicate an unstable series
+	* src/pwl.[ch]: New personal wordlist implementation, based on Trie.
+	Thanks to Ryan Kelly <ryan-bugs@rfk.id.au> (bug 10212).
+	* src/enchant.c: Ditto
+	
+2006-04-23 Dom Lachowicz <cinamod@hotmail.com>
 
 	* configure.in: --with-aspell-prefix didn't work
 	

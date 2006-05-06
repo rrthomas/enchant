@@ -32,17 +32,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if defined(HAVE_FLOCK) || defined(HAVE_LOCKF)
-#include <unistd.h>
-#include <sys/file.h>
-#endif /* HAVE_FLOCK || HAVE_LOCKF */
-
 #include <glib.h>
 #include <gmodule.h>
 #include <locale.h>
 
 #include "enchant.h"
 #include "enchant-provider.h"
+#include "pwl.h"
 
 #ifdef XP_TARGET_COCOA
 #import "enchant_cocoa.h"
@@ -75,7 +71,7 @@ struct str_enchant_broker
 typedef struct str_enchant_session
 {
 	GHashTable *session;
-	GHashTable *personal;
+	EnchantPWL *personal;
 
 	char * personal_filename;
 	char * language_tag;
@@ -90,36 +86,8 @@ typedef struct str_enchant_session
 typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
 typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider, const char * module_dir);
 
-#ifndef BUFSIZ
-#define BUFSIZ 1024
-#endif
-
 /********************************************************************************/
 /********************************************************************************/
-
-static void
-enchant_lock_file (FILE * f)
-{
-#if defined(HAVE_FLOCK)
-	flock (fileno (f), LOCK_EX);
-#elif defined(HAVE_LOCKF)
-	lockf (fileno (f), F_LOCK, 0);
-#else
-	/* TODO: win32, UNIX fcntl. This race condition probably isn't too bad. */
-#endif /* HAVE_FLOCK */
-}
-
-static void
-enchant_unlock_file (FILE * f)
-{
-#if defined(HAVE_FLOCK)
-	flock (fileno (f), LOCK_UN);
-#elif defined(HAVE_LOCKF)
-	lockf (fileno (f), F_ULOCK, 0);
-#else
-	/* TODO: win32, UNIX fcntl. This race condition probably isn't too bad. */
-#endif /* HAVE_FLOCK */
-}
 
 static char *
 enchant_get_module_dir (void)
@@ -288,7 +256,7 @@ static void
 enchant_session_destroy (EnchantSession * session)
 {
 	g_hash_table_destroy (session->session);
-	g_hash_table_destroy (session->personal);
+	enchant_pwl_free (session->personal);
 	g_free (session->personal_filename);
 	g_free (session->language_tag);
 
@@ -303,48 +271,25 @@ enchant_session_new_with_pwl (EnchantProvider * provider, const char * const pwl
 			      gboolean fail_if_no_pwl)
 {
 	EnchantSession * session;
-	FILE * f;
-	char line[BUFSIZ];
+	EnchantPWL *personal = NULL;
+
+	if (pwl)
+		personal = enchant_pwl_init_with_file (pwl);
+
+	if (personal == NULL) {
+		if (fail_if_no_pwl)
+			return NULL;
+		else
+			personal = enchant_pwl_init ();
+	}
+	
 
 	session = g_new0 (EnchantSession, 1);
 	session->session = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-	session->personal = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	session->personal = personal;
 	session->provider = provider;
 	session->language_tag = g_strdup (lang);
-
-	if (pwl) 
-		{
-			session->personal_filename = g_strdup (pwl);
-			
-			/* populate personal filename */
-			f = fopen (pwl, "r");
-			if (f) 
-				{
-					enchant_lock_file (f);
-					
-					while (NULL != (fgets (line, sizeof (line), f)))
-						{
-							size_t l = strlen(line)-1;
-							if (line[l]=='\n') 
-								line[l] = '\0';
-
-							g_hash_table_insert (session->personal, g_strdup (line), GINT_TO_POINTER(TRUE));
-						}
-
-					enchant_unlock_file (f);
-					fclose (f);
-				} 
-			else if (fail_if_no_pwl) 
-				{
-					enchant_session_destroy (session);
-					return NULL;
-				}
-		} 
-	else if (fail_if_no_pwl) 
-		{
-			enchant_session_destroy (session);
-			return NULL;
-		}
+	session->personal_filename = g_strdup (pwl);
 	
 	return session;
 }
@@ -384,23 +329,7 @@ enchant_session_add (EnchantSession * session, const char * const word, size_t l
 static void
 enchant_session_add_personal (EnchantSession * session, const char * const word, size_t len)
 {
-	FILE * f;
-
-	if (session->personal_filename) 
-		{
-			f = fopen (session->personal_filename, "a");
-			
-			if (f) 
-				{
-					enchant_lock_file (f);
-					
-					fwrite (word, sizeof(char), len, f);
-					fwrite ("\n", sizeof(char), 1, f);
-					fclose (f);
-					
-					enchant_unlock_file (f);
-				}
-		}
+	enchant_pwl_add(session->personal, word, len);
 }
 
 static gboolean
@@ -411,7 +340,7 @@ enchant_session_contains (EnchantSession * session, const char * const word, siz
 	char * utf = g_strndup (word, len);
 	
 	if (g_hash_table_lookup (session->session, utf) ||
-	    g_hash_table_lookup (session->personal, utf))
+	    enchant_pwl_check (session->personal, utf, len) == 0)
 		result = TRUE;
 	
 	g_free (utf);
@@ -525,6 +454,11 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	if (enchant_session_contains (session, word, len))
 		return 0;
 
+	if (session->personal) {
+		if (enchant_pwl_check (session->personal, word, len) == 0)
+			return 0;
+	}
+
 	if (dict->check)
 		return (*dict->check) (dict, word, len);
 	else if (session->is_pwl)
@@ -549,41 +483,64 @@ ENCHANT_MODULE_EXPORT (char **)
 enchant_dict_suggest (EnchantDict * dict, const char *const word,
 		      ssize_t len, size_t * out_n_suggs)
 {
-	size_t n_suggs;
-	char ** suggs;
+	EnchantSession * session;
+	size_t n_suggs = 0, n_dict_suggs = 0, n_pwl_suggs = 0;
+	char **suggs, **dict_suggs = NULL, **pwl_suggs = NULL;
 
 	g_return_val_if_fail (dict, NULL);
 	g_return_val_if_fail (word, NULL);
 
+	session = (EnchantSession*)dict->enchant_private_data;
+
 	if (len < 0)
 		len = strlen (word);
-	
+
+	/* Check for suggestions from personal dictionary */
+	if(session->personal)
+		pwl_suggs = enchant_pwl_suggest(session->personal, word, len, &n_pwl_suggs);
+		
+	/* Check for suggestions from provider dictionary */
 	if (dict->suggest) 
 		{
-			char ** tmp_suggs;
+			dict_suggs = (*dict->suggest) (dict, word, len,
+							&n_dict_suggs);
+		}
+
+	/* Clone suggestions if there are any */
+	n_suggs = n_pwl_suggs + n_dict_suggs;
+	if (n_suggs > 0)
+		{
+			size_t i, j, k;
 			
-			tmp_suggs = (*dict->suggest) (dict, word, len, &n_suggs);
-			
-			/* clone the suggestion array */
-			if (tmp_suggs) 
-				{
-					size_t i;
-					
-					suggs = g_new0 (char *, n_suggs + 1);
-					for (i = 0; i < n_suggs; i++)
-						suggs[i] = g_strdup (tmp_suggs[i]);
-					
-					enchant_dict_free_string_list_impl (dict, tmp_suggs);
-				} 
-			else 
-				{
-					suggs = NULL;
+			suggs = g_new0 (char *, n_suggs + 1);
+
+			/* Copy over suggestions from dict */
+			for(i = 0; i < n_dict_suggs; i++)
+				suggs[i] = g_strdup (dict_suggs[i]);
+			if(dict_suggs)
+				enchant_dict_free_string_list_impl (dict, dict_suggs);
+
+			/* Copy over suggestions from pwl, except dupes */
+			for(j = 0; j < n_pwl_suggs; j++) {
+				int dupe = 0;
+				for(k = 0; k < n_dict_suggs; k++) {
+					if(strcmp(suggs[k],pwl_suggs[j])==0) {
+						dupe = 1;
+						break;
+					}
 				}
+				if(!dupe) {
+					suggs[i] = g_strdup (pwl_suggs[j]);
+					i++;
+				}
+			}
+
+			if(pwl_suggs)
+				enchant_pwl_free_string_list(session->personal,pwl_suggs);
 		}
 	else 
 		{
 			suggs = NULL;
-			n_suggs = 0;
 		}
 	
 	if (out_n_suggs)
