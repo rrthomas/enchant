@@ -993,6 +993,8 @@ enchant_dict_destroyed (gpointer data)
 	
 	if (owner && owner->dispose_dict) 
 		(*owner->dispose_dict) (owner, dict);
+	else if(session->is_pwl)
+		g_free (dict);
 
 	enchant_session_destroy (session);
 }
