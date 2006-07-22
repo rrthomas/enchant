@@ -93,6 +93,7 @@ static char *
 enchant_get_module_dir (void)
 {
 	char * module_dir = NULL;
+	char * prefix = NULL;
 
 #ifdef XP_TARGET_COCOA
 	return g_strdup ([[EnchantResourceProvider instance] moduleFolder]);
@@ -104,7 +105,6 @@ enchant_get_module_dir (void)
 		return module_dir;
 
 	/* Dynamically locate library and search for modules relative to it. */
-	char * prefix = NULL;
 	prefix = enchant_get_prefix_dir();
 	if(prefix)
 		{
