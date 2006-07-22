@@ -11,7 +11,7 @@ ispelldir= $(libdir)/enchant
 
 libenchant_ispell_lalibdir=$(libdir)/enchant
 libenchant_ispell_la_LIBADD= $(ENCHANT_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_ispell_la_LDFLAGS = -avoid-version -no-undefined
+libenchant_ispell_la_LDFLAGS = -module -avoid-version -no-undefined
 libenchant_ispell_la_SOURCES =	\
 	correct.cpp		\
 	good.cpp		\

@@ -10,6 +10,6 @@ uspell_LTLIBRARIES = $(target_lib)
 uspelldir= $(libdir)/enchant
 
 libenchant_uspell_la_LIBADD= $(ENCHANT_LIBS) $(USPELL_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_uspell_la_LDFLAGS = -avoid-version -no-undefined
+libenchant_uspell_la_LDFLAGS = -module -avoid-version -no-undefined
 libenchant_uspell_la_SOURCES = uspell_provider.cpp
 libenchant_uspell_lalibdir=$(libdir)/enchant
