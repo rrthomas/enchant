@@ -158,9 +158,10 @@ if test "x$check_aspell" != "xno"; then
 	  AC_MSG_CHECKING([For Aspell >= 0.50.0])
 	  aspell_major=`aspell -v | awk -F. '{print $4;}' | awk -F")" '{print $1;}'`
 	  if test "$aspell_major" -ge "50"; then
-              LDFLAGS="-L`aspell config prefix`/lib "$LDFLAGS
-	      ASPELL_INC="-I`aspell config prefix`/include"
-	      ASPELL_LIBS="-L`aspell config prefix`/lib -laspell"
+	      aspell_prefix=`aspell config prefix`
+              LDFLAGS="-L${aspell_prefix}/lib "$LDFLAGS
+	      ASPELL_INC="-I${aspell_prefix}/include"
+	      ASPELL_LIBS="-L${aspell_prefix}/lib -laspell"
 	      AC_MSG_RESULT([yes])
 	  else
 	      AC_MSG_RESULT([unknown])

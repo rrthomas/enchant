@@ -8,6 +8,8 @@
 	* src/*/Makefile.am: add '-module' to LDFLAGS so that things get
 	built correctly on Mac OSX (bug 10398)
 	* src/enchant.c: Fix C99-ism (bug 10387)
+	* configure.in: Grab the value of `aspell config prefix` and
+	use that if available (bug 10308)
 	
 2006-05-06 Dom Lachowicz <cinamod@hotmail.com>
 
