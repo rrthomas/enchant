@@ -1,32 +1,35 @@
 .PU
-.TH enchant 1 
+.TH ENCHANT 1 "July 2006" enchant "Enchant Mini Help File"
 .SH NAME
 Enchant \- a spellchecker
 .SH SYNOPSIS
 .ll +8
-.B enchant [-a] [-l] [-L] [-v]
+.B enchant
+[\fB\-a\fR] [\fB\-l\fR] [\fB\-L\fR] [\fB\-v\fR]
 .ll -8
 .br
 .SH DESCRIPTION
-.I Enchant is an ispell-compatible spellchecker.
+.B Enchant
+is an ispell-compatible spellchecker.
 .SS OPTIONS
 .TP
-.I "\-a"
-List alternatives
+.B "\-a"
+List alternatives.
 .TP
-.I "\-l"
-List only the misspellings
+.B "\-l"
+List only the misspellings.
 .TP
-.I "\-L"
-Includes the line number in the output
+.B "\-L"
+Include the line number in the output.
 .TP
-.I "\-v"
-Prints the program's version
+.B "\-v"
+Prints the program's version.
 .SH ENCHANT ORDERING FILE
-Enchant has a global and a per-user ordering file called enchant.ordering. 
-It lets the user specify which spelling backend to use for individual 
-languages in the case when you care which backend gets used. This global file 
-is located in $(datadir)/enchant; the per-user file is located in ~/.enchant.
+Enchant has a global and a per-user ordering file named \fIenchant.ordering\fR.
+It lets the user specify which spelling backend to use for individual
+languages in the case when you care which backend gets used. The global
+file is located in \fI$(datadir)/enchant\fR and the per-user file is
+located in \fI~/.enchant\fR.
 The per-user file takes precedence, if found.
 .PP
 The ordering file takes the form language_tag:<comma-separated list of spelling
@@ -41,13 +44,18 @@ en_UK:myspell,aspell,ispell
 .br
 fr:myspell,ispell:aspell
 .SH DIRECTORIES IMPORTANT TO ENCHANT
-Unless configured otherwise, Enchant's Myspell, Ispell, and Uspell backends will look
-for dictionaries in directories specific to Enchant, and will not use your 
-system-wide installed dictionaries. This is for pragmatic reasons - every
-distribution installs these dictionaries into different places.
+Unless configured otherwise, Enchant's Myspell, Ispell, and Uspell
+backends will look for dictionaries in directories specific to Enchant,
+and will not use your system-wide installed dictionaries. This is for
+pragmatic reasons since many distributions install these dictionaries
+into different locations.
 .PP
-Like the enchant.ordering file described above, Enchant will look in a global
-directory for these dictionaries and a per-user directory. The per-user directory takes precedence, if found. Enchant looks for Myspell dictionaries in $(datadir)/enchant/myspell and ~/.enchant/myspell. Enchant looks for Ispell dictionaries in $(datadir)/enchant/ispell and ~/.enchant/ispell. Enchant looks for Uspell dictionaries in $(datadir)/enchant/uspell and ~/.enchant/uspell
+Like the \fIenchant.ordering\fR file described above, Enchant looks in
+the global directory for these dictionaries and a per-user directory.
+The per-user directory takes precedence if it is found.
+Enchant looks for Myspell dictionaries in \fI$(datadir)/enchant/myspell\fR and \fI~/.enchant/myspell\fR.
+Enchant looks for Ispell dictionaries in \fI$(datadir)/enchant/ispell\fR and \fI~/.enchant/ispell\fR.
+Enchant looks for Uspell dictionaries in \fI$(datadir)/enchant/uspell\fR and \fI~/.enchant/uspell\fR.
 .PP
 Packagers and users may wish to make symbolic links to the system-wide dictionary directories. Or, preferably, use the --with-myspell-dir, --with-ispell-dir, and --with-uspell-dir 'configure' arguments.
 .SH MORE INFORMATION
