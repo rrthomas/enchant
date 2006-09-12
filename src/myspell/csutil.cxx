@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <cstring>
-#include <cctype>
 #include <cstdio>
 #include "csutil.hxx"
 
@@ -190,7 +189,9 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
       if (delim) {
         dp = (char *)memchr(mp,(int)((unsigned char)delim),n);
       } else {
-        for (dp = mp; (*dp && !isspace(*dp)); dp++);
+	// don't use isspace() here, the string can be in some random charset
+	// that's way different than the locale's
+        for (dp = mp; (*dp && *dp != ' ' && *dp != '\t'); dp++);
         if (!*dp) dp = NULL;
       }
       if (dp) {
@@ -249,29 +250,6 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
         }
      }
      return d;
- }
-
-
- // return 1 if s1 is a leading subset of s2
- int isSubset(const char * s1, const char * s2)
- {
-    while ((*s1 == *s2) && *s1) {
-        s1++;
-        s2++;
-    }
-    return (*s1 == '\0');
- }
-
-
- // return 1 if s1 (reversed) is a leading subset of end of s2
- int isRevSubset(const char * s1, const char * end_of_s2, int len)
- {
-    while ((len > 0) && *s1 && (*s1 == *end_of_s2)) {
-        s1++;
-        end_of_s2--;
-        len--;
-    }
-    return (*s1 == '\0');
  }
 
  // convert null terminated string to all caps using encoding

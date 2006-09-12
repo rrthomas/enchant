@@ -91,8 +91,10 @@ public:
             const unsigned short needflag = (unsigned short) 0, char in_compound = IN_CPD_NOT);
   struct hentry *     prefix_check(const char * word, int len,
             char in_compound, const FLAG needflag = FLAG_NULL);
+  inline int isSubset(const char * s1, const char * s2);
   struct hentry *     prefix_check_twosfx(const char * word, int len,
             char in_compound, const FLAG needflag = FLAG_NULL);
+  inline int isRevSubset(const char * s1, const char * end_of_s2, int len);
   struct hentry *     suffix_check(const char * word, int len, int sfxopts, AffEntry* ppfx,
 			char ** wlst, int maxSug, int * ns, const FLAG cclass = FLAG_NULL,
                         const FLAG needflag = FLAG_NULL, char in_compound = IN_CPD_NOT);

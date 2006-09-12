@@ -640,17 +640,44 @@ int Hunspell::suggest(char*** slst, const char * word)
                      break;
                    }
      case HUHINITCAP:
+                    capwords = 1;
      case HUHCAP: { 
                      ns = pSMgr->suggest(slst, cw, ns);
                      if (ns != -1) {
+                        int prevns;
+                        if (captype == HUHINITCAP) {
+                            // TheOpenOffice.org -> The OpenOffice.org
+                            memcpy(wspace,cw,(wl+1));
+                            mkinitsmall2(wspace, unicw, nc);
+                            ns = pSMgr->suggest(slst, wspace, ns);
+                        }
                         memcpy(wspace,cw,(wl+1));
                         mkallsmall2(wspace, unicw, nc);
                         insert_sug(slst, wspace, &ns);
+                        prevns = ns;
                         ns = pSMgr->suggest(slst, wspace, ns);
                         if (captype == HUHINITCAP) {
                             mkinitcap2(wspace, unicw, nc);
                             insert_sug(slst, wspace, &ns);
                             ns = pSMgr->suggest(slst, wspace, ns);
+                        }
+                        // aNew -> "a New" (instead of "a new")
+                        for (int j = prevns; j < ns; j++) {
+                           char * space;
+                           if (space = strchr((*slst)[j],' ')) {
+                                int slen = strlen(space + 1);
+                                // different case after space (need capitalisation)
+                                if ((slen < wl) && strcmp(cw + wl - slen, space + 1)) {
+                                    w_char w[MAXWORDLEN + 1];
+                                    int wc = 0;
+                                    char * r = (*slst)[j];
+                                    if (utf8) wc = u8_u16(w, MAXWORDLEN, space + 1);
+                                    mkinitcap2(space + 1, w, wc);
+                                    // set as first suggestion
+                                    for (int k = j; k > 0; k--) (*slst)[k] = (*slst)[k - 1];
+                                    (*slst)[0] = r;
+                                }
+                           }
                         }
                      }
                      break;
@@ -733,21 +760,9 @@ int Hunspell::suggest(char*** slst, const char * word)
     }
   }
 
-  // capitalize and erase capitalized duplications
-  if (capwords) {
-    int l = 0;
-    for (int j=0; j < ns; j++) {
+  // capitalize
+  if (capwords) for (int j=0; j < ns; j++) {
       mkinitcap((*slst)[j]);
-      (*slst)[l] = (*slst)[j];
-      for (int k=0; k < l; k++) {
-        if (strcmp((*slst)[k], (*slst)[j]) == 0) {
-          free((*slst)[j]);
-          l--;
-        }
-      }
-      l++;
-    }
-    ns = l;
   }
 
   // expand suggestions with dot(s)
@@ -793,24 +808,23 @@ int Hunspell::suggest(char*** slst, const char * word)
         }    
       }
       ns = l;
-      l = 0;
-      // remove duplications
-      for (int j=0; j < ns; j++) {
-      (*slst)[l] = (*slst)[j];
-        for (int k=0; k < l; k++) {
-          if (strcmp((*slst)[k], (*slst)[j]) == 0) {
-            free((*slst)[j]);
-            l--;
-          }
-        }
-        l++;
-      }
-      ns = l;
     }
   }
   }
 
-  return ns;
+  // remove duplications
+  int l = 0;
+  for (int j = 0; j < ns; j++) {
+    (*slst)[l] = (*slst)[j];
+    for (int k = 0; k < l; k++) {
+      if (strcmp((*slst)[k], (*slst)[j]) == 0) {
+        free((*slst)[j]);
+        l--;
+      }
+    }
+    l++;
+  }
+  return l;
 }
 
 // XXX need UTF-8 support
@@ -1106,6 +1120,20 @@ int Hunspell::mkinitcap2(char * p, w_char * u, int nc)
     if (*p != '\0') *p = csconv[((unsigned char)*p)].cupper;
   } else if (nc > 0) {
       unsigned short i = utfconv[(u[0].h << 8) + u[0].l].cupper;
+      u[0].h = (unsigned char) (i >> 8);
+      u[0].l = (unsigned char) (i & 0x00FF);
+      u16_u8(p, MAXWORDUTF8LEN, u, nc);
+      return strlen(p);
+  }
+  return nc;
+}
+
+int Hunspell::mkinitsmall2(char * p, w_char * u, int nc)
+{
+  if (!utf8) {
+    if (*p != '\0') *p = csconv[((unsigned char)*p)].clower;
+  } else if (nc > 0) {
+      unsigned short i = utfconv[(u[0].h << 8) + u[0].l].clower;
       u[0].h = (unsigned char) (i >> 8);
       u[0].l = (unsigned char) (i & 0x00FF);
       u16_u8(p, MAXWORDUTF8LEN, u, nc);

@@ -1016,6 +1016,16 @@ int AffixMgr::encodeit(struct affentry * ptr, char * cs)
   return 0;
 }
 
+ // return 1 if s1 is a leading subset of s2
+inline int AffixMgr::isSubset(const char * s1, const char * s2)
+ {
+    while ((*s1 == *s2) && *s1) {
+        s1++;
+        s2++;
+    }
+    return (*s1 == '\0');
+ }
+
 
 // check word for prefixes
 struct hentry * AffixMgr::prefix_check(const char * word, int len, char in_compound,
@@ -2218,6 +2228,16 @@ int AffixMgr::compound_check_morph(const char * word, int len,
     return 0;
 }    
 
+ // return 1 if s1 (reversed) is a leading subset of end of s2
+inline int AffixMgr::isRevSubset(const char * s1, const char * end_of_s2, int len)
+ {
+    while ((len > 0) && *s1 && (*s1 == *end_of_s2)) {
+        s1++;
+        end_of_s2--;
+        len--;
+    }
+    return (*s1 == '\0');
+ }
 
 
 

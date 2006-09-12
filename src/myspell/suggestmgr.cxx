@@ -647,16 +647,15 @@ int SuggestMgr::twowords(char ** wlst, const char * word, int ns, int cpdsuggest
     int forbidden = 0;
 
     int wl=strlen(word);
-    if (wl < 4) return ns;
+    if (wl < 3) return ns;
     
     if (pAMgr->get_langnum() == LANG_hu) forbidden = check_forbidden(word, wl);
 
     strcpy(candidate + 1, word);
-    candidate[0] = word[0];
 
     // split the string into two pieces after every char
     // if both pieces are good words make them a suggestion
-    for (p = candidate + 2;  p[2] != '\0';  p++) {
+    for (p = candidate + 1;  p[1] != '\0';  p++) {
        p[-1] = *p;
        // go to end of the UTF-8 character
        while (utf8 && ((p[1] & 0xc0) == 0x80)) {

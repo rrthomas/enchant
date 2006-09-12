@@ -127,6 +127,7 @@ private:
    int    cleanword2(char *, const char *, w_char *, int * w_len, int * pcaptype, int * pabbrev);
    void   mkinitcap(char *);
    int    mkinitcap2(char * p, w_char * u, int nc);
+   int    mkinitsmall2(char * p, w_char * u, int nc);
    void   mkallcap(char *);
    int    mkallcap2(char * p, w_char * u, int nc);
    void   mkallsmall(char *);

@@ -37,12 +37,6 @@ char * mystrsep2(char ** sptr, const char delim);
 // parse into tokens with char delimiter
 char * mystrrep(char *, const char *, const char *);
 
-// is one string a leading subset of another
-int    isSubset(const char * s1, const char * s2);
-
-// is one reverse string a leading subset of the end of another   
-int    isRevSubset(const char * s1, const char * s2, int len);
-
 // append s to ends of every lines in text
 void strlinecat(char * lines, const char * s);
 
