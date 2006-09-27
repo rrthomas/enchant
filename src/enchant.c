@@ -1305,26 +1305,23 @@ _enchant_provider_dictionary_exists (EnchantProvider * provider,
 			
 			dicts = (*provider->list_dicts) (provider, &n_dicts);
 			
-			for (i = 0; i < n_dicts; i++)
+			for (i = 0; (i < n_dicts) && !exists; i++)
 				{
 					if (!strcmp(dicts[i], tag)) 
-						{
-							exists = 1;
-							break;
-						}
+						exists = 1;
 				}
 			
 			enchant_provider_free_string_list (provider, dicts);
 		}
 	else if (provider->request_dict)
 		{
-			EnchantDict *dict = NULL;
+			EnchantDict *dict;
 
 			dict = (*provider->request_dict) (provider, tag);
 			if (dict)
 				{
-					if (provider->dispose) 
-						(*provider->dispose) (provider);
+					if (provider->dispose_dict) 
+						(*provider->dispose_dict) (provider, dict);
 					exists = 1;
 				}
 		}
