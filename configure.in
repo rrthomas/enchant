@@ -282,6 +282,19 @@ fi
 
 AM_CONDITIONAL(WITH_HSPELL, test "$build_hspell" = yes)
 
+dnl
+dnl TODO: check for networking bits
+dnl
+
+build_zemberek=no
+
+dnl AC_ARG_ENABLE(zemberek, [  --disable-zemberek     enable the zemberek backend (https://zemberek.dev.java.net/) [default=auto]], build_zemberek="$enableval", build_zemberek=yes)
+
+dnl if test "x$have_cxx" = "xno"; then
+dnl    build_zemberek=no
+dnl fi
+AM_CONDITIONAL(WITH_ZEMBEREK, test "x$build_zemberek" = "xyes")
+
 dnl =======================================================================================
 
 AC_OUTPUT([
@@ -296,6 +309,7 @@ src/myspell/Makefile
 src/hspell/Makefile
 src/applespell/Makefile
 src/voikko/Makefile
+src/zemberek/Makefile
 tests/Makefile
 tests/ispell
 doc/Makefile
@@ -322,5 +336,6 @@ $PACKAGE-$VERSION
 	Build Hspell backend:           ${build_hspell}
 	Build Myspell/Hunspell backend: ${build_myspell}
 	Build Voikko backend:           ${build_voikko}
+	Build Zemberek backend:		${build_zemberek}
 	Build a relocatable library:	${relocatable_library}
 "

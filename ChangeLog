@@ -2,6 +2,9 @@
 
 	* Added Voikko spell checker backend (AbiWord bug 10450), for better
 	Finnish support. Credit goes to Harri Pitknen and Anssi Hannula.
+
+	* Added Zemberek spell checker backend, for better Turkish support.
+	Credit goes to Baris Metin.
 	
 2006-07-22 Jose Da Silva <Digital@JoesCat.com>
 
