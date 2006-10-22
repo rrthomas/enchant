@@ -1,3 +1,8 @@
+2006-10-22 Dom Lachowicz <domlachowicz@gmail.com>
+
+	* Added Voikko spell checker backend (AbiWord bug 10450), for better
+	Finnish support. Credit goes to Harri Pitknen and Anssi Hannula.
+	
 2006-07-22 Jose Da Silva <Digital@JoesCat.com>
 
 	* doc/enchant.1: enchant.1 page more similar to other man/info pages
