@@ -4,7 +4,7 @@ else
 target_lib =
 endif
 
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -D_ENCHANT_BUILD=1
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -D_ENCHANT_BUILD=1 @ZEMBEREK_CFLAGS@
 
 zemberek_LTLIBRARIES = $(target_lib)
 zemberekdir= $(libdir)/enchant

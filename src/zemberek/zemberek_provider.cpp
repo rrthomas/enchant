@@ -33,8 +33,12 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#ifndef ZEMBEREK_HOST
 #define ZEMBEREK_HOST "localhost"
+#endif
+#ifndef ZEMBEREK_PORT
 #define ZEMBEREK_PORT 10444
+#endif
 
 ENCHANT_PLUGIN_DECLARE("Zemberek")
 
