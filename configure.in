@@ -57,13 +57,17 @@ AC_MSG_CHECKING([for native Win32])
 case "$host" in
   *-*-mingw*)
     native_win32=yes
+    SOCKET_LIBS='-lws2_32 -ldnsapi'
     ;;
   *)
     native_win32=no
+    SOCKET_LIBS=''
     ;;
 esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
+
+AC_SUBST(SOCKET_LIBS)
 
 dnl ===========================================================================
 
