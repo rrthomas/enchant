@@ -309,7 +309,7 @@ fi
 if test "x$build_zemberek" != "xno"; then
    ZEMBEREK_SERVER=
    if test "x$zemberek_server" != "x"; then
-      ZEMBEREK_SERVER="-DZEMBEREK_SERVER=$zemberek_server"
+      ZEMBEREK_SERVER="-DZEMBEREK_HOST=$zemberek_server"
    fi
 
    ZEMBEREK_PORT=
