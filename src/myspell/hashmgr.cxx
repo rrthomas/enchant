@@ -9,13 +9,13 @@
 #endif
 #include <cstdio>
 
-#include "hashmgr.hxx"
-#include "csutil.hxx"
-
 #ifndef W32
 #include <unistd.h>
 using namespace std;
 #endif
+
+#include "hashmgr.hxx"
+#include "csutil.hxx"
 
 // build a hash table from a munched word list
 

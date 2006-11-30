@@ -6,13 +6,12 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "affentry.hxx"
-#include "csutil.hxx"
-
 #ifndef W32
 using namespace std;
 #endif
 
+#include "affentry.hxx"
+#include "csutil.hxx"
 
 PfxEntry::PfxEntry(AffixMgr* pmgr, affentry* dp)
 {

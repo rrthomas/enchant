@@ -4,9 +4,9 @@
 #include <cctype>
 #include <cstdio>
 
-#include "dictmgr.hxx"
-
 using namespace std;
+
+#include "dictmgr.hxx"
 
 DictMgr::DictMgr(const char * dictpath, const char * etype) 
 {

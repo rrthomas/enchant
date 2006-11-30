@@ -6,12 +6,11 @@
 #include <cstring>
 #include <cstdio>
 
-#include "suggestmgr.hxx"
-
 #ifndef W32
 using namespace std;
 #endif
 
+#include "suggestmgr.hxx"
 
 SuggestMgr::SuggestMgr(const char * tryme, int maxn, 
                        AffixMgr * aptr)

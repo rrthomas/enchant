@@ -5,11 +5,11 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "hunspell.hxx"
-
 #ifndef W32
 using namespace std;
 #endif
+
+#include "hunspell.hxx"
 
 Hunspell::Hunspell(const char * affpath, const char * dpath)
 {

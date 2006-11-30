@@ -1,17 +1,17 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
-#include "csutil.hxx"
 
+#ifndef W32
+using namespace std;
+#endif
+
+#include "csutil.hxx"
 #include "atypes.hxx"
 #include "langnum.hxx"
 
 #include "utf_info.cxx"
 #define UTF_LST_LEN (sizeof(utf_lst) / (sizeof(unicode_info)))
-
-#ifndef W32
-using namespace std;
-#endif
 
 /* only UTF-16 (BMP) implementation */
 char * u16_u8(char * dest, int size, const w_char * src, int srclen) {

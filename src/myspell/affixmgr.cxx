@@ -6,15 +6,15 @@
 #include <cctype>
 #include <cstdio>
 
+#ifndef W32
+using namespace std;
+#endif
+
 #include "affixmgr.hxx"
 #include "affentry.hxx"
 #include "langnum.hxx"
 
 #include "csutil.hxx"
-
-#ifndef W32
-using namespace std;
-#endif
 
 AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr) 
 {
