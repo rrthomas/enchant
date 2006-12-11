@@ -1,5 +1,6 @@
 #ifndef _AFFIXMGR_HXX_
 #define _AFFIXMGR_HXX_
+#include <stdio.h>
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
