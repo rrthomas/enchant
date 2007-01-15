@@ -1,3 +1,8 @@
+2007-01-14  Hubert Figuiere  <hub@figuiere.net>
+
+	* src/Makefile.am (libenchant_includedir): removed trailing '/'
+	that breaks on MacOS X.
+
 2006-10-22 Dom Lachowicz <domlachowicz@gmail.com>
 
 	* Added Voikko spell checker backend (AbiWord bug 10450), for better
