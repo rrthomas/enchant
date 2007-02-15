@@ -332,6 +332,7 @@ dnl ============================================================================
 AC_OUTPUT([
 Makefile
 enchant.pc
+enchant-uninstalled.pc
 enchant.spec
 src/Makefile
 src/aspell/Makefile
