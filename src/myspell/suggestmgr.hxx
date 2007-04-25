@@ -3,9 +3,9 @@
 
 #define MAXSWL 100
 #define MAXSWUTF8L (MAXSWL * 4)
-#define MAX_ROOTS 50
-#define MAX_WORDS 200
-#define MAX_GUESS 200
+#define MAX_ROOTS 100
+#define MAX_WORDS 100
+#define MAX_GUESS 100
 #define MAXNGRAMSUGS 5
 
 #define MINTIMER 500
@@ -32,7 +32,6 @@ class SuggestMgr
   AffixMgr*       pAMgr;
   int             maxSug;
   struct cs_info * csconv;
-  struct unicode_info2 * utfconv;
   int             utf8;
   int             nosplitsugs;
   int             maxngramsugs;
@@ -53,24 +52,33 @@ public:
   char * suggest_morph_for_spelling_error(const char * word);
 
 private:
-   int check(const char *, int, int, int *, time_t *);
+   int testsug(char** wlst, const char * candidate, int wl, int ns, int cpdsuggest,
+     int * timer, time_t * timelimit);
+   int checkword(const char *, int, int, int *, time_t *);
    int check_forbidden(const char *, int);
 
+   int capchars(char **, const char *, int, int);
    int replchars(char**, const char *, int, int);
-   int doubledsyllable(char**, const char *, int, int);
+   int doubletwochars(char**, const char *, int, int);
    int forgotchar(char **, const char *, int, int);
    int swapchar(char **, const char *, int, int);
+   int longswapchar(char **, const char *, int, int);
+   int movechar(char **, const char *, int, int);
    int extrachar(char **, const char *, int, int);
    int badchar(char **, const char *, int, int);
    int twowords(char **, const char *, int, int);
    int fixstems(char **, const char *, int);
 
+   int capchars_utf(char **, const w_char *, int wl, int, int);
+   int doubletwochars_utf(char**, const w_char *, int wl, int, int);
    int forgotchar_utf(char**, const w_char *, int wl, int, int);
    int extrachar_utf(char**, const w_char *, int wl, int, int);
    int badchar_utf(char **, const w_char *, int wl, int, int);
    int swapchar_utf(char **, const w_char *, int wl, int, int);
+   int longswapchar_utf(char **, const w_char *, int, int, int);
+   int movechar_utf(char **, const w_char *, int, int, int);
 
-   int mapchars(char**, const char *, int, int);
+   int mapchars(char**, const char *, int);
    int map_related(const char *, int, char ** wlst, int, const mapentry*, int, int *, time_t *);
    int map_related_utf(w_char *, int, int, char ** wlst, int, const mapentry*, int, int *, time_t *);
    int ngram(int n, char * s1, const char * s2, int uselen);

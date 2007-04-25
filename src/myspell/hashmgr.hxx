@@ -1,7 +1,6 @@
 #ifndef _HASHMGR_HXX_
 #define _HASHMGR_HXX_
 
-#include <stdio.h>
 #include <cstdio>
 #include "htypes.hxx"
 
@@ -11,10 +10,13 @@ class HashMgr
 {
   int             tablesize;
   struct hentry * tableptr;
-  int	          userword;
+  int             userword;
   flag            flag_mode;
   int             complexprefixes;
   int             utf8;
+  char *          ignorechars;
+  unsigned short * ignorechars_utf16;
+  int             ignorechars_utf16_len;
   int                 numaliasf; // flag vector `compression' with aliases
   unsigned short **   aliasf;
   unsigned short *    aliasflen;
@@ -36,16 +38,21 @@ public:
   unsigned short        decode_flag(const char * flag);
   char *                encode_flag(unsigned short flag);
   int is_aliasf();
-  int is_aliasm();
   int get_aliasf(int index, unsigned short ** fvec);
+#ifdef HUNSPELL_EXPERIMENTAL
+  int is_aliasm();
   char * get_aliasm(int index);
+#endif
+
   
 private:
   int load_tables(const char * tpath);
   int add_word(const char * word, int wl, unsigned short * ap, int al, const char * desc);
   int load_config(const char * affpath);
   int parse_aliasf(char * line, FILE * af);
+#ifdef HUNSPELL_EXPERIMENTAL
   int parse_aliasm(char * line, FILE * af);
+#endif
 
 };
 

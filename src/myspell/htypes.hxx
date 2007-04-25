@@ -15,11 +15,14 @@ struct hentry
 {
   short    wlen;
   short    alen;
+  char     wbeg[2];
   char *   word;
   unsigned short * astr;
   struct   hentry * next;
   struct   hentry * next_homonym;
+#ifdef HUNSPELL_EXPERIMENTAL
   char *   description;
+#endif
 };
 
 #endif

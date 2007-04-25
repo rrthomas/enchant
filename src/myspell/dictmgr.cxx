@@ -4,9 +4,9 @@
 #include <cctype>
 #include <cstdio>
 
-using namespace std;
-
 #include "dictmgr.hxx"
+
+using namespace std;
 
 DictMgr::DictMgr(const char * dictpath, const char * etype) 
 {
@@ -76,7 +76,7 @@ int  DictMgr::parse_file(const char * dictpath, const char * etype)
 
        /* parse in a dictionary entry */
        if (strncmp(line,etype,4) == 0) {
-	  if (numdict < MAXDICTIONARIES) {
+          if (numdict < MAXDICTIONARIES) {
              char * tp = line;
              char * piece;
              i = 0;
@@ -84,27 +84,27 @@ int  DictMgr::parse_file(const char * dictpath, const char * etype)
                 if (*piece != '\0') {
                     switch(i) {
                        case 0: break;
-		       case 1: pdict->lang = mystrdup(piece); break;
+                       case 1: pdict->lang = mystrdup(piece); break;
                        case 2: if (strcmp (piece, "ANY") == 0)
-				 pdict->region = mystrdup("");
-			       else
-				 pdict->region = mystrdup(piece);
-			       break;
+                                 pdict->region = mystrdup("");
+                               else
+                                 pdict->region = mystrdup(piece);
+                               break;
                        case 3: pdict->filename = mystrdup(piece); break;
-		       default: break;
+                       default: break;
                     }
                     i++;
                 }
                 free(piece);
-	     }
+             }
              if (i == 4) {
                  numdict++;
                  pdict++;
-	     } else {
+             } else {
                  fprintf(stderr,"dictionary list corruption in line \"%s\"\n",line);
                  fflush(stderr);
-	     }
-	  }
+             }
+          }
        }
     }
     fclose(dictlst);

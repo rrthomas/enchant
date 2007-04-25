@@ -1,13 +1,16 @@
 #include "license.hunspell"
 #include "license.myspell"
 
+#ifndef MOZILLA_CLIENT
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
 #include <cstdio>
-
-#ifndef W32
-using namespace std;
+#else
+#include <stdlib.h> 
+#include <string.h>
+#include <stdio.h> 
+#include <ctype.h>
 #endif
 
 #include "affixmgr.hxx"
@@ -16,6 +19,12 @@ using namespace std;
 
 #include "csutil.hxx"
 
+#ifndef MOZILLA_CLIENT
+#ifndef W32
+using namespace std;
+#endif
+#endif
+
 AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr) 
 {
   // register hash manager and load affix data from aff file
@@ -23,7 +32,6 @@ AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr)
   trystring = NULL;
   encoding=NULL;
   utf8 = 0;
-  utf_tbl = NULL;
   complexprefixes = 0;
   maptable = NULL;
   nummap = 0;
@@ -51,8 +59,8 @@ AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr)
   lang = NULL; // language
   langnum = 0; // language code (see http://l10n.openoffice.org/languages.html)
   pseudoroot = FLAG_NULL; // forbidden root, allowed only with suffixes
-  cpdwordmax=0; // default: unlimited wordcount in compound words
-  cpdmin = 3;  // default value
+  cpdwordmax = -1; // default: unlimited wordcount in compound words
+  cpdmin = -1;  // undefined
   cpdmaxsyllable = 0; // default: unlimited syllablecount in compound words
   cpdvowels=NULL; // vowels (for calculating of Hungarian compounding limit, O(n) search! XXX)
   cpdvowels_utf16=NULL; // vowels for UTF-8 encoding (bsearch instead of O(n) search)
@@ -64,6 +72,9 @@ AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr)
   wordchars=NULL; // letters + spec. word characters
   wordchars_utf16=NULL; // letters + spec. word characters
   wordchars_utf16_len=0; // letters + spec. word characters
+  ignorechars=NULL; // letters + spec. word characters
+  ignorechars_utf16=NULL; // letters + spec. word characters
+  ignorechars_utf16_len=0; // letters + spec. word characters
   version=NULL; // affix and dictionary file version string
   havecontclass=0; // flags of possible continuing classes (double affix)
   // LEMMA_PRESENT: not put root into the morphological output. Lemma presents
@@ -94,10 +105,11 @@ AffixMgr::AffixMgr(const char * affpath, HashMgr* ptr)
   }
 
   if (parse_file(affpath)) {
-     fprintf(stderr,"Failure loading aff file %s\n",affpath);
-     fflush(stderr);
+     HUNSPELL_WARNING(stderr, "Failure loading aff file %s\n",affpath);
      wordchars = mystrdup("qwertzuiopasdfghjklyxcvbnmQWERTZUIOPASDFGHJKLYXCVBNM");
   }
+  
+  if (cpdmin == -1) cpdmin = MINCPDLEN;
 
 }
 
@@ -207,10 +219,12 @@ AffixMgr::~AffixMgr()
   if (cpdvowels) free(cpdvowels);
   if (cpdvowels_utf16) free(cpdvowels_utf16);
   if (cpdsyllablenum) free(cpdsyllablenum);
-  if (utf_tbl) free(utf_tbl);
+  free_utf_tbl();
   if (lang) free(lang);
   if (wordchars) free(wordchars);
   if (wordchars_utf16) free(wordchars_utf16);
+  if (ignorechars) free(ignorechars);
+  if (ignorechars_utf16) free(ignorechars_utf16);
   if (version) free(version);
   if (derived) free(derived);
   checknum=0;
@@ -231,11 +245,14 @@ int  AffixMgr::parse_file(const char * affpath)
   char dupflags[CONTSIZE];
   char dupflags_ini = 1;
 
+  // first line indicator for removing byte order mark
+  int firstline = 1;
+  
   // open the affix file
   FILE * afflst;
   afflst = fopen(affpath,"r");
   if (!afflst) {
-    fprintf(stderr,"Error - could not open affix description file %s\n",affpath);
+    HUNSPELL_WARNING(stderr, "error: could not open affix description file %s\n",affpath);
     return 1;
   }
 
@@ -245,31 +262,50 @@ int  AffixMgr::parse_file(const char * affpath)
 
     // read in each line ignoring any that do not
     // start with a known line type indicator
-
     while (fgets(line,MAXLNLEN,afflst)) {
        mychomp(line);
 
+       /* remove byte order mark */
+       if (firstline) {
+         firstline = 0;
+         if (strncmp(line,"﻿",3) == 0) {
+            memmove(line, line+3, strlen(line+3)+1);
+            HUNSPELL_WARNING(stderr, "warning: affix file begins with byte order mark: possible incompatibility with old Hunspell versions\n");
+         }
+       }
+
        /* parse in the try string */
        if (strncmp(line,"TRY",3) == 0) {
-          if (parse_try(line)) {
+          if (parse_string(line, &trystring, "TRY")) {
+             fclose(afflst);
              return 1;
           }
        }
 
        /* parse in the name of the character set used by the .dict and .aff */
        if (strncmp(line,"SET",3) == 0) {
-          if (parse_set(line)) {
+          if (parse_string(line, &encoding, "SET")) {
+             fclose(afflst);
              return 1;
+          }
+          if (strcmp(encoding, "UTF-8") == 0) {
+             utf8 = 1;
+#ifndef OPENOFFICEORG
+#ifndef MOZILLA_CLIENT
+             if (initialize_utf_tbl()) return 1;
+#endif
+#endif
           }
        }
 
        /* parse COMPLEXPREFIXES for agglutinative languages with right-to-left writing system */
        if (strncmp(line,"COMPLEXPREFIXES",15) == 0)
-		   complexprefixes = 1;
+                   complexprefixes = 1;
 
        /* parse in the flag used by the controlled compound words */
        if (strncmp(line,"COMPOUNDFLAG",12) == 0) {
           if (parse_flag(line, &compoundflag, "COMPOUNDFLAG")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -278,10 +314,12 @@ int  AffixMgr::parse_file(const char * affpath)
        if (strncmp(line,"COMPOUNDBEGIN",13) == 0) {
           if (complexprefixes) {
             if (parse_flag(line, &compoundend, "COMPOUNDBEGIN")) {
+              fclose(afflst);
               return 1;
             }
           } else {
             if (parse_flag(line, &compoundbegin, "COMPOUNDBEGIN")) {
+              fclose(afflst);
               return 1;
             }
           }
@@ -290,6 +328,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by compound words */
        if (strncmp(line,"COMPOUNDMIDDLE",14) == 0) {
           if (parse_flag(line, &compoundmiddle, "COMPOUNDMIDDLE")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -297,18 +336,21 @@ int  AffixMgr::parse_file(const char * affpath)
        if (strncmp(line,"COMPOUNDEND",11) == 0) {
           if (complexprefixes) {
             if (parse_flag(line, &compoundbegin, "COMPOUNDEND")) {
+              fclose(afflst);
               return 1;
             }
           } else {
             if (parse_flag(line, &compoundend, "COMPOUNDEND")) {
+              fclose(afflst);
               return 1;
             }
           }
        }
 
-       /* parse in the flag used by compound_check() method */
+       /* parse in the data used by compound_check() method */
        if (strncmp(line,"COMPOUNDWORDMAX",15) == 0) {
           if (parse_num(line, &cpdwordmax, "COMPOUNDWORDMAX")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -316,6 +358,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag sign compounds in dictionary */
        if (strncmp(line,"COMPOUNDROOT",12) == 0) {
           if (parse_flag(line, &compoundroot, "COMPOUNDROOT")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -323,6 +366,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by compound_check() method */
        if (strncmp(line,"COMPOUNDPERMITFLAG",18) == 0) {
           if (parse_flag(line, &compoundpermitflag, "COMPOUNDPERMITFLAG")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -330,24 +374,30 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by compound_check() method */
        if (strncmp(line,"COMPOUNDFORBIDFLAG",18) == 0) {
           if (parse_flag(line, &compoundforbidflag, "COMPOUNDFORBIDFLAG")) {
+             fclose(afflst);
              return 1;
           }
        }
 
-       if (strncmp(line,"CHECKCOMPOUNDDUP",16) == 0)
-		   checkcompounddup = 1;
+       if (strncmp(line,"CHECKCOMPOUNDDUP",16) == 0) {
+                   checkcompounddup = 1;
+       }
 
-       if (strncmp(line,"CHECKCOMPOUNDREP",16) == 0)
-		   checkcompoundrep = 1;
+       if (strncmp(line,"CHECKCOMPOUNDREP",16) == 0) {
+                   checkcompoundrep = 1;
+       }
 
-       if (strncmp(line,"CHECKCOMPOUNDTRIPLE",19) == 0)
-		   checkcompoundtriple = 1;
+       if (strncmp(line,"CHECKCOMPOUNDTRIPLE",19) == 0) {
+                   checkcompoundtriple = 1;
+       }
 
-       if (strncmp(line,"CHECKCOMPOUNDCASE",17) == 0)
-		   checkcompoundcase = 1;
+       if (strncmp(line,"CHECKCOMPOUNDCASE",17) == 0) {
+                   checkcompoundcase = 1;
+       }
 
        if (strncmp(line,"NOSUGGEST",9) == 0) {
           if (parse_flag(line, &nosuggest, "NOSUGGEST")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -355,6 +405,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by forbidden words */
        if (strncmp(line,"FORBIDDENWORD",13) == 0) {
           if (parse_flag(line, &forbiddenword, "FORBIDDENWORD")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -362,6 +413,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by forbidden words */
        if (strncmp(line,"LEMMA_PRESENT",13) == 0) {
           if (parse_flag(line, &lemma_present, "LEMMA_PRESENT")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -369,6 +421,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by circumfixes */
        if (strncmp(line,"CIRCUMFIX",9) == 0) {
           if (parse_flag(line, &circumfix, "CIRCUMFIX")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -376,6 +429,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by fogemorphemes */
        if (strncmp(line,"ONLYINCOMPOUND",14) == 0) {
           if (parse_flag(line, &onlyincompound, "ONLYINCOMPOUND")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -383,6 +437,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by `pseudoroots' */
        if (strncmp(line,"PSEUDOROOT",10) == 0) {
           if (parse_flag(line, &pseudoroot, "PSEUDOROOT")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -390,6 +445,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the flag used by `pseudoroots' */
        if (strncmp(line,"NEEDAFFIX",9) == 0) {
           if (parse_flag(line, &pseudoroot, "NEEDAFFIX")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -397,6 +453,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the minimal length for words in compounds */
        if (strncmp(line,"COMPOUNDMIN",11) == 0) {
           if (parse_num(line, &cpdmin, "COMPOUNDMIN")) {
+             fclose(afflst);
              return 1;
           }
           if (cpdmin < 1) cpdmin = 1;
@@ -405,13 +462,15 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the max. words and syllables in compounds */
        if (strncmp(line,"COMPOUNDSYLLABLE",16) == 0) {
           if (parse_cpdsyllable(line)) {
+             fclose(afflst);
              return 1;
           }
        }
 
        /* parse in the flag used by compound_check() method */
        if (strncmp(line,"SYLLABLENUM",11) == 0) {
-          if (parse_syllablenum(line)) {
+          if (parse_string(line, &cpdsyllablenum, "SYLLABLENUM")) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -421,9 +480,18 @@ int  AffixMgr::parse_file(const char * affpath)
            checknum=1;
        }
 
-       /* parse in the try string */
+       /* parse in the extra word characters */
        if (strncmp(line,"WORDCHARS",9) == 0) {
-          if (parse_wordchars(line)) {
+          if (parse_array(line, &wordchars, &wordchars_utf16, &wordchars_utf16_len, "WORDCHARS", utf8)) {
+             fclose(afflst);
+             return 1;
+          }
+       }
+
+       /* parse in the ignored characters (for example, Arabic optional diacretics charachters */
+       if (strncmp(line,"IGNORE",6) == 0) {
+          if (parse_array(line, &ignorechars, &ignorechars_utf16, &ignorechars_utf16_len, "IGNORE", utf8)) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -431,6 +499,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the typical fault correcting table */
        if (strncmp(line,"REP",3) == 0) {
           if (parse_reptable(line, afflst)) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -438,6 +507,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the checkcompoundpattern table */
        if (strncmp(line,"CHECKCOMPOUNDPATTERN",20) == 0) {
           if (parse_checkcpdtable(line, afflst)) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -445,6 +515,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the defcompound table */
        if (strncmp(line,"COMPOUNDRULE",12) == 0) {
           if (parse_defcpdtable(line, afflst)) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -452,6 +523,7 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the related character map table */
        if (strncmp(line,"MAP",3) == 0) {
           if (parse_maptable(line, afflst)) {
+             fclose(afflst);
              return 1;
           }
        }
@@ -459,44 +531,53 @@ int  AffixMgr::parse_file(const char * affpath)
        /* parse in the word breakpoints table */
        if (strncmp(line,"BREAK",5) == 0) {
           if (parse_breaktable(line, afflst)) {
+             fclose(afflst);
              return 1;
           }
        }
 
        /* parse in the language for language specific codes */
        if (strncmp(line,"LANG",4) == 0) {
-          if (parse_lang(line)) {
+          if (parse_string(line, &lang, "LANG")) {
+             fclose(afflst);
              return 1;
           }
+          langnum = get_lang_num(lang);
        }
 
        if (strncmp(line,"VERSION",7) == 0) {
-          if (parse_version(line)) {
+          if (parse_string(line, &version, "VERSION")) {
+             fclose(afflst);
              return 1;
           }
        }
 
        if (strncmp(line,"MAXNGRAMSUGS",12) == 0) {
           if (parse_num(line, &maxngramsugs, "MAXNGRAMSUGS")) {
+             fclose(afflst);
              return 1;
           }
        }
 
-       if (strncmp(line,"NOSPLITSUGS",11) == 0)
-		   nosplitsugs=1;
+       if (strncmp(line,"NOSPLITSUGS",11) == 0) {
+                   nosplitsugs=1;
+       }
 
-       if (strncmp(line,"SUGSWITHDOTS",12) == 0)
-		   sugswithdots=1;
+       if (strncmp(line,"SUGSWITHDOTS",12) == 0) {
+                   sugswithdots=1;
+       }
 
        /* parse in the flag used by forbidden words */
        if (strncmp(line,"KEEPCASE",8) == 0) {
           if (parse_flag(line, &keepcase, "KEEPCASE")) {
+             fclose(afflst);
              return 1;
           }
        }
 
-       if (strncmp(line,"CHECKSHARPS",11) == 0)
-		   checksharps=1;
+       if (strncmp(line,"CHECKSHARPS",11) == 0) {
+                   checksharps=1;
+       }
 
        /* parse this affix: P - prefix, S - suffix */
        ft = ' ';
@@ -571,6 +652,13 @@ int  AffixMgr::parse_file(const char * affpath)
 
     wordchars = mystrdup(expw);
 
+    // temporary BREAK definition for German dash handling (OOo issue 64400)
+    if ((langnum == LANG_de) && (!breaktable)) {
+        breaktable = (char **) malloc(sizeof(char *));
+        if (!breaktable) return 1;
+        breaktable[0] = mystrdup("-");
+        numbreak = 1;
+    }
     return 0;
 }
 
@@ -587,7 +675,7 @@ int AffixMgr::build_pfxtree(AffEntry* pfxptr)
 
   // get the right starting points
   const char * key = ep->getKey();
-  const unsigned char flg = ep->getFlag();
+  const unsigned char flg = (unsigned char) (ep->getFlag() & 0x00FF);
 
   // first index by flag which must exist
   ptr = (PfxEntry*)pFlag[flg];
@@ -626,13 +714,13 @@ int AffixMgr::build_pfxtree(AffEntry* pfxptr)
     if (strcmp(ep->getKey(), ptr->getKey() ) <= 0) {
        ptr = ptr->getNextEQ();
        if (!ptr) {
-	  pptr->setNextEQ(ep);
+          pptr->setNextEQ(ep);
           break;
        }
     } else {
        ptr = ptr->getNextNE();
        if (!ptr) {
-	  pptr->setNextNE(ep);
+          pptr->setNextNE(ep);
           break;
        }
     }
@@ -651,7 +739,7 @@ int AffixMgr::build_sfxtree(AffEntry* sfxptr)
 
   /* get the right starting point */
   const char * key = ep->getKey();
-  const unsigned char flg = ep->getFlag();
+  const unsigned char flg = (unsigned char) (ep->getFlag() & 0x00FF);
 
   // first index by flag which must exist
   ptr = (SfxEntry*)sFlag[flg];
@@ -690,13 +778,13 @@ int AffixMgr::build_sfxtree(AffEntry* sfxptr)
     if (strcmp(ep->getKey(), ptr->getKey() ) <= 0) {
        ptr = ptr->getNextEQ();
        if (!ptr) {
-	  pptr->setNextEQ(ep);
+          pptr->setNextEQ(ep);
           break;
        }
     } else {
        ptr = ptr->getNextNE();
        if (!ptr) {
-	  pptr->setNextNE(ep);
+          pptr->setNextNE(ep);
           break;
        }
     }
@@ -765,9 +853,9 @@ int AffixMgr::process_pfx_order()
 
          for (; ptr != NULL; ptr = ptr->getNext()) {
 
-	     PfxEntry * nptr = ptr->getNext();
+             PfxEntry * nptr = ptr->getNext();
              for (; nptr != NULL; nptr = nptr->getNext()) {
-	         if (! isSubset( ptr->getKey() , nptr->getKey() )) break;
+                 if (! isSubset( ptr->getKey() , nptr->getKey() )) break;
              }
              ptr->setNextNE(nptr);
              ptr->setNextEQ(NULL);
@@ -782,10 +870,10 @@ int AffixMgr::process_pfx_order()
 
          ptr = (PfxEntry *) pStart[i];
          for (; ptr != NULL; ptr = ptr->getNext()) {
-	     PfxEntry * nptr = ptr->getNext();
+             PfxEntry * nptr = ptr->getNext();
              PfxEntry * mptr = NULL;
              for (; nptr != NULL; nptr = nptr->getNext()) {
-	         if (! isSubset(ptr->getKey(),nptr->getKey())) break;
+                 if (! isSubset(ptr->getKey(),nptr->getKey())) break;
                  mptr = nptr;
              }
              if (mptr) mptr->setNextNE(NULL);
@@ -813,9 +901,9 @@ int AffixMgr::process_sfx_order()
          // of as NextEQ
 
          for (; ptr != NULL; ptr = ptr->getNext()) {
-	     SfxEntry * nptr = ptr->getNext();
+             SfxEntry * nptr = ptr->getNext();
              for (; nptr != NULL; nptr = nptr->getNext()) {
-	         if (! isSubset(ptr->getKey(),nptr->getKey())) break;
+                 if (! isSubset(ptr->getKey(),nptr->getKey())) break;
              }
              ptr->setNextNE(nptr);
              ptr->setNextEQ(NULL);
@@ -831,10 +919,10 @@ int AffixMgr::process_sfx_order()
 
          ptr = (SfxEntry *) sStart[i];
          for (; ptr != NULL; ptr = ptr->getNext()) {
-	     SfxEntry * nptr = ptr->getNext();
+             SfxEntry * nptr = ptr->getNext();
              SfxEntry * mptr = NULL;
              for (; nptr != NULL; nptr = nptr->getNext()) {
-	         if (! isSubset(ptr->getKey(),nptr->getKey())) break;
+                 if (! isSubset(ptr->getKey(),nptr->getKey())) break;
                  mptr = nptr;
              }
              if (mptr) mptr->setNextNE(NULL);
@@ -863,9 +951,9 @@ int AffixMgr::encodeit(struct affentry * ptr, char * cs)
 
   // now parse the string to create the conds array */
   int nc = strlen(cs);
-  int neg = 0;   // complement indicator
+  unsigned char neg = 0;   // complement indicator
   int grp = 0;   // group indicator
-  int n = 0;     // number of conditions
+  unsigned char n = 0;     // number of conditions
   int ec = 0;    // end condition indicator
   int nm = 0;    // number of member in group
 
@@ -914,17 +1002,17 @@ int AffixMgr::encodeit(struct affentry * ptr, char * cs)
       if (grp == 1) {
         if (neg == 0) {
           // set the proper bits in the condition array vals for those chars
-	  for (j=0;j<nm;j++) {
-	     k = (unsigned int) mbr[j];
-             ptr->conds.base[k] = ptr->conds.base[k] | (1 << n);
+          for (j=0;j<nm;j++) {
+             k = (unsigned int) mbr[j];
+             ptr->conds.base[k] = ptr->conds.base[k] | ((unsigned char)1 << n);
           }
-	} else {
-	  // complement so set all of them and then unset indicated ones
-	   for (j=0;j<SETSIZE;j++) ptr->conds.base[j] = ptr->conds.base[j] | (1 << n);
-	   for (j=0;j<nm;j++) {
-	     k = (unsigned int) mbr[j];
-             ptr->conds.base[k] = ptr->conds.base[k] & ~(1 << n);
-	   }
+        } else {
+          // complement so set all of them and then unset indicated ones
+           for (j=0;j<SETSIZE;j++) ptr->conds.base[j] = ptr->conds.base[j] | ((unsigned char)1 << n);
+           for (j=0;j<nm;j++) {
+             k = (unsigned int) mbr[j];
+             ptr->conds.base[k] = ptr->conds.base[k] & ~((unsigned char)1 << n);
+           }
         }
         neg = 0;
         grp = 0;   
@@ -933,10 +1021,10 @@ int AffixMgr::encodeit(struct affentry * ptr, char * cs)
          // not a group so just set the proper bit for this char
          // but first handle special case of . inside condition
          if (c == '.') {
-	    // wild card character so set them all
-            for (j=0;j<SETSIZE;j++) ptr->conds.base[j] = ptr->conds.base[j] | (1 << n);
+            // wild card character so set them all
+            for (j=0;j<SETSIZE;j++) ptr->conds.base[j] = ptr->conds.base[j] | ((unsigned char)1 << n);
          } else {  
-	    ptr->conds.base[(unsigned int) c] = ptr->conds.base[(unsigned int)c] | (1 << n);
+            ptr->conds.base[(unsigned int) c] = ptr->conds.base[(unsigned int)c] | ((unsigned char)1 << n);
          }
       }
       n++;
@@ -946,29 +1034,29 @@ int AffixMgr::encodeit(struct affentry * ptr, char * cs)
         ptr->conds.utf8.neg[n] = neg;
         if (neg == 0) {
           // set the proper bits in the condition array vals for those chars
-	  for (j=0;j<nm;j++) {
-	     k = (unsigned int) mbr[j];
+          for (j=0;j<nm;j++) {
+             k = (unsigned int) mbr[j];
              if (k >> 7) {
                 u8_u16(wpos, 1, (char *) mbr + j);
                 wpos++;
                 if ((k & 0xe0) == 0xe0) j+=2; else j++; // 3-byte UTF-8 character
              } else {
-                ptr->conds.utf8.ascii[k] = ptr->conds.utf8.ascii[k] | (1 << n);
+                ptr->conds.utf8.ascii[k] = ptr->conds.utf8.ascii[k] | ((unsigned char)1 << n);
              }
           }
-	} else { // neg == 1
-	  // complement so set all of them and then unset indicated ones
-	   for (j=0;j<(SETSIZE/2);j++) ptr->conds.utf8.ascii[j] = ptr->conds.utf8.ascii[j] | (1 << n);
-	   for (j=0;j<nm;j++) {
-	     k = (unsigned int) mbr[j];
+        } else { // neg == 1
+          // complement so set all of them and then unset indicated ones
+           for (j=0;j<(SETSIZE/2);j++) ptr->conds.utf8.ascii[j] = ptr->conds.utf8.ascii[j] | ((unsigned char)1 << n);
+           for (j=0;j<nm;j++) {
+             k = (unsigned int) mbr[j];
              if (k >> 7) {
                 u8_u16(wpos, 1, (char *) mbr + j);
                 wpos++;
                 if ((k & 0xe0) == 0xe0) j+=2; else j++; // 3-byte UTF-8 character
              } else {
-                ptr->conds.utf8.ascii[k] = ptr->conds.utf8.ascii[k] & ~(1 << n);
+                ptr->conds.utf8.ascii[k] = ptr->conds.utf8.ascii[k] & ~((unsigned char)1 << n);
              }
-	   }
+           }
         }
         neg = 0;
         grp = 0;   
@@ -995,11 +1083,11 @@ int AffixMgr::encodeit(struct affentry * ptr, char * cs)
             // but first handle special case of . inside condition
             if (c == '.') {
                 ptr->conds.utf8.all[n] = 1;
-	        // wild card character so set them all
-                for (j=0;j<(SETSIZE/2);j++) ptr->conds.utf8.ascii[j] = ptr->conds.utf8.ascii[j] | (1 << n);
+                // wild card character so set them all
+                for (j=0;j<(SETSIZE/2);j++) ptr->conds.utf8.ascii[j] = ptr->conds.utf8.ascii[j] | ((unsigned char)1 << n);
             } else {
                 ptr->conds.utf8.all[n] = 0;
-	        ptr->conds.utf8.ascii[(unsigned int) c] = ptr->conds.utf8.ascii[(unsigned int)c] | (1 << n);
+                ptr->conds.utf8.ascii[(unsigned int) c] = ptr->conds.utf8.ascii[(unsigned int)c] | ((unsigned char)1 << n);
             }
          }
          neg = 0;
@@ -1017,9 +1105,20 @@ int AffixMgr::encodeit(struct affentry * ptr, char * cs)
 }
 
  // return 1 if s1 is a leading subset of s2
-inline int AffixMgr::isSubset(const char * s1, const char * s2)
+/* inline int AffixMgr::isSubset(const char * s1, const char * s2)
  {
     while ((*s1 == *s2) && *s1) {
+        s1++;
+        s2++;
+    }
+    return (*s1 == '\0');
+ }
+*/
+
+ // return 1 if s1 is a leading subset of s2 (dots are for infixes)
+inline int AffixMgr::isSubset(const char * s1, const char * s2)
+ {
+    while (((*s1 == *s2) || (*s1 == '.')) && (*s1 != '\0')) {
         s1++;
         s2++;
     }
@@ -1046,13 +1145,15 @@ struct hentry * AffixMgr::prefix_check(const char * word, int len, char in_compo
                   (TESTAFF(pe->getCont(), onlyincompound, pe->getContLen())))) &&
             // permit prefixes in compounds
               ((in_compound != IN_CPD_END) || (pe->getCont() &&
-                  (TESTAFF(pe->getCont(), compoundpermitflag, pe->getContLen())))) &&
-            // check prefix
-                  (rv = pe->check(word, len, in_compound, needflag))
+                  (TESTAFF(pe->getCont(), compoundpermitflag, pe->getContLen()))))
               ) {
-                    pfx=(AffEntry *)pe; // BUG: pfx not stateless
-	            return rv;
-	     }
+                    // check prefix
+                    rv = pe->checkword(word, len, in_compound, needflag);
+                    if (rv) {
+                        pfx=(AffEntry *)pe; // BUG: pfx not stateless
+                        return rv;
+                    }
+             }
        pe = pe->getNext();
     }
   
@@ -1068,16 +1169,18 @@ struct hentry * AffixMgr::prefix_check(const char * word, int len, char in_compo
                   (TESTAFF(pptr->getCont(), onlyincompound, pptr->getContLen())))) &&
             // permit prefixes in compounds
               ((in_compound != IN_CPD_END) || (pptr->getCont() &&
-                  (TESTAFF(pptr->getCont(), compoundpermitflag, pptr->getContLen())))) &&
-            // check prefix
-                  (rv = pptr->check(word, len, in_compound, needflag))
+                  (TESTAFF(pptr->getCont(), compoundpermitflag, pptr->getContLen()))))
               ) {
+            // check prefix
+                  rv = pptr->checkword(word, len, in_compound, needflag);
+                  if (rv) {
                     pfx=(AffEntry *)pptr; // BUG: pfx not stateless
-	            return rv;
-	     }
+                    return rv;
+                  }
+             }
              pptr = pptr->getNextEQ();
         } else {
-	     pptr = pptr->getNextNE();
+             pptr = pptr->getNextNE();
         }
     }
     
@@ -1111,18 +1214,18 @@ struct hentry * AffixMgr::prefix_check_twosfx(const char * word, int len,
             rv = pptr->check_twosfx(word, len, in_compound, needflag);
             if (rv) {
                 pfx = (AffEntry *)pptr;
-	        return rv;
-	    }
+                return rv;
+            }
             pptr = pptr->getNextEQ();
         } else {
-	     pptr = pptr->getNextNE();
+             pptr = pptr->getNextNE();
         }
     }
     
     return NULL;
 }
 
-
+#ifdef HUNSPELL_EXPERIMENTAL
 // check word for prefixes
 char * AffixMgr::prefix_check_morph(const char * word, int len, char in_compound,
     const FLAG needflag)
@@ -1165,7 +1268,7 @@ char * AffixMgr::prefix_check_morph(const char * word, int len, char in_compound
             }
             pptr = pptr->getNextEQ();
         } else {
-	    pptr = pptr->getNextNE();
+            pptr = pptr->getNextNE();
         }
     }
     
@@ -1211,13 +1314,14 @@ char * AffixMgr::prefix_check_twosfx_morph(const char * word, int len,
             }
             pptr = pptr->getNextEQ();
         } else {
-	    pptr = pptr->getNextNE();
+            pptr = pptr->getNextNE();
         }
     }
     
     if (*result) return mystrdup(result);
     return NULL;
 }
+#endif // END OF HUNSPELL_EXPERIMENTAL CODE
 
 
 // Is word a non compound with a REP substitution (see checkcompoundrep)?
@@ -1235,11 +1339,10 @@ int AffixMgr::cpdrep_check(const char * word, int wl)
       lenp = strlen(reptable[i].pattern);
       // search every occurence of the pattern in the word
       while ((r=strstr(r, reptable[i].pattern)) != NULL) {
-	  strcpy(candidate, word);
-	  if (r-word + lenr + strlen(r+lenp) >= MAXLNLEN) break;
-	  strcpy(candidate+(r-word),reptable[i].pattern2);
-	  strcpy(candidate+(r-word)+lenr, r+lenp);
-          if (candidate_check(candidate,strlen(candidate))) return 1;
+          strcpy(candidate, word);
+          if (r-word + lenr + strlen(r+lenp) >= MAXLNLEN) break;
+          strcpy(candidate+(r-word),reptable[i].pattern2);
+          strcpy(candidate+(r-word)+lenr, r+lenp);
           if (candidate_check(candidate,strlen(candidate))) return 1;
           r++; // search for the next letter
       }
@@ -1270,8 +1373,7 @@ int AffixMgr::cpdcase_check(const char * word, int pos)
       u8_u16(&w, 1, p);
       unsigned short a = (u.h << 8) + u.l;
       unsigned short b = (w.h << 8) + w.l;
-      if (utf_tbl[a].cletter && utf_tbl[a].cletter &&
-          ((utf_tbl[a].cupper == a) || (utf_tbl[b].cupper == b))) return 1;
+      if (((unicodetoupper(a, langnum) == a) || (unicodetoupper(b, langnum) == b))) return 1;
   } else {
       unsigned char a = *(word + pos - 1);
       unsigned char b = *(word + pos);
@@ -1283,8 +1385,8 @@ int AffixMgr::cpdcase_check(const char * word, int pos)
 // check compound patterns
 int AffixMgr::defcpd_check(hentry *** words, short wnum, hentry * rv, hentry ** def, char all)
 {
-  short btpp[MAXWORDLEN]; // metacharacter (*, ?) positions for backtracking
-  short btwp[MAXWORDLEN]; // word positions for metacharacters
+  signed short btpp[MAXWORDLEN]; // metacharacter (*, ?) positions for backtracking
+  signed short btwp[MAXWORDLEN]; // word positions for metacharacters
   int btnum[MAXWORDLEN]; // number of matched characters in metacharacter positions
   short bt = 0;  
   int i;
@@ -1297,8 +1399,8 @@ int AffixMgr::defcpd_check(hentry *** words, short wnum, hentry * rv, hentry ** 
   (*words)[wnum] = rv;
 
   for (i = 0; i < numdefcpd; i++) {
-    int pp = 0; // pattern position
-    int wp = 0; // "words" position
+    signed short pp = 0; // pattern position
+    signed short wp = 0; // "words" position
     int ok2;
     ok = 1;
     ok2 = 1;
@@ -1377,15 +1479,15 @@ inline int AffixMgr::candidate_check(const char * word, int len)
 }
 
 // calculate number of syllable for compound-checking
-int AffixMgr::get_syllable(const char * word, int wlen)
+short AffixMgr::get_syllable(const char * word, int wlen)
 {
     if (cpdmaxsyllable==0) return 0;
     
-    int num=0;
+    short num=0;
 
     if (!utf8) {
         for (int i=0; i<wlen; i++) {
-	    if (strchr(cpdvowels, word[i])) num++;
+            if (strchr(cpdvowels, word[i])) num++;
         }
     } else if (cpdvowels_utf16) {
         w_char w[MAXWORDUTF8LEN];
@@ -1404,7 +1506,8 @@ struct hentry * AffixMgr::compound_check(const char * word, int len,
     short wordnum, short numsyllable, short maxwordnum, short wnum, hentry ** words = NULL,
     char hu_mov_rule = 0, int * cmpdstemnum = NULL, int * cmpdstem = NULL, char is_sug = 0)
 {
-    int i, oldnumsyllable, oldnumsyllable2, oldwordnum, oldwordnum2;
+    int i; 
+    short oldnumsyllable, oldnumsyllable2, oldwordnum, oldwordnum2;
     int oldcmpdstemnum = 0;
     struct hentry * rv = NULL;
     struct hentry * rv_first;
@@ -1418,11 +1521,11 @@ struct hentry * AffixMgr::compound_check(const char * word, int len,
 
 #ifdef HUNSTEM
     if (cmpdstemnum) {
-	if (wordnum == 0) {
-	    *cmpdstemnum = 1;
-	} else {
-	    (*cmpdstemnum)++;
-	}
+        if (wordnum == 0) {
+            *cmpdstemnum = 1;
+        } else {
+            (*cmpdstemnum)++;
+        }
     }
 #endif
     if (utf8) {
@@ -1453,22 +1556,22 @@ struct hentry * AffixMgr::compound_check(const char * word, int len,
             if (i >= cmax) return NULL;
         }
 
-	
+        
         ch = st[i];
         st[i] = '\0';
 
         sfx = NULL;
         pfx = NULL;
         
-	// FIRST WORD
-	
+        // FIRST WORD
+        
         rv = lookup(st); // perhaps without prefix
 
         // search homonym with compound flag
         while ((rv) && !hu_mov_rule &&
             ((pseudoroot && TESTAFF(rv->astr, pseudoroot, rv->alen)) ||
-		!((compoundflag && !words && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
-	          (compoundbegin && !wordnum &&
+                !((compoundflag && !words && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
+                  (compoundbegin && !wordnum &&
                         TESTAFF(rv->astr, compoundbegin, rv->alen)) ||
                   (compoundmiddle && wordnum && !words &&
                     TESTAFF(rv->astr, compoundmiddle, rv->alen)) ||
@@ -1501,13 +1604,13 @@ struct hentry * AffixMgr::compound_check(const char * word, int len,
                 (rv = prefix_check(st, i, hu_mov_rule ? IN_CPD_OTHER : IN_CPD_BEGIN, compoundmiddle)))))
               ) checked_prefix = 1;
         // else check forbiddenwords and pseudoroot
-	} else if (rv->astr && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
+        } else if (rv->astr && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
             TESTAFF(rv->astr, pseudoroot, rv->alen) || 
             (is_sug && nosuggest && TESTAFF(rv->astr, nosuggest, rv->alen))
              )) {
                 st[i] = ch;
                 continue;
-	}
+        }
 
             // check non_compound flag in suffix and prefix
             if ((rv) && !hu_mov_rule &&
@@ -1530,7 +1633,7 @@ struct hentry * AffixMgr::compound_check(const char * word, int len,
                         ((SfxEntry*)sfx)->getContLen())))) {
                     rv = NULL;
             }
-	    
+            
             // check compoundmiddle flag in suffix and prefix
             if ((rv) && !checked_prefix && (wordnum==0) && compoundmiddle && !hu_mov_rule &&
                 ((pfx && ((PfxEntry*)pfx)->getCont() &&
@@ -1540,49 +1643,49 @@ struct hentry * AffixMgr::compound_check(const char * word, int len,
                     TESTAFF(((SfxEntry*)sfx)->getCont(), compoundmiddle, 
                         ((SfxEntry*)sfx)->getContLen())))) {
                     rv = NULL;
-            }	    
+            }       
 
-	// check forbiddenwords
-	if ((rv) && (rv->astr) && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
+        // check forbiddenwords
+        if ((rv) && (rv->astr) && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
             (is_sug && nosuggest && TESTAFF(rv->astr, nosuggest, rv->alen)))) {
                 return NULL;
             }
 
-	// increment word number, if the second root has a compoundroot flag
-	if ((rv) && compoundroot && 
-	    (TESTAFF(rv->astr, compoundroot, rv->alen))) {
-		wordnum++;
-	}
+        // increment word number, if the second root has a compoundroot flag
+        if ((rv) && compoundroot && 
+            (TESTAFF(rv->astr, compoundroot, rv->alen))) {
+                wordnum++;
+        }
 
-	// first word is acceptable in compound words?
-	if (((rv) && 
-	  ( checked_prefix || (words && words[wnum]) ||
-	    (compoundflag && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
-	    ((oldwordnum == 0) && compoundbegin && TESTAFF(rv->astr, compoundbegin, rv->alen)) ||
-	    ((oldwordnum > 0) && compoundmiddle && TESTAFF(rv->astr, compoundmiddle, rv->alen))// ||
+        // first word is acceptable in compound words?
+        if (((rv) && 
+          ( checked_prefix || (words && words[wnum]) ||
+            (compoundflag && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
+            ((oldwordnum == 0) && compoundbegin && TESTAFF(rv->astr, compoundbegin, rv->alen)) ||
+            ((oldwordnum > 0) && compoundmiddle && TESTAFF(rv->astr, compoundmiddle, rv->alen))// ||
 //            (numdefcpd && )
 
 // LANG_hu section: spec. Hungarian rule
-	    || ((langnum == LANG_hu) && hu_mov_rule && (
-		    TESTAFF(rv->astr, 'F', rv->alen) || // XXX hardwired Hungarian dictionary codes
-		    TESTAFF(rv->astr, 'G', rv->alen) ||
-		    TESTAFF(rv->astr, 'H', rv->alen)
-		)
-	      )
+            || ((langnum == LANG_hu) && hu_mov_rule && (
+                    TESTAFF(rv->astr, 'F', rv->alen) || // XXX hardwired Hungarian dictionary codes
+                    TESTAFF(rv->astr, 'G', rv->alen) ||
+                    TESTAFF(rv->astr, 'H', rv->alen)
+                )
+              )
 // END of LANG_hu section
-	  )
-	  && ! (( checkcompoundtriple && // test triple letters
+          )
+          && ! (( checkcompoundtriple && // test triple letters
                    (word[i-1]==word[i]) && (
                       ((i>1) && (word[i-1]==word[i-2])) || 
                       ((word[i-1]==word[i+1])) // may be word[i+1] == '\0'
-		   )
+                   )
                ) ||
                ( 
                  // test CHECKCOMPOUNDPATTERN
-	         numcheckcpd && cpdpat_check(word, i)
-	       ) ||
+                 numcheckcpd && cpdpat_check(word, i)
+               ) ||
                ( 
-	         checkcompoundcase && cpdcase_check(word, i)
+                 checkcompoundcase && cpdcase_check(word, i)
                ))
          )
 // LANG_hu section: spec. Hungarian rule
@@ -1592,88 +1695,88 @@ struct hentry * AffixMgr::compound_check(const char * word, int len,
                         TESTAFF(((SfxEntry*)sfx)->getCont(), (unsigned short) '%', ((SfxEntry*)sfx)->getContLen())
                     )                
                )
-	     )
+             )
 // END of LANG_hu section
          ) {
 
 // LANG_hu section: spec. Hungarian rule
-	    if (langnum == LANG_hu) {
+            if (langnum == LANG_hu) {
                 // calculate syllable number of the word            
                 numsyllable += get_syllable(st, i);
 
-	        // + 1 word, if syllable number of the prefix > 1 (hungarian convention)
-	        if (pfx && (get_syllable(((PfxEntry *)pfx)->getKey(),strlen(((PfxEntry *)pfx)->getKey())) > 1)) wordnum++;
+                // + 1 word, if syllable number of the prefix > 1 (hungarian convention)
+                if (pfx && (get_syllable(((PfxEntry *)pfx)->getKey(),strlen(((PfxEntry *)pfx)->getKey())) > 1)) wordnum++;
             }
 // END of LANG_hu section
 
 #ifdef HUNSTEM
-	    if (cmpdstem) cmpdstem[*cmpdstemnum - 1] = i;
+            if (cmpdstem) cmpdstem[*cmpdstemnum - 1] = i;
 #endif
 
-	    // NEXT WORD(S)
-	    rv_first = rv;
-	    rv = lookup((word+i)); // perhaps without prefix
+            // NEXT WORD(S)
+            rv_first = rv;
+            rv = lookup((word+i)); // perhaps without prefix
 
         // search homonym with compound flag
         while ((rv) && ((pseudoroot && TESTAFF(rv->astr, pseudoroot, rv->alen)) ||
-			!((compoundflag && !words && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
-			  (compoundend && !words && TESTAFF(rv->astr, compoundend, rv->alen)) ||
+                        !((compoundflag && !words && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
+                          (compoundend && !words && TESTAFF(rv->astr, compoundend, rv->alen)) ||
                            (numdefcpd && words && defcpd_check(&words, wnum + 1, rv, NULL,1))))) {
             rv = rv->next_homonym;
         }
 
             if (rv && words && words[wnum + 1]) return rv;
 
-	    oldnumsyllable2 = numsyllable;
-	    oldwordnum2 = wordnum;
+            oldnumsyllable2 = numsyllable;
+            oldwordnum2 = wordnum;
 
 // LANG_hu section: spec. Hungarian rule, XXX hardwired dictionary code
-	    if ((rv) && (langnum == LANG_hu) && (TESTAFF(rv->astr, 'I', rv->alen)) && !(TESTAFF(rv->astr, 'J', rv->alen))) {
-		numsyllable--;
-	    }
+            if ((rv) && (langnum == LANG_hu) && (TESTAFF(rv->astr, 'I', rv->alen)) && !(TESTAFF(rv->astr, 'J', rv->alen))) {
+                numsyllable--;
+            }
 // END of LANG_hu section
 
-	    // increment word number, if the second root has a compoundroot flag
-	    if ((rv) && (compoundroot) && 
-		(TESTAFF(rv->astr, compoundroot, rv->alen))) {
-		    wordnum++;
-	    }
+            // increment word number, if the second root has a compoundroot flag
+            if ((rv) && (compoundroot) && 
+                (TESTAFF(rv->astr, compoundroot, rv->alen))) {
+                    wordnum++;
+            }
 
-	    // check forbiddenwords
-	    if ((rv) && (rv->astr) && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
+            // check forbiddenwords
+            if ((rv) && (rv->astr) && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
                (is_sug && nosuggest && TESTAFF(rv->astr, nosuggest, rv->alen)))) return NULL;
 
-	    // second word is acceptable, as a root?
-	    // hungarian conventions: compounding is acceptable,
-	    // when compound forms consist of 2 words, or if more,
-	    // then the syllable number of root words must be 6, or lesser.
+            // second word is acceptable, as a root?
+            // hungarian conventions: compounding is acceptable,
+            // when compound forms consist of 2 words, or if more,
+            // then the syllable number of root words must be 6, or lesser.
 
-	    if ((rv) && (
-	              (compoundflag && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
-	              (compoundend && TESTAFF(rv->astr, compoundend, rv->alen))
-	            )
-		&& (
-		      ((cpdwordmax==0) || (wordnum+1<cpdwordmax)) || 
-		      ((cpdmaxsyllable==0) || 
-		          (numsyllable + get_syllable(rv->word,rv->wlen)<=cpdmaxsyllable))
-		    )
-		&& (
-		     (!checkcompounddup || (rv != rv_first))
-		   )
-		)
-		 {
-		      // forbid compound word, if it is a non compound word with typical fault
-		      if (checkcompoundrep && cpdrep_check(word,len)) return NULL;
-		      return rv;
-	    }
+            if ((rv) && (
+                      (compoundflag && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
+                      (compoundend && TESTAFF(rv->astr, compoundend, rv->alen))
+                    )
+                && (
+                      ((cpdwordmax==-1) || (wordnum+1<cpdwordmax)) || 
+                      ((cpdmaxsyllable==0) || 
+                          (numsyllable + get_syllable(rv->word,rv->wlen)<=cpdmaxsyllable))
+                    )
+                && (
+                     (!checkcompounddup || (rv != rv_first))
+                   )
+                )
+                 {
+                      // forbid compound word, if it is a non compound word with typical fault
+                      if (checkcompoundrep && cpdrep_check(word,len)) return NULL;
+                      return rv;
+            }
 
-	    numsyllable = oldnumsyllable2 ;
-	    wordnum = oldwordnum2;
+            numsyllable = oldnumsyllable2 ;
+            wordnum = oldwordnum2;
 
-	    // perhaps second word has prefix or/and suffix
+            // perhaps second word has prefix or/and suffix
             sfx = NULL;
-	    sfxflag = FLAG_NULL;
-	    rv = (compoundflag) ? affix_check((word+i),strlen(word+i), compoundflag, IN_CPD_END) : NULL;
+            sfxflag = FLAG_NULL;
+            rv = (compoundflag) ? affix_check((word+i),strlen(word+i), compoundflag, IN_CPD_END) : NULL;
             if (!rv && compoundend) {
                 sfx = NULL;
                 pfx = NULL;
@@ -1696,105 +1799,106 @@ struct hentry * AffixMgr::compound_check(const char * word, int len,
                     rv = NULL;
             }
 
-	    // check forbiddenwords
-	    if ((rv) && (rv->astr) && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
+            // check forbiddenwords
+            if ((rv) && (rv->astr) && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
                (is_sug && nosuggest && TESTAFF(rv->astr, nosuggest, rv->alen)))) return NULL;
 
-	    // pfxappnd = prefix of word+i, or NULL
-	    // calculate syllable number of prefix.
-	    // hungarian convention: when syllable number of prefix is more,
-	    // than 1, the prefix+word counts as two words.
+            // pfxappnd = prefix of word+i, or NULL
+            // calculate syllable number of prefix.
+            // hungarian convention: when syllable number of prefix is more,
+            // than 1, the prefix+word counts as two words.
 
             if (langnum == LANG_hu) {
-	        // calculate syllable number of the word
-	        numsyllable += get_syllable(word + i, strlen(word + i));
+                // calculate syllable number of the word
+                numsyllable += get_syllable(word + i, strlen(word + i));
                 
                 // - affix syllable num.
                 // XXX only second suffix (inflections, not derivations)
                 if (sfxappnd) {
                     char * tmp = myrevstrdup(sfxappnd);
-	            numsyllable -= get_syllable(tmp, strlen(tmp));
+                    numsyllable -= get_syllable(tmp, strlen(tmp));
                     free(tmp);
                 }
                 
                 // + 1 word, if syllable number of the prefix > 1 (hungarian convention)
-	        if (pfx && (get_syllable(((PfxEntry *)pfx)->getKey(),strlen(((PfxEntry *)pfx)->getKey())) > 1)) wordnum++;
+                if (pfx && (get_syllable(((PfxEntry *)pfx)->getKey(),strlen(((PfxEntry *)pfx)->getKey())) > 1)) wordnum++;
 
-	        // increment syllable num, if last word has a SYLLABLENUM flag
-	        // and the suffix is beginning `s'
+                // increment syllable num, if last word has a SYLLABLENUM flag
+                // and the suffix is beginning `s'
             
-	        if (cpdsyllablenum) {
-	            switch (sfxflag) {
-		        case 'c': { numsyllable+=2; break; }
-		        case 'J': { numsyllable += 1; break; }
+                if (cpdsyllablenum) {
+                    switch (sfxflag) {
+                        case 'c': { numsyllable+=2; break; }
+                        case 'J': { numsyllable += 1; break; }
                         case 'I': { if (TESTAFF(rv->astr, 'J', rv->alen)) numsyllable += 1; break; }
                     }
                 }
             }
             
-	    // increment word number, if the second word has a compoundroot flag
-	    if ((rv) && (compoundroot) && 
-		(TESTAFF(rv->astr, compoundroot, rv->alen))) {
-		    wordnum++;
-	    }
+            // increment word number, if the second word has a compoundroot flag
+            if ((rv) && (compoundroot) && 
+                (TESTAFF(rv->astr, compoundroot, rv->alen))) {
+                    wordnum++;
+            }
 
-	    // second word is acceptable, as a word with prefix or/and suffix?
-	    // hungarian conventions: compounding is acceptable,
-	    // when compound forms consist 2 word, otherwise
-	    // the syllable number of root words is 6, or lesser.
-	    if ((rv) && 
+            // second word is acceptable, as a word with prefix or/and suffix?
+            // hungarian conventions: compounding is acceptable,
+            // when compound forms consist 2 word, otherwise
+            // the syllable number of root words is 6, or lesser.
+            if ((rv) && 
                     (
-		      ((cpdwordmax ==0 ) || (wordnum + 1 < cpdwordmax)) || 
-		      ((cpdmaxsyllable == 0) || 
-		          (numsyllable <= cpdmaxsyllable))
-		    )
-		&& (
-		   (!checkcompounddup || (rv != rv_first))
-		   )) {
-		    // forbid compound word, if it is a non compound word with typical fault
-		    if (checkcompoundrep && cpdrep_check(word, len)) return NULL;
-		    return rv;
-	    }
+                      ((cpdwordmax == -1) || (wordnum + 1 < cpdwordmax)) || 
+                      ((cpdmaxsyllable == 0) || 
+                          (numsyllable <= cpdmaxsyllable))
+                    )
+                && (
+                   (!checkcompounddup || (rv != rv_first))
+                   )) {
+                    // forbid compound word, if it is a non compound word with typical fault
+                    if (checkcompoundrep && cpdrep_check(word, len)) return NULL;
+                    return rv;
+            }
 
-	    numsyllable = oldnumsyllable2;
-	    wordnum = oldwordnum2;
+            numsyllable = oldnumsyllable2;
+            wordnum = oldwordnum2;
 #ifdef HUNSTEM
-	    if (cmpdstemnum) oldcmpdstemnum = *cmpdstemnum;
+            if (cmpdstemnum) oldcmpdstemnum = *cmpdstemnum;
 #endif
-	    // perhaps second word is a compound word (recursive call)
-	    if (wordnum < maxwordnum) {
-		rv = compound_check((word+i),strlen(word+i), wordnum+1,
-		     numsyllable, maxwordnum, wnum + 1, words,
+            // perhaps second word is a compound word (recursive call)
+            if (wordnum < maxwordnum) {
+                rv = compound_check((word+i),strlen(word+i), wordnum+1,
+                     numsyllable, maxwordnum, wnum + 1, words,
                      0, cmpdstemnum, cmpdstem, is_sug);
-	    } else {
-		rv=NULL;
-	    }
-	    if (rv) {
-		// forbid compound word, if it is a non compound word with typical fault
-		if (checkcompoundrep && cpdrep_check(word, len)) return NULL;
-		return rv;
-	    } else {
+            } else {
+                rv=NULL;
+            }
+            if (rv) {
+                // forbid compound word, if it is a non compound word with typical fault
+                if (checkcompoundrep && cpdrep_check(word, len)) return NULL;
+                return rv;
+            } else {
 #ifdef HUNSTEM
-	    if (cmpdstemnum) *cmpdstemnum = oldcmpdstemnum;
+            if (cmpdstemnum) *cmpdstemnum = oldcmpdstemnum;
 #endif
-	    }
-	}
+            }
+        }
         st[i] = ch;
-	wordnum = oldwordnum;
-	numsyllable = oldnumsyllable;
+        wordnum = oldwordnum;
+        numsyllable = oldnumsyllable;
     }
     
     return NULL;
 }    
 
-
+#ifdef HUNSPELL_EXPERIMENTAL
 // check if compound word is correctly spelled
 // hu_mov_rule = spec. Hungarian rule (XXX)
 int AffixMgr::compound_check_morph(const char * word, int len, 
     short wordnum, short numsyllable, short maxwordnum, short wnum, hentry ** words,
     char hu_mov_rule = 0, char ** result = NULL, char * partresult = NULL)
 {
-    int i, oldnumsyllable, oldnumsyllable2, oldwordnum, oldwordnum2;
+    int i;
+    short oldnumsyllable, oldnumsyllable2, oldwordnum, oldwordnum2;
     int ok = 0;
 
     struct hentry * rv = NULL;
@@ -1826,8 +1930,8 @@ int AffixMgr::compound_check_morph(const char * word, int len,
     strcpy(st, word);
 
     for (i = cmin; i < cmax; i++) {
-	oldnumsyllable = numsyllable;
-	oldwordnum = wordnum;
+        oldnumsyllable = numsyllable;
+        oldwordnum = wordnum;
         checked_prefix = 0;
 
         // go to end of the UTF-8 character
@@ -1835,22 +1939,22 @@ int AffixMgr::compound_check_morph(const char * word, int len,
             for (; (st[i] & 0xc0) == 0x80; i++);
             if (i >= cmax) return 0;
         }
-	
+        
         ch = st[i];
-	st[i] = '\0';
+        st[i] = '\0';
         sfx = NULL;
 
-	// FIRST WORD
+        // FIRST WORD
         *presult = '\0';
         if (partresult) strcat(presult, partresult);
-	
-	rv = lookup(st); // perhaps without prefix
+        
+        rv = lookup(st); // perhaps without prefix
 
         // search homonym with compound flag
         while ((rv) && !hu_mov_rule && 
             ((pseudoroot && TESTAFF(rv->astr, pseudoroot, rv->alen)) ||
-		!((compoundflag && !words && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
-	        (compoundbegin && !wordnum &&
+                !((compoundflag && !words && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
+                (compoundbegin && !wordnum &&
                         TESTAFF(rv->astr, compoundbegin, rv->alen)) ||
                 (compoundmiddle && wordnum && !words &&
                     TESTAFF(rv->astr, compoundmiddle, rv->alen)) ||
@@ -1861,10 +1965,10 @@ int AffixMgr::compound_check_morph(const char * word, int len,
             rv = rv->next_homonym;
         }
 
-        if (rv)	 {
+        if (rv)  {
             if (rv->description) {
                 if ((!rv->astr) || !TESTAFF(rv->astr, lemma_present, rv->alen))
-					strcat(presult, st);
+                                        strcat(presult, st);
                 strcat(presult, rv->description);
             }
         }
@@ -1918,11 +2022,11 @@ int AffixMgr::compound_check_morph(const char * word, int len,
                 //strcat(presult, "+");
             }
         // else check forbiddenwords
-	} else if (rv->astr && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
+        } else if (rv->astr && (TESTAFF(rv->astr, forbiddenword, rv->alen) ||
             TESTAFF(rv->astr, pseudoroot, rv->alen))) {
                 st[i] = ch;
                 continue;
-	}
+        }
 
             // check non_compound flag in suffix and prefix
             if ((rv) && !hu_mov_rule &&
@@ -1955,45 +2059,45 @@ int AffixMgr::compound_check_morph(const char * word, int len,
                     TESTAFF(((SfxEntry*)sfx)->getCont(), compoundmiddle, 
                         ((SfxEntry*)sfx)->getContLen())))) {
                     rv = NULL;
-            }	    
+            }       
 
-	// check forbiddenwords
-	if ((rv) && (rv->astr) && TESTAFF(rv->astr, forbiddenword, rv->alen)) continue;
+        // check forbiddenwords
+        if ((rv) && (rv->astr) && TESTAFF(rv->astr, forbiddenword, rv->alen)) continue;
 
-	// increment word number, if the second root has a compoundroot flag
-	if ((rv) && (compoundroot) && 
-	    (TESTAFF(rv->astr, compoundroot, rv->alen))) {
-		wordnum++;
-	}
+        // increment word number, if the second root has a compoundroot flag
+        if ((rv) && (compoundroot) && 
+            (TESTAFF(rv->astr, compoundroot, rv->alen))) {
+                wordnum++;
+        }
 
-	// first word is acceptable in compound words?
-	if (((rv) && 
-	  ( checked_prefix || (words && words[wnum]) ||
-	    (compoundflag && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
-	    ((oldwordnum == 0) && compoundbegin && TESTAFF(rv->astr, compoundbegin, rv->alen)) ||
-	    ((oldwordnum > 0) && compoundmiddle && TESTAFF(rv->astr, compoundmiddle, rv->alen)) 
+        // first word is acceptable in compound words?
+        if (((rv) && 
+          ( checked_prefix || (words && words[wnum]) ||
+            (compoundflag && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
+            ((oldwordnum == 0) && compoundbegin && TESTAFF(rv->astr, compoundbegin, rv->alen)) ||
+            ((oldwordnum > 0) && compoundmiddle && TESTAFF(rv->astr, compoundmiddle, rv->alen)) 
 // LANG_hu section: spec. Hungarian rule
-	    || ((langnum == LANG_hu) &&	// hu_mov_rule
-	        hu_mov_rule && (
-		    TESTAFF(rv->astr, 'F', rv->alen) ||
-		    TESTAFF(rv->astr, 'G', rv->alen) ||
-		    TESTAFF(rv->astr, 'H', rv->alen)
-		)
-	      )
+            || ((langnum == LANG_hu) && // hu_mov_rule
+                hu_mov_rule && (
+                    TESTAFF(rv->astr, 'F', rv->alen) ||
+                    TESTAFF(rv->astr, 'G', rv->alen) ||
+                    TESTAFF(rv->astr, 'H', rv->alen)
+                )
+              )
 // END of LANG_hu section
-	  )
-	  && ! (( checkcompoundtriple && // test triple letters
+          )
+          && ! (( checkcompoundtriple && // test triple letters
                    (word[i-1]==word[i]) && (
                       ((i>1) && (word[i-1]==word[i-2])) || 
                       ((word[i-1]==word[i+1])) // may be word[i+1] == '\0'
-		   )
+                   )
                ) ||
-	       (
-	           // test CHECKCOMPOUNDPATTERN
+               (
+                   // test CHECKCOMPOUNDPATTERN
                    numcheckcpd && cpdpat_check(word, i)
-	       ) ||
+               ) ||
                ( 
-	         checkcompoundcase && cpdcase_check(word, i)
+                 checkcompoundcase && cpdcase_check(word, i)
                ))
          )
 // LANG_hu section: spec. Hungarian rule
@@ -2003,28 +2107,28 @@ int AffixMgr::compound_check_morph(const char * word, int len,
                         TESTAFF(((SfxEntry*)sfx)->getCont(), (unsigned short) '%', ((SfxEntry*)sfx)->getContLen())
                     )                
                )
-	     )
+             )
 // END of LANG_hu section
          ) {
 
 // LANG_hu section: spec. Hungarian rule
             if (langnum == LANG_hu) {
-	        // calculate syllable number of the word
-	        numsyllable += get_syllable(st, i);
+                // calculate syllable number of the word
+                numsyllable += get_syllable(st, i);
 
-	        // + 1 word, if syllable number of the prefix > 1 (hungarian convention)
-	        if (pfx && (get_syllable(((PfxEntry *)pfx)->getKey(),strlen(((PfxEntry *)pfx)->getKey())) > 1)) wordnum++;
+                // + 1 word, if syllable number of the prefix > 1 (hungarian convention)
+                if (pfx && (get_syllable(((PfxEntry *)pfx)->getKey(),strlen(((PfxEntry *)pfx)->getKey())) > 1)) wordnum++;
             }
 // END of LANG_hu section
 
-	    // NEXT WORD(S)
-	    rv_first = rv;
-	    rv = lookup((word+i)); // perhaps without prefix
+            // NEXT WORD(S)
+            rv_first = rv;
+            rv = lookup((word+i)); // perhaps without prefix
 
         // search homonym with compound flag
         while ((rv) && ((pseudoroot && TESTAFF(rv->astr, pseudoroot, rv->alen)) ||
-			!((compoundflag && !words && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
-			  (compoundend && !words && TESTAFF(rv->astr, compoundend, rv->alen)) ||
+                        !((compoundflag && !words && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
+                          (compoundend && !words && TESTAFF(rv->astr, compoundend, rv->alen)) ||
                            (numdefcpd && defcpd_check(&words, wnum + 1, rv, NULL,1))))) {
             rv = rv->next_homonym;
         }
@@ -2033,71 +2137,71 @@ int AffixMgr::compound_check_morph(const char * word, int len,
                   strcat(*result, presult);
                   if (complexprefixes && rv->description) strcat(*result, rv->description);
                   if (rv->description && ((!rv->astr) || 
-		     !TESTAFF(rv->astr, lemma_present, rv->alen)))
-			strcat(*result, rv->word);
+                     !TESTAFF(rv->astr, lemma_present, rv->alen)))
+                        strcat(*result, rv->word);
                   if (!complexprefixes && rv->description) strcat(*result, rv->description);
                   strcat(*result, "\n");
                   ok = 1;
                   return 0;
             }
 
-	    oldnumsyllable2 = numsyllable;
-	    oldwordnum2 = wordnum;
+            oldnumsyllable2 = numsyllable;
+            oldwordnum2 = wordnum;
 
 // LANG_hu section: spec. Hungarian rule
-	    if ((rv) && (langnum == LANG_hu) && (TESTAFF(rv->astr, 'I', rv->alen)) && !(TESTAFF(rv->astr, 'J', rv->alen))) {
-		numsyllable--;
-	    }
+            if ((rv) && (langnum == LANG_hu) && (TESTAFF(rv->astr, 'I', rv->alen)) && !(TESTAFF(rv->astr, 'J', rv->alen))) {
+                numsyllable--;
+            }
 // END of LANG_hu section
-	    // increment word number, if the second root has a compoundroot flag
-	    if ((rv) && (compoundroot) && 
-		(TESTAFF(rv->astr, compoundroot, rv->alen))) {
-		    wordnum++;
-	    }
+            // increment word number, if the second root has a compoundroot flag
+            if ((rv) && (compoundroot) && 
+                (TESTAFF(rv->astr, compoundroot, rv->alen))) {
+                    wordnum++;
+            }
 
-	    // check forbiddenwords
-	    if ((rv) && (rv->astr) && TESTAFF(rv->astr, forbiddenword, rv->alen)) {
+            // check forbiddenwords
+            if ((rv) && (rv->astr) && TESTAFF(rv->astr, forbiddenword, rv->alen)) {
                 st[i] = ch;
                 continue;
             }
                     
-	    // second word is acceptable, as a root?
-	    // hungarian conventions: compounding is acceptable,
-	    // when compound forms consist of 2 words, or if more,
-	    // then the syllable number of root words must be 6, or lesser.
-	    if ((rv) && (
-	              (compoundflag && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
-	              (compoundend && TESTAFF(rv->astr, compoundend, rv->alen))
-	            )
-		&& (
-		      ((cpdwordmax==0) || (wordnum+1<cpdwordmax)) || 
-		      ((cpdmaxsyllable==0) || 
-		          (numsyllable+get_syllable(rv->word,rv->wlen)<=cpdmaxsyllable))
-		    )
-		&& (
-		     (!checkcompounddup || (rv != rv_first))
-		   )
-		)
-		 {
-		      // bad compound word
+            // second word is acceptable, as a root?
+            // hungarian conventions: compounding is acceptable,
+            // when compound forms consist of 2 words, or if more,
+            // then the syllable number of root words must be 6, or lesser.
+            if ((rv) && (
+                      (compoundflag && TESTAFF(rv->astr, compoundflag, rv->alen)) ||
+                      (compoundend && TESTAFF(rv->astr, compoundend, rv->alen))
+                    )
+                && (
+                      ((cpdwordmax==-1) || (wordnum+1<cpdwordmax)) || 
+                      ((cpdmaxsyllable==0) || 
+                          (numsyllable+get_syllable(rv->word,rv->wlen)<=cpdmaxsyllable))
+                    )
+                && (
+                     (!checkcompounddup || (rv != rv_first))
+                   )
+                )
+                 {
+                      // bad compound word
                       strcat(*result, presult);
-					  
+                                          
                       if (rv->description) {
                         if (complexprefixes) strcat(*result, rv->description);
                         if ((!rv->astr) || !TESTAFF(rv->astr, lemma_present, rv->alen))
-					       strcat(*result, rv->word);
+                                               strcat(*result, rv->word);
                         if (!complexprefixes) strcat(*result, rv->description);
                       }
                       strcat(*result, "\n");
-		              ok = 1;
-	    }
+                              ok = 1;
+            }
 
-	    numsyllable = oldnumsyllable2 ;
-	    wordnum = oldwordnum2;
+            numsyllable = oldnumsyllable2 ;
+            wordnum = oldwordnum2;
 
-	    // perhaps second word has prefix or/and suffix
+            // perhaps second word has prefix or/and suffix
             sfx = NULL;
-	    sfxflag = FLAG_NULL;
+            sfxflag = FLAG_NULL;
 
             if (compoundflag) rv = affix_check((word+i),strlen(word+i), compoundflag); else rv = NULL;
 
@@ -2115,15 +2219,17 @@ int AffixMgr::compound_check_morph(const char * word, int len,
                       if ((!m || *m == '\0') && compoundend)
                             m = affix_check_morph((word+i),strlen(word+i), compoundend);
                       strcat(*result, presult);
-                      line_uniq(m);
-                      if (strchr(m, '\n')) {
+                      if (m) {
+                        line_uniq(m);
+                        if (strchr(m, '\n')) {
                             strcat(*result, "(");
                             strcat(*result, line_join(m, '|'));
                             strcat(*result, ")");
-                      } else {
+                        } else {
                             strcat(*result, m);
+                        }
+                        free(m);
                       }
-                      free(m);
                       strcat(*result, "\n");
                       ok = 1;
                 }
@@ -2140,9 +2246,9 @@ int AffixMgr::compound_check_morph(const char * word, int len,
                     rv = NULL;
             }
 
-	    // check forbiddenwords
-	    if ((rv) && (rv->astr) && (TESTAFF(rv->astr,forbiddenword,rv->alen))
-	    	    && (! TESTAFF(rv->astr, pseudoroot, rv->alen))) {
+            // check forbiddenwords
+            if ((rv) && (rv->astr) && (TESTAFF(rv->astr,forbiddenword,rv->alen))
+                    && (! TESTAFF(rv->astr, pseudoroot, rv->alen))) {
                         st[i] = ch;
                         continue;
                     }
@@ -2155,7 +2261,7 @@ int AffixMgr::compound_check_morph(const char * word, int len,
                 // XXX only second suffix (inflections, not derivations)
                 if (sfxappnd) {
                     char * tmp = myrevstrdup(sfxappnd);
-	            numsyllable -= get_syllable(tmp, strlen(tmp));
+                    numsyllable -= get_syllable(tmp, strlen(tmp));
                     free(tmp);
                 }
 
@@ -2165,71 +2271,74 @@ int AffixMgr::compound_check_morph(const char * word, int len,
                 // increment syllable num, if last word has a SYLLABLENUM flag
                 // and the suffix is beginning `s'
 
-	        if (cpdsyllablenum) {
-	            switch (sfxflag) {
-		        case 'c': { numsyllable+=2; break; }
-		        case 'J': { numsyllable += 1; break; }
+                if (cpdsyllablenum) {
+                    switch (sfxflag) {
+                        case 'c': { numsyllable+=2; break; }
+                        case 'J': { numsyllable += 1; break; }
                         case 'I': { if (rv && TESTAFF(rv->astr, 'J', rv->alen)) numsyllable += 1; break; }
-	            }
-	        }
+                    }
+                }
             }
 
-	    // increment word number, if the second word has a compoundroot flag
-	    if ((rv) && (compoundroot) && 
-		(TESTAFF(rv->astr, compoundroot, rv->alen))) {
-		    wordnum++;
-	    }
-	    // second word is acceptable, as a word with prefix or/and suffix?
-	    // hungarian conventions: compounding is acceptable,
-	    // when compound forms consist 2 word, otherwise
-	    // the syllable number of root words is 6, or lesser.
-	    if ((rv) && 
+            // increment word number, if the second word has a compoundroot flag
+            if ((rv) && (compoundroot) && 
+                (TESTAFF(rv->astr, compoundroot, rv->alen))) {
+                    wordnum++;
+            }
+            // second word is acceptable, as a word with prefix or/and suffix?
+            // hungarian conventions: compounding is acceptable,
+            // when compound forms consist 2 word, otherwise
+            // the syllable number of root words is 6, or lesser.
+            if ((rv) && 
                     (
-		      ((cpdwordmax==0) || (wordnum+1<cpdwordmax)) || 
-		      ((cpdmaxsyllable==0) || 
-		          (numsyllable <= cpdmaxsyllable))
-		    )
-		&& (
-		   (!checkcompounddup || (rv != rv_first))
-		   )) {
+                      ((cpdwordmax==-1) || (wordnum+1<cpdwordmax)) || 
+                      ((cpdmaxsyllable==0) || 
+                          (numsyllable <= cpdmaxsyllable))
+                    )
+                && (
+                   (!checkcompounddup || (rv != rv_first))
+                   )) {
                       char * m = NULL;
                       if (compoundflag) m = affix_check_morph((word+i),strlen(word+i), compoundflag);
                       if ((!m || *m == '\0') && compoundend)
                             m = affix_check_morph((word+i),strlen(word+i), compoundend);
                       strcat(*result, presult);
-                      line_uniq(m);
-                      if (strchr(m, '\n')) {
+                      if (m) {
+                        line_uniq(m);
+                        if (strchr(m, '\n')) {
                             strcat(*result, "(");
                             strcat(*result, line_join(m, '|'));
                             strcat(*result, ")");
-                      } else {
+                        } else {
                             strcat(*result, m);
+                        }
+                        free(m);
                       }
-                      free(m);
                       strcat(*result, "\n");
                       ok = 1;
-	    }
+            }
 
-	    numsyllable = oldnumsyllable2;
-	    wordnum = oldwordnum2;
+            numsyllable = oldnumsyllable2;
+            wordnum = oldwordnum2;
 
-	    // perhaps second word is a compound word (recursive call)
-	    if ((wordnum < maxwordnum) && (ok == 0)) {
-			compound_check_morph((word+i),strlen(word+i), wordnum+1, 
+            // perhaps second word is a compound word (recursive call)
+            if ((wordnum < maxwordnum) && (ok == 0)) {
+                        compound_check_morph((word+i),strlen(word+i), wordnum+1, 
                              numsyllable, maxwordnum, wnum + 1, words, 0, result, presult);
-	    } else {
-		rv=NULL;
-	    }
-	}
+            } else {
+                rv=NULL;
+            }
+        }
         st[i] = ch;
-	wordnum = oldwordnum;
-	numsyllable = oldnumsyllable;
+        wordnum = oldwordnum;
+        numsyllable = oldnumsyllable;
     }
     return 0;
 }    
+#endif // END OF HUNSPELL_EXPERIMENTAL CODE
 
  // return 1 if s1 (reversed) is a leading subset of end of s2
-inline int AffixMgr::isRevSubset(const char * s1, const char * end_of_s2, int len)
+/* inline int AffixMgr::isRevSubset(const char * s1, const char * end_of_s2, int len)
  {
     while ((len > 0) && *s1 && (*s1 == *end_of_s2)) {
         s1++;
@@ -2238,8 +2347,17 @@ inline int AffixMgr::isRevSubset(const char * s1, const char * end_of_s2, int le
     }
     return (*s1 == '\0');
  }
+ */
 
-
+inline int AffixMgr::isRevSubset(const char * s1, const char * end_of_s2, int len)
+ {
+    while ((len > 0) && (*s1 != '\0') && ((*s1 == *end_of_s2) || (*s1 == '.'))) {
+        s1++;
+        end_of_s2--;
+        len--;
+    }
+    return (*s1 == '\0');
+ }
 
 // check word for suffixes
 
@@ -2257,11 +2375,11 @@ struct hentry * AffixMgr::suffix_check (const char * word, int len,
 
     while (se) {
         if (!cclass || se->getCont()) {
-	    // suffixes are not allowed in beginning of compounds
-            if (((((in_compound != IN_CPD_BEGIN)) || // && !cclass
-	     // except when signed with compoundpermitflag flag
-	     (se->getCont() && compoundpermitflag &&
-	        TESTAFF(se->getCont(),compoundpermitflag,se->getContLen()))) && (!circumfix ||
+            // suffixes are not allowed in beginning of compounds
+            if ((((in_compound != IN_CPD_BEGIN)) || // && !cclass
+             // except when signed with compoundpermitflag flag
+             (se->getCont() && compoundpermitflag &&
+                TESTAFF(se->getCont(),compoundpermitflag,se->getContLen()))) && (!circumfix ||
               // no circumfix flag in prefix and suffix
               ((!ppfx || !(ep->getCont()) || !TESTAFF(ep->getCont(),
                    circumfix, ep->getContLen())) &&
@@ -2273,17 +2391,20 @@ struct hentry * AffixMgr::suffix_check (const char * word, int len,
             // fogemorpheme
               (in_compound || 
                  !((se->getCont() && (TESTAFF(se->getCont(), onlyincompound, se->getContLen()))))) &&
-	    // pseudoroot on prefix or first suffix
-	      (cclass || 
+            // pseudoroot on prefix or first suffix
+              (cclass || 
                    !(se->getCont() && TESTAFF(se->getCont(), pseudoroot, se->getContLen())) ||
                    (ppfx && !((ep->getCont()) &&
                      TESTAFF(ep->getCont(), pseudoroot,
                        ep->getContLen())))
               )
-            ) &&
-	    (rv = se->check(word,len, sfxopts, ppfx, wlst, maxSug, ns, (FLAG) cclass, needflag))) {
-                sfx=(AffEntry *)se; // BUG: sfx not stateless
-                return rv;
+            ) {
+                rv = se->checkword(word,len, sfxopts, ppfx, wlst, maxSug, ns, (FLAG) cclass, 
+                    needflag, (in_compound ? 0 : onlyincompound));
+                if (rv) {
+                    sfx=(AffEntry *)se; // BUG: sfx not stateless
+                    return rv;
+                }
             }
         }
        se = se->getNext();
@@ -2296,11 +2417,11 @@ struct hentry * AffixMgr::suffix_check (const char * word, int len,
     while (sptr) {
         if (isRevSubset(sptr->getKey(), word + len - 1, len)
         ) {
-	    // suffixes are not allowed in beginning of compounds
-            if (((((in_compound != IN_CPD_BEGIN)) || // && !cclass
-	     // except when signed with compoundpermitflag flag
-	     (sptr->getCont() && compoundpermitflag &&
-	        TESTAFF(sptr->getCont(),compoundpermitflag,sptr->getContLen()))) && (!circumfix ||
+            // suffixes are not allowed in beginning of compounds
+            if ((((in_compound != IN_CPD_BEGIN)) || // && !cclass
+             // except when signed with compoundpermitflag flag
+             (sptr->getCont() && compoundpermitflag &&
+                TESTAFF(sptr->getCont(),compoundpermitflag,sptr->getContLen()))) && (!circumfix ||
               // no circumfix flag in prefix and suffix
               ((!ppfx || !(ep->getCont()) || !TESTAFF(ep->getCont(),
                    circumfix, ep->getContLen())) &&
@@ -2312,34 +2433,37 @@ struct hentry * AffixMgr::suffix_check (const char * word, int len,
             // fogemorpheme
               (in_compound || 
                  !((sptr->getCont() && (TESTAFF(sptr->getCont(), onlyincompound, sptr->getContLen()))))) &&
-	    // pseudoroot on prefix or first suffix
-	      (cclass || 
+            // pseudoroot on prefix or first suffix
+              (cclass || 
                   !(sptr->getCont() && TESTAFF(sptr->getCont(), pseudoroot, sptr->getContLen())) ||
                   (ppfx && !((ep->getCont()) &&
                      TESTAFF(ep->getCont(), pseudoroot,
                        ep->getContLen())))
               )
-            ) &&
-            (rv = sptr->check(word,len, sfxopts, ppfx, wlst, maxSug, ns, cclass, needflag))) {
+            ) {
+                rv = sptr->checkword(word,len, sfxopts, ppfx, wlst,
+                    maxSug, ns, cclass, needflag, (in_compound ? 0 : onlyincompound));
+                if (rv) {
                     sfx=(AffEntry *)sptr; // BUG: sfx not stateless
-            	    sfxflag = sptr->getFlag(); // BUG: sfxflag not stateless
-		    if (!sptr->getCont()) sfxappnd=sptr->getKey(); // BUG: sfxappnd not stateless
-       	   	    if (cclass || sptr->getCont()) {
-				if (!derived) {
-					derived = mystrdup(word);
-				} else {
-					strcpy(result, derived); // XXX check size
-					strcat(result, "\n");
-					strcat(result, word);
-					free(derived);
-					derived = mystrdup(result);
-				}
-		    }
-                return rv;
-	    }
+                    sfxflag = sptr->getFlag(); // BUG: sfxflag not stateless
+                    if (!sptr->getCont()) sfxappnd=sptr->getKey(); // BUG: sfxappnd not stateless
+                    if (cclass || sptr->getCont()) {
+                                if (!derived) {
+                                        derived = mystrdup(word);
+                                } else {
+                                        strcpy(result, derived); // XXX check size
+                                        strcat(result, "\n");
+                                        strcat(result, word);
+                                        free(derived);
+                                        derived = mystrdup(result);
+                                }
+                    }
+                    return rv;
+                }
+             }
              sptr = sptr->getNextEQ();
         } else {
-	     sptr = sptr->getNextNE();
+             sptr = sptr->getNextNE();
         }
     }
 
@@ -2372,23 +2496,23 @@ struct hentry * AffixMgr::suffix_check_twosfx(const char * word, int len,
         if (isRevSubset(sptr->getKey(), word + len - 1, len)) {
             if (contclasses[sptr->getFlag()])
             {
-	        rv = sptr->check_twosfx(word,len, sfxopts, ppfx, needflag);
+                rv = sptr->check_twosfx(word,len, sfxopts, ppfx, needflag);
                 if (rv) {
-            	    sfxflag = sptr->getFlag(); // BUG: sfxflag not stateless
-		    if (!sptr->getCont()) sfxappnd=sptr->getKey(); // BUG: sfxappnd not stateless
-            	    return rv;
+                    sfxflag = sptr->getFlag(); // BUG: sfxflag not stateless
+                    if (!sptr->getCont()) sfxappnd=sptr->getKey(); // BUG: sfxappnd not stateless
+                    return rv;
                 }
             }
             sptr = sptr->getNextEQ();
         } else {
-	     sptr = sptr->getNextNE();
+             sptr = sptr->getNextNE();
         }
     }
 
     return NULL;
 }
 
-
+#ifdef HUNSPELL_EXPERIMENTAL
 char * AffixMgr::suffix_check_twosfx_morph(const char * word, int len, 
        int sfxopts, AffEntry * ppfx, const FLAG needflag)
 {
@@ -2429,22 +2553,21 @@ char * AffixMgr::suffix_check_twosfx_morph(const char * word, int len,
         if (isRevSubset(sptr->getKey(), word + len - 1, len)) {
             if (contclasses[sptr->getFlag()]) 
             {
-	        st = sptr->check_twosfx_morph(word,len, sfxopts, ppfx, needflag);
+                st = sptr->check_twosfx_morph(word,len, sfxopts, ppfx, needflag);
                 if (st) {
-            	    sfxflag = sptr->getFlag(); // BUG: sfxflag not stateless
-		    if (!sptr->getCont()) sfxappnd=sptr->getKey(); // BUG: sfxappnd not stateless
+                    sfxflag = sptr->getFlag(); // BUG: sfxflag not stateless
+                    if (!sptr->getCont()) sfxappnd=sptr->getKey(); // BUG: sfxappnd not stateless
                     strcpy(result2, st);
                     free(st);
 
                 result3[0] = '\0';
 #ifdef DEBUG
                 unsigned short flag = sptr->getFlag();
-                char flagch[2] = &flag;
                 if (flag_mode == FLAG_NUM) {
-                    sprintf(result3, "%d", sptr->getKey());
+                    sprintf(result3, "<%d>", sptr->getKey());
                 } else if (flag_mode == FLAG_LONG) {
-                    sprintf(result3, "%c%c", flagch[0], flagch[1]);                
-                } else sprintf(result3, "%c", flagch[1]);                
+                    sprintf(result3, "<%c%c>", flag >> 8, (flag << 8) >>8);
+                } else sprintf(result3, "<%c>", flag);
                 strcat(result3, ":");
 #endif
                 if (sptr->getMorph()) strcat(result3, sptr->getMorph());
@@ -2455,7 +2578,7 @@ char * AffixMgr::suffix_check_twosfx_morph(const char * word, int len,
             }
             sptr = sptr->getNextEQ();
         } else {
-	     sptr = sptr->getNextNE();
+             sptr = sptr->getNextNE();
         }
     }
     if (result) return mystrdup(result);
@@ -2477,11 +2600,11 @@ char * AffixMgr::suffix_check_morph(const char * word, int len,
     SfxEntry * se = (SfxEntry *) sStart[0];
     while (se) {
         if (!cclass || se->getCont()) {
-	    // suffixes are not allowed in beginning of compounds
+            // suffixes are not allowed in beginning of compounds
             if (((((in_compound != IN_CPD_BEGIN)) || // && !cclass
-	     // except when signed with compoundpermitflag flag
-	     (se->getCont() && compoundpermitflag &&
-	        TESTAFF(se->getCont(),compoundpermitflag,se->getContLen()))) && (!circumfix ||
+             // except when signed with compoundpermitflag flag
+             (se->getCont() && compoundpermitflag &&
+                TESTAFF(se->getCont(),compoundpermitflag,se->getContLen()))) && (!circumfix ||
               // no circumfix flag in prefix and suffix
               ((!ppfx || !(ep->getCont()) || !TESTAFF(ep->getCont(),
                    circumfix, ep->getContLen())) &&
@@ -2493,23 +2616,23 @@ char * AffixMgr::suffix_check_morph(const char * word, int len,
             // fogemorpheme
               (in_compound || 
                  !((se->getCont() && (TESTAFF(se->getCont(), onlyincompound, se->getContLen()))))) &&
-	    // pseudoroot on prefix or first suffix
-	      (cclass || 
+            // pseudoroot on prefix or first suffix
+              (cclass || 
                    !(se->getCont() && TESTAFF(se->getCont(), pseudoroot, se->getContLen())) ||
                    (ppfx && !((ep->getCont()) &&
                      TESTAFF(ep->getCont(), pseudoroot,
                        ep->getContLen())))
               )
             ))
-            rv = se->check(word,len, sfxopts, ppfx, NULL, 0, 0, cclass, needflag);
+            rv = se->checkword(word,len, sfxopts, ppfx, NULL, 0, 0, cclass, needflag);
          while (rv) {
            if (ppfx) {
                 if (((PfxEntry *) ppfx)->getMorph()) strcat(result, ((PfxEntry *) ppfx)->getMorph());
             }
             if (complexprefixes && rv->description) strcat(result, rv->description);
             if (rv->description && ((!rv->astr) || 
-		   			!TESTAFF(rv->astr, lemma_present, rv->alen)))
-					       strcat(result, rv->word);
+                                        !TESTAFF(rv->astr, lemma_present, rv->alen)))
+                                               strcat(result, rv->word);
             if (!complexprefixes && rv->description) strcat(result, rv->description);
             if (se->getMorph()) strcat(result, se->getMorph());
             strcat(result, "\n");
@@ -2526,11 +2649,11 @@ char * AffixMgr::suffix_check_morph(const char * word, int len,
     while (sptr) {
         if (isRevSubset(sptr->getKey(), word + len - 1, len)
         ) {
-	    // suffixes are not allowed in beginning of compounds
+            // suffixes are not allowed in beginning of compounds
             if (((((in_compound != IN_CPD_BEGIN)) || // && !cclass
-	     // except when signed with compoundpermitflag flag
-	     (sptr->getCont() && compoundpermitflag &&
-	        TESTAFF(sptr->getCont(),compoundpermitflag,sptr->getContLen()))) && (!circumfix ||
+             // except when signed with compoundpermitflag flag
+             (sptr->getCont() && compoundpermitflag &&
+                TESTAFF(sptr->getCont(),compoundpermitflag,sptr->getContLen()))) && (!circumfix ||
               // no circumfix flag in prefix and suffix
               ((!ppfx || !(ep->getCont()) || !TESTAFF(ep->getCont(),
                    circumfix, ep->getContLen())) &&
@@ -2542,10 +2665,10 @@ char * AffixMgr::suffix_check_morph(const char * word, int len,
             // fogemorpheme
               (in_compound || 
                  !((sptr->getCont() && (TESTAFF(sptr->getCont(), onlyincompound, sptr->getContLen()))))) &&
-	    // pseudoroot on first suffix
-	      (cclass || !(sptr->getCont() && 
-	           TESTAFF(sptr->getCont(), pseudoroot, sptr->getContLen())))
-            )) rv = sptr->check(word,len, sfxopts, ppfx, NULL, 0, 0, cclass, needflag);
+            // pseudoroot on first suffix
+              (cclass || !(sptr->getCont() && 
+                   TESTAFF(sptr->getCont(), pseudoroot, sptr->getContLen())))
+            )) rv = sptr->checkword(word,len, sfxopts, ppfx, NULL, 0, 0, cclass, needflag);
             while (rv) {
                     if (ppfx) {
                         if (((PfxEntry *) ppfx)->getMorph()) strcat(result, ((PfxEntry *) ppfx)->getMorph());
@@ -2555,30 +2678,29 @@ char * AffixMgr::suffix_check_morph(const char * word, int len,
                         !TESTAFF(rv->astr, lemma_present, rv->alen))) strcat(result, rv->word);
                     if (!complexprefixes && rv->description) strcat(result, rv->description);
 #ifdef DEBUG
-                unsigned short flag = sptr->getKey();
-                char flagch[2] = &flag;
+                unsigned short flag = sptr->getFlag();
                 if (flag_mode == FLAG_NUM) {
-                    sprintf(result2, "%d", sptr->getKey());
+                    sprintf(result, "<%d>", sptr->getKey());
                 } else if (flag_mode == FLAG_LONG) {
-                    sprintf(result2, "%c%c", flagch[0], flagch[1]);                
-                } else sprintf(result2, "%c", flagch[1]);                
-                strcat(result2, ":");
-                strcat(result, result2);
+                    sprintf(result, "<%c%c>", flag >> 8, (flag << 8) >>8);
+                } else sprintf(result, "<%c>", flag);
+                strcat(result, ":");
 #endif
 
                 if (sptr->getMorph()) strcat(result, sptr->getMorph());
                 strcat(result, "\n");
                 rv = sptr->get_next_homonym(rv, sfxopts, ppfx, cclass, needflag);
-	    }
+            }
              sptr = sptr->getNextEQ();
         } else {
-	     sptr = sptr->getNextNE();
+             sptr = sptr->getNextNE();
         }
     }
 
     if (*result) return mystrdup(result);
     return NULL;
 }
+#endif // END OF HUNSPELL_EXPERIMENTAL CODE
 
 
 // check if word with affixes is correctly spelled
@@ -2608,7 +2730,7 @@ struct hentry * AffixMgr::affix_check (const char * word, int len, const FLAG ne
     return rv;
 }
 
-
+#ifdef HUNSPELL_EXPERIMENTAL
 // check if word with affixes is correctly spelled
 char * AffixMgr::affix_check_morph(const char * word, int len, const FLAG needflag, char in_compound)
 {
@@ -2651,6 +2773,7 @@ char * AffixMgr::affix_check_morph(const char * word, int len, const FLAG needfl
     
     return mystrdup(result);
 }
+#endif // END OF HUNSPELL_EXPERIMENTAL CODE
 
 
 int AffixMgr::expand_rootword(struct guessword * wlst, int maxn, const char * ts,
@@ -2677,19 +2800,21 @@ int AffixMgr::expand_rootword(struct guessword * wlst, int maxn, const char * ts
                 // check pseudoroot flag
                 !(sptr->getCont() && ((pseudoroot && 
                       TESTAFF(sptr->getCont(), pseudoroot, sptr->getContLen())) ||
+                  (circumfix && 
+                      TESTAFF(sptr->getCont(), circumfix, sptr->getContLen())) ||
                   (onlyincompound && 
                       TESTAFF(sptr->getCont(), onlyincompound, sptr->getContLen()))))
                 ) {
-	    char * newword = sptr->add(ts, wl);
+            char * newword = sptr->add(ts, wl);
             if (newword) {
                 if (nh < maxn) {
-	            wlst[nh].word = newword;
+                    wlst[nh].word = newword;
                     wlst[nh].allow = sptr->allowCross();              
                 nh++;
-	        } else {
-	            free(newword);
+                } else {
+                    free(newword);
                 }
-	    }
+            }
          }
          sptr = (SfxEntry *)sptr ->getFlgNxt();
        }
@@ -2706,21 +2831,21 @@ int AffixMgr::expand_rootword(struct guessword * wlst, int maxn, const char * ts
              while (cptr) {
                 if (cptr->allowCross() && (!cptr->getKeyLen() || ((badl > cptr->getKeyLen()) &&
                         (strncmp(cptr->getKey(), bad, cptr->getKeyLen()) == 0)))) {
-	            int l1 = strlen(wlst[j].word);
-	            char * newword = cptr->add(wlst[j].word, l1);
+                    int l1 = strlen(wlst[j].word);
+                    char * newword = cptr->add(wlst[j].word, l1);
                     if (newword) {
-		       if (nh < maxn) {
-	                  wlst[nh].word = newword;
+                       if (nh < maxn) {
+                          wlst[nh].word = newword;
                           wlst[nh].allow = cptr->allowCross();
                           nh++;
-		       } else {
-			  free(newword);
+                       } else {
+                          free(newword);
                        }
-	            }
+                    }
                 }
                 cptr = (PfxEntry *)cptr ->getFlgNxt();
              }
-	  }
+          }
        }
 
 
@@ -2734,19 +2859,21 @@ int AffixMgr::expand_rootword(struct guessword * wlst, int maxn, const char * ts
                 // check pseudoroot flag
                 !(ptr->getCont() && ((pseudoroot && 
                       TESTAFF(ptr->getCont(), pseudoroot, ptr->getContLen())) ||
+                     (circumfix && 
+                      TESTAFF(ptr->getCont(), circumfix, ptr->getContLen())) ||                      
                   (onlyincompound && 
                       TESTAFF(ptr->getCont(), onlyincompound, ptr->getContLen()))))
                 ) {
-	    char * newword = ptr->add(ts, wl);
+            char * newword = ptr->add(ts, wl);
             if (newword) {
-	        if (nh < maxn) {
-	            wlst[nh].word = newword;
+                if (nh < maxn) {
+                    wlst[nh].word = newword;
                     wlst[nh].allow = ptr->allowCross();
                     nh++;
                 } else {
-	            free(newword);
-	        } 
-	    }
+                    free(newword);
+                } 
+            }
          }
          ptr = (PfxEntry *)ptr ->getFlgNxt();
        }
@@ -2811,12 +2938,6 @@ int AffixMgr::get_langnum()
   return langnum;
 }
 
-// return UTF info table
-struct unicode_info2 * AffixMgr::get_utf_conv()
-{
-  return utf_tbl;
-}
-
 // return double prefix option
 int AffixMgr::get_complexprefixes()
 {
@@ -2831,6 +2952,20 @@ FLAG AffixMgr::get_keepcase()
 int AffixMgr::get_checksharps()
 {
   return checksharps;
+}
+
+// return the preferred ignore string for suggestions
+char * AffixMgr::get_ignore()
+{
+  if (!ignorechars) return NULL;
+  return mystrdup(ignorechars);
+}
+
+// return the preferred ignore string for suggestions
+unsigned short * AffixMgr::get_ignore_utf16(int * len)
+{
+  *len = ignorechars_utf16_len;
+  return ignorechars_utf16;
 }
 
 // return the preferred try string for suggestions
@@ -2974,193 +3109,31 @@ int AffixMgr::get_sugswithdots(void)
   return sugswithdots;
 }
 
-/* parse in the try string */
-int  AffixMgr::parse_try(char * line)
-{
-   if (trystring) {
-      fprintf(stderr,"error: duplicate TRY strings\n");
-      return 1;
-   }
-   char * tp = line;
-   char * piece;
-   int i = 0;
-   int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
-      if (*piece != '\0') {
-          switch(i) {
-	      case 0: { np++; break; }
-              case 1: { trystring = mystrdup(piece); np++; break; }
-	      default: break;
-          }
-          i++;
-      }
-      free(piece);
-   }
-   if (np != 2) {
-      fprintf(stderr,"error: missing TRY information\n");
-      return 1;
-   } 
-   return 0;
-}
-
-
-/* parse in the name of the character set used by the .dict and .aff */
-int  AffixMgr::parse_set(char * line)
-{
-   if (encoding) {
-      fprintf(stderr,"error: duplicate SET strings\n");
-      return 1;
-   }
-   char * tp = line;
-   char * piece;
-   int i = 0;
-   int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
-      if (*piece != '\0') {
-          switch(i) {
-	     case 0: { np++; break; }
-             case 1: { encoding = mystrdup(piece); 
-                    if (strcmp(encoding, "UTF-8") == 0) {
-                        unicode_info * uni = get_utf_cs();
-                        utf8 = 1;
-                        utf_tbl = (unicode_info2 *) malloc(CONTSIZE * sizeof(unicode_info2));
-                        if (utf_tbl) {
-                            int j;
-                            for (j = 0; j < CONTSIZE; j++) {
-                                utf_tbl[j].cletter = 0;
-                                utf_tbl[j].clower = j;
-                                utf_tbl[j].cupper = j;
-                            }
-                            for (j = 0; j < get_utf_cs_len(); j++) {
-                                utf_tbl[uni[j].c].cletter = 1;
-                                utf_tbl[uni[j].c].clower = uni[j].clower;
-                                utf_tbl[uni[j].c].cupper = uni[j].cupper;
-                            }
-                            // set Azeri, Turkish spec. lowercasing
-                            set_spec_utf8_encoding();
-                        } else return 1;
-                    }
-                    np++; break; }
-	     default: break;
-          }
-          i++;
-      }
-      free(piece);
-   }
-   if (np != 2) {
-      fprintf(stderr,"error: missing SET information\n");
-      return 1;
-   } 
-   return 0;
-}
-
 /* parse flag */
-int AffixMgr::parse_flag(char * line, unsigned short * out, char * name)
-{
-   if (*out) {
-      fprintf(stderr,"error: duplicate %s strings\n", name);
+int AffixMgr::parse_flag(char * line, unsigned short * out, const char * name) {
+   char * s = NULL;
+   if (*out != FLAG_NULL) {
+      HUNSPELL_WARNING(stderr, "error: duplicate %s line\n", name);
       return 1;
    }
-   char * tp = line;
-   char * piece;
-   int i = 0;
-   int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
-      if (*piece != '\0') {
-          switch(i) {
-	      case 0: { np++; break; }
-              case 1: { 
-                *out = pHMgr->decode_flag(piece);
-                np++;
-                break;
-              }
-	      default: break;
-          }
-          i++;
-      }
-      free(piece);
-   }
-   if (np != 2) {
-      fprintf(stderr,"error: missing %s information\n", name);
-      return 1;
-   } 
+   if (parse_string(line, &s, name)) return 1;
+   *out = pHMgr->decode_flag(s);
+   free(s);
    return 0;
 }
 
-/* parse flag */
-int AffixMgr::parse_num(char * line, int * out, char * name)
-{
-   char * tp = line;
-   char * piece;
-   int i = 0;
-   int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
-      if (*piece != '\0') {
-          switch(i) {
-	      case 0: { np++; break; }
-              case 1: { 
-                *out = atoi(piece);
-                np++;
-                break;
-              }
-	      default: break;
-          }
-          i++;
-      }
-      free(piece);
-   }
-   if (np != 2) {
-      fprintf(stderr,"error: missing %s information\n", name);
+/* parse num */
+int AffixMgr::parse_num(char * line, int * out, const char * name) {
+   char * s = NULL;
+   if (*out != -1) {
+      HUNSPELL_WARNING(stderr, "error: duplicate %s line\n", name);
       return 1;
-   } 
+   }
+   if (parse_string(line, &s, name)) return 1;
+   *out = atoi(s);
+   free(s);
    return 0;
 }
-
-/* parse in the wordchars string */
-int  AffixMgr::parse_wordchars(char * line)
-{
-   if (wordchars) {
-      fprintf(stderr,"error: duplicate WORDCHARS strings\n");
-      return 1;
-   }
-   char * tp = line;
-   char * piece;
-   int i = 0;
-   int np = 0;
-   w_char w[MAXWORDLEN];
-   while ((piece=mystrsep(&tp, 0))) {
-      if (*piece != '\0') {
-          switch(i) {
-	      case 0: { np++; break; }
-              case 1: {
-                if (!utf8) {
-                    wordchars = mystrdup(piece);
-                } else {
-                    int n = u8_u16(w, MAXWORDLEN, piece);
-                    if (n > 0) {
-                        flag_qsort((unsigned short *) w, 0, n);
-                        wordchars_utf16 = (unsigned short *) malloc(n * sizeof(unsigned short));
-                        if (!wordchars_utf16) return 1;
-                        memcpy(wordchars_utf16, w, n * sizeof(unsigned short));
-                    }
-                    wordchars_utf16_len = n;
-                }
-                np++;
-                break;
-              }
-	      default: break;
-          }
-          i++;
-      }
-      free(piece);
-   }
-   if (np != 2) {
-      fprintf(stderr,"error: missing WORDCHARS information\n");
-      return 1;
-   } 
-   return 0;
-}
-
 
 /* parse in the max syllablecount of compound words and  */
 int  AffixMgr::parse_cpdsyllable(char * line)
@@ -3170,10 +3143,11 @@ int  AffixMgr::parse_cpdsyllable(char * line)
    int i = 0;
    int np = 0;
    w_char w[MAXWORDLEN];
-   while ((piece=mystrsep(&tp, 0))) {
+   piece = mystrsep(&tp, 0);
+   while (piece) {
       if (*piece != '\0') {
           switch(i) {
-	     case 0: { np++; break; }
+             case 0: { np++; break; }
              case 1: { cpdmaxsyllable = atoi(piece); np++; break; }
              case 2: {
                 if (!utf8) {
@@ -3191,42 +3165,18 @@ int  AffixMgr::parse_cpdsyllable(char * line)
                 np++;
                 break;
              }
-	     default: break;
+             default: break;
           }
           i++;
       }
       free(piece);
+      piece = mystrsep(&tp, 0);
    }
    if (np < 2) {
-      fprintf(stderr,"error: missing compoundsyllable information\n");
+      HUNSPELL_WARNING(stderr, "error: missing compoundsyllable information\n");
       return 1;
    }
    if (np == 2) cpdvowels = mystrdup("aeiouAEIOU");
-   return 0;
-}
-
-/* parse in the flags, that increments syllable number */
-int  AffixMgr::parse_syllablenum(char * line)
-{
-   char * tp = line;
-   char * piece;
-   int i = 0;
-   int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
-      if (*piece != '\0') {
-          switch(i) {
-	     case 0: { np++; break; }
-             case 1: { cpdsyllablenum = mystrdup(piece); np++; break; }
-	     default: break;
-          }
-          i++;
-      }
-      free(piece);
-   }
-   if (np != 2) {
-      fprintf(stderr,"error: missing cpdsyllablenum information\n");
-      return 1;
-   }
    return 0;
 }
 
@@ -3234,37 +3184,39 @@ int  AffixMgr::parse_syllablenum(char * line)
 int  AffixMgr::parse_reptable(char * line, FILE * af)
 {
    if (numrep != 0) {
-      fprintf(stderr,"error: duplicate REP tables used\n");
+      HUNSPELL_WARNING(stderr, "error: duplicate REP tables used\n");
       return 1;
    }
    char * tp = line;
    char * piece;
    int i = 0;
    int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
+   piece = mystrsep(&tp, 0);
+   while (piece) {
        if (*piece != '\0') {
           switch(i) {
-	     case 0: { np++; break; }
+             case 0: { np++; break; }
              case 1: { 
                        numrep = atoi(piece);
-	               if (numrep < 1) {
-			  fprintf(stderr,"incorrect number of entries in replacement table\n");
-			  free(piece);
+                       if (numrep < 1) {
+                          HUNSPELL_WARNING(stderr, "incorrect number of entries in replacement table\n");
+                          free(piece);
                           return 1;
                        }
                        reptable = (replentry *) malloc(numrep * sizeof(struct replentry));
                        if (!reptable) return 1;
                        np++;
                        break;
-	             }
-	     default: break;
+                     }
+             default: break;
           }
           i++;
        }
        free(piece);
+       piece = mystrsep(&tp, 0);
    }
    if (np != 2) {
-      fprintf(stderr,"error: missing replacement table information\n");
+      HUNSPELL_WARNING(stderr, "error: missing replacement table information\n");
       return 1;
    } 
  
@@ -3277,27 +3229,29 @@ int  AffixMgr::parse_reptable(char * line, FILE * af)
         i = 0;
         reptable[j].pattern = NULL;
         reptable[j].pattern2 = NULL;
-        while ((piece=mystrsep(&tp, 0))) {
+        piece = mystrsep(&tp, 0);
+        while (piece) {
            if (*piece != '\0') {
                switch(i) {
                   case 0: {
-		             if (strncmp(piece,"REP",3) != 0) {
-		                 fprintf(stderr,"error: replacement table is corrupt\n");
+                             if (strncmp(piece,"REP",3) != 0) {
+                                 HUNSPELL_WARNING(stderr, "error: replacement table is corrupt\n");
                                  free(piece);
                                  return 1;
                              }
                              break;
-		          }
-                  case 1: { reptable[j].pattern = mystrdup(piece); break; }
-                  case 2: { reptable[j].pattern2 = mystrdup(piece); break; }
-		  default: break;
+                          }
+                  case 1: { reptable[j].pattern = mystrrep(mystrdup(piece),"_"," "); break; }
+                  case 2: { reptable[j].pattern2 = mystrrep(mystrdup(piece),"_"," "); break; }
+                  default: break;
                }
                i++;
            }
            free(piece);
+           piece = mystrsep(&tp, 0);
         }
-	if ((!(reptable[j].pattern)) || (!(reptable[j].pattern2))) {
-	     fprintf(stderr,"error: replacement table is corrupt\n");
+        if ((!(reptable[j].pattern)) || (!(reptable[j].pattern2))) {
+             HUNSPELL_WARNING(stderr, "error: replacement table is corrupt\n");
              return 1;
         }
    }
@@ -3308,37 +3262,39 @@ int  AffixMgr::parse_reptable(char * line, FILE * af)
 int  AffixMgr::parse_checkcpdtable(char * line, FILE * af)
 {
    if (numcheckcpd != 0) {
-      fprintf(stderr,"error: duplicate compound pattern tables used\n");
+      HUNSPELL_WARNING(stderr, "error: duplicate compound pattern tables used\n");
       return 1;
    }
    char * tp = line;
    char * piece;
    int i = 0;
    int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
+   piece = mystrsep(&tp, 0);
+   while (piece) {
        if (*piece != '\0') {
           switch(i) {
-	     case 0: { np++; break; }
+             case 0: { np++; break; }
              case 1: { 
                        numcheckcpd = atoi(piece);
-	               if (numcheckcpd < 1) {
-			  fprintf(stderr,"incorrect number of entries in compound pattern table\n");
-			  free(piece);
+                       if (numcheckcpd < 1) {
+                          HUNSPELL_WARNING(stderr, "incorrect number of entries in compound pattern table\n");
+                          free(piece);
                           return 1;
                        }
                        checkcpdtable = (replentry *) malloc(numcheckcpd * sizeof(struct replentry));
                        if (!checkcpdtable) return 1;
                        np++;
                        break;
-	             }
-	     default: break;
+                     }
+             default: break;
           }
           i++;
        }
        free(piece);
+       piece = mystrsep(&tp, 0);
    }
    if (np != 2) {
-      fprintf(stderr,"error: missing compound pattern table information\n");
+      HUNSPELL_WARNING(stderr, "error: missing compound pattern table information\n");
       return 1;
    } 
  
@@ -3351,27 +3307,29 @@ int  AffixMgr::parse_checkcpdtable(char * line, FILE * af)
         i = 0;
         checkcpdtable[j].pattern = NULL;
         checkcpdtable[j].pattern2 = NULL;
-        while ((piece=mystrsep(&tp, 0))) {
+        piece = mystrsep(&tp, 0);
+        while (piece) {
            if (*piece != '\0') {
                switch(i) {
                   case 0: {
-		             if (strncmp(piece,"CHECKCOMPOUNDPATTERN",20) != 0) {
-		                 fprintf(stderr,"error: compound pattern table is corrupt\n");
+                             if (strncmp(piece,"CHECKCOMPOUNDPATTERN",20) != 0) {
+                                 HUNSPELL_WARNING(stderr, "error: compound pattern table is corrupt\n");
                                  free(piece);
                                  return 1;
                              }
                              break;
-		          }
+                          }
                   case 1: { checkcpdtable[j].pattern = mystrdup(piece); break; }
                   case 2: { checkcpdtable[j].pattern2 = mystrdup(piece); break; }
-		  default: break;
+                  default: break;
                }
                i++;
            }
            free(piece);
+           piece = mystrsep(&tp, 0);
         }
-	if ((!(checkcpdtable[j].pattern)) || (!(checkcpdtable[j].pattern2))) {
-	     fprintf(stderr,"error: compound pattern table is corrupt\n");
+        if ((!(checkcpdtable[j].pattern)) || (!(checkcpdtable[j].pattern2))) {
+             HUNSPELL_WARNING(stderr, "error: compound pattern table is corrupt\n");
              return 1;
         }
    }
@@ -3382,37 +3340,39 @@ int  AffixMgr::parse_checkcpdtable(char * line, FILE * af)
 int  AffixMgr::parse_defcpdtable(char * line, FILE * af)
 {
    if (numdefcpd != 0) {
-      fprintf(stderr,"error: duplicate compound rule tables used\n");
+      HUNSPELL_WARNING(stderr, "error: duplicate compound rule tables used\n");
       return 1;
    }
    char * tp = line;
    char * piece;
    int i = 0;
    int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
+   piece = mystrsep(&tp, 0);
+   while (piece) {
        if (*piece != '\0') {
           switch(i) {
-	     case 0: { np++; break; }
+             case 0: { np++; break; }
              case 1: { 
                        numdefcpd = atoi(piece);
-	               if (numdefcpd < 1) {
-			  fprintf(stderr,"incorrect number of entries in compound rule table\n");
-			  free(piece);
+                       if (numdefcpd < 1) {
+                          HUNSPELL_WARNING(stderr, "incorrect number of entries in compound rule table\n");
+                          free(piece);
                           return 1;
                        }
                        defcpdtable = (flagentry *) malloc(numdefcpd * sizeof(flagentry));
                        if (!defcpdtable) return 1;
                        np++;
                        break;
-	             }
-	     default: break;
+                     }
+             default: break;
           }
           i++;
        }
        free(piece);
+       piece = mystrsep(&tp, 0);
    }
    if (np != 2) {
-      fprintf(stderr,"error: missing compound rule table information\n");
+      HUNSPELL_WARNING(stderr, "error: missing compound rule table information\n");
       return 1;
    } 
  
@@ -3424,30 +3384,32 @@ int  AffixMgr::parse_defcpdtable(char * line, FILE * af)
         tp = nl;
         i = 0;
         defcpdtable[j].def = NULL;
-        while ((piece=mystrsep(&tp, 0))) {
+        piece = mystrsep(&tp, 0);
+        while (piece) {
            if (*piece != '\0') {
                switch(i) {
                   case 0: {
-		             if (strncmp(piece, "COMPOUNDRULE", 12) != 0) {
-		                 fprintf(stderr,"error: compound rule table is corrupt\n");
+                             if (strncmp(piece, "COMPOUNDRULE", 12) != 0) {
+                                 HUNSPELL_WARNING(stderr, "error: compound rule table is corrupt\n");
                                  free(piece);
                                  return 1;
                              }
                              break;
-		          }
+                          }
                   case 1: { 
                             defcpdtable[j].len = 
                                 pHMgr->decode_flags(&(defcpdtable[j].def), piece);
                             break; 
                            }
-		  default: break;
+                  default: break;
                }
                i++;
            }
            free(piece);
+           piece = mystrsep(&tp, 0);
         }
-	if (!defcpdtable[j].len) {
-	     fprintf(stderr,"error: compound rule table is corrupt\n");
+        if (!defcpdtable[j].len) {
+             HUNSPELL_WARNING(stderr, "error: compound rule table is corrupt\n");
              return 1;
         }
    }
@@ -3459,37 +3421,39 @@ int  AffixMgr::parse_defcpdtable(char * line, FILE * af)
 int  AffixMgr::parse_maptable(char * line, FILE * af)
 {
    if (nummap != 0) {
-      fprintf(stderr,"error: duplicate MAP tables used\n");
+      HUNSPELL_WARNING(stderr, "error: duplicate MAP tables used\n");
       return 1;
    }
    char * tp = line;
    char * piece;
    int i = 0;
    int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
+   piece = mystrsep(&tp, 0);
+   while (piece) {
        if (*piece != '\0') {
           switch(i) {
-	     case 0: { np++; break; }
+             case 0: { np++; break; }
              case 1: { 
                        nummap = atoi(piece);
-	               if (nummap < 1) {
-			  fprintf(stderr,"incorrect number of entries in map table\n");
-			  free(piece);
+                       if (nummap < 1) {
+                          HUNSPELL_WARNING(stderr, "incorrect number of entries in map table\n");
+                          free(piece);
                           return 1;
                        }
                        maptable = (mapentry *) malloc(nummap * sizeof(struct mapentry));
                        if (!maptable) return 1;
                        np++;
                        break;
-	             }
-	     default: break;
+                     }
+             default: break;
           }
           i++;
        }
        free(piece);
+       piece = mystrsep(&tp, 0);
    }
    if (np != 2) {
-      fprintf(stderr,"error: missing map table information\n");
+      HUNSPELL_WARNING(stderr, "error: missing map table information\n");
       return 1;
    } 
  
@@ -3502,17 +3466,18 @@ int  AffixMgr::parse_maptable(char * line, FILE * af)
         i = 0;
         maptable[j].set = NULL;
         maptable[j].len = 0;
-        while ((piece=mystrsep(&tp, 0))) {
+        piece = mystrsep(&tp, 0);
+        while (piece) {
            if (*piece != '\0') {
                switch(i) {
                   case 0: {
-		             if (strncmp(piece,"MAP",3) != 0) {
-		                 fprintf(stderr,"error: map table is corrupt\n");
+                             if (strncmp(piece,"MAP",3) != 0) {
+                                 HUNSPELL_WARNING(stderr, "error: map table is corrupt\n");
                                  free(piece);
                                  return 1;
                              }
                              break;
-		          }
+                          }
                   case 1: {
                             maptable[j].len = 0;
                             maptable[j].set = NULL;
@@ -3532,14 +3497,15 @@ int  AffixMgr::parse_maptable(char * line, FILE * af)
                                 maptable[j].len = n;
                             }
                             break; }
-		  default: break;
+                  default: break;
                }
                i++;
            }
            free(piece);
+           piece = mystrsep(&tp, 0);
         }
-	if ((!(maptable[j].set || maptable[j].set_utf16)) || (!(maptable[j].len))) {
-	     fprintf(stderr,"error: map table is corrupt\n");
+        if ((!(maptable[j].set || maptable[j].set_utf16)) || (!(maptable[j].len))) {
+             HUNSPELL_WARNING(stderr, "error: map table is corrupt\n");
              return 1;
         }
    }
@@ -3550,37 +3516,39 @@ int  AffixMgr::parse_maptable(char * line, FILE * af)
 int  AffixMgr::parse_breaktable(char * line, FILE * af)
 {
    if (numbreak != 0) {
-      fprintf(stderr,"error: duplicate word breakpoint tables used\n");
+      HUNSPELL_WARNING(stderr, "error: duplicate word breakpoint tables used\n");
       return 1;
    }
    char * tp = line;
    char * piece;
    int i = 0;
    int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
+   piece = mystrsep(&tp, 0);
+   while (piece) {
        if (*piece != '\0') {
           switch(i) {
-	     case 0: { np++; break; }
+             case 0: { np++; break; }
              case 1: { 
                        numbreak = atoi(piece);
-	               if (numbreak < 1) {
-			  fprintf(stderr,"incorrect number of entries in BREAK table\n");
-			  free(piece);
+                       if (numbreak < 1) {
+                          HUNSPELL_WARNING(stderr, "incorrect number of entries in BREAK table\n");
+                          free(piece);
                           return 1;
                        }
                        breaktable = (char **) malloc(numbreak * sizeof(char *));
                        if (!breaktable) return 1;
                        np++;
                        break;
-	             }
-	     default: break;
+                     }
+             default: break;
           }
           i++;
        }
        free(piece);
+       piece = mystrsep(&tp, 0);
    }
    if (np != 2) {
-      fprintf(stderr,"error: missing word breakpoint table information\n");
+      HUNSPELL_WARNING(stderr, "error: missing word breakpoint table information\n");
       return 1;
    } 
  
@@ -3591,80 +3559,34 @@ int  AffixMgr::parse_breaktable(char * line, FILE * af)
         mychomp(nl);
         tp = nl;
         i = 0;
-        while ((piece=mystrsep(&tp, 0))) {
+        piece = mystrsep(&tp, 0);
+        while (piece) {
            if (*piece != '\0') {
                switch(i) {
                   case 0: {
-		             if (strncmp(piece,"BREAK",5) != 0) {
-		                 fprintf(stderr,"error: BREAK table is corrupt\n");
+                             if (strncmp(piece,"BREAK",5) != 0) {
+                                 HUNSPELL_WARNING(stderr, "error: BREAK table is corrupt\n");
                                  free(piece);
                                  return 1;
                              }
                              break;
-		          }
+                          }
                   case 1: {
                             breaktable[j] = mystrdup(piece);
                             break;
                           }
-		  default: break;
+                  default: break;
                }
                i++;
            }
            free(piece);
+           piece = mystrsep(&tp, 0);
         }
-	if (!breaktable) {
-	     fprintf(stderr,"error: BREAK table is corrupt\n");
+        if (!breaktable) {
+             HUNSPELL_WARNING(stderr, "error: BREAK table is corrupt\n");
              return 1;
         }
    }
-   return 0;
-}
-
-/* parse in the flag used by affix_check() */
-int  AffixMgr::parse_lang(char * line)
-{
-   if (lang != NULL) {
-      fprintf(stderr,"error: duplicate LANG used\n");
-      return 1;
-   }
-   char * tp = line;
-   char * piece;
-   int i = 0;
-   int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
-      if (*piece != '\0') {
-          switch(i) {
-	     case 0: { np++; break; }
-             case 1: { 
-                    lang = mystrdup(piece);
-                    langnum = get_lang_num(piece);
-                    set_spec_utf8_encoding();
-                    np++; break; 
-                }
-	     default: break;
-          }
-          i++;
-      }
-      free(piece);
-   }
-   if (np < 2) {
-      fprintf(stderr,"error: missing LANG information\n");
-      return 1;
-   }
-   return 0;
-}
-
-/* parse in the version string */
-int  AffixMgr::parse_version(char * line)
-{
-   if (version) {
-      fprintf(stderr,"error: duplicate VERSION strings\n");
-      return 1;
-   }
-   char * tp = line;
-   char * piece = mystrsep(&tp, 0);
-   version = mystrdup(tp);
-   free(piece);
    return 0;
 }
 
@@ -3674,7 +3596,7 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
 
    unsigned short aflag = 0;      // affix char identifier
 
-   short ff=0;
+   char ff=0;
    struct affentry * ptr= NULL;
    struct affentry * nptr= NULL;
 
@@ -3684,12 +3606,15 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
    int i = 0;
 
    // checking lines with bad syntax
+#ifdef DEBUG
    int basefieldnum = 0;
+#endif
 
    // split affix header line into pieces
 
    int np = 0;
-   while ((piece=mystrsep(&tp, 0))) {
+   piece = mystrsep(&tp, 0);
+   while (piece) {
       if (*piece != '\0') {
           switch(i) {
              // piece 1 - is type of affix
@@ -3701,7 +3626,7 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
                     aflag = pHMgr->decode_flag(piece);
                     if (((at == 'S') && (dupflags[aflag] & dupSFX)) ||
                         ((at == 'P') && (dupflags[aflag] & dupPFX))) {
-                        fprintf(stderr, "error: duplicate affix flag %s in line %s\n", piece, nl);
+                        HUNSPELL_WARNING(stderr, "error: duplicate affix flag %s in line %s\n", piece, nl);
                         // return 1; XXX permissive mode for bad dictionaries
                     }
                     dupflags[aflag] += ((at == 'S') ? dupSFX : dupPFX);
@@ -3716,7 +3641,7 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
                        numents = atoi(piece); 
                        if (numents == 0) {
                            char * err = pHMgr->encode_flag(aflag);
-                           fprintf(stderr, "error: affix %s header has incorrect entry count in line %s\n",
+                           HUNSPELL_WARNING(stderr, "error: affix %s header has incorrect entry count in line %s\n",
                                    err, nl);
                            free(err);
                            return 1;
@@ -3726,20 +3651,23 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
                        ptr->opts = ff;
                        if (utf8) ptr->opts += aeUTF8;
                        if (pHMgr->is_aliasf()) ptr->opts += aeALIASF;
+#ifdef HUNSPELL_EXPERIMENTAL
                        if (pHMgr->is_aliasm()) ptr->opts += aeALIASM;
+#endif
                        ptr->aflag = aflag;
                      }
 
-	     default: break;
+             default: break;
           }
           i++;
       }
       free(piece);
+      piece = mystrsep(&tp, 0);
    }
    // check to make sure we parsed enough pieces
    if (np != 4) {
        char * err = pHMgr->encode_flag(aflag); 
-       fprintf(stderr, "error: affix %s header has insufficient data in line %s\n", err, nl);
+       HUNSPELL_WARNING(stderr, "error: affix %s header has insufficient data in line %s\n", err, nl);
        free(err);
        free(ptr);
        return 1;
@@ -3757,7 +3685,8 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
       np = 0;
 
       // split line into pieces
-      while ((piece=mystrsep(&tp, 0))) {
+      piece = mystrsep(&tp, 0);
+      while (piece) {
          if (*piece != '\0') {
              switch(i) {
                 // piece 1 - is type
@@ -3769,11 +3698,11 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
 
                 // piece 2 - is affix char
                 case 1: { 
-		          np++;
+                          np++;
                           if (pHMgr->decode_flag(piece) != aflag) {
                               char * err = pHMgr->encode_flag(aflag);
-                              fprintf(stderr, "error: affix %s is corrupt near line %s\n", err, nl);
-                              fprintf(stderr, "error: possible incorrect count\n");
+                              HUNSPELL_WARNING(stderr, "error: affix %s is corrupt near line %s\n", err, nl);
+                              HUNSPELL_WARNING(stderr, "error: possible incorrect count\n");
                               free(err);
                               free(piece);
                               return 1;
@@ -3781,7 +3710,7 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
 
                           if (nptr != ptr) nptr->aflag = ptr->aflag;
                           break;
-		        }
+                        }
 
                 // piece 3 - is string to strip or 0 for null 
                 case 2: { 
@@ -3790,25 +3719,36 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
                             if (utf8) reverseword_utf(piece); else reverseword(piece);
                           }
                           nptr->strip = mystrdup(piece);
-                          nptr->stripl = strlen(nptr->strip);
+                          nptr->stripl = (unsigned char) strlen(nptr->strip);
                           if (strcmp(nptr->strip,"0") == 0) {
                               free(nptr->strip);
                               nptr->strip=mystrdup("");
-			      nptr->stripl = 0;
+                              nptr->stripl = 0;
                           }   
                           break; 
                         }
 
                 // piece 4 - is affix string or 0 for null
                 case 3: { 
-                          char * dash; 	
+                          char * dash;  
+#ifdef HUNSPELL_EXPERIMENTAL
                           nptr->morphcode = NULL;
+#endif
                           nptr->contclass = NULL;
                           nptr->contclasslen = 0;
-		          np++;
+                          np++;
                           dash = strchr(piece, '/');
-			  if (dash) {
+                          if (dash) {
                             *dash = '\0';
+
+                            if (ignorechars) {
+                              if (utf8) {
+                                remove_ignored_chars_utf(piece, ignorechars_utf16, ignorechars_utf16_len);
+                              } else {
+                                remove_ignored_chars(piece,ignorechars);
+                              }
+                            }
+                            
                             if (complexprefixes) {
                                 if (utf8) reverseword_utf(piece); else reverseword(piece);
                             }
@@ -3816,29 +3756,37 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
                             
                             if (pHMgr->is_aliasf()) {
                                 int index = atoi(dash + 1);
-                                nptr->contclasslen = pHMgr->get_aliasf(index, &(nptr->contclass));
+                                nptr->contclasslen = (unsigned short) pHMgr->get_aliasf(index, &(nptr->contclass));
                             } else {
-                                nptr->contclasslen = pHMgr->decode_flags(&(nptr->contclass), dash + 1);
+                                nptr->contclasslen = (unsigned short) pHMgr->decode_flags(&(nptr->contclass), dash + 1);
                                 flag_qsort(nptr->contclass, 0, nptr->contclasslen);
                             }
                             *dash = '/';
 
                             havecontclass = 1;
-                            for (unsigned short i = 0; i < nptr->contclasslen; i++) {
-                              contclasses[(nptr->contclass)[i]] = 1;
+                            for (unsigned short _i = 0; _i < nptr->contclasslen; _i++) {
+                              contclasses[(nptr->contclass)[_i]] = 1;
                             }
                           } else {
+                            if (ignorechars) {
+                              if (utf8) {
+                                remove_ignored_chars_utf(piece, ignorechars_utf16, ignorechars_utf16_len);
+                              } else {
+                                remove_ignored_chars(piece,ignorechars);
+                              }
+                            }
+
                             if (complexprefixes) {
                                 if (utf8) reverseword_utf(piece); else reverseword(piece);
                             }
                             nptr->appnd = mystrdup(piece);       
                           }
-			  
-                          nptr->appndl = strlen(nptr->appnd);
+                          
+                          nptr->appndl = (unsigned char) strlen(nptr->appnd);
                           if (strcmp(nptr->appnd,"0") == 0) {
                               free(nptr->appnd);
                               nptr->appnd=mystrdup("");
-			      nptr->appndl = 0;
+                              nptr->appndl = 0;
                           }   
                           break; 
                         }
@@ -3879,8 +3827,9 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
                          break;
                 }
                 
+#ifdef HUNSPELL_EXPERIMENTAL
                 case 5: {
-		          np++;
+                          np++;
                           if (pHMgr->is_aliasm()) {
                             int index = atoi(piece);
                             nptr->morphcode = pHMgr->get_aliasm(index);
@@ -3892,54 +3841,35 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
                           }
                           break; 
                 }
+#endif
 
-                case 6: {
-                // XXX deprecated syntax
-                          np++;
-                          if (nptr->contclass) {
-                            fprintf(stderr, "error: affix rule contains two contclass "
-                            "(%s and %s by deprecated syntax).\n", nptr->contclass, piece);
-                          } else {
-                            if (pHMgr->is_aliasf()) {
-                                int index = atoi(piece);
-                                nptr->contclasslen = pHMgr->get_aliasf(index, &(nptr->contclass));
-                            } else {
-                                nptr->contclasslen = pHMgr->decode_flags(&(nptr->contclass), piece);
-			        flag_qsort(nptr->contclass, 0, nptr->contclasslen);
-                            }
-                            havecontclass = 1;
-                            for (unsigned short i = 0; i < nptr->contclasslen; i++) {
-                              contclasses[(nptr->contclass)[i]] = 1;
-                            }
-                          }
-                          break;
-                
-                }
-
-		default: break;
+                default: break;
              }
              i++;
          }
          free(piece);
+         piece = mystrsep(&tp, 0);
       }
       // check to make sure we parsed enough pieces
-      if (np < 5) {
+      if (np < 4) {
           char * err = pHMgr->encode_flag(aflag);
-          fprintf(stderr, "error: affix %s is corrupt near line %s\n", err, nl);
+          HUNSPELL_WARNING(stderr, "error: affix %s is corrupt near line %s\n", err, nl);
           free(err);
           free(ptr);
           return 1;
       }
 
-#if DEBUG
+#ifdef DEBUG
+#ifdef HUNSPELL_EXPERIMENTAL
       // detect unnecessary fields, excepting comments
       if (basefieldnum) {
         int fieldnum = !(nptr->morphcode) ? 5 : ((*(nptr->morphcode)=='#') ? 5 : 6);
           if (fieldnum != basefieldnum) 
-            fprintf(stderr, "warning - bad field number:\n%s\n", nl);
+            HUNSPELL_WARNING(stderr, "warning: bad field number:\n%s\n", nl);
       } else {
         basefieldnum = !(nptr->morphcode) ? 5 : ((*(nptr->morphcode)=='#') ? 5 : 6);
       }
+#endif
 #endif
       nptr++;
    }
@@ -3949,28 +3879,16 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af, char * dupflag
    nptr = ptr;
    for (int k = 0; k < numents; k++) {
       if (at == 'P') {
-	  PfxEntry * pfxptr = new PfxEntry(this,nptr);
+          PfxEntry * pfxptr = new PfxEntry(this,nptr);
           build_pfxtree((AffEntry *)pfxptr);
       } else {
-	  SfxEntry * sfxptr = new SfxEntry(this,nptr);
+          SfxEntry * sfxptr = new SfxEntry(this,nptr);
           build_sfxtree((AffEntry *)sfxptr); 
       }
       nptr++;
    }      
    free(ptr);
    return 0;
-}
-
-void AffixMgr::set_spec_utf8_encoding() {
-    if (utf8) {
-        // In Azeri and Turkish, I and i dictinct letters:
-        // There are a dotless lower case i pair of upper `I',
-        // and an upper I with dot pair of lower `i'. 
-        if ((langnum == LANG_az) || (langnum == LANG_tr)) {
-            utf_tbl[0x0049].clower = 0x0131;
-            utf_tbl[0x0069].cupper = 0x0130;
-        }
-    }
 }
 
 int AffixMgr::redundant_condition(char ft, char * strip, int stripl, const char * cond, char * line) {
@@ -3986,7 +3904,7 @@ int AffixMgr::redundant_condition(char ft, char * strip, int stripl, const char 
       for (i = 0, j = 0; (i < stripl) && (j < condl); i++, j++) {
         if (cond[j] != '[') {
           if (cond[j] != strip[i]) {
-            fprintf(stderr, "warning - incompatible stripping characters and condition:\n%s\n", line);
+            HUNSPELL_WARNING(stderr, "warning: incompatible stripping characters and condition:\n%s\n", line);
           }
         } else {
           neg = (cond[j+1] == '^') ? 1 : 0;
@@ -3996,11 +3914,11 @@ int AffixMgr::redundant_condition(char ft, char * strip, int stripl, const char 
             if (strip[i] == cond[j]) in = 1;
           } while ((j < (condl - 1)) && (cond[j] != ']'));
           if (j == (condl - 1) && (cond[j] != ']')) {
-            fprintf(stderr, "error - missing ] in condition:\n%s\n", line);
+            HUNSPELL_WARNING(stderr, "error: missing ] in condition:\n%s\n", line);
             return 0;
           }
           if ((!neg && !in) || (neg && in)) {
-            fprintf(stderr, "warning - incompatible stripping characters and condition:\n%s\n", line);
+            HUNSPELL_WARNING(stderr, "warning: incompatible stripping characters and condition:\n%s\n", line);
             return 0;          
           }
         }
@@ -4014,7 +3932,7 @@ int AffixMgr::redundant_condition(char ft, char * strip, int stripl, const char 
       for (i = stripl - 1, j = condl - 1; (i >= 0) && (j >= 0); i--, j--) {
         if (cond[j] != ']') {
           if (cond[j] != strip[i]) {
-            fprintf(stderr, "warning - incompatible stripping characters and condition:\n%s\n", line);
+            HUNSPELL_WARNING(stderr, "warning: incompatible stripping characters and condition:\n%s\n", line);
           }
         } else {
           in = 0;
@@ -4023,12 +3941,12 @@ int AffixMgr::redundant_condition(char ft, char * strip, int stripl, const char 
             if (strip[i] == cond[j]) in = 1;
           } while ((j > 0) && (cond[j] != '['));
           if ((j == 0) && (cond[j] != '[')) {
-            fprintf(stderr, "error - missing ] in condition:\n%s\n", line);
+            HUNSPELL_WARNING(stderr, "error: missing ] in condition:\n%s\n", line);
             return 0;
           }
           neg = (cond[j+1] == '^') ? 1 : 0;
           if ((!neg && !in) || (neg && in)) {
-            fprintf(stderr, "warning - incompatible stripping characters and condition:\n%s\n", line);
+            HUNSPELL_WARNING(stderr, "warning: incompatible stripping characters and condition:\n%s\n", line);
             return 0;          
           }
         }

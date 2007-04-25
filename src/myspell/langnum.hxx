@@ -7,6 +7,7 @@
 */
 
 enum {
+LANG_ar=96,
 LANG_az=100, // custom number
 LANG_bg=41,
 LANG_ca=37,

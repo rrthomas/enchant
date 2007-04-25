@@ -1,8 +1,18 @@
+#include "license.hunspell"
+#include "license.myspell"
+
 #include "hashmgr.hxx"
 #include "affixmgr.hxx"
 #include "suggestmgr.hxx"
 #include "csutil.hxx"
 #include "langnum.hxx"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#define  SPELL_COMPOUND  (1 << 0)
+#define  SPELL_FORBIDDEN (1 << 1)
 
 #define NOCAP   0
 #define INITCAP 1
@@ -31,23 +41,10 @@ class Hunspell
   SuggestMgr*     pSMgr;
   char *          encoding;
   struct cs_info * csconv;
-  struct unicode_info2 * utfconv;
   int             langnum;
   int             utf8;
   int             complexprefixes;
   char**          wordbreak;
-
-/* XXX not stateless variables for compound handling */
-  char *	  prevroot;
-  int             prevcompound;
-
-/* forbidden_compound:
- * 0 = not forbidden
- * 1 = forbidden
- * 2 = forbidden compound (written without dash in Hungarian)
- */
-  int		  forbidden_compound;
-  
 
 public:
 
@@ -61,9 +58,15 @@ public:
 
   /* spell(word) - spellcheck word
    * output: 0 = bad word, not 0 = good word
+   *   
+   * plus output:
+   *   info: information bit array, fields:
+   *     SPELL_COMPOUND  = a compound word 
+   *     SPELL_FORBIDDEN = an explicit forbidden word
+   *   root: root (stem), when input is a word with affix(es)
    */
    
-  int spell(const char *);
+  int spell(const char * word, int * info = NULL, char ** root = NULL);
 
   /* suggest(suggestions, word) - search suggestions
    * input: pointer to an array of strings pointer and the (bad) word
@@ -74,15 +77,12 @@ public:
    */
 
   int suggest(char*** slst, const char * word);
+  char * get_dic_encoding();
 
   /* handling custom dictionary */
-
+  
   int put_word(const char * word);
 
-  /* suffix is an affix flag string, similarly in dictionary files */
-  
-  int put_word_suffix(const char * word, const char * suffix);
-  
   /* pattern is a sample dictionary word 
    * put word into custom dictionary with affix flags of pattern word
    */
@@ -91,15 +91,20 @@ public:
 
   /* other */
 
-  char * get_dic_encoding();
+  /* get extra word characters definied in affix file for tokenization */
   const char * get_wordchars();
   unsigned short * get_wordchars_utf16(int * len);
+
   struct cs_info * get_csconv();
-  struct unicode_info2 * get_utf_conv();
   const char * get_version();
 
   /* experimental functions */
 
+#ifdef HUNSPELL_EXPERIMENTAL
+  /* suffix is an affix flag string, similarly in dictionary files */
+  
+  int put_word_suffix(const char * word, const char * suffix);
+  
   /* morphological analysis */
   
   char * morph(const char * word);
@@ -115,12 +120,7 @@ public:
   int suggest_auto(char*** slst, const char * word);
   int suggest_pos_stems(char*** slst, const char * word);
   char * get_possible_root();
-
-  /* not threadsafe functions for Hunspell command line API */
-  
-  char * get_prevroot();
-  int get_prevcompound();
-  int get_forbidden_compound();
+#endif
 
 private:
    int    cleanword(char *, const char *, int * pcaptype, int * pabbrev);
@@ -132,9 +132,9 @@ private:
    int    mkallcap2(char * p, w_char * u, int nc);
    void   mkallsmall(char *);
    int    mkallsmall2(char * p, w_char * u, int nc);
-   struct hentry * check(const char *);
+   struct hentry * checkword(const char *, int * info, char **root);
    char * sharps_u8_l1(char * dest, char * source);
-   hentry * spellsharps(char * base, char *, int, int, char * tmp);
+   hentry * spellsharps(char * base, char *, int, int, char * tmp, int * info, char **root);
    int    is_keepcase(const hentry * rv);
    int    insert_sug(char ***slst, char * word, int *ns);
 

@@ -1,6 +1,6 @@
 #include "csutil.hxx"
 /* fields: Unicode letter, toupper, tolower */
-struct unicode_info utf_lst[] = {
+static struct unicode_info utf_lst[] = {
 { 0x0041, 0x0041, 0x0061 },
 { 0x0042, 0x0042, 0x0062 },
 { 0x0043, 0x0043, 0x0063 },

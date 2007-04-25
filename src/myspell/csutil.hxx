@@ -53,10 +53,10 @@ void strlinecat(char * lines, const char * s);
    char * delete_zeros(char * morphout);
 
 // reverse word
-   void reverseword(char *);
+   int reverseword(char *);
 
 // reverse word
-   void reverseword_utf(char *);
+   int reverseword_utf(char *);
 
 // character encoding information
 struct cs_info {
@@ -78,6 +78,12 @@ struct unicode_info2 {
   unsigned short clower;
 };
 
+int initialize_utf_tbl();
+void free_utf_tbl();
+unsigned short unicodetoupper(unsigned short c, int langnum);
+unsigned short unicodetolower(unsigned short c, int langnum);
+int unicodeisalpha(unsigned short c);
+
 struct enc_entry {
   const char * enc_name;
   struct cs_info * cs_table;
@@ -92,10 +98,6 @@ struct lang_map {
 };
 
 struct cs_info * get_current_cs(const char * es);
-
-struct unicode_info * get_utf_cs();
-
-int get_utf_cs_len();
 
 const char * get_default_enc(const char * lang);
 
@@ -120,6 +122,20 @@ void mkallsmall(char * p, const struct cs_info * csconv);
 void mkinitcap(char * p, const struct cs_info * csconv);
 
 // convert first nc characters of UTF-8 string to little
-void mkallsmall_utf(w_char * u, int nc, struct unicode_info2 * utfconv);
+void mkallsmall_utf(w_char * u, int nc, int langnum);
+
+// convert first nc characters of UTF-8 string to capital
+void mkallcap_utf(w_char * u, int nc, int langnum);
+
+// strip all ignored characters in the string
+void remove_ignored_chars_utf(char * word, unsigned short ignored_chars[], int ignored_len);
+
+// strip all ignored characters in the string
+void remove_ignored_chars(char * word, char * ignored_chars);
+
+int parse_string(char * line, char ** out, const char * name);
+
+int parse_array(char * line, char ** out,
+        unsigned short ** out_utf16, int * out_utf16_len, const char * name, int utf8);
 
 #endif

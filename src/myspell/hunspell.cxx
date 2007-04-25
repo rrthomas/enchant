@@ -1,21 +1,29 @@
 #include "license.hunspell"
 #include "license.myspell"
 
-#include <cstring>
+#ifndef MOZILLA_CLIENT
 #include <cstdlib>
+#include <cstring>
 #include <cstdio>
-
-#ifndef W32
-using namespace std;
+#else
+#include <stdlib.h> 
+#include <string.h>
+#include <stdio.h> 
 #endif
 
 #include "hunspell.hxx"
+#include "hunspell.h"
+
+#ifndef MOZILLA_CLIENT
+#ifndef W32
+using namespace std;
+#endif
+#endif
 
 Hunspell::Hunspell(const char * affpath, const char * dpath)
 {
     encoding = NULL;
     csconv = NULL;
-    utfconv = NULL;
     utf8 = 0;
     complexprefixes = 0;
 
@@ -33,7 +41,6 @@ Hunspell::Hunspell(const char * affpath, const char * dpath)
     csconv = get_current_cs(encoding);
     langnum = pAMgr->get_langnum();
     utf8 = pAMgr->get_utf8();
-    utfconv = pAMgr->get_utf_conv();
     complexprefixes = pAMgr->get_complexprefixes();
     wordbreak = pAMgr->get_breaktable();
 
@@ -41,9 +48,6 @@ Hunspell::Hunspell(const char * affpath, const char * dpath)
     pSMgr = new SuggestMgr(try_string, MAXSUGGESTION, pAMgr);
     if (try_string) free(try_string);
 
-    prevroot = NULL;
-    prevcompound = 0;
-    forbidden_compound = 0;
 }
 
 Hunspell::~Hunspell()
@@ -115,16 +119,21 @@ int Hunspell::cleanword2(char * dest, const char * src,
       *nc = u8_u16(dest_utf, MAXWORDLEN, (const char *) q);
       // don't check too long words
       if (*nc >= MAXWORDLEN) return 0;
+      if (*nc == -1) { // big Unicode character (non BMP area)
+         *pcaptype = NOCAP;
+         strcpy((char *) p, (char *) q);
+         return strlen(dest);
+      }
       *nc -= *pabbrev;
       for (int i = 0; i < *nc; i++) {
          idx = (dest_utf[i].h << 8) + dest_utf[i].l;
-         if (idx != utfconv[idx].clower) ncap++;
-         if (utfconv[idx].cupper == utfconv[idx].clower) nneutral++;
+         if (idx != unicodetolower(idx, langnum)) ncap++;
+         if (unicodetoupper(idx, langnum) == unicodetolower(idx, langnum)) nneutral++;
       }
       u16_u8(dest, MAXWORDUTF8LEN, dest_utf, *nc);
       if (ncap) {
          idx = (dest_utf[0].h << 8) + dest_utf[0].l;
-         firstcap = (idx != utfconv[idx].clower);
+         firstcap = (idx != unicodetolower(idx, langnum));
       }
    }
 
@@ -190,13 +199,13 @@ int Hunspell::cleanword(char * dest, const char * src,
       nc = u8_u16(t, MAXWORDLEN, src);
       for (int i = 0; i < nc; i++) {
          idx = (t[i].h << 8) + t[i].l;
-         if (idx != utfconv[idx].clower) ncap++;
-         if (utfconv[idx].cupper == utfconv[idx].clower) nneutral++;
+         if (idx != unicodetolower(idx, langnum)) ncap++;
+         if (unicodetoupper(idx, langnum) == unicodetolower(idx, langnum)) nneutral++;
       }
       u16_u8(dest, MAXWORDUTF8LEN, t, nc);
       if (ncap) {
          idx = (t[0].h << 8) + t[0].l;
-         firstcap = (idx != utfconv[idx].clower);
+         firstcap = (idx != unicodetolower(idx, langnum));
       }
    }
 
@@ -224,9 +233,9 @@ void Hunspell::mkallcap(char * p)
       unsigned short idx;
       for (int i = 0; i < nc; i++) {
          idx = (u[i].h << 8) + u[i].l;
-         if (idx != utfconv[idx].cupper) {
-            u[i].h = (unsigned char) (utfconv[idx].cupper >> 8);
-            u[i].l = (unsigned char) (utfconv[idx].cupper & 0x00FF);
+         if (idx != unicodetoupper(idx, langnum)) {
+            u[i].h = (unsigned char) (unicodetoupper(idx, langnum) >> 8);
+            u[i].l = (unsigned char) (unicodetoupper(idx, langnum) & 0x00FF);
          }
       }
       u16_u8(p, MAXWORDUTF8LEN, u, nc);
@@ -244,9 +253,9 @@ int Hunspell::mkallcap2(char * p, w_char * u, int nc)
       unsigned short idx;
       for (int i = 0; i < nc; i++) {
          idx = (u[i].h << 8) + u[i].l;
-         if (idx != utfconv[idx].cupper) {
-            u[i].h = (unsigned char) (utfconv[idx].cupper >> 8);
-            u[i].l = (unsigned char) (utfconv[idx].cupper & 0x00FF);
+         if (idx != unicodetoupper(idx, langnum)) {
+            u[i].h = (unsigned char) (unicodetoupper(idx, langnum) >> 8);
+            u[i].l = (unsigned char) (unicodetoupper(idx, langnum) & 0x00FF);
          }
       }
       u16_u8(p, MAXWORDUTF8LEN, u, nc);
@@ -275,9 +284,9 @@ int Hunspell::mkallsmall2(char * p, w_char * u, int nc)
       unsigned short idx;
       for (int i = 0; i < nc; i++) {
          idx = (u[i].h << 8) + u[i].l;
-         if (idx != utfconv[idx].clower) {
-            u[i].h = (unsigned char) (utfconv[idx].clower >> 8);
-            u[i].l = (unsigned char) (utfconv[idx].clower & 0x00FF);
+         if (idx != unicodetolower(idx, langnum)) {
+            u[i].h = (unsigned char) (unicodetolower(idx, langnum) >> 8);
+            u[i].l = (unsigned char) (unicodetolower(idx, langnum) & 0x00FF);
          }
       }
       u16_u8(p, MAXWORDUTF8LEN, u, nc);
@@ -303,18 +312,21 @@ char * Hunspell::sharps_u8_l1(char * dest, char * source) {
 }
 
 // recursive search for right ss-ß permutations
-hentry * Hunspell::spellsharps(char * base, char * pos, int n, int repnum, char * tmp) {
-    if ((pos = strstr(pos, "ss")) && (n < MAXSHARPS)) {
-        hentry * h;
+hentry * Hunspell::spellsharps(char * base, char * pos, int n,
+        int repnum, char * tmp, int * info, char **root) {
+    pos = strstr(pos, "ss");
+    if (pos && (n < MAXSHARPS)) {
         *pos = 'Ã';
         *(pos + 1) = 'Ÿ';
-        if (h = spellsharps(base, pos + 2, n + 1, repnum + 1, tmp)) return h;
+        hentry * h = spellsharps(base, pos + 2, n + 1, repnum + 1, tmp, info, root);
+        if (h) return h;
         *pos = 's';
         *(pos + 1) = 's';
-        if (h = spellsharps(base, pos + 2, n + 1, repnum, tmp)) return h;
+        h = spellsharps(base, pos + 2, n + 1, repnum, tmp, info, root);
+        if (h) return h;
     } else if (repnum > 0) {
-        if (utf8) return check(base);
-        return check(sharps_u8_l1(tmp, base));
+        if (utf8) return checkword(base, info, root);
+        return checkword(sharps_u8_l1(tmp, base), info, root);
     }
     return NULL;
 }
@@ -338,7 +350,7 @@ int Hunspell::insert_sug(char ***slst, char * word, int *ns) {
     return 0;
 }
 
-int Hunspell::spell(const char * word)
+int Hunspell::spell(const char * word, int * info, char ** root)
 {
   struct hentry * rv=NULL;
   // need larger vector. For example, Turkish capital letter I converted a
@@ -347,7 +359,7 @@ int Hunspell::spell(const char * word)
   char wspace[MAXWORDUTF8LEN + 4];
   w_char unicw[MAXWORDLEN + 1];
   int nc = strlen(word);
-  int wl2;
+  int wl2 = 0;
   if (utf8) {
     if (nc >= MAXWORDUTF8LEN) return 0;
   } else {
@@ -359,20 +371,28 @@ int Hunspell::spell(const char * word)
 
   if (wl == 0) return 1;
 
+  if (info) *info = 0; 
+  if (root) *root = NULL;
+
   // allow numbers with dots and commas (but forbid double separators: "..", ",," etc.)
   enum { NBEGIN, NNUM, NSEP };
   int nstate = NBEGIN;
   int i;
-  
-  for (i = 0; (i < wl) && 
-      (((cw[i] <= '9') && (cw[i] >= '0') && (nstate = NNUM)) ||
-          ((nstate == NNUM) && ((cw[i] == ',') ||
-              (cw[i] == '.') || (cw[i] == '-')) && (nstate = NSEP))); i++);     
+
+  for (i = 0; (i < wl); i++) {
+    if ((cw[i] <= '9') && (cw[i] >= '0')) {
+        nstate = NNUM;
+    } else if ((cw[i] == ',') || (cw[i] == '.') || (cw[i] == '-')) {
+        if ((nstate == NSEP) || (i == 0)) break;
+        nstate = NSEP;
+    } else break;
+  }
   if ((i == wl) && (nstate == NNUM)) return 1;
 
   // LANG_hu section: number(s) + (percent or degree) with suffixes
   if (langnum == LANG_hu) {
-    if ((nstate == NNUM) && ((cw[i] == '%') || (cw[i] == '°')) && check(cw + i)) return 1;
+    if ((nstate == NNUM) && ((cw[i] == '%') || (cw[i] == '°'))
+        && checkword(cw + i, info, root)) return 1;
   }
   // END of LANG_hu section
 
@@ -380,44 +400,44 @@ int Hunspell::spell(const char * word)
      case HUHCAP: 
      case HUHINITCAP: 
      case NOCAP: { 
-                    rv = check(cw); 
+                    rv = checkword(cw, info, root); 
                     if ((abbv) && !(rv)) {
                         memcpy(wspace,cw,wl);
                         *(wspace+wl) = '.';
                         *(wspace+wl+1) = '\0';
-                        rv = check(wspace);
+                        rv = checkword(wspace, info, root);
                     }
                     break;
                  }
      case ALLCAP: {
-                    rv = check(cw);
+                    rv = checkword(cw, info, root);
                     if (rv) break;
                     if (abbv) {
                         memcpy(wspace,cw,wl);
                         *(wspace+wl) = '.';
                         *(wspace+wl+1) = '\0';
-                        rv = check(wspace);
+                        rv = checkword(wspace, info, root);
                         if (rv) break;
                     }
                     if (pAMgr && pAMgr->get_checksharps() && strstr(cw, "SS")) {
                         char tmpword[MAXWORDUTF8LEN];
                         wl = mkallsmall2(cw, unicw, nc);
                         memcpy(wspace,cw,(wl+1));
-                        rv = spellsharps(wspace, wspace, 0, 0, tmpword);
+                        rv = spellsharps(wspace, wspace, 0, 0, tmpword, info, root);
                         if (!rv) {
                             wl2 = mkinitcap2(cw, unicw, nc);
-                            rv = spellsharps(cw, cw, 0, 0, tmpword);
+                            rv = spellsharps(cw, cw, 0, 0, tmpword, info, root);
                         }
                         if ((abbv) && !(rv)) {
                             *(wspace+wl) = '.';
                             *(wspace+wl+1) = '\0';
-                            rv = spellsharps(wspace, wspace, 0, 0, tmpword);
-			    if (!rv) {
-		                memcpy(wspace, cw, wl2);
+                            rv = spellsharps(wspace, wspace, 0, 0, tmpword, info, root);
+                            if (!rv) {
+                                memcpy(wspace, cw, wl2);
                                 *(wspace+wl2) = '.';
                                 *(wspace+wl2+1) = '\0';
-                                rv = spellsharps(wspace, wspace, 0, 0, tmpword);
-			    }
+                                rv = spellsharps(wspace, wspace, 0, 0, tmpword, info, root);
+                            }
                         }
                         if (rv) break;
                     }
@@ -425,30 +445,30 @@ int Hunspell::spell(const char * word)
      case INITCAP: { 
                      wl = mkallsmall2(cw, unicw, nc);
                      memcpy(wspace,cw,(wl+1));                     
-                     rv = check(wspace);
+                     rv = checkword(wspace, info, root);
                      if (!rv || (is_keepcase(rv) && !((captype == INITCAP) &&
                            // if CHECKSHARPS: KEEPCASE words with ß are allowed
                            // in INITCAP form, too.
                            pAMgr->get_checksharps() && ((utf8 && strstr(wspace, "ÃŸ")) || 
                             (!utf8 && strchr(wspace, 'ß')))))) {
                         wl2 = mkinitcap2(cw, unicw, nc);
-                        rv = check(cw);
+                        rv = checkword(cw, info, root);
                         if (rv && (captype == ALLCAP) && is_keepcase(rv)) rv = NULL;
                      }
                      if (abbv && !rv) {
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
-                         rv = check(wspace);
-			 if (!rv || is_keepcase(rv)) {
-		            memcpy(wspace, cw, wl2);
+                         rv = checkword(wspace, info, root);
+                         if (!rv || is_keepcase(rv)) {
+                            memcpy(wspace, cw, wl2);
                             *(wspace+wl2) = '.';
                             *(wspace+wl2+1) = '\0';
-			    rv = check(wspace);
+                            rv = checkword(wspace, info, root);
                             if (rv && ((captype == ALLCAP) && is_keepcase(rv))) rv = NULL;
-			 }
+                         }
                      }
-		     break;
-                   }		   
+                     break;
+                   }               
   }
   
   if (rv) return 1;
@@ -457,12 +477,13 @@ int Hunspell::spell(const char * word)
   if (wordbreak) {
     char * s;
     char r;
-    for (int i = 0; i < pAMgr->get_numbreak(); i++) {
-      if (s=(char *) strstr(cw, wordbreak[i])) {
+    for (int j = 0; j < pAMgr->get_numbreak(); j++) {
+      s=(char *) strstr(cw, wordbreak[j]);
+      if (s) {
         r = *s;
         *s = '\0';
         // examine 2 sides of the break point
-        if (spell(cw) && spell(s + strlen(wordbreak[i]))) {
+        if (spell(cw) && spell(s + strlen(wordbreak[j]))) {
             *s = r;
             return 1;
         }
@@ -478,7 +499,8 @@ int Hunspell::spell(const char * word)
     char * dash;
     int result = 0;
     // n-dash
-    if (!wordbreak && (dash=(char *) strstr(cw,"â€“"))) {
+    dash = (char *) strstr(cw,"â€“");
+    if (dash && !wordbreak) {
         *dash = '\0';
         // examine 2 sides of the dash
         if (spell(cw) && spell(dash + 3)) {
@@ -487,7 +509,8 @@ int Hunspell::spell(const char * word)
         }
         *dash = 'â';
     }
-    if ((dash=(char *) strchr(cw,'-'))) {
+    dash = (char *) strchr(cw,'-');
+    if (dash) {
         *dash='\0';      
         // examine 2 sides of the dash
         if (dash[1] == '\0') { // base word ending with dash
@@ -501,21 +524,22 @@ int Hunspell::spell(const char * word)
             dash[1] = r2;
             dash[0]='\0';
             if (result && spell(dash+1) && ((strlen(dash+1) > 1) || (dash[1] == 'e') ||
-	        ((dash[1] > '0') && (dash[1] < '9')))) return 1;
+                ((dash[1] > '0') && (dash[1] < '9')))) return 1;
         }
         // affixed number in correct word
         if (result && (dash > cw) && (((*(dash-1)<='9') && (*(dash-1)>='0')) || (*(dash-1)>='.'))) {
             *dash='-';
-	    n = 1;
-	    if (*(dash - n) == '.') n++;
-	    // search first not a number character to left from dash
-	    while (((dash - n)>=cw) && ((*(dash - n)=='0') || (n < 3)) && (n < 6)) {
-	        n++;
-	    }
-	    if ((dash - n) < cw) n--;
+            n = 1;
+            if (*(dash - n) == '.') n++;
+            // search first not a number character to left from dash
+            while (((dash - n)>=cw) && ((*(dash - n)=='0') || (n < 3)) && (n < 6)) {
+                n++;
+            }
+            if ((dash - n) < cw) n--;
             // numbers: deprecated
             for(; n >= 1; n--) {
-                if ((*(dash - n) >= '0') && (*(dash - n) <= '9') && check(dash - n)) return 1;
+                if ((*(dash - n) >= '0') && (*(dash - n) <= '9') &&
+                    checkword(dash - n, info, root)) return 1;
             }
         }
     }
@@ -523,36 +547,51 @@ int Hunspell::spell(const char * word)
   return 0;
 }
 
-struct hentry * Hunspell::check(const char * w)
+//int Hunspell::spell(const char * word) {
+//  return spell(word, NULL, NULL);
+//}
+
+struct hentry * Hunspell::checkword(const char * w, int * info, char ** root)
 {
   struct hentry * he = NULL;
   int len;
   char w2[MAXWORDUTF8LEN];
-  const char * word = w;
+  const char * word;
+
+  char * ignoredchars = pAMgr->get_ignore();
+  if (ignoredchars != NULL) {
+     strcpy(w2, w);
+     if (utf8) {
+        int ignoredchars_utf16_len;
+        unsigned short * ignoredchars_utf16 = pAMgr->get_ignore_utf16(&ignoredchars_utf16_len);
+        remove_ignored_chars_utf(w2, ignoredchars_utf16, ignoredchars_utf16_len);
+     } else {
+        remove_ignored_chars(w2,ignoredchars);
+     }
+     word = w2;
+  } else word = w;
 
   // word reversing wrapper for complex prefixes
   if (complexprefixes) {
-    strcpy(w2, w);
+    if (word != w2) {
+      strcpy(w2, word);
+      word = w2;
+    }
     if (utf8) reverseword_utf(w2); else reverseword(w2);
-    word = w2;
   }
-
-  forbidden_compound = 0; // XXX LANG_hu class variable for suggestions (not threadsafe)
-  prevcompound = 0;       // compounding information for Hunspell's pipe interface (not threadsafe)
-  prevroot = NULL;        // root information for Hunspell's pipe interface (not threadsafe)
 
   // look word in hash table
   if (pHMgr) he = pHMgr->lookup(word);
 
   // check forbidden and onlyincompound words
   if ((he) && (he->astr) && (pAMgr) && TESTAFF(he->astr, pAMgr->get_forbiddenword(), he->alen)) {
+    info += SPELL_FORBIDDEN;
     // LANG_hu section: set dash information for suggestions
     if (langnum == LANG_hu) {
-    	forbidden_compound = 1;
-	if (pAMgr->get_compoundflag() &&
+        if (pAMgr->get_compoundflag() &&
             TESTAFF(he->astr, pAMgr->get_compoundflag(), he->alen)) {
-		forbidden_compound = 2;
-	}
+                info += SPELL_COMPOUND;
+        }
     }
     return NULL;
   }
@@ -573,29 +612,39 @@ struct hentry * Hunspell::check(const char * w)
      if (he && he->astr && pAMgr->get_onlyincompound() &&
          TESTAFF(he->astr, pAMgr->get_onlyincompound(), he->alen)) he = NULL;
 
-     // try check compound word
      if (he) {
         if ((he->astr) && (pAMgr) && TESTAFF(he->astr, pAMgr->get_forbiddenword(), he->alen)) {
-	    forbidden_compound = 1; // LANG_hu
-	    return NULL;
+            info += SPELL_FORBIDDEN;
+            return NULL;
         }
-	prevroot = he->word;
+        if (root) {
+            *root = mystrdup(he->word);
+            if (complexprefixes) {
+                if (utf8) reverseword_utf(*root); else reverseword(*root);
+            }
+        }
+     // try check compound word
      } else if (pAMgr->get_compound()) {
           he = pAMgr->compound_check(word, len, 
-	                          0,0,100,0,NULL,0,NULL,NULL,0);
+                                  0,0,100,0,NULL,0,NULL,NULL,0);
           // LANG_hu section: `moving rule' with last dash
-	  if ((!he) && (langnum == LANG_hu) && (word[len-1]=='-')) {
-	     char * dup = mystrdup(word);
-	     dup[len-1] = '\0';
+          if ((!he) && (langnum == LANG_hu) && (word[len-1]=='-')) {
+             char * dup = mystrdup(word);
+             dup[len-1] = '\0';
              he = pAMgr->compound_check(dup, len-1, 
-	                          -5,0,100,0,NULL,1,NULL,NULL,0);
-	     free(dup);
-	  }
+                                  -5,0,100,0,NULL,1,NULL,NULL,0);
+             free(dup);
+          }
           // end of LANG speficic region          
-	  if (he) {
-		prevroot = he->word;
-		prevcompound = 1;
-	  }
+          if (he) {
+                if (root) {
+                    *root = mystrdup(he->word);
+                    if (complexprefixes) {
+                        if (utf8) reverseword_utf(*root); else reverseword(*root);
+                    }
+                }
+                if (info) *info += SPELL_COMPOUND;
+          }
      }
 
   }
@@ -663,8 +712,8 @@ int Hunspell::suggest(char*** slst, const char * word)
                         }
                         // aNew -> "a New" (instead of "a new")
                         for (int j = prevns; j < ns; j++) {
-                           char * space;
-                           if (space = strchr((*slst)[j],' ')) {
+                           char * space = strchr((*slst)[j],' ');
+                           if (space) {
                                 int slen = strlen(space + 1);
                                 // different case after space (need capitalisation)
                                 if ((slen < wl) && strcmp(cw + wl - slen, space + 1)) {
@@ -696,14 +745,18 @@ int Hunspell::suggest(char*** slst, const char * word)
                         if (pAMgr && pAMgr->get_checksharps()) {
                             char * pos;
                             if (utf8) {
-                                while (pos = strstr((*slst)[j], "ÃŸ")) {
+                                pos = strstr((*slst)[j], "ÃŸ");
+                                while (pos) {
                                     *pos = 'S';
                                     *(pos+1) = 'S';
+                                    pos = strstr(pos+2, "ÃŸ");
                                 }
                             } else {
-                                while (pos = strchr((*slst)[j], 'ß')) {
+                                pos = strchr((*slst)[j], 'ß');
+                                while (pos) {
                                     (*slst)[j] = (char *) realloc((*slst)[j], strlen((*slst)[j]) + 2);
                                     mystrrep((*slst)[j], "ß", "SS");
+                                    pos = strchr((*slst)[j], 'ß');
                                 }
                             }
                         }
@@ -713,10 +766,20 @@ int Hunspell::suggest(char*** slst, const char * word)
   }
 
   // LANG_hu section: replace '-' with ' ' in Hungarian
-  if ((langnum == LANG_hu) && (forbidden_compound == 2)) {
+  if (langnum == LANG_hu) {
       for (int j=0; j < ns; j++) {
           char * pos = strchr((*slst)[j],'-');
-          if (pos) *pos = ' ';
+          if (pos) {
+              int info;
+              char w[MAXWORDUTF8LEN];
+              *pos = '\0';
+              strcpy(w, (*slst)[j]);
+              strcat(w, pos + 1);
+              spell(w, &info, NULL);
+              if ((info & SPELL_COMPOUND) && (info & SPELL_FORBIDDEN)) {
+                  *pos = ' ';
+              } else *pos = '-';
+          }
       }
   }
   // END OF LANG_hu section
@@ -725,7 +788,7 @@ int Hunspell::suggest(char*** slst, const char * word)
   if ((ns == 0) && pAMgr && (pAMgr->get_maxngramsugs() != 0)) {
       ngramsugs = 1;
       switch(captype) {
-	  case NOCAP: {
+          case NOCAP: {
               ns = pSMgr->ngsuggest(*slst, cw, pHMgr);
               break;
           }
@@ -749,7 +812,7 @@ int Hunspell::suggest(char*** slst, const char * word)
               for (int j=0; j < ns; j++) 
                   mkallcap((*slst)[j]);
               break;
-	 }
+         }
       }
   }
 
@@ -790,13 +853,13 @@ int Hunspell::suggest(char*** slst, const char * word)
             strcpy(s, (*slst)[j]);
             len = strlen(s);
           }
-          int wl = mkallsmall2(s, w, len);
+          mkallsmall2(s, w, len);
           free((*slst)[j]);          
           if (spell(s)) {
             (*slst)[l] = mystrdup(s);
             l++;
           } else {
-            int wl = mkinitcap2(s, w, len);
+            mkinitcap2(s, w, len);
             if (spell(s)) {
               (*slst)[l] = mystrdup(s);
               l++;
@@ -827,6 +890,12 @@ int Hunspell::suggest(char*** slst, const char * word)
   return l;
 }
 
+char * Hunspell::get_dic_encoding()
+{
+  return encoding;
+}
+
+#ifdef HUNSPELL_EXPERIMENTAL
 // XXX need UTF-8 support
 int Hunspell::suggest_auto(char*** slst, const char * word)
 {
@@ -850,7 +919,7 @@ int Hunspell::suggest_auto(char*** slst, const char * word)
      case NOCAP:   { 
                      ns = pSMgr->suggest_auto(slst, cw, ns);
                      if (ns>0) break;
-		     break;
+                     break;
                    }
 
      case INITCAP: { 
@@ -859,9 +928,9 @@ int Hunspell::suggest_auto(char*** slst, const char * word)
                      ns = pSMgr->suggest_auto(slst, wspace, ns);
                      for (int j=0; j < ns; j++)
                        mkinitcap((*slst)[j]);
-	             ns = pSMgr->suggest_auto(slst, cw, ns);
+                     ns = pSMgr->suggest_auto(slst, cw, ns);
                      break;
-		     
+                     
                    }
 
      case HUHCAP: { 
@@ -870,7 +939,7 @@ int Hunspell::suggest_auto(char*** slst, const char * word)
                         memcpy(wspace,cw,(wl+1));
                         mkallsmall(wspace);
                         ns = pSMgr->suggest_auto(slst, wspace, ns);
-		     }
+                     }
                      break;
                    }
 
@@ -903,13 +972,24 @@ int Hunspell::suggest_auto(char*** slst, const char * word)
     }
   }
 
-  // replace '-' with ' '
-  if (forbidden_compound == 2) {
-    for (int j=0; j < ns; j++) {
-	char * pos = strchr((*slst)[j],'-');
-	if (pos) *pos = ' ';
-    }
+  // LANG_hu section: replace '-' with ' ' in Hungarian
+  if (langnum == LANG_hu) {
+      for (int j=0; j < ns; j++) {
+          char * pos = strchr((*slst)[j],'-');
+          if (pos) {
+              int info;
+              char w[MAXWORDUTF8LEN];
+              *pos = '\0';
+              strcpy(w, (*slst)[j]);
+              strcat(w, pos + 1);
+              spell(w, &info, NULL);
+              if ((info & SPELL_COMPOUND) && (info & SPELL_FORBIDDEN)) {
+                  *pos = ' ';
+              } else *pos = '-';
+          }
+      }
   }
+  // END OF LANG_hu section  
   return ns;
 }
 
@@ -940,53 +1020,53 @@ int Hunspell::stem(char*** slst, const char * word)
                      ns = pSMgr->suggest_stems(slst, cw, ns);
 
                      if ((abbv) && (ns == 0)) {
-		         memcpy(wspace,cw,wl);
+                         memcpy(wspace,cw,wl);
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
                          ns = pSMgr->suggest_stems(slst, wspace, ns);
                      }
 
-		     break;
+                     break;
                    }
 
      case INITCAP: { 
 
-	             ns = pSMgr->suggest_stems(slst, cw, ns);
+                     ns = pSMgr->suggest_stems(slst, cw, ns);
 
                      if (ns == 0) {
                         memcpy(wspace,cw,(wl+1));
                         mkallsmall(wspace);
                         ns = pSMgr->suggest_stems(slst, wspace, ns);
 
-		     }
+                     }
 
                      if ((abbv) && (ns == 0)) {
-		         memcpy(wspace,cw,wl);
+                         memcpy(wspace,cw,wl);
                          mkallsmall(wspace);
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
                          ns = pSMgr->suggest_stems(slst, wspace, ns);
                      }
-		     
+                     
                      break;
-		     
+                     
                    }
 
      case ALLCAP: { 
                      ns = pSMgr->suggest_stems(slst, cw, ns);
-		     if (ns != 0) break;
-		     
+                     if (ns != 0) break;
+                     
                      memcpy(wspace,cw,(wl+1));
                      mkallsmall(wspace);
                      ns = pSMgr->suggest_stems(slst, wspace, ns);
 
                      if (ns == 0) {
-		         mkinitcap(wspace);
-		         ns = pSMgr->suggest_stems(slst, wspace, ns);
-		     }
+                         mkinitcap(wspace);
+                         ns = pSMgr->suggest_stems(slst, wspace, ns);
+                     }
 
                      if ((abbv) && (ns == 0)) {
-		         memcpy(wspace,cw,wl);
+                         memcpy(wspace,cw,wl);
                          mkallsmall(wspace);
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
@@ -1027,52 +1107,48 @@ int Hunspell::suggest_pos_stems(char*** slst, const char * word)
                      ns = pSMgr->suggest_pos_stems(slst, cw, ns);
 
                      if ((abbv) && (ns == 0)) {
-		         memcpy(wspace,cw,wl);
+                         memcpy(wspace,cw,wl);
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
                          ns = pSMgr->suggest_pos_stems(slst, wspace, ns);
                      }
 
-		     break;
+                     break;
                    }
 
      case INITCAP: { 
 
-	             ns = pSMgr->suggest_pos_stems(slst, cw, ns);
+                     ns = pSMgr->suggest_pos_stems(slst, cw, ns);
 
                      if (ns == 0 || ((*slst)[0][0] == '#')) {
                         memcpy(wspace,cw,(wl+1));
                         mkallsmall(wspace);
                         ns = pSMgr->suggest_pos_stems(slst, wspace, ns);
-		     }
-		     
+                     }
+                     
                      break;
-		     
+                     
                    }
 
      case ALLCAP: { 
                      ns = pSMgr->suggest_pos_stems(slst, cw, ns);
-		     if (ns != 0) break;
-		     
+                     if (ns != 0) break;
+                     
                      memcpy(wspace,cw,(wl+1));
                      mkallsmall(wspace);
                      ns = pSMgr->suggest_pos_stems(slst, wspace, ns);
 
                      if (ns == 0) {
-		         mkinitcap(wspace);
-		         ns = pSMgr->suggest_pos_stems(slst, wspace, ns);
-		     }
+                         mkinitcap(wspace);
+                         ns = pSMgr->suggest_pos_stems(slst, wspace, ns);
+                     }
                      break;
                    }
   }
 
   return ns;
 }
-
-char * Hunspell::get_dic_encoding()
-{
-  return encoding;
-}
+#endif // END OF HUNSPELL_EXPERIMENTAL CODE
 
 const char * Hunspell::get_wordchars()
 {
@@ -1084,21 +1160,6 @@ unsigned short * Hunspell::get_wordchars_utf16(int * len)
   return pAMgr->get_wordchars_utf16(len);
 }
 
-char * Hunspell::get_prevroot()
-{
-  return prevroot; // XXX not stateless, not for OOo
-}
-
-int Hunspell::get_prevcompound()
-{
-  return prevcompound; // XXX not stateless, not for OOo
-}
-
-int Hunspell::get_forbidden_compound()
-{
-  return forbidden_compound; // XXX not stateless, not for OOo
-}
-
 void Hunspell::mkinitcap(char * p)
 {
   if (!utf8) {
@@ -1107,7 +1168,7 @@ void Hunspell::mkinitcap(char * p)
       int len;
       w_char u[MAXWORDLEN];
       len = u8_u16(u, MAXWORDLEN, p);
-      unsigned short i = utfconv[(u[0].h << 8) + u[0].l].cupper;
+      unsigned short i = unicodetoupper((u[0].h << 8) + u[0].l, langnum);
       u[0].h = (unsigned char) (i >> 8);
       u[0].l = (unsigned char) (i & 0x00FF);
       u16_u8(p, MAXWORDUTF8LEN, u, len);
@@ -1119,7 +1180,7 @@ int Hunspell::mkinitcap2(char * p, w_char * u, int nc)
   if (!utf8) {
     if (*p != '\0') *p = csconv[((unsigned char)*p)].cupper;
   } else if (nc > 0) {
-      unsigned short i = utfconv[(u[0].h << 8) + u[0].l].cupper;
+      unsigned short i = unicodetoupper((u[0].h << 8) + u[0].l, langnum);
       u[0].h = (unsigned char) (i >> 8);
       u[0].l = (unsigned char) (i & 0x00FF);
       u16_u8(p, MAXWORDUTF8LEN, u, nc);
@@ -1133,7 +1194,7 @@ int Hunspell::mkinitsmall2(char * p, w_char * u, int nc)
   if (!utf8) {
     if (*p != '\0') *p = csconv[((unsigned char)*p)].clower;
   } else if (nc > 0) {
-      unsigned short i = utfconv[(u[0].h << 8) + u[0].l].clower;
+      unsigned short i = unicodetolower((u[0].h << 8) + u[0].l, langnum);
       u[0].h = (unsigned char) (i >> 8);
       u[0].l = (unsigned char) (i & 0x00FF);
       u16_u8(p, MAXWORDUTF8LEN, u, nc);
@@ -1142,28 +1203,10 @@ int Hunspell::mkinitsmall2(char * p, w_char * u, int nc)
   return nc;
 }
 
-struct cs_info * Hunspell::get_csconv()
-{
-  return csconv;
-}
-
-struct unicode_info2 * Hunspell::get_utf_conv()
-{
-  return utfconv;
-}
-
 int Hunspell::put_word(const char * word)
 {
     if (pHMgr) {
-	return pHMgr->put_word(word, strlen(word), NULL);
-    }
-    return 0;
-}
-
-int Hunspell::put_word_suffix(const char * word, const char * suffix)
-{
-    if (pHMgr) {
-	return pHMgr->put_word(word, strlen(word), (char *) suffix);
+        return pHMgr->put_word(word, strlen(word), NULL);
     }
     return 0;
 }
@@ -1171,7 +1214,7 @@ int Hunspell::put_word_suffix(const char * word, const char * suffix)
 int Hunspell::put_word_pattern(const char * word, const char * pattern)
 {
     if (pHMgr) {
-	return pHMgr->put_word_pattern(word, strlen(word), pattern);
+        return pHMgr->put_word_pattern(word, strlen(word), pattern);
     }
     return 0;
 }
@@ -1181,6 +1224,12 @@ const char * Hunspell::get_version()
   return pAMgr->get_version();
 }
 
+struct cs_info * Hunspell::get_csconv()
+{
+  return csconv;
+}
+
+#ifdef HUNSPELL_EXPERIMENTAL
 // XXX need UTF-8 support
 char * Hunspell::morph(const char * word)
 {
@@ -1217,43 +1266,43 @@ char * Hunspell::morph(const char * word)
   // LANG_hu section: set dash information for suggestions
   if (langnum == LANG_hu) {
   while ((n < wl) && 
-  	(((cw[n] <= '9') && (cw[n] >= '0')) || (((cw[n] == '.') || (cw[n] == ',')) && (n > 0)))) {
-  	n++;
-	if ((cw[n] == '.') || (cw[n] == ',')) {
-		if (((n2 == 0) && (n > 3)) || 
-			((n2 > 0) && ((cw[n-1] == '.') || (cw[n-1] == ',')))) break;
-		n2++;
-		n3 = n;
-	}
+        (((cw[n] <= '9') && (cw[n] >= '0')) || (((cw[n] == '.') || (cw[n] == ',')) && (n > 0)))) {
+        n++;
+        if ((cw[n] == '.') || (cw[n] == ',')) {
+                if (((n2 == 0) && (n > 3)) || 
+                        ((n2 > 0) && ((cw[n-1] == '.') || (cw[n-1] == ',')))) break;
+                n2++;
+                n3 = n;
+        }
   }
 
   if ((n == wl) && (n3 > 0) && (n - n3 > 3)) return NULL;
-  if ((n == wl) || ((n>0) && ((cw[n]=='%') || (cw[n]=='°')) && check(cw+n))) {
-  	strcat(result, cw);
-	result[n - 1] = '\0';
-  	if (n == wl) {
-		st = pSMgr->suggest_morph(cw + n - 1);
-		if (st) {
-			strcat(result, st);
-			free(st);
-		}
-	} else {
-		char sign = cw[n];
-		cw[n] = '\0';
-		st = pSMgr->suggest_morph(cw + n - 1);
-		if (st) {
-			strcat(result, st);
-			free(st);
-		}
-		strcat(result, "+"); // XXX SPEC. MORPHCODE
-		cw[n] = sign;
-		st = pSMgr->suggest_morph(cw + n);
-		if (st) {
-			strcat(result, st);
-			free(st);
-		}
-	}
-	return mystrdup(result);
+  if ((n == wl) || ((n>0) && ((cw[n]=='%') || (cw[n]=='°')) && checkword(cw+n, NULL, NULL))) {
+        strcat(result, cw);
+        result[n - 1] = '\0';
+        if (n == wl) {
+                st = pSMgr->suggest_morph(cw + n - 1);
+                if (st) {
+                        strcat(result, st);
+                        free(st);
+                }
+        } else {
+                char sign = cw[n];
+                cw[n] = '\0';
+                st = pSMgr->suggest_morph(cw + n - 1);
+                if (st) {
+                        strcat(result, st);
+                        free(st);
+                }
+                strcat(result, "+"); // XXX SPEC. MORPHCODE
+                cw[n] = sign;
+                st = pSMgr->suggest_morph(cw + n);
+                if (st) {
+                        strcat(result, st);
+                        free(st);
+                }
+        }
+        return mystrdup(result);
   }
   }
   // END OF LANG_hu section
@@ -1265,18 +1314,18 @@ char * Hunspell::morph(const char * word)
                         strcat(result, st);
                         free(st);
                      }
-					 if (abbv) {
-		         		memcpy(wspace,cw,wl);
+                                         if (abbv) {
+                                        memcpy(wspace,cw,wl);
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
                          st = pSMgr->suggest_morph(wspace);
-                     	 if (st) {
+                         if (st) {
                             if (*result) strcat(result, "\n");
                             strcat(result, st);
                             free(st);
-						 }
+                                                 }
                      }
-					 break;
+                                         break;
                    }
      case INITCAP: { 
                      memcpy(wspace,cw,(wl+1));
@@ -1285,33 +1334,33 @@ char * Hunspell::morph(const char * word)
                      if (st) {
                         strcat(result, st);
                         free(st);
-                     }					 
-	                 st = pSMgr->suggest_morph(cw);
+                     }                                   
+                         st = pSMgr->suggest_morph(cw);
                      if (st) {
                         if (*result) strcat(result, "\n");
                         strcat(result, st);
                         free(st);
                      }
-					 if (abbv) {
-		         		 memcpy(wspace,cw,wl);
+                                         if (abbv) {
+                                         memcpy(wspace,cw,wl);
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
-                     	 mkallsmall(wspace);
+                         mkallsmall(wspace);
                          st = pSMgr->suggest_morph(wspace);
-                     	 if (st) {
+                         if (st) {
                             if (*result) strcat(result, "\n");
                             strcat(result, st);
                             free(st);
-						 }
-                     	 mkinitcap(wspace);
+                                                 }
+                         mkinitcap(wspace);
                          st = pSMgr->suggest_morph(wspace);
-                     	 if (st) {
+                         if (st) {
                             if (*result) strcat(result, "\n");
                             strcat(result, st);
                             free(st);
-						 }
+                                                 }
                      }
-		     break;
+                     break;
                    }
      case HUHCAP: { 
                      st = pSMgr->suggest_morph(cw);
@@ -1337,7 +1386,7 @@ char * Hunspell::morph(const char * word)
                      if (st) {
                         strcat(result, st);
                         free(st);
-                     }		     
+                     }               
                      mkallsmall(wspace);
                      st = pSMgr->suggest_morph(wspace);
                      if (st) {
@@ -1345,23 +1394,23 @@ char * Hunspell::morph(const char * word)
                         strcat(result, st);
                         free(st);
                      }
-		             mkinitcap(wspace);
-		             st = pSMgr->suggest_morph(wspace);
+                             mkinitcap(wspace);
+                             st = pSMgr->suggest_morph(wspace);
                      if (st) {
                         if (*result) strcat(result, "\n");
                         strcat(result, st);
                         free(st);
                      }
-					 if (abbv) {
-                     	memcpy(wspace,cw,(wl+1));
+                                         if (abbv) {
+                        memcpy(wspace,cw,(wl+1));
                         *(wspace+wl) = '.';
                         *(wspace+wl+1) = '\0';
                         if (*result) strcat(result, "\n");
-                     	st = pSMgr->suggest_morph(wspace);
-                     	if (st) {
-                        	strcat(result, st);
-                        	free(st);
-                     	}		     
+                        st = pSMgr->suggest_morph(wspace);
+                        if (st) {
+                                strcat(result, st);
+                                free(st);
+                        }                    
                         mkallsmall(wspace);
                         st = pSMgr->suggest_morph(wspace);
                         if (st) {
@@ -1369,14 +1418,14 @@ char * Hunspell::morph(const char * word)
                           strcat(result, st);
                           free(st);
                         }
-		                mkinitcap(wspace);
-		                st = pSMgr->suggest_morph(wspace);
+                                mkinitcap(wspace);
+                                st = pSMgr->suggest_morph(wspace);
                         if (st) {
                           if (*result) strcat(result, "\n");
                           strcat(result, st);
                           free(st);
                         }
-					 }
+                                         }
                      break;
                    }
   }
@@ -1390,29 +1439,30 @@ char * Hunspell::morph(const char * word)
   }
 
   // compound word with dash (HU) I18n
-  char * dash;
+  char * dash = NULL;
   int nresult = 0;
   // LANG_hu section: set dash information for suggestions
-  if ((langnum == LANG_hu) && (dash=(char *) strchr(cw,'-'))) {
+  if (langnum == LANG_hu) dash = (char *) strchr(cw,'-');
+  if ((langnum == LANG_hu) && dash) {
       *dash='\0';      
       // examine 2 sides of the dash
       if (dash[1] == '\0') { // base word ending with dash
         if (spell(cw)) return pSMgr->suggest_morph(cw);
       } else if ((dash[1] == 'e') && (dash[2] == '\0')) { // XXX (HU) -e hat.
         if (spell(cw) && (spell("-e"))) {
-			st = pSMgr->suggest_morph(cw);
-			if (st) {
-				strcat(result, st);
-				free(st);
-			}
-			strcat(result,"+"); // XXX spec. separator in MORPHCODE
-			st = pSMgr->suggest_morph("-e");
-			if (st) {
-				strcat(result, st);
-				free(st);
-			}
-			return mystrdup(result);
-		}
+                        st = pSMgr->suggest_morph(cw);
+                        if (st) {
+                                strcat(result, st);
+                                free(st);
+                        }
+                        strcat(result,"+"); // XXX spec. separator in MORPHCODE
+                        st = pSMgr->suggest_morph("-e");
+                        if (st) {
+                                strcat(result, st);
+                                free(st);
+                        }
+                        return mystrdup(result);
+                }
       } else {
       // first word ending with dash: word- XXX ???
         char r2 = *(dash + 1);
@@ -1422,47 +1472,47 @@ char * Hunspell::morph(const char * word)
         dash[1] = r2;
         dash[0]='\0';
         if (nresult && spell(dash+1) && ((strlen(dash+1) > 1) ||
-	    	((dash[1] > '0') && (dash[1] < '9')))) {
-			    st = morph(cw);
-			    if (st) {
-			        strcat(result, st);
-				    free(st);
-			    	strcat(result,"+"); // XXX spec. separator in MORPHCODE
-			    }
-			    st = morph(dash+1);
-			    if (st) {
-				    strcat(result, st);
-				    free(st);
-			    }
-			    return mystrdup(result);			
-			}
+                ((dash[1] > '0') && (dash[1] < '9')))) {
+                            st = morph(cw);
+                            if (st) {
+                                strcat(result, st);
+                                    free(st);
+                                strcat(result,"+"); // XXX spec. separator in MORPHCODE
+                            }
+                            st = morph(dash+1);
+                            if (st) {
+                                    strcat(result, st);
+                                    free(st);
+                            }
+                            return mystrdup(result);                    
+                        }
       }
       // affixed number in correct word
      if (nresult && (dash > cw) && (((*(dash-1)<='9') && 
-	 		(*(dash-1)>='0')) || (*(dash-1)=='.'))) {
+                        (*(dash-1)>='0')) || (*(dash-1)=='.'))) {
          *dash='-';
-	 n = 1;
-	 if (*(dash - n) == '.') n++;
-	 // search first not a number character to left from dash
-	 while (((dash - n)>=cw) && ((*(dash - n)=='0') || (n < 3)) && (n < 6)) {
-	    n++;
-	 }
-	 if ((dash - n) < cw) n--;
-	 // numbers: valami1000000-hoz
-	 // examine 100000-hoz, 10000-hoz 1000-hoz, 10-hoz,
-	 // 56-hoz, 6-hoz
-	 for(; n >= 1; n--) {
-	    if ((*(dash - n) >= '0') && (*(dash - n) <= '9') && check(dash - n)) {
-	   	    strcat(result, cw);
-		    result[dash - cw - n] = '\0';
-			st = pSMgr->suggest_morph(dash - n);
-			if (st) {
-		        strcat(result, st);
-				free(st);
-			}
-		    return mystrdup(result);			
-	    }
-	 }
+         n = 1;
+         if (*(dash - n) == '.') n++;
+         // search first not a number character to left from dash
+         while (((dash - n)>=cw) && ((*(dash - n)=='0') || (n < 3)) && (n < 6)) {
+            n++;
+         }
+         if ((dash - n) < cw) n--;
+         // numbers: valami1000000-hoz
+         // examine 100000-hoz, 10000-hoz 1000-hoz, 10-hoz,
+         // 56-hoz, 6-hoz
+         for(; n >= 1; n--) {
+            if ((*(dash - n) >= '0') && (*(dash - n) <= '9') && checkword(dash - n, NULL, NULL)) {
+                    strcat(result, cw);
+                    result[dash - cw - n] = '\0';
+                        st = pSMgr->suggest_morph(dash - n);
+                        if (st) {
+                        strcat(result, st);
+                                free(st);
+                        }
+                    return mystrdup(result);                    
+            }
+         }
      }
   }
   return NULL;
@@ -1498,18 +1548,18 @@ char * Hunspell::morph_with_correction(const char * word)
                         strcat(result, st);
                         free(st);
                      }
-					 if (abbv) {
-		         		memcpy(wspace,cw,wl);
+                                         if (abbv) {
+                                        memcpy(wspace,cw,wl);
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
                          st = pSMgr->suggest_morph_for_spelling_error(wspace);
-                     	 if (st) {
+                         if (st) {
                             if (*result) strcat(result, "\n");
                             strcat(result, st);
                             free(st);
-						 }
+                                                 }
                      }
-					 break;
+                                         break;
                    }
      case INITCAP: { 
                      memcpy(wspace,cw,(wl+1));
@@ -1518,33 +1568,33 @@ char * Hunspell::morph_with_correction(const char * word)
                      if (st) {
                         strcat(result, st);
                         free(st);
-                     }					 
-	                 st = pSMgr->suggest_morph_for_spelling_error(cw);
+                     }                                   
+                         st = pSMgr->suggest_morph_for_spelling_error(cw);
                      if (st) {
                         if (*result) strcat(result, "\n");
                         strcat(result, st);
                         free(st);
                      }
-					 if (abbv) {
-		         		 memcpy(wspace,cw,wl);
+                                         if (abbv) {
+                                         memcpy(wspace,cw,wl);
                          *(wspace+wl) = '.';
                          *(wspace+wl+1) = '\0';
-                     	 mkallsmall(wspace);
+                         mkallsmall(wspace);
                          st = pSMgr->suggest_morph_for_spelling_error(wspace);
-                     	 if (st) {
+                         if (st) {
                             if (*result) strcat(result, "\n");
                             strcat(result, st);
                             free(st);
-						 }
-                     	 mkinitcap(wspace);
+                                                 }
+                         mkinitcap(wspace);
                          st = pSMgr->suggest_morph_for_spelling_error(wspace);
-                     	 if (st) {
+                         if (st) {
                             if (*result) strcat(result, "\n");
                             strcat(result, st);
                             free(st);
-						 }
+                                                 }
                      }
-		     break;
+                     break;
                    }
      case HUHCAP: { 
                      st = pSMgr->suggest_morph_for_spelling_error(cw);
@@ -1559,7 +1609,7 @@ char * Hunspell::morph_with_correction(const char * word)
                         if (*result) strcat(result, "\n");
                         strcat(result, st);
                         free(st);
-                     }		     
+                     }               
                      break;
                  }
      case ALLCAP: { 
@@ -1568,7 +1618,7 @@ char * Hunspell::morph_with_correction(const char * word)
                      if (st) {
                         strcat(result, st);
                         free(st);
-                     }		     
+                     }               
                      mkallsmall(wspace);
                      st = pSMgr->suggest_morph_for_spelling_error(wspace);
                      if (st) {
@@ -1576,23 +1626,23 @@ char * Hunspell::morph_with_correction(const char * word)
                         strcat(result, st);
                         free(st);
                      }
-		             mkinitcap(wspace);
-		             st = pSMgr->suggest_morph_for_spelling_error(wspace);
+                             mkinitcap(wspace);
+                             st = pSMgr->suggest_morph_for_spelling_error(wspace);
                      if (st) {
                         if (*result) strcat(result, "\n");
                         strcat(result, st);
                         free(st);
                      }
-					 if (abbv) {
-                     	memcpy(wspace,cw,(wl+1));
+                                         if (abbv) {
+                        memcpy(wspace,cw,(wl+1));
                         *(wspace+wl) = '.';
                         *(wspace+wl+1) = '\0';
                         if (*result) strcat(result, "\n");
-                     	st = pSMgr->suggest_morph_for_spelling_error(wspace);
-                     	if (st) {
-                        	strcat(result, st);
-                        	free(st);
-                     	}		     
+                        st = pSMgr->suggest_morph_for_spelling_error(wspace);
+                        if (st) {
+                                strcat(result, st);
+                                free(st);
+                        }                    
                         mkallsmall(wspace);
                         st = pSMgr->suggest_morph_for_spelling_error(wspace);
                         if (st) {
@@ -1600,14 +1650,14 @@ char * Hunspell::morph_with_correction(const char * word)
                           strcat(result, st);
                           free(st);
                         }
-		                mkinitcap(wspace);
-		                st = pSMgr->suggest_morph_for_spelling_error(wspace);
+                                mkinitcap(wspace);
+                                st = pSMgr->suggest_morph_for_spelling_error(wspace);
                         if (st) {
                           if (*result) strcat(result, "\n");
                           strcat(result, st);
                           free(st);
                         }
-					 }
+                                         }
                      break;
                    }
   }
@@ -1635,10 +1685,37 @@ int Hunspell::analyze(char ***out, const char *word) {
        strncpy((*out)[n++], m + p, i - p + 1);
        if (m[i] == '\n') (*out)[n++][i - p] = '\0';
        if(!m[i+1]) break;
-       p = i + 1;	 
+       p = i + 1;        
      }
   }
   free(m);
   return n;
+}
+
+#endif // END OF HUNSPELL_EXPERIMENTAL CODE
+
+Hunhandle *Hunspell_create(const char * affpath, const char * dpath)
+{
+        return (Hunhandle*)(new Hunspell(affpath, dpath));
+}
+
+void Hunspell_destroy(Hunhandle *pHunspell)
+{
+        delete (Hunspell*)(pHunspell);
+}
+
+int Hunspell_spell(Hunhandle *pHunspell, const char *word)
+{
+        return ((Hunspell*)pHunspell)->spell(word);
+}
+
+char *Hunspell_get_dic_encoding(Hunhandle *pHunspell)
+{
+        return ((Hunspell*)pHunspell)->get_dic_encoding();
+}
+
+int Hunspell_suggest(Hunhandle *pHunspell, char*** slst, const char * word)
+{
+        return ((Hunspell*)pHunspell)->suggest(slst, word);
 }
 

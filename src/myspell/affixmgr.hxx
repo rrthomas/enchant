@@ -1,9 +1,14 @@
 #ifndef _AFFIXMGR_HXX_
 #define _AFFIXMGR_HXX_
+
+#ifdef MOZILLA_CLIENT
+#ifdef __SUNPRO_CC // for SunONE Studio compiler
+using namespace std;
+#endif
 #include <stdio.h>
-#include <cstdlib>
-#include <cstring>
+#else
 #include <cstdio>
+#endif
 
 #include "atypes.hxx"
 #include "baseaffix.hxx"
@@ -25,7 +30,6 @@ class AffixMgr
   char *              encoding;
   struct cs_info *    csconv;
   int                 utf8;
-  struct unicode_info2 * utf_tbl;
   int                 complexprefixes;
   FLAG                compoundflag;  
   FLAG                compoundbegin;
@@ -71,6 +75,9 @@ class AffixMgr
   char *              wordchars;
   unsigned short *    wordchars_utf16;
   int                 wordchars_utf16_len;
+  char *              ignorechars;
+  unsigned short *    ignorechars_utf16;
+  int                 ignorechars_utf16_len;
   char *              version;
   char *              lang;
   int                 langnum;
@@ -97,7 +104,7 @@ public:
             char in_compound, const FLAG needflag = FLAG_NULL);
   inline int isRevSubset(const char * s1, const char * end_of_s2, int len);
   struct hentry *     suffix_check(const char * word, int len, int sfxopts, AffEntry* ppfx,
-			char ** wlst, int maxSug, int * ns, const FLAG cclass = FLAG_NULL,
+                        char ** wlst, int maxSug, int * ns, const FLAG cclass = FLAG_NULL,
                         const FLAG needflag = FLAG_NULL, char in_compound = IN_CPD_NOT);
   struct hentry *     suffix_check_twosfx(const char * word, int len,
             int sfxopts, AffEntry* ppfx, const FLAG needflag = FLAG_NULL);
@@ -117,12 +124,12 @@ public:
   int                 expand_rootword(struct guessword * wlst, int maxn, const char * ts,
                         int wl, const unsigned short * ap, unsigned short al, char * bad, int);
 
-  int                 get_syllable (const char * word, int wlen);
+  short               get_syllable (const char * word, int wlen);
   int                 cpdrep_check(const char * word, int len);
   int                 cpdpat_check(const char * word, int len);
   int                 defcpd_check(hentry *** words, short wnum, hentry * rv, hentry ** rwords, char all);
   int                 cpdcase_check(const char * word, int len);
-  int                 candidate_check(const char * word, int len);
+  inline int                 candidate_check(const char * word, int len);
   struct hentry *     compound_check(const char * word, int len,
                               short wordnum, short numsyllable, short maxwordnum, short wnum, hentry ** words,
                               char hu_mov_rule, int * cmpdstemnum, int * cmpdstem, char is_sug);
@@ -140,15 +147,17 @@ public:
   char **             get_breaktable();
   char *              get_encoding();
   int                 get_langnum();
-  struct unicode_info2 * get_utf_conv();
   char *              get_try_string();
   const char *        get_wordchars();
-  unsigned short * get_wordchars_utf16(int * len);
+  unsigned short *    get_wordchars_utf16(int * len);
+  char *              get_ignore();
+  unsigned short *    get_ignore_utf16(int * len);
   int                 get_compound();
   FLAG                get_compoundflag();
   FLAG                get_compoundbegin();
   FLAG                get_forbiddenword();
   FLAG                get_nosuggest();
+//  FLAG                get_circumfix();
   FLAG                get_pseudoroot();
   FLAG                get_onlyincompound();
   FLAG                get_compoundroot();
@@ -171,24 +180,18 @@ public:
 
 private:
   int  parse_file(const char * affpath);
-  int  parse_try(char * line);
-  int  parse_set(char * line);
-  int  parse_flag(char * line, unsigned short * out, char * name);
-  int  parse_num(char * line, int * out, char * name);
-  int  parse_cpdflag(char * line);
-  int  parse_cpdforbid(char * line);
-  int  parse_forbid(char * line);
+//  int  parse_string(char * line, char ** out, const char * name);
+  int  parse_flag(char * line, unsigned short * out, const char * name);
+  int  parse_num(char * line, int * out, const char * name);
+//  int  parse_array(char * line, char ** out, unsigned short ** out_utf16,
+//            int * out_utf16_len, const char * name);
   int  parse_cpdsyllable(char * line);
-  int  parse_syllablenum(char * line);
   int  parse_reptable(char * line, FILE * af);
   int  parse_maptable(char * line, FILE * af);
   int  parse_breaktable(char * line, FILE * af);
   int  parse_checkcpdtable(char * line, FILE * af);
   int  parse_defcpdtable(char * line, FILE * af);
   int  parse_affix(char * line, const char at, FILE * af, char * dupflags);
-  int  parse_wordchars(char * line);
-  int  parse_lang(char * line);
-  int  parse_version(char * line);
 
   int encodeit(struct affentry * ptr, char * cs);
   int build_pfxtree(AffEntry* pfxptr);
@@ -199,7 +202,6 @@ private:
   AffEntry * process_sfx_in_order(AffEntry * ptr, AffEntry * nptr);
   int process_pfx_tree_to_list();
   int process_sfx_tree_to_list();
-  void set_spec_utf8_encoding();
   int redundant_condition(char, char * strip, int stripl, const char * cond, char *);
 };
 

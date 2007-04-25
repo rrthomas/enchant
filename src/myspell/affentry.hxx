@@ -22,7 +22,7 @@ public:
   ~PfxEntry();
 
   inline bool          allowCross() { return ((opts & aeXPRODUCT) != 0); }
-  struct hentry *      check(const char * word, int len, char in_compound, 
+  struct hentry *      checkword(const char * word, int len, char in_compound, 
                             const FLAG needflag = FLAG_NULL);
 
   struct hentry *      check_twosfx(const char * word, int len, char in_compound, const FLAG needflag = NULL);
@@ -71,7 +71,7 @@ class SfxEntry : public AffEntry
        SfxEntry *   nexteq;
        SfxEntry *   nextne;
        SfxEntry *   flgnxt;
-	   
+           
        SfxEntry *   l_morph;
        SfxEntry *   r_morph;
        SfxEntry *   eq_morph;
@@ -82,9 +82,10 @@ public:
   ~SfxEntry();
 
   inline bool          allowCross() { return ((opts & aeXPRODUCT) != 0); }
-  struct hentry *   check(const char * word, int len, int optflags, 
+  struct hentry *   checkword(const char * word, int len, int optflags, 
                     AffEntry* ppfx, char ** wlst, int maxSug, int * ns,
-                    const FLAG cclass = FLAG_NULL, const FLAG needflag = FLAG_NULL);
+//                    const FLAG cclass = FLAG_NULL, const FLAG needflag = FLAG_NULL, char in_compound=IN_CPD_NOT);
+                    const FLAG cclass = FLAG_NULL, const FLAG needflag = FLAG_NULL, const FLAG badflag = 0);
 
   struct hentry *   check_twosfx(const char * word, int len, int optflags, AffEntry* ppfx, const FLAG needflag = NULL);
 

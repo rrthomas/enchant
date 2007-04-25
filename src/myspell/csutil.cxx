@@ -1,17 +1,54 @@
+#include "license.hunspell"
+#include "license.myspell"
+
+#ifndef MOZILLA_CLIENT
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
-
-#ifndef W32
-using namespace std;
+#else
+#include <stdlib.h> 
+#include <string.h>
+#include <stdio.h> 
 #endif
 
 #include "csutil.hxx"
 #include "atypes.hxx"
 #include "langnum.hxx"
 
-#include "utf_info.cxx"
-#define UTF_LST_LEN (sizeof(utf_lst) / (sizeof(unicode_info)))
+#ifdef OPENOFFICEORG
+#  include <unicode/uchar.h>
+#else
+#  ifndef MOZILLA_CLIENT
+#    include "utf_info.cxx"
+#    define UTF_LST_LEN (sizeof(utf_lst) / (sizeof(unicode_info)))
+#  endif
+#endif
+
+#ifdef MOZILLA_CLIENT
+#include "nsCOMPtr.h"
+#include "nsServiceManagerUtils.h"
+#include "nsIUnicodeEncoder.h"
+#include "nsIUnicodeDecoder.h"
+#include "nsICaseConversion.h"
+#include "nsICharsetConverterManager.h"
+#include "nsUnicharUtilCIID.h"
+#include "nsUnicharUtils.h"
+
+static NS_DEFINE_CID(kCharsetConverterManagerCID, NS_ICHARSETCONVERTERMANAGER_CID);
+static NS_DEFINE_CID(kUnicharUtilCID, NS_UNICHARUTIL_CID);
+#endif
+
+#ifdef MOZILLA_CLIENT
+#ifdef __SUNPRO_CC // for SunONE Studio compiler
+using namespace std;
+#endif
+#else
+#ifndef W32
+using namespace std;
+#endif
+#endif
+
+struct unicode_info2 * utf_tbl = NULL;
 
 /* only UTF-16 (BMP) implementation */
 char * u16_u8(char * dest, int size, const w_char * src, int srclen) {
@@ -85,7 +122,7 @@ int u8_u16(w_char * dest, int size, const char * src) {
         case 0x90:
         case 0xa0:
         case 0xb0: {
-            fprintf(stderr, "UTF-8 encoding error. Unexpected continuation bytes in %d. character position\n%s\n", u8 - src, src);    
+            HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Unexpected continuation bytes in %d. character position\n%s\n", u8 - src, src);    
             u2->h = 0xff;
             u2->l = 0xfd;
             break;
@@ -93,11 +130,11 @@ int u8_u16(w_char * dest, int size, const char * src) {
         case 0xc0:
         case 0xd0: {    // 2-byte UTF-8 codes
             if ((*(u8+1) & 0xc0) == 0x80) {
-	        u2->h = (*u8 & 0x1f) >> 2;
+                u2->h = (*u8 & 0x1f) >> 2;
                 u2->l = (*u8 << 6) + (*(u8+1) & 0x3f);
-	        u8++;
+                u8++;
             } else {
-                fprintf(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
+                HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
                 u2->h = 0xff;
                 u2->l = 0xfd;
             }
@@ -105,28 +142,28 @@ int u8_u16(w_char * dest, int size, const char * src) {
         }
         case 0xe0: {    // 3-byte UTF-8 codes
             if ((*(u8+1) & 0xc0) == 0x80) {
-	        u2->h = ((*u8 & 0x0f) << 4) + ((*(u8+1) & 0x3f) >> 2);
+                u2->h = ((*u8 & 0x0f) << 4) + ((*(u8+1) & 0x3f) >> 2);
                 u8++;
                 if ((*(u8+1) & 0xc0) == 0x80) {
                     u2->l = (*u8 << 6) + (*(u8+1) & 0x3f);
-	            u8++;
+                    u8++;
                 } else {
-                    fprintf(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
+                    HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
                     u2->h = 0xff;
                     u2->l = 0xfd;
                 }
             } else {
-                fprintf(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
+                HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
                 u2->h = 0xff;
                 u2->l = 0xfd;
             }
             break;
         }
         case 0xf0: {    // 4 or more byte UTF-8 codes
-            fprintf(stderr, "This UTF-8 encoding can't convert to UTF-16:\n%s\n", src);
+            HUNSPELL_WARNING(stderr, "This UTF-8 encoding can't convert to UTF-16:\n%s\n", src);
             u2->h = 0xff;
             u2->l = 0xfd;
-            break;            
+            return -1;
         }
     }
     u8++;
@@ -146,9 +183,9 @@ void flag_qsort(unsigned short flags[], int begin, int end) {
                 l++;
             } else {
              r--;
-	     reg = flags[l];
-	     flags[l] = flags[r];
-	     flags[r] = reg;
+             reg = flags[l];
+             flags[l] = flags[r];
+             flags[r] = reg;
           }
        }
        l--;
@@ -189,8 +226,8 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
       if (delim) {
         dp = (char *)memchr(mp,(int)((unsigned char)delim),n);
       } else {
-	// don't use isspace() here, the string can be in some random charset
-	// that's way different than the locale's
+        // don't use isspace() here, the string can be in some random charset
+        // that's way different than the locale's
         for (dp = mp; (*dp && *dp != ' ' && *dp != '\t'); dp++);
         if (!*dp) dp = NULL;
       }
@@ -252,19 +289,7 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
      return d;
  }
 
- // convert null terminated string to all caps using encoding
- void enmkallcap(char * d, const char * p, const char * encoding)
- 
- {
-   struct cs_info * csconv = get_current_cs(encoding);
-   while (*p != '\0') {
-     *d++ = csconv[((unsigned char) *p)].cupper;
-     p++;
-   }
-   *d = '\0';
- }
-
-
+#ifdef HUNSPELL_EXPERIMENTAL
  // append s to ends of every lines in text
  void strlinecat(char * dest, const char * s)
  {
@@ -288,12 +313,12 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
 int line_tok(const char * text, char *** lines) {
     int linenum = 0;
     char * dup = mystrdup(text);
-    char * p = dup;
-    while ((p = strchr(p, '\n'))) {
+    char * p = strchr(dup, '\n');
+    while (p) {
         linenum++;
         *p = '\0';
         p++;
-        if (*p == '\0') break;
+        p = strchr(p, '\n');
     }
     *lines = (char **) calloc(linenum + 1, sizeof(char *));
     if (!(*lines)) return -1;
@@ -310,7 +335,7 @@ int line_tok(const char * text, char *** lines) {
 // uniq line in place
 char * line_uniq(char * text) {
     char ** lines;
-    char linenum = line_tok(text, &lines);
+    int linenum = line_tok(text, &lines);
     int i;
     strcpy(text, lines[0]);
     for ( i = 1; i<=linenum; i++ ) {
@@ -369,6 +394,7 @@ char * delete_zeros(char * morphout) {
     *q = '\0';
     return morphout;
 }
+#endif // END OF HUNSPELL_EXPERIMENTAL CODE
 
 char * mystrrep(char * word, const char * pat, const char * rep) {
     char * pos = strstr(word, pat);
@@ -392,24 +418,33 @@ char * mystrrep(char * word, const char * pat, const char * rep) {
     return word;
 }
 
- // convert null terminated string to all little using encoding
- void enmkallsmall(char * d, const char * p, const char * encoding)
- {
-   struct cs_info * csconv = get_current_cs(encoding);
-   while (*p != '\0') {
-     *d++ = csconv[((unsigned char) *p)].clower;
-     p++;
+ // reverse word 
+ int reverseword(char * word) {
+   char r;
+   for (char * dest = word + strlen(word) - 1; word < dest; word++, dest--) {
+     r=*word;
+     *word = *dest;
+     *dest = r;
    }
-   *d = '\0';
+   return 0;
  }
- // convert null terminated string to have intial capital using encoding
- void enmkinitcap(char * d, const char * p, const char * encoding)
- {
-   struct cs_info * csconv = get_current_cs(encoding);
-   memcpy(d,p,(strlen(p)+1));
-   if (*p != '\0') *d= csconv[((unsigned char)*p)].cupper;
+
+ // reverse word (error: 1)
+ int reverseword_utf(char * word) {
+   w_char w[MAXWORDLEN];
+   w_char * p;
+   w_char r;
+   int l = u8_u16(w, MAXWORDLEN, word);
+   if (l == -1) return 1;
+   p = w;
+   for (w_char * dest = w + l - 1; p < dest; p++, dest--) {
+     r=*p;
+     *p = *dest;
+     *dest = r;
+   }
+   u16_u8(word, MAXWORDUTF8LEN, w, l);
+   return 0;
  }
- 
  
  // convert null terminated string to all caps
  void mkallcap(char * p, const struct cs_info * csconv)
@@ -419,8 +454,7 @@ char * mystrrep(char * word, const char * pat, const char * rep) {
      p++;
    }
  }
- 
- 
+  
  // convert null terminated string to all little
  void mkallsmall(char * p, const struct cs_info * csconv)
  {
@@ -430,12 +464,22 @@ char * mystrrep(char * word, const char * pat, const char * rep) {
    }
  }
 
-void mkallsmall_utf(w_char * u, int nc, struct unicode_info2 * utfconv) {
+void mkallsmall_utf(w_char * u, int nc, int langnum) {
     for (int i = 0; i < nc; i++) {
         unsigned short idx = (u[i].h << 8) + u[i].l;
-        if (idx != utfconv[idx].clower) {
-            u[i].h = (unsigned char) (utfconv[idx].clower >> 8);
-            u[i].l = (unsigned char) (utfconv[idx].clower & 0x00FF);
+        if (idx != unicodetolower(idx, langnum)) {
+            u[i].h = (unsigned char) (unicodetolower(idx, langnum) >> 8);
+            u[i].l = (unsigned char) (unicodetolower(idx, langnum) & 0x00FF);
+        }
+    }
+}
+
+void mkallcap_utf(w_char * u, int nc, int langnum) {
+    for (int i = 0; i < nc; i++) {
+        unsigned short idx = (u[i].h << 8) + u[i].l;
+        if (idx != unicodetoupper(idx, langnum)) {
+            u[i].h = (unsigned char) (unicodetolower(idx, langnum) >> 8);
+            u[i].l = (unsigned char) (unicodetolower(idx, langnum) & 0x00FF);
         }
     }
 }
@@ -446,29 +490,36 @@ void mkallsmall_utf(w_char * u, int nc, struct unicode_info2 * utfconv) {
    if (*p != '\0') *p = csconv[((unsigned char)*p)].cupper;
  }
 
- // reverse word 
- void reverseword(char * word) {
-   char r;
-   for (char * dest = word + strlen(word) - 1; word < dest; word++, dest--) {
-     r=*word;
-     *word = *dest;
-     *dest = r;
+#ifndef MOZILLA_CLIENT
+ // convert null terminated string to all caps using encoding
+ void enmkallcap(char * d, const char * p, const char * encoding)
+ 
+ {
+   struct cs_info * csconv = get_current_cs(encoding);
+   while (*p != '\0') {
+     *d++ = csconv[((unsigned char) *p)].cupper;
+     p++;
    }
+   *d = '\0';
  }
 
- // reverse word 
- void reverseword_utf(char * word) {
-   w_char w[MAXWORDLEN];
-   w_char * p;
-   w_char r;
-   int l = u8_u16(w, MAXWORDLEN, word);
-   p = w;
-   for (w_char * dest = w + l - 1; p < dest; p++, dest--) {
-     r=*p;
-     *p = *dest;
-     *dest = r;
+ // convert null terminated string to all little using encoding
+ void enmkallsmall(char * d, const char * p, const char * encoding)
+ {
+   struct cs_info * csconv = get_current_cs(encoding);
+   while (*p != '\0') {
+     *d++ = csconv[((unsigned char) *p)].clower;
+     p++;
    }
-   u16_u8(word, MAXWORDUTF8LEN, w, l);
+   *d = '\0';
+ }
+
+ // convert null terminated string to have intial capital using encoding
+ void enmkinitcap(char * d, const char * p, const char * encoding)
+ {
+   struct cs_info * csconv = get_current_cs(encoding);
+   memcpy(d,p,(strlen(p)+1));
+   if (*p != '\0') *d= csconv[((unsigned char)*p)].cupper;
  }
 
 // these are simple character mappings for the 
@@ -4901,7 +4952,6 @@ struct enc_entry encds[] = {
 {"ISCII-DEVANAGARI", iscii_devanagari_tbl},
 };
 
-
 struct cs_info * get_current_cs(const char * es) {
   struct cs_info * ccs = encds[0].cs_table;
   int n = sizeof(encds) / sizeof(encds[0]);
@@ -4911,17 +4961,85 @@ struct cs_info * get_current_cs(const char * es) {
     }
   }
   return ccs;
-};
+}
+#else
+// XXX This function was rewritten for mozilla. Instead of storing the
+// conversion tables static in this file, create them when needed
+// with help the mozilla backend.
+struct cs_info * get_current_cs(const char * es) {
+  struct cs_info *ccs;
 
-struct unicode_info * get_utf_cs() {
-  return utf_lst;
-};
+  nsCOMPtr<nsIUnicodeEncoder> encoder; 
+  nsCOMPtr<nsIUnicodeDecoder> decoder; 
+  nsCOMPtr<nsICaseConversion> caseConv;
 
-int get_utf_cs_len() {
-  return UTF_LST_LEN;
-};
+  nsresult rv;
+  nsCOMPtr<nsICharsetConverterManager> ccm = do_GetService(kCharsetConverterManagerCID, &rv);
+  if (NS_FAILED(rv))
+    return nsnull;
+
+  rv = ccm->GetUnicodeEncoder(es, getter_AddRefs(encoder));
+  if (encoder && NS_SUCCEEDED(rv))
+    encoder->SetOutputErrorBehavior(encoder->kOnError_Replace, nsnull, '?');
+  if (NS_FAILED(rv))
+    return nsnull;
+  rv = ccm->GetUnicodeDecoder(es, getter_AddRefs(decoder));
+
+  caseConv = do_GetService(kUnicharUtilCID, &rv);
+  if (NS_FAILED(rv))
+    return nsnull;
+
+  ccs = (struct cs_info *) malloc(256 * sizeof(cs_info));
+
+  PRInt32 charLength = 256;
+  PRInt32 uniLength = 512;
+  char *source = (char *)malloc(charLength * sizeof(char));
+  PRUnichar *uni = (PRUnichar *)malloc(uniLength * sizeof(PRUnichar));
+  char *lower = (char *)malloc(charLength * sizeof(char));
+  char *upper = (char *)malloc(charLength * sizeof(char));
+
+  // Create a long string of all chars.
+  unsigned int i;
+  for (i = 0x00; i <= 0xff ; ++i) {
+    source[i] = i;
+  }
+
+  // Convert this long string to unicode
+  rv = decoder->Convert(source, &charLength, uni, &uniLength);
+
+  // Do case conversion stuff, and convert back.
+  caseConv->ToUpper(uni, uni, uniLength);
+  encoder->Convert(uni, &uniLength, upper, &charLength);
+
+  uniLength = 512;
+  charLength = 256;
+  rv = decoder->Convert(source, &charLength, uni, &uniLength);
+  caseConv->ToLower(uni, uni, uniLength);
+  encoder->Convert(uni, &uniLength, lower, &charLength);
+
+  // Store
+  for (i = 0x00; i <= 0xff ; ++i) {
+    ccs[i].cupper = upper[i];
+    ccs[i].clower = lower[i];
+    
+    if (ccs[i].clower != (unsigned char)i)
+      ccs[i].ccase = true;
+    else
+      ccs[i].ccase = false;
+      
+  }
+
+  free(source);
+  free(uni);
+  free(lower);
+  free(upper);
+
+  return ccs;
+}
+#endif
 
 struct lang_map lang2enc[] = {
+{"ar", "UTF-8", LANG_ar},
 {"az", "UTF-8", LANG_az},
 {"bg", "microsoft-cp1251", LANG_bg},
 {"ca", "ISO8859-1", LANG_ca},
@@ -4957,7 +5075,7 @@ const char * get_default_enc(const char * lang) {
     }
   }
   return NULL;
-};
+}
 
 int get_lang_num(const char * lang) {
   int n = sizeof(lang2enc) / sizeof(lang2enc[0]);
@@ -4967,4 +5085,168 @@ int get_lang_num(const char * lang) {
     }
   }
   return LANG_xx;
-};
+}
+
+#ifndef OPENOFFICEORG
+#ifndef MOZILLA_CLIENT
+int initialize_utf_tbl() {
+  utf_tbl = (unicode_info2 *) malloc(CONTSIZE * sizeof(unicode_info2));
+  if (utf_tbl) {
+    int j;
+    for (j = 0; j < CONTSIZE; j++) {
+      utf_tbl[j].cletter = 0;
+      utf_tbl[j].clower = (unsigned short) j;
+      utf_tbl[j].cupper = (unsigned short) j;
+    }
+    for (j = 0; j < UTF_LST_LEN; j++) {
+      utf_tbl[utf_lst[j].c].cletter = 1;
+      utf_tbl[utf_lst[j].c].clower = utf_lst[j].clower;
+      utf_tbl[utf_lst[j].c].cupper = utf_lst[j].cupper;
+    }
+  } else return 1;
+  return 0;
+}
+#endif
+#endif
+
+void free_utf_tbl() {
+  if (utf_tbl) free(utf_tbl);
+}
+
+#ifdef MOZILLA_CLIENT
+static nsCOMPtr<nsICaseConversion>& getcaseConv()
+{
+  nsresult rv;
+  static nsCOMPtr<nsICaseConversion> caseConv = do_GetService(kUnicharUtilCID, &rv);
+  return caseConv;
+}
+#endif
+
+unsigned short unicodetoupper(unsigned short c, int langnum)
+{
+  // In Azeri and Turkish, I and i dictinct letters:
+  // There are a dotless lower case i pair of upper `I',
+  // and an upper I with dot pair of lower `i'. 
+  if (c == 0x0069 && ((langnum == LANG_az) || (langnum == LANG_tr)))
+    return 0x0130;
+#ifdef OPENOFFICEORG
+  return u_toupper(c);
+#else
+#ifdef MOZILLA_CLIENT
+  unsigned short ret(c);
+  getcaseConv()->ToUpper(c, &ret);
+  return ret;
+#else
+  return utf_tbl[c].cupper;
+#endif
+#endif
+}
+
+unsigned short unicodetolower(unsigned short c, int langnum)
+{
+  // In Azeri and Turkish, I and i dictinct letters:
+  // There are a dotless lower case i pair of upper `I',
+  // and an upper I with dot pair of lower `i'. 
+  if (c == 0x0049 && ((langnum == LANG_az) || (langnum == LANG_tr)))
+    return 0x0131;
+#ifdef OPENOFFICEORG
+  return u_tolower(c);
+#else
+#ifdef MOZILLA_CLIENT
+  unsigned short ret(c);
+  getcaseConv()->ToLower(c, &ret);
+  return ret;
+#else
+  return utf_tbl[c].clower;
+#endif
+#endif
+}
+
+int unicodeisalpha(unsigned short c)
+{
+#ifdef OPENOFFICEORG
+  return u_isalpha(c);
+#else
+  return utf_tbl[c].cletter;
+#endif
+}
+
+// strip all ignored characters in the string
+void remove_ignored_chars_utf(char * word, unsigned short ignored_chars[], int ignored_len)
+{
+   w_char w[MAXWORDLEN];
+   w_char w2[MAXWORDLEN];
+   int i;
+   int j;
+   int len = u8_u16(w, MAXWORDLEN, word);
+   for (i = 0, j = 0; i < len; i++) {
+      if (!flag_bsearch(ignored_chars, ((unsigned short *) w)[i], ignored_len)) {
+         w2[j] = w[i];
+         j++;
+      }
+   }
+   if (j < i) u16_u8(word, MAXWORDUTF8LEN, w2, j);
+}
+
+// strip all ignored characters in the string
+void remove_ignored_chars(char * word, char * ignored_chars)
+{
+   for (char * p = word; *p != '\0'; p++) {
+      if (!strchr(ignored_chars, *p)) {
+        *word = *p;
+        word++;
+      }
+   }
+   *word = '\0';
+}
+
+int parse_string(char * line, char ** out, const char * name)
+{
+   char * tp = line;
+   char * piece;
+   int i = 0;
+   int np = 0;
+   if (*out) {
+      HUNSPELL_WARNING(stderr, "error: duplicate %s line\n", name);
+      return 1;
+   }
+   piece = mystrsep(&tp, 0);
+   while (piece) {
+      if (*piece != '\0') {
+          switch(i) {
+              case 0: { np++; break; }
+              case 1: { 
+                *out = mystrdup(piece);
+                np++;
+                break;
+              }
+              default: break;
+          }
+          i++;
+      }
+      free(piece);
+      piece = mystrsep(&tp, 0);
+   }
+   if (np != 2) {
+      HUNSPELL_WARNING(stderr, "error: missing %s information\n", name);
+      return 1;
+   } 
+   return 0;
+}
+
+int parse_array(char * line, char ** out,
+        unsigned short ** out_utf16, int * out_utf16_len, const char * name, int utf8) {
+   if (parse_string(line, out, name)) return 1;
+   if (utf8) {
+        w_char w[MAXWORDLEN];
+        int n = u8_u16(w, MAXWORDLEN, *out);
+        if (n > 0) {
+            flag_qsort((unsigned short *) w, 0, n);
+            *out_utf16 = (unsigned short *) malloc(n * sizeof(unsigned short));
+            if (!*out_utf16) return 1;
+            memcpy(*out_utf16, w, n * sizeof(unsigned short));
+        }
+        *out_utf16_len = n;
+   }
+   return 0;
+}
