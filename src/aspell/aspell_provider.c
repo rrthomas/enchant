@@ -64,10 +64,13 @@
 #define pspell_manager_store_replacement aspell_speller_store_replacement
 
 #define pspell_word_list_elements aspell_word_list_elements
+#define pspell_word_list_size aspell_word_list_size
 
 #define pspell_string_emulation_next    aspell_string_enumeration_next
+#define delete_pspell_string_emulation  delete_aspell_string_enumeration
 
 #define pspell_error_message    aspell_error_message
+#define pspell_error_number     aspell_error_number
 
 #endif
 
