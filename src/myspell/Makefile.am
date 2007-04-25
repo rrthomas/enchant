@@ -22,6 +22,7 @@ libenchant_myspell_la_SOURCES =	\
 	dictmgr.hxx		\
 	hashmgr.hxx		\
 	htypes.hxx		\
+	hunspell.h		\
 	hunspell.hxx		\
 	langnum.hxx		\
 	suggestmgr.hxx		\
