@@ -33,7 +33,43 @@
 #include <string.h>
 
 #include <glib.h>
+
+#ifdef HAVE_PSPELL_H
 #include <pspell/pspell.h>
+#else
+#include <aspell.h>
+
+/* to allow this to build on places that lack pspell.h */
+
+#define PspellManager AspellSpeller
+#define PspellWordList AspellWordList
+#define PspellStringEmulation AspellStringEnumeration
+#define PspellCanHaveError   AspellCanHaveError 
+#define PspellConfig AspellConfig
+
+#define new_pspell_config new_aspell_config
+#define delete_pspell_config delete_aspell_config
+#define pspell_config_replace aspell_config_replace
+
+#define new_pspell_manager new_aspell_speller
+#define to_pspell_manager to_aspell_speller
+#define delete_pspell_manager delete_aspell_speller
+#define pspell_manager_error_number aspell_speller_error_number
+#define pspell_manager_error_message aspell_speller_error_message
+#define pspell_manager_save_all_word_lists aspell_speller_save_all_word_lists
+#define pspell_manager_check aspell_speller_check
+#define pspell_manager_add_to_personal aspell_speller_add_to_personal
+#define pspell_manager_add_to_session aspell_speller_add_to_session
+#define pspell_manager_suggest aspell_speller_suggest
+#define pspell_manager_store_replacement aspell_speller_store_replacement
+
+#define pspell_word_list_elements aspell_word_list_elements
+
+#define pspell_string_emulation_next    aspell_string_enumeration_next
+
+#define pspell_error_message    aspell_error_message
+
+#endif
 
 #include "enchant.h"
 #include "enchant-provider.h"
