@@ -219,15 +219,17 @@ EnchantPWL* enchant_pwl_init(void)
 EnchantPWL* enchant_pwl_init_with_file(const char * file)
 {
 	FILE *f;
+	EnchantPWL *pwl;
 
+	g_return_val_if_fail (file != NULL, NULL);
+
+	pwl = enchant_pwl_init();
+	pwl->filename = g_strdup(file);
+	
 	f = fopen (file, "r");
 	if (f) 
 		{
-			EnchantPWL *pwl;
 			char line[BUFSIZ];
-
-			pwl = enchant_pwl_init();
-			pwl->filename = g_strdup(file);
 
 			enchant_lock_file (f);
 			
@@ -242,11 +244,9 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 			
 			enchant_unlock_file (f);
 			fclose (f);
-
-			return pwl;
 		} 
 
-	return NULL;
+	return pwl;
 }
 
 void enchant_pwl_free(EnchantPWL *pwl)

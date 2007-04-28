@@ -89,6 +89,28 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 /********************************************************************************/
 
+static void
+_enchant_ensure_private_datadir (void)
+{
+	/* test if ~/.enchant exists  */
+	char * home_dir;
+
+	home_dir = enchant_get_user_home_dir ();
+        if (home_dir) {
+                char * enchant_path;
+		
+		enchant_path = g_build_filename (home_dir, ENCHANT_USER_PATH_EXTENSION, NULL);
+                if (enchant_path && !g_file_test (enchant_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
+			{
+				(void)g_remove (enchant_path);
+				g_mkdir (enchant_path, 0700);                        
+			}
+		
+		g_free (enchant_path);
+		g_free (home_dir);
+	}
+}
+
 static char *
 enchant_get_module_dir (void)
 {
@@ -303,6 +325,7 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 	home_dir = enchant_get_user_home_dir ();
 	if (home_dir) 
 		{
+			_enchant_ensure_private_datadir ();
 			filename = g_strdup_printf ("%s.dic", lang);
 			dic = g_build_filename (home_dir,
 						ENCHANT_USER_PATH_EXTENSION,
@@ -311,7 +334,7 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 			g_free (filename);
 			g_free (home_dir);
 		}
-	
+
 	session = enchant_session_new_with_pwl (provider, dic, lang, FALSE);	
 	
 	if (dic)
