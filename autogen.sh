@@ -10,6 +10,12 @@
 
 rm -f autogen.err
 
+srcdir=`dirname $0`
+test -z "$srcdir" && srcdir=.
+
+olddir=`pwd`
+cd $srcdir
+
 automake --version | perl -ne 'if (/\(GNU automake\) (([0-9]+).([0-9]+))/) {print; if ($2 < 1 || ($2 == 1 && $3 < 4)) {exit 1;}}'
 
 if [ $? -ne 0 ]; then
@@ -60,6 +66,8 @@ autoconf 2>> autogen.err || {
     echo ""
 }
 
+cd $olddir
+
 run_configure=true
 for arg in $*; do
     case $arg in
@@ -72,7 +80,7 @@ for arg in $*; do
 done
 
 if $run_configure; then
-    ./configure --enable-maintainer-mode "$@"
+    $srcdir/configure --enable-maintainer-mode "$@"
     echo
     echo "Now type 'make' to compile enchant."
 else

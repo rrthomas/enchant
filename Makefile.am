@@ -9,6 +9,7 @@ EXTRA_DIST =		\
 	enchant-uninstalled.pc.in \
 	enchant.spec.in	\
 	enchant.spec	\
+	lt-compile-resource \
 	README 		\
 	TODO 		\
 	HACKING 	\

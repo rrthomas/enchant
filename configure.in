@@ -1,4 +1,5 @@
 AC_INIT(src/enchant.h)
+AC_CANONICAL_TARGET
 
 dnl Set release number
 dnl This is derived from "Versioning" chapter of info libtool documentation.
@@ -54,20 +55,59 @@ AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
 
 AC_MSG_CHECKING([for native Win32])
-case "$host" in
+case "$target" in
   *-*-mingw*)
     native_win32=yes
     SOCKET_LIBS='-lws2_32 -ldnsapi'
+    ENCHANT_WIN32_RESOURCE=enchant-win32res.lo
     ;;
   *)
     native_win32=no
     SOCKET_LIBS=''
+    ENCHANT_WIN32_RESOURCE=
     ;;
 esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
+AC_SUBST([ENCHANT_WIN32_RESOURCE])
 
 AC_SUBST(SOCKET_LIBS)
+
+# Courtesy of Glib: Ensure MSVC-compatible struct packing convention 
+# is used when compiling for Win32 with gcc.
+# What flag to depends on gcc version: gcc3 uses "-mms-bitfields", while
+# gcc2 uses "-fnative-struct".
+if test x"$native_win32" = xyes; then
+  if test x"$GCC" = xyes; then
+    msnative_struct=''
+    AC_MSG_CHECKING([how to get MSVC-compatible struct packing])
+    if test -z "$ac_cv_prog_CC"; then
+      our_gcc="$CC"
+    else
+      our_gcc="$ac_cv_prog_CC"
+    fi
+    case `$our_gcc --version | sed -e 's,\..*,.,' -e q` in
+      2.)
+	if $our_gcc -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
+	  msnative_struct='-fnative-struct'
+	fi
+	;;
+      *)
+	if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
+	  msnative_struct='-mms-bitfields'
+	fi
+	;;
+    esac
+    if test x"$msnative_struct" = x ; then
+      AC_MSG_RESULT([no way])
+      AC_MSG_WARN([produced libraries might be incompatible with MSVC-compiled code])
+    else
+      CFLAGS="$CFLAGS $msnative_struct"
+      CXXFLAGS="$CXXFLAGS $msnative_struct"
+      AC_MSG_RESULT([${msnative_struct}])
+    fi
+  fi
+fi 
 
 dnl ===========================================================================
 
@@ -343,6 +383,7 @@ Makefile
 enchant.pc
 enchant-uninstalled.pc
 enchant.spec
+src/libenchant.rc
 src/Makefile
 src/aspell/Makefile
 src/ispell/Makefile
