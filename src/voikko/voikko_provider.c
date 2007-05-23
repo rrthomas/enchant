@@ -1,7 +1,7 @@
 /* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
  * Copyright (C) 2003,2004 Dom Lachowicz
- *               2006 Harri Pitkänen
+ *               2006-2007 Harri Pitkänen <hatapitk@iki.fi>
  *               2006 Anssi Hannula <anssi.hannula@gmail.com>
  *
  * This library is free software; you can redistribute it and/or
@@ -43,8 +43,7 @@
 /**
  * Voikko is a Finnish spell checker. More information is available from:
  *
- * http://www.hunspell-fi.org/
- * http://www.lemi.fi/voikko/
+ * http://voikko.sourceforge.net/
  */
 ENCHANT_PLUGIN_DECLARE("Voikko")
 
@@ -111,6 +110,25 @@ voikko_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
+static int
+voikko_provider_dictionary_exists (struct str_enchant_provider * me,
+                                   const char *const tag)
+{
+	int voikko_handle;
+
+	/* Only Finnish is supported */
+	if (strncmp(tag, "fi_FI", 6) != 0 && strncmp(tag, "fi", 3) != 0)
+		return 0;
+
+	/* Check that a dictionary is actually available */
+	if (voikko_init(&voikko_handle, "fi_FI", 0) == NULL) {
+		voikko_terminate(voikko_handle);
+		return 1;
+	}
+	else return 0;
+}
+
+
 static char **
 voikko_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
@@ -167,6 +185,7 @@ init_enchant_provider (void)
 	provider->dispose = voikko_provider_dispose;
 	provider->request_dict = voikko_provider_request_dict;
 	provider->dispose_dict = voikko_provider_dispose_dict;
+	provider->dictionary_exists = voikko_provider_dictionary_exists;
 	provider->identify = voikko_provider_identify;
 	provider->describe = voikko_provider_describe;
 	provider->list_dicts = voikko_provider_list_dicts;
