@@ -7,6 +7,7 @@ using namespace std;
 #endif
 #include <stdio.h>
 #else
+#include <stdio.h>
 #include <cstdio>
 #endif
 

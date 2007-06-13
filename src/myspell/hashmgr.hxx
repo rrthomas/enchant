@@ -1,6 +1,7 @@
 #ifndef _HASHMGR_HXX_
 #define _HASHMGR_HXX_
 
+#include <stdio.h>
 #include <cstdio>
 #include "htypes.hxx"
 
