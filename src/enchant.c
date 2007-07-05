@@ -1052,6 +1052,18 @@ enchant_broker_init (void)
 	EnchantBroker *broker = NULL;
 	
 	g_return_val_if_fail (g_module_supported (), NULL);
+
+#ifdef ENABLE_BINRELOC
+	{
+		static gboolean binreloc_initialized = FALSE;
+
+		if (!binreloc_initialized)
+			{
+				(void)gbr_init_lib (NULL);
+				binreloc_initialized = TRUE;
+			}
+	}
+#endif
 	
 	broker = g_new0 (EnchantBroker, 1);
 	
@@ -1539,7 +1551,7 @@ enchant_get_prefix_dir(void)
 		}
 #elif defined(ENABLE_BINRELOC)
 	/* Use standard binreloc PREFIX macro */
-	prefix = g_strdup (PREFIX);
+	prefix = gbr_find_prefix(NULL);
 #endif
 
 	return prefix;
