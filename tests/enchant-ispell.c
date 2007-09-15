@@ -1,6 +1,7 @@
 /* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
+ *               2007 Hannu Väisänen
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,6 +32,11 @@
 /**
  * This is a rough approximation of an "ispell compatibility mode"
  * for Enchant.
+ *
+ * Modified in 2007 to work when called from emacs which
+ * calls a spelling program (e.g. enchant) like this
+ *
+ * enchant -a -m -d dictionary
  */
 
 #include <stdio.h>
@@ -44,6 +50,7 @@
 /* word has to be bigger than this to be checked */
 #define MIN_WORD_LENGTH 1
 
+
 typedef enum 
 	{
 		MODE_NONE,
@@ -56,14 +63,17 @@ static void
 print_version (FILE * to)
 {
 	fprintf (to, "@(#) International Ispell Version 3.1.20 (but really Enchant %s)\n", VERSION);
+	fflush (to);
 }
 
 static void
 print_help (FILE * to, const char * prog)
 {
-	fprintf (to, "Usage: %s [options] -a|-l|-L|-v[v]|<file>\n", prog);
+	fprintf (to, "Usage: %s [options] -a|-d dict|-l|-L|-m|-v[v]|<file>\n", prog);
 	fprintf (to, "\t-a lists alternatives.\n");
+	fprintf (to, "\t-d dict uses dictionary <dict>.\n");
 	fprintf (to, "\t-l lists misspellings.\n");
+	fprintf (to, "\t-m is ignored.\n");
 	fprintf (to, "\t-L displays line numbers.\n");
 	fprintf (to, "\t-v displays program version.\n");
 }
@@ -95,8 +105,8 @@ consume_line (FILE * in, GString * str)
 			g_string_assign (str, utf);
 			g_free (utf);
 		} 
-		/* else str->str stays the same. we'll assume that it's 
-		   already utf8 and glib is just being stupid */
+		/* Else str->str stays the same. we'll assume that it's 
+		   already utf8 and glib is just being stupid. */
 	}
 
 	return ret;
@@ -113,7 +123,7 @@ print_utf (FILE * out, const char * str)
 		fwrite (native, 1, bytes_written, out);
 		g_free (native);
 	} else {
-		/* we'll assume that it's already utf8 and glib is just being stupid */
+		/* We'll assume that it's already utf8 and glib is just being stupid. */
 		fwrite (str, 1, strlen (str), out);
 	}
 }
@@ -124,11 +134,12 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, siz
 	size_t n_suggs;
 	char ** suggs;	
 
-	if (word->len <= MIN_WORD_LENGTH || enchant_dict_check (dict, word->str, word->len) == 0)
+	if (word->len <= MIN_WORD_LENGTH || enchant_dict_check (dict, word->str, word->len) == 0) {
 		if (lineCount)
 			fprintf (out, "* %ld\n", lineCount);
 		else
 			fwrite ("*\n", 1, 2, out);
+	}
 	else {
 		suggs = enchant_dict_suggest (dict, word->str, 
 					      word->len, &n_suggs);
@@ -137,7 +148,7 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, siz
 			if (lineCount)
 				fprintf (out, "%ld ", lineCount);
 			print_utf (out, word->str);
-			fprintf (out, " %ld\n", start_pos+1);
+			fprintf (out, " %ld\n", start_pos);
 		}
 		else {
 			size_t i = 0;
@@ -174,68 +185,164 @@ do_mode_l (FILE * out, EnchantDict * dict, GString * word, size_t lineCount)
 	}
 }
 
-/* splits a line into a set of (word,word_position) touples */
+
+static int
+is_word_char (gunichar uc, size_t n)
+{
+	switch (g_unichar_type(uc)) {
+	case G_UNICODE_MODIFIER_LETTER:
+	case G_UNICODE_LOWERCASE_LETTER:
+	case G_UNICODE_TITLECASE_LETTER:
+	case G_UNICODE_UPPERCASE_LETTER:
+	case G_UNICODE_OTHER_LETTER:
+	case G_UNICODE_COMBINING_MARK:
+	case G_UNICODE_ENCLOSING_MARK:
+	case G_UNICODE_NON_SPACING_MARK:
+	case G_UNICODE_DECIMAL_NUMBER:
+	case G_UNICODE_LETTER_NUMBER:
+	case G_UNICODE_OTHER_NUMBER:
+	case G_UNICODE_CONNECT_PUNCTUATION:
+                return 1;     /* Enchant 1.3.0 defines word chars like this. */
+	default:
+		if ((n > 0) && (uc == g_utf8_get_char("'"))) {
+		        return 1;  /** Char ' is accepted only within a word. */
+		}
+		return 0;
+	}
+}
+
+
+typedef struct lang_map {
+  char *ispell;
+  char *enchant;
+} LangMap;
+
+
+/* Maps ispell language codes to enchant language codes. */
+/* The list is partially taken from src/ispell/ispell_checker.cpp. */
+static const LangMap lingua[] = {
+	{"american",	"en_US"},
+	{"brazilian",	"pt_BR"},
+	{"british",	"en_GB"},
+	{"bulgarian",	"bg"},
+	{"catala",	"ca"},
+	{"catalan",	"ca"},
+	{"danish",	"da"},
+	{"dansk",	"da"},
+	{"deutsch",	"de"},
+	{"dutch",	"nl"},
+	{"ellhnika",	"el"},
+	{"espanol",	"es"},
+	{"esperanto",	"eo"},
+	{"estonian",	"et"},
+	{"faeroese",	"fo"},
+	{"finnish",	"fi"},
+	{"francais",	"fr"},
+	{"french",	"fr"},
+	{"galician",	"gl"},
+	{"german",	"de"},
+	{"hungarian",	"hu"},
+	{"interlingua",	"ia"},
+	{"irish",	"ga"},
+	{"italian",	"it"},
+	{"latin",	"la"},
+	{"lietuviu",	"lt"},
+	{"lithuanian",	"lt"},
+	{"mlatin",	"la"},
+	{"nederlands",	"nl"},
+	{"norsk",	"no"},
+	{"norwegian",	"no"},
+	{"nynorsk",	"nn"},
+	{"polish",	"pl"},
+	{"portugues",	"pt"},
+	{"portuguese",	"pt"},
+	{"russian",	"ru"},
+	{"sardinian",	"sc"},
+	{"slovak",	"sk"},
+	{"slovenian",	"sl"},
+	{"slovensko",	"sl"},
+	{"spanish",	"es"},
+	{"suomi",	"fi"},   /* For Emacs/Voikko/tmispell compatibility. */
+	{"svenska",	"sv"},
+	{"swedish",	"sv"},
+	{"swiss",	"de_CH"},
+	{"ukrainian",	"uk"},
+	{"yiddish-yivo",	"yi"},
+	{NULL,       NULL}    /* Last item must be {NULL, NULL}. */
+};
+
+
+/* Converts ispell language code to enchant language code. */
+static gchar *
+convert_language_code (gchar *code)
+{
+	size_t i;
+	for (i = 0; lingua[i].ispell; i++) {
+	        if (!strcmp(code,lingua[i].ispell)) {
+			/* We must call g_strdup() because the calling program g_free()s the result. */
+		        return g_strdup (lingua[i].enchant);
+		}
+	}
+	/* Let's call g_strdup() here too! */
+	return g_strdup (code);
+}
+
+
+/* Splits a line into a set of (word,word_position) touples. */
 static GSList *
 tokenize_line (GString * line)
 {
 	GSList * tokens = NULL;
-	size_t start_pos, cur_pos;
 	char *utf = (char *) line->str;
 
 	GString * word;
 	
 	gunichar uc;
-	
-	start_pos = cur_pos = 0;
+	size_t cur_pos = 0;
+	size_t start_pos = 0;
 	word = g_string_new (NULL);
 
 	while (cur_pos < line->len && *utf) {
-		uc = g_utf8_get_char (utf); 
-		
-		switch (g_unichar_type(uc)) {
-		case G_UNICODE_MODIFIER_LETTER:
-		case G_UNICODE_LOWERCASE_LETTER:
-		case G_UNICODE_TITLECASE_LETTER:
-		case G_UNICODE_UPPERCASE_LETTER:
-		case G_UNICODE_OTHER_LETTER:
-		case G_UNICODE_COMBINING_MARK:
-		case G_UNICODE_ENCLOSING_MARK:
-		case G_UNICODE_NON_SPACING_MARK:
-		case G_UNICODE_DECIMAL_NUMBER:
-		case G_UNICODE_LETTER_NUMBER:
-		case G_UNICODE_OTHER_NUMBER:
-		case G_UNICODE_CONNECT_PUNCTUATION:
-			g_string_append_unichar (word, uc);
-			cur_pos++;
-			break;
-		case G_UNICODE_OTHER_PUNCTUATION:
-			if (uc == '\'') {
-				g_string_append_unichar (word, uc);
-				cur_pos++;
-				break;
-			}
-			/* else fall through */
-		default: /* some sort of non-word character */
-			if (word->len) {
-				tokens = g_slist_append (tokens,
-							 g_string_new_len (word->str, word->len));
-				tokens = g_slist_append (tokens,
-							 GINT_TO_POINTER(start_pos));
-				g_string_truncate (word, 0);
-				start_pos = ++cur_pos;
-			}
-			break;
-		}
-		utf = g_utf8_next_char (utf);
-	}
 
+	        /* Skip non-word characters. */
+		cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
+		uc = g_utf8_get_char (utf);
+		while (cur_pos < line->len && *utf && !is_word_char(uc,0)) {
+		        utf = g_utf8_next_char (utf);
+			uc = g_utf8_get_char (utf);
+			cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
+		}
+		start_pos = cur_pos;
+
+		/* Skip over word. */
+		while (cur_pos < line->len && *utf && is_word_char(uc,1)) {
+			g_string_append_unichar (word, uc);
+		        utf = g_utf8_next_char (utf);
+			uc = g_utf8_get_char (utf);
+			cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
+		}
+
+	        /* Do not accept one or more  ' at the end of the word. */
+		int i = word->len-1;
+	        while ((i >= 0) && (word->str[i] == '\'')) {
+	                g_string_truncate (word, i);
+			i--;
+		}
+
+		/* Save (word, position) touple. */
+                if (word->len) {
+		        tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
+			tokens = g_slist_append (tokens, GINT_TO_POINTER(start_pos));
+			g_string_truncate (word, 0);
+		}
+	}
 	g_string_free (word, TRUE);
 
 	return tokens;
 }
 
 static int
-parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
+parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dictionary)
 {
 	EnchantBroker * broker;
 	EnchantDict * dict;
@@ -250,9 +357,14 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
 	if (mode == MODE_A)
 		print_version (out);
 
-	lang = enchant_get_user_language();
-	if(!lang)
-		return 1;
+	if (dictionary) {
+		lang = convert_language_code (dictionary);
+	}
+	else {
+	        lang = enchant_get_user_language();
+		if(!lang)
+			return 1;
+ 	}
 
 	/* Enchant will get rid of useless trailing garbage like de_DE@euro or de_DE.ISO-8859-15 */
 	
@@ -277,7 +389,6 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
 			lineCount++;
 
 		if (str->len) {
-
 			corrected_something = FALSE;
 			token_ptr = tokens = tokenize_line (str);
 			while (tokens != NULL) {
@@ -293,17 +404,17 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines)
 				else if (mode == MODE_L)
 					do_mode_l (out, dict, word, lineCount);
 			}
-
 			if (token_ptr)
 				g_slist_free (token_ptr);
 		} 
 		
-		if (mode == MODE_A && corrected_something)
+		if (mode == MODE_A && corrected_something) {
 			fwrite ("\n", 1, 1, out);
-		
+		}
 		g_string_truncate (str, 0);
+		fflush (out);
 	}
-	
+
 	enchant_broker_free_dict (broker, dict);
 	enchant_broker_free (broker);
 
@@ -324,12 +435,14 @@ int main (int argc, char ** argv)
 	FILE * fp = stdin;
 
 	int countLines = 0;
-	
+	gchar *dictionary = 0;  /* -d dictionary */
+
+
 	for (i = 1; i < argc; i++) {
 		char * arg = argv[i];
 		if (arg[0] == '-') {
 			if (strlen (arg) == 2) {
-				/* it seems that the first one of these that is specified gets precedence */
+				/* It seems that the first one of these that is specified gets precedence. */
 				if (arg[1] == 'a' && MODE_NONE == mode)
 					mode = MODE_A;
 				else if (arg[1] == 'l' && MODE_NONE == mode)
@@ -338,7 +451,19 @@ int main (int argc, char ** argv)
 					mode = MODE_VERSION;
 				else if (arg[1] == 'L' && MODE_NONE == mode)
 					countLines = 1;
+				else if (arg[1] == 'm')
+				     	; /* Ignore. Emacs calls ispell with '-m'. */
+				else if (arg[1] == 'd') {
+				     	i++;
+					dictionary = argv[i];  /* Emacs calls ispell with '-d dictionary'. */
+				}
 			} 
+			else if ((strlen (arg) == 3) && (arg[1] == 'v') && (arg[2] == 'v')) {
+			     	mode = MODE_VERSION;   /* Emacs (or ispell.el) calls [ai]spell with '-vv'. */
+			}
+			else if (arg[1] == 'd') {
+			        dictionary = arg + 2;  /* Accept "-ddictionary", i.e. no space between -d and dictionary. */
+			}
 			else if (strlen (arg) > 2) {
 				fprintf (stderr, "-%c does not take any parameters.\n", arg[1]);
 				exit(1);
@@ -365,7 +490,7 @@ int main (int argc, char ** argv)
 			}
 		}
 		
-		rval = parse_file (fp, stdout, mode, countLines);
+		rval = parse_file (fp, stdout, mode, countLines, dictionary);
 		
 		if (file)
 			fclose (fp);
