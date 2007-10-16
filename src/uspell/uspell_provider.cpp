@@ -341,25 +341,6 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 		manager = uspell_request_manager (private_dir, mapIndex);
 	}
 
-	if (!manager) {
-		// try shortened form: he_IL => he
-		std::string shortened_dict (tag);
-		size_t uscore_pos;
-		
-		if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
-			shortened_dict = shortened_dict.substr(0, uscore_pos);
-
-			for (mapIndex = 0; mapIndex < n_mappings; mapIndex++) {
-				if (!strcmp(shortened_dict.c_str(), mapping[mapIndex].language_tag)) 
-					break;
-			}
-
-			if (mapIndex < n_mappings) {
-				manager = uspell_request_manager (private_dir, mapIndex);
-			}			
-		}
-	}
-
 	g_free (private_dir);
 
 	if (!manager) 
@@ -385,19 +366,6 @@ uspell_provider_dictionary_exists (struct str_enchant_provider * me,
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
 			return 1;
-	}
-
-	std::string shortened_dict (tag);
-	size_t uscore_pos;
-	
-	if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
-		shortened_dict = shortened_dict.substr(0, uscore_pos);
-
-		s_buildHashNames (names, shortened_dict.c_str());
-		for (size_t i = 0; i < names.size(); i++) {
-			if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
-				return 1;
-		}
 	}
 
 	return 0;

@@ -336,7 +336,7 @@ zemberek_provider_dictionary_exists (EnchantProvider * me,
 	EnchantDict * dict;
 	Zemberek * checker;
 
-	if (!strcmp ("tr", tag) || !strcmp ("tr_TR", tag)) {
+	if (!strcmp ("tr", tag)) {
 	  return zemberek_provider_server_is_running ();
 	}
 	else {

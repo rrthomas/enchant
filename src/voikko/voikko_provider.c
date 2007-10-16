@@ -117,7 +117,7 @@ voikko_provider_dictionary_exists (struct str_enchant_provider * me,
 	int voikko_handle;
 
 	/* Only Finnish is supported */
-	if (strncmp(tag, "fi_FI", 6) != 0 && strncmp(tag, "fi", 3) != 0)
+	if (strncmp(tag, "fi", 3) != 0)
 		return 0;
 
 	/* Check that a dictionary is actually available */
@@ -139,9 +139,8 @@ voikko_provider_list_dicts (EnchantProvider * me,
 
 	if (voikko_init(&voikko_handle, "fi_FI", 0) == NULL) {
 		voikko_terminate(voikko_handle);
-		*out_n_dicts = 2;
+		*out_n_dicts = 1;
 		out_list = g_new0 (char *, *out_n_dicts + 1);
-		out_list[0] = g_strdup("fi_FI");
 		out_list[1] = g_strdup("fi");
 	}
 

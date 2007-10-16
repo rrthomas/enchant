@@ -274,6 +274,18 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	return new_tag;
 }
 
+static char *
+enchant_iso_639_from_tag (const char * const dict_tag)
+{
+	char * new_tag = g_strdup (dict_tag);
+	char * needle;
+
+	if ((needle = strchr (new_tag, '_')) != NULL)
+		*needle = '\0';
+
+	return new_tag;
+}
+
 static void
 enchant_session_destroy (EnchantSession * session)
 {
@@ -1147,6 +1159,44 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 	return dict;
 }
 
+static EnchantDict *
+_enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
+{
+	EnchantDict * dict;
+	GSList * list;
+
+	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
+	if (dict) {
+		return dict;
+	}
+
+	for (list = enchant_get_ordered_providers (broker, tag); list != NULL; list = g_slist_next (list))
+		{
+			EnchantProvider * provider;
+
+			provider = (EnchantProvider *) list->data;
+			
+			if (provider->request_dict)
+				{
+					dict = (*provider->request_dict) (provider, tag);
+					
+					if (dict)
+						{
+							EnchantSession *session;
+	
+							session = enchant_session_new (provider, tag);
+							dict->enchant_private_data = (void*)session;
+							g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (tag), dict);
+							break;
+						}
+				}
+		}
+
+	g_slist_free (list);
+
+	return dict;
+}
+
 /**
  * enchant_broker_request_dict
  * @broker: A non-null #EnchantBroker
@@ -1157,10 +1207,7 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 ENCHANT_MODULE_EXPORT (EnchantDict *)
 enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 {
-	EnchantSession *session;
-	EnchantProvider *provider;
 	EnchantDict *dict = NULL;
-	GSList *list = NULL;
 	char * normalized_tag;
 
 	g_return_val_if_fail (broker, NULL);
@@ -1169,34 +1216,19 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	enchant_broker_clear_error (broker);
 	
 	normalized_tag = enchant_normalize_dictionary_tag (tag);
-	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) normalized_tag);
-	if (dict) {
-		g_free (normalized_tag);
-		return dict;
-	}
-
-	for (list = enchant_get_ordered_providers (broker, normalized_tag); list != NULL; list = g_slist_next (list))
+	if ((dict = _enchant_broker_request_dict (broker, normalized_tag)) == NULL)
 		{
-			provider = (EnchantProvider *) list->data;
-			
-			if (provider->request_dict)
-				{
-					dict = (*provider->request_dict) (provider, normalized_tag);
-					
-					if (dict)
-						{
-							session = enchant_session_new (provider, normalized_tag);
-							dict->enchant_private_data = (void*)session;
-							g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (normalized_tag), dict);
-							break;
-						}
-				}
+			char * iso_639_only_tag;
+
+			iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
+
+			dict = _enchant_broker_request_dict (broker, iso_639_only_tag);
+
+			g_free (iso_639_only_tag);
 		}
 
 	g_free (normalized_tag);
-	g_slist_free (list);
 	
-	/* Nothing found */
 	return dict;
 }
 
@@ -1364,6 +1396,32 @@ _enchant_provider_dictionary_exists (EnchantProvider * provider,
 	return exists;
 }
 
+static int
+_enchant_broker_dict_exists (EnchantBroker * broker,
+			     const char * const tag)
+{
+	GSList * list;
+
+	/* don't query the providers if we can just do a quick map lookup */
+	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL) {
+		return 1;
+	}
+
+	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
+		{
+			EnchantProvider * provider;
+
+			provider = (EnchantProvider *) list->data;
+
+			if (_enchant_provider_dictionary_exists (provider, tag))
+				{
+					return 1;
+				}
+		}
+
+	return 0;
+}
+
 /**
  * enchant_broker_dict_exists
  * @broker: A non-null #EnchantBroker
@@ -1378,6 +1436,7 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 	EnchantProvider *provider;
 	GSList *list;
 	char * normalized_tag;
+	int exists = 0;
 
 	g_return_val_if_fail (broker, 0);
 	g_return_val_if_fail (tag && strlen(tag), 0);
@@ -1386,25 +1445,18 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 
 	normalized_tag = enchant_normalize_dictionary_tag (tag);
 
-	/* don't query the providers if we can just do a quick map lookup */
-	if (g_hash_table_lookup (broker->dict_map, (gpointer) normalized_tag) != NULL) {
-		g_free (normalized_tag);
-		return 1;
-	}
-
-	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
+	if ((exists = _enchant_broker_dict_exists (broker, normalized_tag)) == 0)
 		{
-			provider = (EnchantProvider *) list->data;
+			char * iso_639_only_tag;
 
-			if (_enchant_provider_dictionary_exists (provider, normalized_tag))
-				{
-					g_free (normalized_tag);
-					return 1;
-				}
+			iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
+			exists = _enchant_broker_dict_exists (broker, iso_639_only_tag);
+
+			g_free (iso_639_only_tag);
 		}
 
 	g_free (normalized_tag);
-	return 0;
+	return exists;
 }
 
 /**

@@ -237,10 +237,9 @@ hspell_provider_list_dicts (EnchantProvider * me,
 	if(dictionary_path && *dictionary_path && g_file_test (dictionary_path, G_FILE_TEST_EXISTS)) {
 		*out_n_dicts = 2;
 		
-		out_list = g_new0 (char *, 3);
+		out_list = g_new0 (char *, 2);
 		
-		out_list[0] = g_strdup ("he_IL");
-		out_list[1] = g_strdup ("he");
+		out_list[0] = g_strdup ("he");
 	}		
 		
 	return out_list;
