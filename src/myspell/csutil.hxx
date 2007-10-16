@@ -3,10 +3,30 @@
 
 // First some base level utility routines
 
+#define NOCAP   0
+#define INITCAP 1
+#define ALLCAP  2
+#define HUHCAP  3
+#define HUHINITCAP  4
+
+#define FIELD_STEM  "st:"
+#define FIELD_POS   "po:"
+#define FIELD_SUFF  "su:"
+#define FIELD_PREF  "pr:"
+#define FIELD_FREQ  "fr:"
+#define FIELD_PHON  "ph:"
+#define FIELD_HYPH  "hy:"
+#define FIELD_COMP  "co:"
+
+// default flags
+#define ONLYUPCASEFLAG 65535
+
 typedef struct {
     unsigned char l;
     unsigned char h;
 } w_char;
+
+#define w_char_eq(a,b) (((a).l == (b).l) && ((a).h == (b).h))
 
 // convert UTF-16 characters to UTF-8
 char * u16_u8(char * dest, int size, const w_char * src, int srclen);
@@ -65,6 +85,12 @@ struct cs_info {
   unsigned char cupper;
 };
 
+// two character arrays
+struct replentry {
+  char * pattern;
+  char * pattern2;
+};
+
 // Unicode character encoding information
 struct unicode_info {
   unsigned short c;
@@ -101,7 +127,11 @@ struct cs_info * get_current_cs(const char * es);
 
 const char * get_default_enc(const char * lang);
 
+// get language identifiers of language codes
 int get_lang_num(const char * lang);
+
+// get characters of the given 8bit encoding with lower- and uppercase forms
+char * get_casechars(const char * enc);
 
 // convert null terminated string to all caps using encoding
 void enmkallcap(char * d, const char * p, const char * encoding);
@@ -126,6 +156,12 @@ void mkallsmall_utf(w_char * u, int nc, int langnum);
 
 // convert first nc characters of UTF-8 string to capital
 void mkallcap_utf(w_char * u, int nc, int langnum);
+
+// get type of capitalization
+int get_captype(char * q, int nl, cs_info *);
+
+// get type of capitalization (UTF-8)
+int get_captype_utf8(w_char * q, int nl, int langnum);
 
 // strip all ignored characters in the string
 void remove_ignored_chars_utf(char * word, unsigned short ignored_chars[], int ignored_len);

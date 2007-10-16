@@ -1,37 +1,33 @@
-#include "license.hunspell"
-#include "license.myspell"
-
 #include "hashmgr.hxx"
 #include "affixmgr.hxx"
 #include "suggestmgr.hxx"
 #include "csutil.hxx"
 #include "langnum.hxx"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #define  SPELL_COMPOUND  (1 << 0)
 #define  SPELL_FORBIDDEN (1 << 1)
-
-#define NOCAP   0
-#define INITCAP 1
-#define ALLCAP  2
-#define HUHCAP  3
-#define HUHINITCAP  4
+#define  SPELL_ALLCAP    (1 << 2)
+#define  SPELL_NOCAP     (1 << 3)
+#define  SPELL_INITCAP   (1 << 4)
 
 #define MAXSUGGESTION 15
 #define MAXSHARPS 5
 
-#ifdef W32
-#define DLLTEST2_API __declspec(dllexport)
-#endif
-
 #ifndef _MYSPELLMGR_HXX_
 #define _MYSPELLMGR_HXX_
 
+#ifdef HUNSPELL_STATIC
+	#define DLLEXPORT
+#else
+	#ifdef HUNSPELL_EXPORTS
+		#define DLLEXPORT  __declspec( dllexport )
+	#else
+		#define DLLEXPORT  __declspec( dllimport )
+	#endif
+#endif
+
 #ifdef W32
-class DLLTEST2_API Hunspell
+class DLLEXPORT Hunspell
 #else
 class Hunspell
 #endif
@@ -136,7 +132,7 @@ private:
    char * sharps_u8_l1(char * dest, char * source);
    hentry * spellsharps(char * base, char *, int, int, char * tmp, int * info, char **root);
    int    is_keepcase(const hentry * rv);
-   int    insert_sug(char ***slst, char * word, int *ns);
+   int    insert_sug(char ***slst, char * word, int ns);
 
 };
 

@@ -33,6 +33,8 @@ libenchant_myspell_la_SOURCES =	\
 	hashmgr.cxx		\
 	hunspell.cxx		\
 	suggestmgr.cxx		\
+	phonet.cxx		\
+	phonet.hxx		\
 	myspell_checker.cpp
 
 EXTRA_DIST=			\

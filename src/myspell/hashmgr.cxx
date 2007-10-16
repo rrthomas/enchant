@@ -36,6 +36,10 @@ HashMgr::HashMgr(const char * tpath, const char * apath)
   flag_mode = FLAG_CHAR;
   complexprefixes = 0;
   utf8 = 0;
+  langnum = 0;
+  lang = NULL;
+  enc = NULL;
+  csconv = 0;
   ignorechars = NULL;
   ignorechars_utf16 = NULL;
   ignorechars_utf16_len = 0;
@@ -43,6 +47,7 @@ HashMgr::HashMgr(const char * tpath, const char * apath)
   aliasf = NULL;
   numaliasm = 0;
   aliasm = NULL;
+  forbiddenword = FLAG_NULL; // forbidden word signing flag
   load_config(apath);  
   int ec = load_tables(tpath);
   if (ec) {
@@ -50,6 +55,7 @@ HashMgr::HashMgr(const char * tpath, const char * apath)
     HUNSPELL_WARNING(stderr, "Hash Manager Error : %d\n",ec);
     if (tableptr) {
       free(tableptr);
+      tableptr = NULL;
     }
     tablesize = 0;
   }
@@ -62,20 +68,19 @@ HashMgr::~HashMgr()
     // now pass through hash table freeing up everything
     // go through column by column of the table
     for (int i=0; i < tablesize; i++) {
-      struct hentry * pt = &tableptr[i];
+      struct hentry * pt = tableptr[i];
       struct hentry * nt = NULL;
-      if (pt) {
-        if (pt->astr && !aliasf) free(pt->astr);
-        if (pt->word) free(pt->word);
+/*      if (pt) {
+        if (pt->astr && (!aliasf || TESTAFF(pt->astr, ONLYUPCASEFLAG, pt->alen))) free(pt->astr);
 #ifdef HUNSPELL_EXPERIMENTAL
         if (pt->description && !aliasm) free(pt->description);
 #endif
         pt = pt->next;
       }
+*/
       while(pt) {
         nt = pt->next;
-        if (pt->astr && !aliasf) free(pt->astr);
-        if (pt->word) free(pt->word);
+        if (pt->astr && (!aliasf || TESTAFF(pt->astr, ONLYUPCASEFLAG, pt->alen))) free(pt->astr);
 #ifdef HUNSPELL_EXPERIMENTAL
         if (pt->description && !aliasm) free(pt->description);
 #endif
@@ -101,6 +106,15 @@ HashMgr::~HashMgr()
     free(aliasm);
     aliasm = NULL;
   }  
+
+#ifndef OPENOFFICEORG
+#ifndef MOZILLA_CLIENT
+  if (utf8) free_utf_tbl();
+#endif
+#endif
+
+  if (enc) free(enc);
+  if (lang) free(lang);
   
   if (ignorechars) free(ignorechars);
   if (ignorechars_utf16) free(ignorechars_utf16);
@@ -112,57 +126,50 @@ struct hentry * HashMgr::lookup(const char *word) const
 {
     struct hentry * dp;
     if (tableptr) {
-       dp = &tableptr[hash(word)];
-       if (dp->word == NULL) return NULL;
+       dp = tableptr[hash(word)];
+       if (!dp) return NULL;
        for (  ;  dp != NULL;  dp = dp->next) {
-          if (strcmp(word,dp->word) == 0) return dp;
+          if (strcmp(word,&(dp->word)) == 0) return dp;
        }
     }
     return NULL;
 }
 
 // add a word to the hash table (private)
-
-int HashMgr::add_word(const char * word, int wl, unsigned short * aff, int al, const char * desc)
+int HashMgr::add_word(const char * word, int wbl, int wcl, unsigned short * aff,
+    int al, const char * desc, bool onlyupcase)
 {
-    char * st = mystrdup(word);
-    if (wl && !st) return 1;
+    bool upcasehomonym = false;
+    int descl = (desc) ? strlen(desc) : 0;
+    // variable-length hash record with word and optional fields
+    // instead of mmap implementation temporarily
+    struct hentry* hp = 
+	(struct hentry *) malloc (sizeof(struct hentry) + wbl + descl + 1);
+    if (!hp) return 1;
+    char * hpw = &(hp->word);
+    strcpy(hpw, word);
+    if (desc && strncmp(desc, FIELD_PHON, strlen(FIELD_PHON)) == 0) {
+	strcpy(hpw + wbl + 1, desc + strlen(FIELD_PHON));
+	hp->var = 1;
+    } else {
+	hp->var = 0;
+    }
     if (ignorechars != NULL) {
       if (utf8) {
-        remove_ignored_chars_utf(st, ignorechars_utf16, ignorechars_utf16_len);
+        remove_ignored_chars_utf(hpw, ignorechars_utf16, ignorechars_utf16_len);
       } else {
-        remove_ignored_chars(st, ignorechars);
+        remove_ignored_chars(hpw, ignorechars);
       }
     }
     if (complexprefixes) {
-        if (utf8) reverseword_utf(st); else reverseword(st);
+        if (utf8) reverseword_utf(hpw); else reverseword(hpw);
     }
-    int i = hash(st);
-    struct hentry * dp = &tableptr[i];
-    if (dp->word == NULL) {
-       dp->wlen = (short) wl;
-       dp->alen = (short) al;
-       dp->word = st;
-       dp->astr = aff;
-       dp->next = NULL;
-       dp->next_homonym = NULL;
-#ifdef HUNSPELL_EXPERIMENTAL
-       if (aliasm) {
-            dp->description = (desc) ? get_aliasm(atoi(desc)) : mystrdup(desc);
-       } else {
-            dp->description = mystrdup(desc);
-            if (desc && !dp->description) return 1;
-            if (dp->description && complexprefixes) {
-                if (utf8) reverseword_utf(dp->description); else reverseword(dp->description);
-            }
-       }
-#endif
-    } else {
-       struct hentry* hp = (struct hentry *) malloc (sizeof(struct hentry));
-       if (!hp) return 1;
-       hp->wlen = (short) wl;
+
+    int i = hash(hpw);
+
+       hp->blen = (unsigned char) wbl;
+       hp->clen = (unsigned char) wcl;
        hp->alen = (short) al;
-       hp->word = st;
        hp->astr = aff;
        hp->next = NULL;      
        hp->next_homonym = NULL;
@@ -171,24 +178,114 @@ int HashMgr::add_word(const char * word, int wl, unsigned short * aff, int al, c
             hp->description = (desc) ? get_aliasm(atoi(desc)) : mystrdup(desc);
        } else {
             hp->description = mystrdup(desc);
-            if (desc && !hp->description) return 1;
-            if (dp->description && complexprefixes) {
+            if (desc && !hp->description)
+            {
+                free(hp->astr);
+                free(hp);
+                return 1;
+            }
+            if (hp->description && complexprefixes) {
                 if (utf8) reverseword_utf(hp->description); else reverseword(hp->description);
             }
        }
 #endif
+       
+       struct hentry * dp = tableptr[i];
+       if (!dp) {
+         tableptr[i] = hp;
+         return 0;
+       }
        while (dp->next != NULL) {
-         if ((!dp->next_homonym) && (strcmp(hp->word, dp->word) == 0)) dp->next_homonym = hp;
+         if ((!dp->next_homonym) && (strcmp(&(hp->word), &(dp->word)) == 0)) {
+    	    // remove hidden onlyupcase homonym
+            if (!onlyupcase) {
+		if ((dp->astr) && TESTAFF(dp->astr, ONLYUPCASEFLAG, dp->alen)) {
+		    free(dp->astr);
+		    dp->astr = hp->astr;
+		    dp->alen = hp->alen;
+		    free(hp);
+		    return 0;
+		} else {
+    		    dp->next_homonym = hp;
+    		}
+            } else {
+        	upcasehomonym = true;
+            }
+         }
          dp=dp->next;
        }
-       if ((!dp->next_homonym) && (strcmp(hp->word, dp->word) == 0)) dp->next_homonym = hp;
-       dp->next = hp;
-    }
+       if (strcmp(&(hp->word), &(dp->word)) == 0) {
+    	    // remove hidden onlyupcase homonym
+            if (!onlyupcase) {
+		if ((dp->astr) && TESTAFF(dp->astr, ONLYUPCASEFLAG, dp->alen)) {
+		    free(dp->astr);
+		    dp->astr = hp->astr;
+		    dp->alen = hp->alen;
+		    free(hp);
+		    return 0;
+		} else {
+    		    dp->next_homonym = hp;
+    		}
+            } else {
+        	upcasehomonym = true;
+            }
+       }
+       if (!upcasehomonym) {
+    	    dp->next = hp;
+       } else {
+    	    // remove hidden onlyupcase homonym
+    	    if (hp->astr) free(hp->astr);
+    	    free(hp);
+       }
     return 0;
 }     
 
+int HashMgr::add_hidden_capitalized_word(char * word, int wbl, int wcl,
+    unsigned short * flags, int al, char * dp, int captype)
+{
+    // add inner capitalized forms to handle the following allcap forms:
+    // Mixed caps: OpenOffice.org -> OPENOFFICE.ORG
+    // Allcaps with suffixes: CIA's -> CIA'S    
+    if (((captype == HUHCAP) || (captype == HUHINITCAP) ||
+      ((captype == ALLCAP) && (flags != NULL))) &&
+      !((flags != NULL) && TESTAFF(flags, forbiddenword, al))) {
+          unsigned short * flags2 = (unsigned short *) malloc (sizeof(unsigned short) * (al+1));
+	  if (!flags2) return 1;
+          if (al) memcpy(flags2, flags, al * sizeof(unsigned short));
+          flags2[al] = ONLYUPCASEFLAG;
+          if (utf8) {
+              char st[MAXDELEN];
+              w_char w[MAXDELEN];
+              int wlen = u8_u16(w, MAXDELEN, word);
+              mkallsmall_utf(w, wlen, langnum);
+              mkallcap_utf(w, 1, langnum);
+              u16_u8(st, MAXDELEN, w, wlen);
+              return add_word(st,wbl,wcl,flags2,al+1,dp, true);
+           } else {
+               mkallsmall(word, csconv);
+               mkinitcap(word, csconv);
+               return add_word(word,wbl,wcl,flags2,al+1,dp, true);
+           }
+    }
+    return 0;
+}
+
+// detect captype and modify word length for UTF-8 encoding
+int HashMgr::get_clen_and_captype(const char * word, int wbl, int * captype) {
+    int len;
+    if (utf8) {
+      w_char dest_utf[MAXDELEN];
+      len = u8_u16(dest_utf, MAXDELEN, word);
+      *captype = get_captype_utf8(dest_utf, len, langnum);
+    } else {
+      len = wbl;
+      *captype = get_captype((char *) word, len, csconv);
+    }
+    return len;
+}
+
 // add a custom dic. word to the hash table (public)
-int HashMgr::put_word(const char * word, int wl, char * aff)
+int HashMgr::put_word(const char * word, char * aff)
 {
     unsigned short * flags;
     int al = 0;
@@ -198,51 +295,53 @@ int HashMgr::put_word(const char * word, int wl, char * aff)
     } else {
         flags = NULL;
     }
-    add_word(word, wl, flags, al, NULL);
-    return 0;
+
+    int captype;
+    int wbl = strlen(word);
+    int wcl = get_clen_and_captype(word, wbl, &captype);
+    add_word(word, wbl, wcl, flags, al, NULL, false);
+    return add_hidden_capitalized_word((char *) word, wbl, wcl, flags, al, NULL, captype);
 }
 
-int HashMgr::put_word_pattern(const char * word, int wl, const char * pattern)
+int HashMgr::put_word_pattern(const char * word, const char * pattern)
 {
-    unsigned short * flags;
+    // detect captype and modify word length for UTF-8 encoding
     struct hentry * dp = lookup(pattern);
-    if (!dp || !dp->astr) return 1;
-    flags = (unsigned short *) malloc (dp->alen * sizeof(short));
-    memcpy((void *) flags, (void *) dp->astr, dp->alen * sizeof(short));
-    add_word(word, wl, flags, dp->alen, NULL);
-    return 0;
+    if (dp && dp->astr) {
+        int captype;
+        int wbl = strlen(word);
+        int wcl = get_clen_and_captype(word, wbl, &captype);
+	if (aliasf) {
+	    add_word(word, wbl, wcl, dp->astr, dp->alen, NULL, false);	
+	} else {
+    	    unsigned short * flags = (unsigned short *) malloc (dp->alen * sizeof(short));
+	    if (flags) {
+		memcpy((void *) flags, (void *) dp->astr, dp->alen * sizeof(short));
+		add_word(word, wbl, wcl, flags, dp->alen, NULL, false);
+	    } else return 1;
+	}
+    	return add_hidden_capitalized_word((char *) word, wbl, wcl, dp->astr, dp->alen, NULL, captype);
+    }
+    return 1;
 }
 
 // walk the hash table entry by entry - null at end
+// initialize: col=-1; hp = NULL; hp = walk_hashtable(&col, hp);
 struct hentry * HashMgr::walk_hashtable(int &col, struct hentry * hp) const
-{
-  //reset to start
-  if ((col < 0) || (hp == NULL)) {
-    col = -1;
-    hp = NULL;
+{  
+  if (hp && hp->next != NULL) return hp->next;
+  for (col++; col < tablesize; col++) {
+    if (tableptr[col]) return tableptr[col];
   }
-
-  if (hp && hp->next != NULL) {
-    hp = hp->next;
-  } else {
-    col++;
-    hp = (col < tablesize) ? &tableptr[col] : NULL;
-    // search for next non-blank column entry
-    while (hp && (hp->word == NULL)) {
-        col ++;
-        hp = (col < tablesize) ? &tableptr[col] : NULL;
-    }
-    if (col < tablesize) return hp;
-    hp = NULL;
-    col = -1;
-  }
-  return hp;
+  // null at end and reset to start
+  col = -1;
+  return NULL;
 }
 
 // load a munched word list and build a hash table on the fly
 int HashMgr::load_tables(const char * tpath)
 {
-  int wl, al;
+  int al;
   char * ap;
   char * dp;
   unsigned short * flags;
@@ -253,25 +352,35 @@ int HashMgr::load_tables(const char * tpath)
 
   // first read the first line of file to get hash table size */
   char ts[MAXDELEN];
-  if (! fgets(ts, MAXDELEN-1,rawdict)) return 2;
+  if (! fgets(ts, MAXDELEN-1,rawdict)) {
+    HUNSPELL_WARNING(stderr, "error: empty dic file\n");
+    fclose(rawdict);
+    return 2;
+  }
   mychomp(ts);
   
   /* remove byte order mark */
-  if (strncmp(ts,"﻿",3) == 0) {
+  if (strncmp(ts,"\xEF\xBB\xBF",3) == 0) {
     memmove(ts, ts+3, strlen(ts+3)+1);
     HUNSPELL_WARNING(stderr, "warning: dic file begins with byte order mark: possible incompatibility with old Hunspell versions\n");
   }
   
   if ((*ts < '1') || (*ts > '9')) HUNSPELL_WARNING(stderr, "error - missing word count in dictionary file\n");
   tablesize = atoi(ts);
-  if (!tablesize) return 4; 
+  if (!tablesize) {
+    fclose(rawdict);
+    return 4;
+  }
   tablesize = tablesize + 5 + USERWORD;
   if ((tablesize %2) == 0) tablesize++;
 
   // allocate the hash table
-  tableptr = (struct hentry *) calloc(tablesize, sizeof(struct hentry));
-  if (! tableptr) return 3;
-  for (int i=0; i<tablesize; i++) tableptr[i].word = NULL;
+  tableptr = (struct hentry **) malloc(tablesize * sizeof(struct hentry *));
+  if (! tableptr) {
+    fclose(rawdict);
+    return 3;
+  }
+  for (int i=0; i<tablesize; i++) tableptr[i] = NULL;
 
   // loop through all words on much list and add to hash
   // table and create word and affix strings
@@ -321,13 +430,17 @@ int HashMgr::load_tables(const char * tpath)
       flags = NULL;
     }
 
-    wl = strlen(ts);
-
-    // add the word and its index
-    if (add_word(ts,wl,flags,al,dp)) return 5;
-
+    int captype;
+    int wbl = strlen(ts);
+    int wcl = get_clen_and_captype(ts, wbl, &captype);
+    // add the word and its index plus its capitalized form optionally
+    if (add_word(ts,wbl,wcl,flags,al,dp, false) ||
+	add_hidden_capitalized_word(ts, wbl, wcl, flags, al, dp, captype)) {
+	fclose(rawdict);
+	return 5;
+    }
   }
- 
+
   fclose(rawdict);
   return 0;
 }
@@ -354,8 +467,9 @@ int HashMgr::decode_flags(unsigned short ** result, char * flags) {
       case FLAG_LONG: { // two-character flags (1x2yZz -> 1x 2y Zz)
         len = strlen(flags);
         if (len%2 == 1) HUNSPELL_WARNING(stderr, "error: length of FLAG_LONG flagvector is odd: %s\n", flags);
-        len = len/2;
+        len /= 2;
         *result = (unsigned short *) malloc(len * sizeof(short));
+        if (!*result) return -1;
         for (int i = 0; i < len; i++) {
             (*result)[i] = (((unsigned short) flags[i * 2]) << 8) + (unsigned short) flags[i * 2 + 1]; 
         }
@@ -370,6 +484,7 @@ int HashMgr::decode_flags(unsigned short ** result, char * flags) {
           if (*p == ',') len++;
         }
         *result = (unsigned short *) malloc(len * sizeof(short));
+        if (!*result) return -1;
         dest = *result;
         for (p = flags; *p; p++) {
           if (*p == ',') {
@@ -387,6 +502,7 @@ int HashMgr::decode_flags(unsigned short ** result, char * flags) {
         w_char w[MAXDELEN/2];
         len = u8_u16(w, MAXDELEN/2, flags);
         *result = (unsigned short *) malloc(len * sizeof(short));
+        if (!*result) return -1;
         memcpy(*result, w, len * sizeof(short));
         break;
       }
@@ -394,6 +510,7 @@ int HashMgr::decode_flags(unsigned short ** result, char * flags) {
         unsigned short * dest;
         len = strlen(flags);
         *result = (unsigned short *) malloc(len * sizeof(short));
+        if (!*result) return -1;
         dest = *result;
         for (unsigned char * p = (unsigned char *) flags; *p; p++) {
           *dest = (unsigned short) *p;
@@ -466,7 +583,7 @@ int  HashMgr::load_config(const char * affpath)
        /* remove byte order mark */
        if (firstline) {
          firstline = 0;
-         if (strncmp(line,"﻿",3) == 0) memmove(line, line+3, strlen(line+3)+1);
+         if (strncmp(line,"\xEF\xBB\xBF",3) == 0) memmove(line, line+3, strlen(line+3)+1);
        }
 
         /* parse in the try string */
@@ -481,7 +598,36 @@ int  HashMgr::load_config(const char * affpath)
                 HUNSPELL_WARNING(stderr, "error: FLAG need `num', `long' or `UTF-8' parameter: %s\n", line);
             }
         }
-        if ((strncmp(line,"SET",3) == 0) && isspace(line[3]) && strstr(line, "UTF-8")) utf8 = 1;
+        if (strncmp(line,"FORBIDDENWORD",13) == 0) {
+          char * st = NULL;
+          if (parse_string(line, &st, "FORBIDDENWORD")) {
+             fclose(afflst);
+             return 1;
+          }
+          forbiddenword = decode_flag(st);
+          free(st);
+        }
+        if (strncmp(line, "SET", 3) == 0) {
+    	  if (parse_string(line, &enc, "SET")) {
+             fclose(afflst);
+             return 1;
+          }    	    
+    	  if (strcmp(enc, "UTF-8") == 0) {
+    	    utf8 = 1;
+#ifndef OPENOFFICEORG
+#ifndef MOZILLA_CLIENT
+    	    initialize_utf_tbl();
+#endif
+#endif
+    	  } else csconv = get_current_cs(enc);
+    	}
+        if (strncmp(line, "LANG", 4) == 0) {    	
+    	  if (parse_string(line, &lang, "LANG")) {
+             fclose(afflst);
+             return 1;
+          }    	    
+    	  langnum = get_lang_num(lang);
+    	}
 
        /* parse in the ignored characters (for example, Arabic optional diacritics characters */
        if (strncmp(line,"IGNORE",6) == 0) {
@@ -509,6 +655,7 @@ int  HashMgr::load_config(const char * affpath)
         if (strncmp(line,"COMPLEXPREFIXES",15) == 0) complexprefixes = 1;
         if (((strncmp(line,"SFX",3) == 0) || (strncmp(line,"PFX",3) == 0)) && isspace(line[3])) break;
     }
+    if (csconv == NULL) csconv = get_current_cs("ISO8859-1");
     fclose(afflst);
     return 0;
 }

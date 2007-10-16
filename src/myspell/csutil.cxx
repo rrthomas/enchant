@@ -5,10 +5,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <cctype>
 #else
 #include <stdlib.h> 
 #include <string.h>
 #include <stdio.h> 
+#include <ctype.h>
 #endif
 
 #include "csutil.hxx"
@@ -48,7 +50,8 @@ using namespace std;
 #endif
 #endif
 
-struct unicode_info2 * utf_tbl = NULL;
+static struct unicode_info2 * utf_tbl = NULL;
+static int utf_tbl_count = 0; // utf_tbl can be used by multiple Hunspell instances
 
 /* only UTF-16 (BMP) implementation */
 char * u16_u8(char * dest, int size, const w_char * src, int srclen) {
@@ -104,7 +107,7 @@ int u8_u16(w_char * dest, int size, const char * src) {
     w_char * u2 = dest;
     w_char * u2_max = u2 + size;
     
-    while (*u8 && (u2 < u2_max)) {
+    while ((u2 < u2_max) && *u8) {
     switch ((*u8) & 0xf0) {
         case 0x00:
         case 0x10:
@@ -235,15 +238,19 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
          *stringp = dp+1;
          int nc = (int)((unsigned long)dp - (unsigned long)mp);
          rv = (char *) malloc(nc+1);
-         memcpy(rv,mp,nc);
-         *(rv+nc) = '\0';
-         return rv;
+	 if (rv) {
+            memcpy(rv,mp,nc);
+            *(rv+nc) = '\0';
+            return rv;
+	 }
       } else {
-        rv = (char *) malloc(n+1);
-        memcpy(rv, mp, n);
-        *(rv+n) = '\0';
-        *stringp = mp + n;
-        return rv;
+         rv = (char *) malloc(n+1);
+         if (rv) {
+    	    memcpy(rv, mp, n);
+            *(rv+n) = '\0';
+            *stringp = mp + n;
+            return rv;
+         }
       }
    }
    return NULL;
@@ -478,8 +485,8 @@ void mkallcap_utf(w_char * u, int nc, int langnum) {
     for (int i = 0; i < nc; i++) {
         unsigned short idx = (u[i].h << 8) + u[i].l;
         if (idx != unicodetoupper(idx, langnum)) {
-            u[i].h = (unsigned char) (unicodetolower(idx, langnum) >> 8);
-            u[i].l = (unsigned char) (unicodetolower(idx, langnum) & 0x00FF);
+            u[i].h = (unsigned char) (unicodetoupper(idx, langnum) >> 8);
+            u[i].l = (unsigned char) (unicodetoupper(idx, langnum) & 0x00FF);
         }
     }
 }
@@ -5038,6 +5045,26 @@ struct cs_info * get_current_cs(const char * es) {
 }
 #endif
 
+// primitive isalpha() replacement for tokenization
+char * get_casechars(const char * enc) {
+    struct cs_info * csconv = get_current_cs(enc);
+    char expw[MAXLNLEN];
+    char * p =  expw;
+    for (int i = 0; i <= 255; i++) {
+        if ((csconv[i].cupper != csconv[i].clower)) {
+    	    *p = (char) i;
+    	    p++;
+        }
+    }
+    *p = '\0';
+#ifdef MOZILLA_CLIENT
+    delete csconv;
+#endif
+    return mystrdup(expw);
+}
+
+
+
 struct lang_map lang2enc[] = {
 {"ar", "UTF-8", LANG_ar},
 {"az", "UTF-8", LANG_az},
@@ -5090,6 +5117,8 @@ int get_lang_num(const char * lang) {
 #ifndef OPENOFFICEORG
 #ifndef MOZILLA_CLIENT
 int initialize_utf_tbl() {
+  utf_tbl_count++;
+  if (utf_tbl) return 0;
   utf_tbl = (unicode_info2 *) malloc(CONTSIZE * sizeof(unicode_info2));
   if (utf_tbl) {
     int j;
@@ -5110,7 +5139,11 @@ int initialize_utf_tbl() {
 #endif
 
 void free_utf_tbl() {
-  if (utf_tbl) free(utf_tbl);
+  if (utf_tbl_count > 0) utf_tbl_count--;
+  if (utf_tbl && (utf_tbl_count == 0)) {
+    free(utf_tbl);
+    utf_tbl = NULL;
+  }
 }
 
 #ifdef MOZILLA_CLIENT
@@ -5133,11 +5166,11 @@ unsigned short unicodetoupper(unsigned short c, int langnum)
   return u_toupper(c);
 #else
 #ifdef MOZILLA_CLIENT
-  unsigned short ret(c);
-  getcaseConv()->ToUpper(c, &ret);
-  return ret;
+  PRUnichar ch2;
+  getcaseConv()->ToUpper((PRUnichar) c, &ch2);
+  return ch2;
 #else
-  return utf_tbl[c].cupper;
+  return (utf_tbl) ? utf_tbl[c].cupper : c;
 #endif
 #endif
 }
@@ -5153,11 +5186,11 @@ unsigned short unicodetolower(unsigned short c, int langnum)
   return u_tolower(c);
 #else
 #ifdef MOZILLA_CLIENT
-  unsigned short ret(c);
-  getcaseConv()->ToLower(c, &ret);
-  return ret;
+  PRUnichar ch2;
+  getcaseConv()->ToLower((PRUnichar) c, &ch2);
+  return ch2;
 #else
-  return utf_tbl[c].clower;
+  return (utf_tbl) ? utf_tbl[c].clower : c;
 #endif
 #endif
 }
@@ -5167,9 +5200,71 @@ int unicodeisalpha(unsigned short c)
 #ifdef OPENOFFICEORG
   return u_isalpha(c);
 #else
-  return utf_tbl[c].cletter;
+  return (utf_tbl) ? utf_tbl[c].cletter : 0;
 #endif
 }
+
+/* get type of capitalization */
+int get_captype(char * word, int nl, cs_info * csconv) {
+   // now determine the capitalization type of the first nl letters
+   int ncap = 0;
+   int nneutral = 0;
+   int firstcap = 0;
+
+      for (char * q = word; *q != '\0'; q++) {
+         if (csconv[*((unsigned char *)q)].ccase) ncap++;
+         if (csconv[*((unsigned char *)q)].cupper == csconv[*((unsigned char *)q)].clower) nneutral++;
+      }
+      if (ncap) {
+        firstcap = csconv[*((unsigned char *) word)].ccase;
+      }
+
+   // now finally set the captype
+   if (ncap == 0) {
+        return NOCAP;
+   } else if ((ncap == 1) && firstcap) {
+        return INITCAP;
+   } else if ((ncap == nl) || ((ncap + nneutral) == nl)) {
+        return ALLCAP;
+   } else if ((ncap > 1) && firstcap) {
+        return HUHINITCAP;
+   }
+   return HUHCAP;
+}
+
+int get_captype_utf8(w_char * word, int nl, int langnum) {
+   // now determine the capitalization type of the first nl letters
+   int ncap = 0;
+   int nneutral = 0;
+   int firstcap = 0;
+   unsigned short idx;
+   // don't check too long words
+   if (nl >= MAXWORDLEN) return 0;
+   // big Unicode character (non BMP area)
+   if (nl == -1) return NOCAP;
+   for (int i = 0; i < nl; i++) {
+     idx = (word[i].h << 8) + word[i].l;
+     if (idx != unicodetolower(idx, langnum)) ncap++;
+     if (unicodetoupper(idx, langnum) == unicodetolower(idx, langnum)) nneutral++;
+   }
+   if (ncap) {
+      idx = (word[0].h << 8) + word[0].l;
+      firstcap = (idx != unicodetolower(idx, langnum));
+  }
+
+   // now finally set the captype
+   if (ncap == 0) {
+        return NOCAP;
+   } else if ((ncap == 1) && firstcap) {
+        return INITCAP;
+   } else if ((ncap == nl) || ((ncap + nneutral) == nl)) {
+        return ALLCAP;
+   } else if ((ncap > 1) && firstcap) {
+        return HUHINITCAP;
+   }
+   return HUHCAP;
+}
+
 
 // strip all ignored characters in the string
 void remove_ignored_chars_utf(char * word, unsigned short ignored_chars[], int ignored_len)
@@ -5200,14 +5295,14 @@ void remove_ignored_chars(char * word, char * ignored_chars)
    *word = '\0';
 }
 
-int parse_string(char * line, char ** out, const char * name)
+int parse_string(char * line, char ** out, const char * warnvar)
 {
    char * tp = line;
    char * piece;
    int i = 0;
    int np = 0;
    if (*out) {
-      HUNSPELL_WARNING(stderr, "error: duplicate %s line\n", name);
+      HUNSPELL_WARNING(stderr, "error: duplicate %s line\n", warnvar);
       return 1;
    }
    piece = mystrsep(&tp, 0);
@@ -5228,7 +5323,7 @@ int parse_string(char * line, char ** out, const char * name)
       piece = mystrsep(&tp, 0);
    }
    if (np != 2) {
-      HUNSPELL_WARNING(stderr, "error: missing %s information\n", name);
+      HUNSPELL_WARNING(stderr, "error: missing %s information\n", warnvar);
       return 1;
    } 
    return 0;

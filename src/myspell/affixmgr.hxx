@@ -7,13 +7,13 @@ using namespace std;
 #endif
 #include <stdio.h>
 #else
-#include <stdio.h>
 #include <cstdio>
 #endif
 
 #include "atypes.hxx"
 #include "baseaffix.hxx"
 #include "hashmgr.hxx"
+#include "phonet.hxx"
 
 // check flag duplication
 #define dupSFX        (1 << 0)
@@ -27,12 +27,13 @@ class AffixMgr
   AffEntry *          pFlag[CONTSIZE];
   AffEntry *          sFlag[CONTSIZE];
   HashMgr *           pHMgr;
+  char *              keystring;
   char *              trystring;
   char *              encoding;
   struct cs_info *    csconv;
   int                 utf8;
   int                 complexprefixes;
-  FLAG                compoundflag;  
+  FLAG                compoundflag;
   FLAG                compoundbegin;
   FLAG                compoundmiddle;
   FLAG                compoundend;
@@ -57,6 +58,7 @@ class AffixMgr
   replentry *         checkcpdtable;
   int                 numdefcpd;
   flagentry *         defcpdtable;
+  phonetable *        phone;
   int                 maxngramsugs;
   int                 nosplitsugs;
   int                 sugswithdots;
@@ -123,7 +125,8 @@ public:
             int sfxopts, AffEntry * ppfx, const FLAG needflag = FLAG_NULL);
 
   int                 expand_rootword(struct guessword * wlst, int maxn, const char * ts,
-                        int wl, const unsigned short * ap, unsigned short al, char * bad, int);
+                        int wl, const unsigned short * ap, unsigned short al, char * bad, int,
+                        char *);
 
   short               get_syllable (const char * word, int wlen);
   int                 cpdrep_check(const char * word, int len);
@@ -142,12 +145,14 @@ public:
   struct hentry *     lookup(const char * word);
   int                 get_numrep();
   struct replentry *  get_reptable();
+  struct phonetable * get_phonetable();
   int                 get_nummap();
   struct mapentry *   get_maptable();
   int                 get_numbreak();
   char **             get_breaktable();
   char *              get_encoding();
   int                 get_langnum();
+  char *              get_key_string();
   char *              get_try_string();
   const char *        get_wordchars();
   unsigned short *    get_wordchars_utf16(int * len);
@@ -188,6 +193,7 @@ private:
 //            int * out_utf16_len, const char * name);
   int  parse_cpdsyllable(char * line);
   int  parse_reptable(char * line, FILE * af);
+  int  parse_phonetable(char * line, FILE * af);
   int  parse_maptable(char * line, FILE * af);
   int  parse_breaktable(char * line, FILE * af);
   int  parse_checkcpdtable(char * line, FILE * af);
