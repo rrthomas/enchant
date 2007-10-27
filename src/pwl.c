@@ -175,8 +175,10 @@ enchant_lock_file (FILE * f)
 	flock (fileno (f), LOCK_EX);
 #elif defined(HAVE_LOCKF)
 	lockf (fileno (f), F_LOCK, 0);
+#elif defined(_WIN32)
+    _lock_file(f);
 #else
-	/* TODO: win32, UNIX fcntl. This race condition probably isn't too bad. */
+	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
 }
 
@@ -187,8 +189,10 @@ enchant_unlock_file (FILE * f)
 	flock (fileno (f), LOCK_UN);
 #elif defined(HAVE_LOCKF)
 	lockf (fileno (f), F_ULOCK, 0);
+#elif defined(_WIN32)
+    _unlock_file(f);
 #else
-	/* TODO: win32, UNIX fcntl. This race condition probably isn't too bad. */
+	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
 }
 

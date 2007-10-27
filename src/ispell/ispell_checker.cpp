@@ -35,10 +35,10 @@
 #include <string>
 #include <vector>
 
+#include "enchant-provider.h"
 #include "sp_spell.h"
 #include "ispell_checker.h"
 #include "enchant.h"
-#include "enchant-provider.h"
 
 #ifndef ENCHANT_ISPELL_HOME_DIR
 #define ENCHANT_ISPELL_HOME_DIR ".enchant", "ispell"

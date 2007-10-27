@@ -156,7 +156,7 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 	*nsug = myspell->suggest(&sugMS, word8);
 	if (*nsug > 0) {
 		char **sug = g_new0 (char *, *nsug + 1);
-		for (int i=0; i<*nsug; i++) {
+		for (size_t i=0; i<*nsug; i++) {
 			in = sugMS[i];
 			len_in = strlen(in);
 			len_out = MAXWORDLEN;
@@ -334,7 +334,7 @@ myspell_provider_list_dicts (EnchantProvider * me,
 	if (dicts.size () > 0) {
 		dictionary_list = g_new0 (char *, dicts.size() + 1);
 
-		for (int i = 0; i < dicts.size(); i++)
+		for (size_t i = 0; i < dicts.size(); i++)
 			dictionary_list[i] = g_strdup (dicts[i].c_str());
 	}
 

@@ -183,7 +183,10 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 	unsigned long lType;	
 	DWORD dwSize;
 	char* keyName;
-	BYTE* szValue = NULL;
+  WCHAR* wszValue = NULL;
+	char* szValue = NULL;
+  gunichar2 * uKeyName;
+  gunichar2 * uKey;
 
 	if (current_user)
 		baseKey = HKEY_CURRENT_USER;
@@ -191,17 +194,26 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 		baseKey = HKEY_LOCAL_MACHINE;
 
 	keyName = g_strdup_printf("Software\\Enchant\\%s", prefix);
-	if(RegOpenKeyEx(baseKey, keyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+  uKeyName = g_utf8_to_utf16 (keyName, -1, NULL, NULL, NULL);
+  uKey = g_utf8_to_utf16 (key, -1, NULL, NULL, NULL);
+
+	if(RegOpenKeyEx(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 		{
 			// Determine size of string
-			if(RegQueryValueEx( hKey, key, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
+			if(RegQueryValueEx( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
 				{
-					szValue = g_new0(BYTE, dwSize + 1);
-					RegQueryValueEx(hKey, key, NULL, &lType, szValue, &dwSize);
+					wszValue = g_new0(WCHAR, dwSize + 1);
+					RegQueryValueEx(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
 				}
 		}
-	g_free(keyName);
-	return (char *)szValue;
+  szValue = wszValue == NULL? NULL: g_utf16_to_utf8 (wszValue, -1, NULL, NULL, NULL);
+
+  g_free(keyName);
+  g_free(uKeyName);
+  g_free(uKey);
+  g_free(wszValue);
+
+	return szValue;
 #endif
 }
 
@@ -806,7 +818,7 @@ enchant_broker_clear_error (EnchantBroker * broker)
 static void
 enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 {
-	GModule *module;
+	GModule *module = NULL;
 	GDir *dir;
 	G_CONST_RETURN char *dir_entry;
 	size_t entry_len, g_module_suffix_len;
@@ -1593,13 +1605,17 @@ enchant_get_prefix_dir(void)
 
 #ifdef _WIN32
 	/* Dynamically locate library and return containing directory */
-	HINSTANCE hInstance = GetModuleHandle("libenchant-1");
+	HINSTANCE hInstance = GetModuleHandle(L"libenchant-1");
 	if(hInstance != NULL)
 		{
-			char dll_path[MAX_PATH];
-
+			WCHAR dll_path[MAX_PATH];
+      
 			if(GetModuleFileName(hInstance,dll_path,MAX_PATH))
-				prefix = g_path_get_dirname(dll_path);
+      {
+        gchar* utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
+				prefix = g_path_get_dirname(utf8_dll_path);
+        g_free(utf8_dll_path);
+      }
 		}
 #elif defined(ENABLE_BINRELOC)
 	/* Use standard binreloc PREFIX macro */

@@ -134,7 +134,8 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 	char **sugg_arr = NULL;
 	const utf8_t *sugg;
 	wide_t buf[MAXCHARS];
-	int length, i;
+	int length;
+  unsigned int i;
 	utf8_t **list;
 	
 	if (len >= MAXCHARS) // no suggestions; the word is outlandish
