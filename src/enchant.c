@@ -989,7 +989,7 @@ enchant_get_ordered_providers (EnchantBroker * broker,
 		{
 			for (i = 0; tokens[i]; i++) 
 				{
-					token = tokens[i];
+					token = g_strstrip(tokens[i]);
 					
 					for (iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter)) 
 						{
