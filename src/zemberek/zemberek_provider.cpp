@@ -29,9 +29,22 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#define SHUT_RDWR SD_BOTH //no more receptions of transmissions
+#define close closesocket
+#else
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+typedef int SOCKET
+#ifndef INVALID_SOCKET
+#define INVALID_SOCKET -1
+#endif
+#ifndef SOCKET_ERROR
+#define SOCKET_ERROR -1
+#endif
+#endif
 
 #ifndef ZEMBEREK_HOST
 #define ZEMBEREK_HOST "localhost"
@@ -61,7 +74,7 @@ public:
     bool connOK(void) { return !_connError; }
     
 private:
-    int _conn;
+    SOCKET _conn;
     bool _connError;
     string recvResult() const;
 };
@@ -77,26 +90,26 @@ Zemberek::Zemberek()
     struct sockaddr_in saddr;
 
     if ( ( he = (struct hostent *)gethostbyname(ZEMBEREK_HOST) ) == NULL ) {
-	perror( "gethostbyname()" );
+	      perror( "gethostbyname()" );
 	_connError = true;
-	return;
+	      return;
     }
 
-    if ( ( _conn = socket(AF_INET, SOCK_STREAM, 0) ) == -1 ) {
-	perror( "socket()" );
+    if ( ( _conn = socket(AF_INET, SOCK_STREAM, 0) ) == INVALID_SOCKET ) {
+	      perror( "socket()" );
 	_connError = true;
-	return;
+	      return;
     }
 
     saddr.sin_family = AF_INET;
-    saddr.sin_port = htons( (uint16_t)ZEMBEREK_PORT );
+    saddr.sin_port = htons( ZEMBEREK_PORT );
     saddr.sin_addr = *( (struct in_addr *)he->h_addr );
     memset( &(saddr.sin_zero), '\0', 8 );
 
     if ( connect(_conn, (struct sockaddr *)&saddr, sizeof(struct sockaddr)) == -1) {
         perror("connect()");
 	_connError = true;
-	return;
+	      return;
     }
 }
 
@@ -111,26 +124,26 @@ Zemberek::~Zemberek()
 bool Zemberek::checkWord( const string& str, size_t len ) const
 {
     if (_connError)
-	return false;
+	      return false;
 
     stringstream strstream;
     strstream << str.length()+2 << " * " << str;
     string checkStr = strstream.str();
     if ( send(_conn, checkStr.c_str(), checkStr.length(), 0) == -1) {
         perror("send()");
-	return false;
+	      return false;
     }
 
     switch ( recvResult()[0] ) {
-    case '*':
-        return true;
-        break;
-    case '#':
-        return false;
-        break;
-    default:
-        return false;
-        break;
+        case '*':
+            return true;
+            break;
+        case '#':
+            return false;
+            break;
+        default:
+            return false;
+            break;
     }
 }
 
@@ -139,14 +152,14 @@ vector<string> Zemberek::suggestWord(const string& str, size_t size)
     vector<string> suggestions;
 
     if (_connError)
-	return suggestions;
+	      return suggestions;
     
     stringstream strstream;
     strstream << str.length()+2 << " & " << str;
     string checkStr = strstream.str();
     if ( send( _conn, checkStr.c_str(), checkStr.length(), 0 ) == -1 ) {
         perror( "send()" );
-	return suggestions;
+	      return suggestions;
     }
 
     string result = recvResult();
@@ -225,7 +238,7 @@ zemberek_dict_check (EnchantDict * dict, const char *const word, size_t len)
     checker = (Zemberek *) dict->user_data;
 	
     if (checker->checkWord(word, len))
-	return 0;
+	      return 0;
     return 1;
 }
 
@@ -244,13 +257,13 @@ zemberek_dict_suggest (EnchantDict * dict, const char *const word,
 
     if (suglen > 0)
     {
-	char **sug;
-	sug = g_new0(char *, suglen+1);
+	      char **sug;
+	      sug = g_new0(char *, suglen+1);
 
-	for (int i=0 ; i < suglen ; ++i, ++it )
-	    sug[i] = g_strdup(it->c_str());
+	      for (int i=0 ; i < suglen ; ++i, ++it )
+	          sug[i] = g_strdup(it->c_str());
 
-	return sug;
+	      return sug;
     }
     return 0;
 }
@@ -259,6 +272,9 @@ static void
 zemberek_provider_dispose(EnchantProvider *me)
 {
     g_free(me);
+#ifdef _WIN32
+      WSACleanup();
+#endif
 }
 
 static EnchantDict*
@@ -267,7 +283,7 @@ zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
     Zemberek* checker = new Zemberek();
 
     if (!checker || !checker->connOK())
-	return NULL;
+	      return NULL;
 
     EnchantDict* dict = g_new0(EnchantDict, 1);
     dict->user_data = (void *) checker;
@@ -337,7 +353,7 @@ zemberek_provider_dictionary_exists (EnchantProvider * me,
 	Zemberek * checker;
 
 	if (!strcmp ("tr", tag)) {
-	  return zemberek_provider_server_is_running ();
+	    return zemberek_provider_server_is_running ();
 	}
 	else {
 	    return 0;
@@ -350,6 +366,15 @@ ENCHANT_MODULE_EXPORT(EnchantProvider *)
 init_enchant_provider(void)
 {
     EnchantProvider *provider;
+
+#ifdef _WIN32
+    WSADATA wsaData;
+    int iResult = WSAStartup(WINSOCK_VERSION, &wsaData);
+    if(iResult != NO_ERROR){
+        perror( "WSAStartup()" );
+        return NULL;
+    }
+#endif
 	
     provider = g_new0(EnchantProvider, 1);
     provider->dispose = zemberek_provider_dispose;
