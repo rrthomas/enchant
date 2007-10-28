@@ -303,7 +303,7 @@ tokenize_line (GString * line)
 	word = g_string_new (NULL);
 
 	while (cur_pos < line->len && *utf) {
-
+    int i;
 	        /* Skip non-word characters. */
 		cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		uc = g_utf8_get_char (utf);
@@ -323,7 +323,7 @@ tokenize_line (GString * line)
 		}
 
 	        /* Do not accept one or more  ' at the end of the word. */
-		int i = word->len-1;
+		i = word->len-1;
 	        while ((i >= 0) && (word->str[i] == '\'')) {
 	                g_string_truncate (word, i);
 			i--;
@@ -349,7 +349,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 	
 	GString * str, * word = NULL;
 	GSList * tokens, *token_ptr;
-	gchar * lang, *lang_punct;
+	gchar * lang;
 	size_t pos, lineCount = 0;
 
 	gboolean was_last_line = FALSE, corrected_something = FALSE;
