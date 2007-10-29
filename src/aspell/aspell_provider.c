@@ -162,7 +162,7 @@ aspell_dict_add_to_session (EnchantDict * me,
 }
 
 static void
-aspell_dict_store_replacement (struct str_enchant_dict * me,
+aspell_dict_store_replacement (EnchantDict * me,
 			       const char *const mis, size_t mis_len,
 			       const char *const cor, size_t cor_len)
 {
