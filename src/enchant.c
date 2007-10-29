@@ -618,6 +618,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 				for(k = 0; k < n_dict_suggs; k++) {
 					if(strcmp(suggs[k],pwl_suggs[j])==0) {
 						dupe = 1;
+						--n_suggs;
 						break;
 					}
 				}
