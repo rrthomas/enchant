@@ -248,7 +248,7 @@ enchant_get_registry_value (const char * const prefix, const char * const key)
 ENCHANT_MODULE_EXPORT (char *)
 enchant_get_user_home_dir (void)
 {
-	const char * home_dir = NULL;
+	const char * home_dir;
 
 	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
 	if (home_dir)
@@ -1490,8 +1490,6 @@ ENCHANT_MODULE_EXPORT (int)
 enchant_broker_dict_exists (EnchantBroker * broker,
 			    const char * const tag)
 {
-	EnchantProvider *provider;
-	GSList *list;
 	char * normalized_tag;
 	int exists = 0;
 
