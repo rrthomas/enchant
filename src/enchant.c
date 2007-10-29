@@ -546,11 +546,6 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	if (enchant_session_contains (session, word, len))
 		return 0;
 
-	if (session->personal) {
-		if (enchant_pwl_check (session->personal, word, len) == 0)
-			return 0;
-	}
-
 	if (dict->check)
 		return (*dict->check) (dict, word, len);
 	else if (session->is_pwl)
