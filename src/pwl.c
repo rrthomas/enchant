@@ -55,10 +55,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#ifdef _WIN32
+#include <io.h>
+#endif
 
 #include <glib.h>
 
 #include "pwl.h"
+
+#if defined(_MSC_VER)
+#pragma warning(disable: 4996) /* The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name. */
+#endif
 
 #if defined(HAVE_FLOCK) || defined(HAVE_LOCKF)
 #include <unistd.h>
@@ -199,7 +210,8 @@ enchant_unlock_file (FILE * f)
 /**
  * enchant_pwl_init
  *
- * Returns: a new PWL object used to store/check/suggest words.
+ * Returns: a new PWL object used to store/check/suggest words
+ * or NULL if the file cannot be opened or created
  */
 EnchantPWL* enchant_pwl_init(void)
 {
@@ -223,14 +235,21 @@ EnchantPWL* enchant_pwl_init(void)
 EnchantPWL* enchant_pwl_init_with_file(const char * file)
 {
 	FILE *f;
+	int fd;
 	EnchantPWL *pwl;
 
 	g_return_val_if_fail (file != NULL, NULL);
 
+	fd = open(file, O_CREAT | O_RDONLY, S_IREAD | S_IWRITE);
+	if(fd == -1)
+		{
+			return NULL;
+		}
+
 	pwl = enchant_pwl_init();
 	pwl->filename = g_strdup(file);
 	
-	f = fopen (file, "r");
+	f = fdopen(fd, "r");
 	if (f) 
 		{
 			char line[BUFSIZ];
@@ -248,7 +267,11 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 			
 			enchant_unlock_file (f);
 			fclose (f);
-		} 
+		}
+	else 
+		{
+			close(fd);
+		}
 
 	return pwl;
 }
