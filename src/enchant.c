@@ -656,9 +656,6 @@ enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
 	if (len < 0)
 		len = strlen (word);
 
-	/* add to session backend regardless */
-	enchant_dict_add_to_session (dict, word, len);
-
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 	enchant_session_add_personal (session, word, len);
