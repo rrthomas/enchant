@@ -114,6 +114,7 @@ struct str_enchant_provider
 	/* const */ char * (*identify) (struct str_enchant_provider * me);
 	/* const */ char * (*describe) (struct str_enchant_provider * me);
 
+	/* frees string lists returned by list_dicts and dict->suggest */
 	void (*free_string_list) (struct str_enchant_provider * me,
 				  char **str_list);
 
