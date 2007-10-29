@@ -520,7 +520,7 @@ enchant_dict_get_error (EnchantDict * dict)
 /**
  * enchant_dict_check
  * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to correct, in UTF-8 encoding
+ * @word: The non-null word you wish to check, in UTF-8 encoding
  * @len: The byte length of @word, or -1 for strlen (@word)
  *
  * Will return an "incorrect" value if any of those pre-conditions
@@ -778,7 +778,7 @@ enchant_dict_store_replacement (EnchantDict * dict,
 /**
  * enchant_dict_free_string_list
  * @dict: A non-null #EnchantDict
- * @string_list: 
+ * @string_list: A non-null string list returned from enchant_dict_suggest
  *
  * Releases the string list
  */
@@ -1150,7 +1150,7 @@ enchant_broker_init (void)
  * enchant_broker_free
  * @broker: A non-null #EnchantBroker
  *
- * Destroys the broker object
+ * Destroys the broker object. Must only be called once per broker init
  */
 ENCHANT_MODULE_EXPORT (void) 
 enchant_broker_free (EnchantBroker * broker)
@@ -1200,7 +1200,7 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 		return dict;
 	}
 
-	session = enchant_session_new_with_pwl (NULL, pwl, "Personal WordList", TRUE);
+	session = enchant_session_new_with_pwl (NULL, pwl, "Personal Wordlist", TRUE);
 	if (!session) 
 		{
 			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
@@ -1393,7 +1393,7 @@ enchant_broker_list_dicts (EnchantBroker * broker,
  * @broker: A non-null #EnchantBroker
  * @dict: A non-null #EnchantDict
  *
- * Releases the dictionary when you are done using it
+ * Releases the dictionary when you are done using it. Must only be called once per dictionary request
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
@@ -1599,7 +1599,7 @@ enchant_broker_get_error (EnchantBroker * broker)
 	return broker->error;
 }
 
-/* private */ 
+/* private. returned string should be free'd with g_free */
 ENCHANT_MODULE_EXPORT(char *)
 enchant_get_user_language(void)
 {
@@ -1638,6 +1638,8 @@ enchant_get_user_language(void)
  * the --prefix option given to ./configure when enchant is
  * compiled, except it is determined at runtime based on the location
  * of the enchant library.
+ *
+ * Returns: the prefix dir if it can be determined, or %null otherwise. Must be free'd.
  *
  * This API is private to the providers.
  *
