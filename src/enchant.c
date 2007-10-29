@@ -263,6 +263,40 @@ enchant_get_user_home_dir (void)
 /********************************************************************************/
 /********************************************************************************/
 
+static gchar*
+enchant_modify_string_chars (gchar *str,
+                             gssize len,
+                             gchar (*function)(gchar))
+{
+    gchar* it, *end;
+
+    g_return_val_if_fail (str != NULL, NULL);
+
+    if (len < 0)
+        len = strlen (str);
+
+    end = str + len;
+
+    for (it = str; it != end; ++it)
+        *it = function (*it);
+
+    return str;
+}
+
+static gchar*
+enchant_ascii_strup (gchar *str,
+                     gssize len)
+{
+    return enchant_modify_string_chars(str, len, g_ascii_toupper);
+}
+
+static gchar*
+enchant_ascii_strdown (gchar *str,
+                          gssize len)
+{
+    return enchant_modify_string_chars(str, len, g_ascii_tolower);
+}
+
 static char *
 enchant_normalize_dictionary_tag (const char * const dict_tag)
 {
@@ -282,6 +316,17 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	/* turn en-GB into en_GB */
 	if ((needle = strchr (new_tag, '-')) != NULL)
 		*needle = '_';
+
+	/* everything before first '_' is converted to lower case */
+	if ((needle = strchr (new_tag, '_')) != NULL) {
+		enchant_ascii_strdown(new_tag, needle - new_tag);
+		++needle;
+		/* everything after first '_' is converted to upper case */
+		enchant_ascii_strup(needle, -1);
+        }
+	else {
+		enchant_ascii_strdown(new_tag, -1);
+        }
 
 	return new_tag;
 }
