@@ -1455,6 +1455,11 @@ _enchant_broker_dict_exists (EnchantBroker * broker,
 {
 	GSList * list;
 
+	/* don't query the providers if it is an empty string */
+	if (tag == NULL || *tag == '\0') {
+		return 0;
+	}
+
 	/* don't query the providers if we can just do a quick map lookup */
 	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL) {
 		return 1;
@@ -1501,7 +1506,11 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 			char * iso_639_only_tag;
 
 			iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
-			exists = _enchant_broker_dict_exists (broker, iso_639_only_tag);
+
+			if (strcmp (normalized_tag, iso_639_only_tag) != 0)
+				{
+					exists = _enchant_broker_dict_exists (broker, iso_639_only_tag);
+				}
 
 			g_free (iso_639_only_tag);
 		}
