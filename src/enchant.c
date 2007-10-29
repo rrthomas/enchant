@@ -1650,7 +1650,7 @@ enchant_get_prefix_dir(void)
 
 #ifdef _WIN32
 	/* Dynamically locate library and return containing directory */
-	HINSTANCE hInstance = GetModuleHandle(L"libenchant-1");
+	HINSTANCE hInstance = GetModuleHandle(L"libenchant");
 	if(hInstance != NULL)
 		{
 			WCHAR dll_path[MAX_PATH];
