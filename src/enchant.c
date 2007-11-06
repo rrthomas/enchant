@@ -100,7 +100,7 @@ _enchant_ensure_private_datadir (void)
                 char * enchant_path;
 		
 		enchant_path = g_build_filename (home_dir, ENCHANT_USER_PATH_EXTENSION, NULL);
-                if (enchant_path && !g_file_test (enchant_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
+        if (enchant_path && !g_file_test (enchant_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
 			{
 				(void)g_remove (enchant_path);
 				g_mkdir (enchant_path, 0700);                        
@@ -124,7 +124,7 @@ enchant_get_module_dir (void)
 	/* Look for explicitly set registry values */
 	module_dir = enchant_get_registry_value ("Config", "Module_Dir");
 	if (module_dir)
-		return module_dir;
+		        return module_dir;
 
 	/* Dynamically locate library and search for modules relative to it. */
 	prefix = enchant_get_prefix_dir();
@@ -153,7 +153,7 @@ enchant_get_conf_dir (void)
 	/* Look for explicitly set registry values */
 	ordering_dir = enchant_get_registry_value ("Config", "Data_Dir");
 	if (ordering_dir)
-		return ordering_dir;
+		        return ordering_dir;
 
 	/* Dynamically locate library and search for files relative to it. */
 	prefix = enchant_get_prefix_dir();
@@ -171,6 +171,9 @@ enchant_get_conf_dir (void)
 #endif
 }
 
+/*
+ * Returns: the value if it exists and is not an empty string ("") or %null otherwise. Must be free'd.
+ */
 static char *
 enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key)
 {
@@ -183,10 +186,10 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 	unsigned long lType;	
 	DWORD dwSize;
 	char* keyName;
-  WCHAR* wszValue = NULL;
+    WCHAR* wszValue = NULL;
 	char* szValue = NULL;
-  gunichar2 * uKeyName;
-  gunichar2 * uKey;
+    gunichar2 * uKeyName;
+    gunichar2 * uKey;
 
 	if (current_user)
 		baseKey = HKEY_CURRENT_USER;
@@ -194,8 +197,8 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 		baseKey = HKEY_LOCAL_MACHINE;
 
 	keyName = g_strdup_printf("Software\\Enchant\\%s", prefix);
-  uKeyName = g_utf8_to_utf16 (keyName, -1, NULL, NULL, NULL);
-  uKey = g_utf8_to_utf16 (key, -1, NULL, NULL, NULL);
+    uKeyName = g_utf8_to_utf16 (keyName, -1, NULL, NULL, NULL);
+    uKey = g_utf8_to_utf16 (key, -1, NULL, NULL, NULL);
 
 	if(RegOpenKeyEx(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 		{
@@ -206,12 +209,14 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 					RegQueryValueEx(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
 				}
 		}
-  szValue = wszValue == NULL? NULL: g_utf16_to_utf8 (wszValue, -1, NULL, NULL, NULL);
 
-  g_free(keyName);
-  g_free(uKeyName);
-  g_free(uKey);
-  g_free(wszValue);
+    if(wszValue && *wszValue)
+        szValue = g_utf16_to_utf8 (wszValue, -1, NULL, NULL, NULL);
+
+    g_free(keyName);
+    g_free(uKeyName);
+    g_free(uKey);
+    g_free(wszValue);
 
 	return szValue;
 #endif
@@ -222,7 +227,7 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
  * @prefix: Your category, such as "Ispell" or "Myspell"
  * @key: The tag within your category that you're interested in
  *
- * Returns: the value if it exists, or %null otherwise. Must be free'd.
+ * Returns: the value if it exists and is not an empty string ("") or %null otherwise. Must be free'd.
  *
  * This API is private to the providers.
  */
@@ -230,10 +235,14 @@ ENCHANT_MODULE_EXPORT (char *)
 enchant_get_registry_value (const char * const prefix, const char * const key)
 {
 	char *val;
+
+    g_return_val_if_fail (prefix, NULL);
+    g_return_val_if_fail (key, NULL);
+
 	val = enchant_get_registry_value_ex(1, prefix, key);
 	if(val == NULL) {
 		val = enchant_get_registry_value_ex (0, prefix, key);
-	}
+        }
 	return val;
 }
 
@@ -248,7 +257,7 @@ enchant_get_registry_value (const char * const prefix, const char * const key)
 ENCHANT_MODULE_EXPORT (char *)
 enchant_get_user_home_dir (void)
 {
-	const char * home_dir;
+    const char* home_dir;
 
 	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
 	if (home_dir)
@@ -538,7 +547,7 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 
 	if (len < 0)
 		len = strlen (word);
-	
+
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
@@ -584,13 +593,13 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 
 	/* Check for suggestions from personal dictionary */
 	if(session->personal)
-		pwl_suggs = enchant_pwl_suggest(session->personal, word, len, &n_pwl_suggs);
+		    pwl_suggs = enchant_pwl_suggest(session->personal, word, len, &n_pwl_suggs);
 		
 	/* Check for suggestions from provider dictionary */
 	if (dict->suggest) 
 		{
-			dict_suggs = (*dict->suggest) (dict, word, len,
-							&n_dict_suggs);
+			dict_suggs = (*dict->suggest) (dict, word, len,	
+                            &n_dict_suggs);
 		}
 
 	/* Clone suggestions if there are any */
@@ -698,7 +707,7 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 	if (len < 0)
 		len = strlen (word);
 	
-	session = (EnchantSession*)dict->enchant_private_data;
+    session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
 	enchant_session_add (session, word, len);
@@ -778,7 +787,7 @@ ENCHANT_MODULE_EXPORT (void)
 enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 {
 	g_return_if_fail (string_list);
-	g_strfreev (string_list);
+    g_strfreev(string_list);
 }
 
 /**
@@ -826,7 +835,7 @@ enchant_dict_describe (EnchantDict * dict,
 		{
 			module = (GModule *) provider->enchant_private_data;
 			file = g_module_name (module);	
-			name = (*provider->identify) (provider);
+		    name = (*provider->identify) (provider);
 			desc = (*provider->describe) (provider);
 		} 
 	else 
@@ -891,13 +900,13 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 							    && init_func)
 								{
 									provider = init_func ();
-									if (provider)
-										{
+                                            if(provider)
+                                                {
 											provider->enchant_private_data = (void *) module;
 											provider->owner = broker;
 											broker->provider_list = g_slist_append (broker->provider_list, (gpointer)provider);
-										}
-								}
+                                                }
+                                        }
 							else
 								{
 									g_module_close (module);
@@ -919,9 +928,9 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 					    && conf_func)
 						{
 							conf_func (provider, dir_name);
+                                }
 						}
 				}
-		}
 	
 	g_dir_close (dir);
 }
@@ -1312,7 +1321,7 @@ enchant_broker_describe (EnchantBroker * broker,
 			provider = (EnchantProvider *) list->data;
 			module = (GModule *) provider->enchant_private_data;
 			
-			name = (*provider->identify) (provider);
+		    name = (*provider->identify) (provider);
 			desc = (*provider->describe) (provider);
 			file = g_module_name (module);
 			
@@ -1488,7 +1497,7 @@ ENCHANT_MODULE_EXPORT (int)
 enchant_broker_dict_exists (EnchantBroker * broker,
 			    const char * const tag)
 {
-	char * normalized_tag;
+    char * normalized_tag;
 	int exists = 0;
 
 	g_return_val_if_fail (broker, 0);
@@ -1654,16 +1663,16 @@ enchant_get_prefix_dir(void)
 	/* Dynamically locate library and return containing directory */
 	HINSTANCE hInstance = GetModuleHandle(L"libenchant");
 	if(hInstance != NULL)
-		{
-			WCHAR dll_path[MAX_PATH];
+    {
+		WCHAR dll_path[MAX_PATH];
       
-			if(GetModuleFileName(hInstance,dll_path,MAX_PATH))
-      {
-        gchar* utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
-				prefix = g_path_get_dirname(utf8_dll_path);
-        g_free(utf8_dll_path);
-      }
-		}
+        if(GetModuleFileName(hInstance,dll_path,MAX_PATH))
+        {
+            gchar* utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
+			prefix = g_path_get_dirname(utf8_dll_path);
+            g_free(utf8_dll_path);
+        }
+	}
 #elif defined(ENABLE_BINRELOC)
 	/* Use standard binreloc PREFIX macro */
 	prefix = gbr_find_prefix(NULL);
