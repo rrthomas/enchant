@@ -210,8 +210,7 @@ enchant_unlock_file (FILE * f)
 /**
  * enchant_pwl_init
  *
- * Returns: a new PWL object used to store/check/suggest words
- * or NULL if the file cannot be opened or created
+ * Returns: a new PWL object used to store/check/suggest words.
  */
 EnchantPWL* enchant_pwl_init(void)
 {
@@ -230,7 +229,8 @@ EnchantPWL* enchant_pwl_init(void)
 /**
  * enchant_pwl_init
  *
- * Returns: a new PWL object used to store/check/suggest words.
+ * Returns: a new PWL object used to store/check/suggest words
+ * or NULL if the file cannot be opened or created
  */ 
 EnchantPWL* enchant_pwl_init_with_file(const char * file)
 {
