@@ -105,6 +105,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enchant-lsmod", "enchant-ls
 		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unittest-enchant", "unittest-enchant.vcproj", "{44BF74D0-5462-4A3B-8768-61E0DEF81B7B}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
+		{A8F1C09A-A244-441B-804C-635106305056} = {A8F1C09A-A244-441B-804C-635106305056}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_mock_provider", "libenchant_mock_provider.vcproj", "{A8F1C09A-A244-441B-804C-635106305056}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -151,6 +167,14 @@ Global
 		{8B0F0A17-CEB4-42DF-B97E-375C60DB31E7}.Debug|Win32.Build.0 = Debug|Win32
 		{8B0F0A17-CEB4-42DF-B97E-375C60DB31E7}.Release|Win32.ActiveCfg = Release|Win32
 		{8B0F0A17-CEB4-42DF-B97E-375C60DB31E7}.Release|Win32.Build.0 = Release|Win32
+		{44BF74D0-5462-4A3B-8768-61E0DEF81B7B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{44BF74D0-5462-4A3B-8768-61E0DEF81B7B}.Debug|Win32.Build.0 = Debug|Win32
+		{44BF74D0-5462-4A3B-8768-61E0DEF81B7B}.Release|Win32.ActiveCfg = Release|Win32
+		{44BF74D0-5462-4A3B-8768-61E0DEF81B7B}.Release|Win32.Build.0 = Release|Win32
+		{A8F1C09A-A244-441B-804C-635106305056}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A8F1C09A-A244-441B-804C-635106305056}.Debug|Win32.Build.0 = Debug|Win32
+		{A8F1C09A-A244-441B-804C-635106305056}.Release|Win32.ActiveCfg = Release|Win32
+		{A8F1C09A-A244-441B-804C-635106305056}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

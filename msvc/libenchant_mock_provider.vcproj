@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="libenchant"
-	ProjectGUID="{E0DB6274-F44C-48E6-AE30-C00D59864569}"
-	RootNamespace="enchant"
+	Name="libenchant_mock_provider"
+	ProjectGUID="{A8F1C09A-A244-441B-804C-635106305056}"
+	RootNamespace="libenchant_mock_provider"
 	Keyword="Win32Proj"
 	>
 	<Platforms>
@@ -24,8 +24,6 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Windows Config.h"
-				CommandLine="copy &quot;$(SolutionDir)..\src\config.h.win32&quot; &quot;$(SolutionDir)..\src\config.h&quot;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -42,8 +40,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;;&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\aspell&quot;;&quot;$(SolutionDir)..\lib\hspell&quot;;&quot;$(SolutionDir)..\lib\voikko&quot;;&quot;$(SolutionDir)..\lib&quot;;&quot;$(SolutionDir)..\lib\zemberek&quot;"
-				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;_CRT_SECURE_NO_WARNINGS;_WIN32;_DEBUG;_WINDOWS"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;"
+				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;WIN32;_DEBUG;_USRDLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -62,11 +60,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glib-2.0.lib gmodule-2.0.lib"
+				AdditionalDependencies="glib-2.0.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\lib&quot;"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -92,8 +90,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy dependencies"
-				CommandLine="copy &quot;$(SolutionDir)..\lib\glib\*.dll&quot; &quot;$(OutDir)\&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -106,8 +102,6 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Windows Config.h"
-				CommandLine="copy &quot;$(SolutionDir)..\src\config.h.win32&quot; &quot;$(SolutionDir)..\src\config.h&quot;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -123,8 +117,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;;&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\aspell&quot;;&quot;$(SolutionDir)..\lib\hspell&quot;;&quot;$(SolutionDir)..\lib\voikko&quot;;&quot;$(SolutionDir)..\lib&quot;;&quot;$(SolutionDir)..\lib\zemberek&quot;"
-				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;_CRT_SECURE_NO_WARNINGS;_WIN32;NDEBUG;_WINDOWS"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;"
+				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;WIN32;NDEBUG;_USRDLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -141,11 +135,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glib-2.0.lib gmodule-2.0.lib"
+				AdditionalDependencies="glib-2.0.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\lib&quot;"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -173,8 +167,6 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy dependencies"
-				CommandLine="copy &quot;$(SolutionDir)..\lib\glib\*.dll&quot; &quot;$(OutDir)\&quot;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -182,32 +174,22 @@
 	</References>
 	<Files>
 		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath="..\unittests\mock_provider\mock_provider.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\src\enchant++.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\enchant-provider.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\enchant.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\enchant_cocoa.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\prefix.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\pwl.h"
+				RelativePath="..\unittests\mock_provider\mock_provider.h"
 				>
 			</File>
 		</Filter>
@@ -216,28 +198,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath="..\src\libenchant.rc"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
-			<File
-				RelativePath="..\src\enchant.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\prefix.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\pwl.c"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>
