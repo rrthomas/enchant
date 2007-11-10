@@ -548,6 +548,8 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	if (len < 0)
 		len = strlen (word);
 
+    g_return_val_if_fail (len, -1);
+
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
@@ -590,6 +592,8 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 
 	if (len < 0)
 		len = strlen (word);
+
+    g_return_val_if_fail (len, NULL);
 
 	/* Check for suggestions from personal dictionary */
 	if(session->personal)
@@ -665,6 +669,7 @@ enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
 	if (len < 0)
 		len = strlen (word);
 
+	g_return_if_fail (len);
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 	enchant_session_add_personal (session, word, len);
@@ -707,6 +712,8 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 	if (len < 0)
 		len = strlen (word);
 	
+    g_return_if_fail (len);
+	
     session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
@@ -733,6 +740,8 @@ enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
 	if (len < 0)
 		len = strlen (word);
 	
+   	g_return_val_if_fail (len, 0);
+
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
@@ -767,6 +776,9 @@ enchant_dict_store_replacement (EnchantDict * dict,
 
 	if (cor_len < 0)
 		cor_len = strlen (cor);
+
+   	g_return_if_fail (mis_len);
+	g_return_if_fail (cor_len);
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
