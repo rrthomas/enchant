@@ -24,6 +24,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Windows Config.h"
+				CommandLine="copy &quot;$(SolutionDir)..\src\config.h.win32&quot; &quot;$(SolutionDir)..\src\config.h&quot;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -40,8 +42,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\aspell&quot;;&quot;$(SolutionDir)..\lib\hspell&quot;;&quot;$(SolutionDir)..\lib\voikko&quot;;&quot;$(SolutionDir)..\lib&quot;;&quot;$(SolutionDir)..\lib\zemberek&quot;"
-				PreprocessorDefinitions="_ENCHANT_BUILD=1;_CRT_SECURE_NO_WARNINGS;_WIN32;_DEBUG;_WINDOWS"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;;&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\aspell&quot;;&quot;$(SolutionDir)..\lib\hspell&quot;;&quot;$(SolutionDir)..\lib\voikko&quot;;&quot;$(SolutionDir)..\lib&quot;;&quot;$(SolutionDir)..\lib\zemberek&quot;"
+				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;_CRT_SECURE_NO_WARNINGS;_WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -102,6 +104,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				Description="Windows Config.h"
+				CommandLine="copy &quot;$(SolutionDir)..\src\config.h.win32&quot; &quot;$(SolutionDir)..\src\config.h&quot;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -117,8 +121,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\aspell&quot;;&quot;$(SolutionDir)..\lib\hspell&quot;;&quot;$(SolutionDir)..\lib\voikko&quot;;&quot;$(SolutionDir)..\lib&quot;;&quot;$(SolutionDir)..\lib\zemberek&quot;"
-				PreprocessorDefinitions="_ENCHANT_BUILD=1;_CRT_SECURE_NO_WARNINGS;_WIN32;NDEBUG;_WINDOWS"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)&quot;;&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\aspell&quot;;&quot;$(SolutionDir)..\lib\hspell&quot;;&quot;$(SolutionDir)..\lib\voikko&quot;;&quot;$(SolutionDir)..\lib&quot;;&quot;$(SolutionDir)..\lib\zemberek&quot;"
+				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;_CRT_SECURE_NO_WARNINGS;_WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

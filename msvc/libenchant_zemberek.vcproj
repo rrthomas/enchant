@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\zemberek&quot;;"
-				PreprocessorDefinitions="_ENCHANT_BUILD=1;WIN32;_DEBUG;_WINDOWS;_USRDLL;ZEMBEREK_PROVIDER_EXPORTS"
+				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;WIN32;_DEBUG;_WINDOWS;_USRDLL;ZEMBEREK_PROVIDER_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -118,7 +118,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\zemberek&quot;;"
-				PreprocessorDefinitions="_ENCHANT_BUILD=1;WIN32;NDEBUG;_WINDOWS;_USRDLL;ZEMBEREK_PROVIDER_EXPORTS"
+				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;WIN32;NDEBUG;_WINDOWS;_USRDLL;ZEMBEREK_PROVIDER_EXPORTS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"

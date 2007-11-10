@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\aspell&quot;;"
-				PreprocessorDefinitions="_ENCHANT_BUILD=1;ASPELL_0_50_0=1;HAVE_PSPELL_H;WIN32;_DEBUG;_WINDOWS;_USRDLL;ASPELL_PROVIDER_EXPORTS"
+				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;ASPELL_0_50_0=1;HAVE_PSPELL_H;WIN32;_DEBUG;_WINDOWS;_USRDLL;ASPELL_PROVIDER_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -118,7 +118,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\lib\glib\include\glib-2.0&quot;;&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\lib\aspell&quot;;"
-				PreprocessorDefinitions="_ENCHANT_BUILD=1;ASPELL_0_50_0=1;HAVE_PSPELL_H;WIN32;NDEBUG;_WINDOWS;_USRDLL;ASPELL_PROVIDER_EXPORTS"
+				PreprocessorDefinitions="HAVE_CONFIG_H;_ENCHANT_BUILD=1;ASPELL_0_50_0=1;HAVE_PSPELL_H;WIN32;NDEBUG;_WINDOWS;_USRDLL;ASPELL_PROVIDER_EXPORTS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
