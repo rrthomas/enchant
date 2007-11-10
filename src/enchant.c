@@ -862,6 +862,30 @@ enchant_broker_clear_error (EnchantBroker * broker)
 		}
 }
 
+static int
+enchant_provider_is_valid(EnchantProvider * provider)
+{
+    if(provider == NULL)
+        {
+            g_warning ("EnchantProvider cannot be NULL\n");
+            return 0;
+        }
+
+    if(provider->identify == NULL)
+        {
+            g_warning ("EnchantProvider's identify method cannot be NULL\n");
+            return 0;
+        }
+
+    if(provider->describe == NULL)
+        {
+            g_warning ("EnchantProvider's describe method cannot be NULL\n");
+            return 0;
+        }
+
+    return 1;
+}
+
 static void
 enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 {
@@ -900,13 +924,19 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 							    && init_func)
 								{
 									provider = init_func ();
+   									if (!enchant_provider_is_valid(provider))
+                                        {
+               							    g_warning ("Error loading plugin: %s's init_enchant_provider returned invalid provider.\n", dir_entry);
                                             if(provider)
                                                 {
-											provider->enchant_private_data = (void *) module;
-											provider->owner = broker;
-											broker->provider_list = g_slist_append (broker->provider_list, (gpointer)provider);
+                                                    if(provider->dispose)
+                                                        provider->dispose(provider);
+
+                                                    provider = NULL;
                                                 }
+                                            g_module_close (module);
                                         }
+								}
 							else
 								{
 									g_module_close (module);
@@ -928,9 +958,24 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 					    && conf_func)
 						{
 							conf_func (provider, dir_name);
+       						if (!enchant_provider_is_valid(provider))
+                                {
+   							        g_warning ("Error loading plugin: %s's configure_enchant_provider modified provider and it is now invalid.\n", dir_entry);
+                                    if(provider->dispose)
+                                        provider->dispose(provider);
+
+                                    provider = NULL;
+                                    g_module_close (module);
                                 }
 						}
 				}
+			if (provider)
+				{
+					provider->enchant_private_data = (void *) module;
+					provider->owner = broker;
+					broker->provider_list = g_slist_append (broker->provider_list, (gpointer)provider);
+				}
+		}
 	
 	g_dir_close (dir);
 }
@@ -1368,8 +1413,8 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 					char ** dicts;				       
 
 					dicts = (*provider->list_dicts) (provider, &n_dicts);
-					name = (provider->identify ? (*provider->identify) (provider) : "");
-					desc = (provider->describe ? (*provider->describe) (provider) : "");
+					name = (*provider->identify) (provider);
+					desc = (*provider->describe) (provider);
 					file = g_module_name (module);
 
 					for (i = 0; i < n_dicts; i++)
