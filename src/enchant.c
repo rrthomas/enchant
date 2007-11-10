@@ -469,19 +469,6 @@ enchant_provider_free_string_list (EnchantProvider * provider, char ** string_li
 		(*provider->free_string_list) (provider, string_list);
 }
 
-static void
-enchant_dict_free_string_list_impl (EnchantDict * dict, char **string_list)
-{
-	EnchantSession * session;
-
-	g_return_if_fail (dict);
-	g_return_if_fail (string_list);
-
-	session = (EnchantSession*)dict->enchant_private_data;
-	enchant_session_clear_error (session);
-	enchant_provider_free_string_list (session->provider, string_list);
-}
-
 /**
  * enchant_dict_set_error
  * @dict: A non-null dictionary
@@ -588,13 +575,13 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 	g_return_val_if_fail (dict, NULL);
 	g_return_val_if_fail (word, NULL);
 
-	session = (EnchantSession*)dict->enchant_private_data;
-
 	if (len < 0)
 		len = strlen (word);
 
     g_return_val_if_fail (len, NULL);
 
+  	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
 	/* Check for suggestions from personal dictionary */
 	if(session->personal)
 		    pwl_suggs = enchant_pwl_suggest(session->personal, word, len, &n_pwl_suggs);
@@ -617,8 +604,8 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			/* Copy over suggestions from dict */
 			for(i = 0; i < n_dict_suggs; i++)
 				suggs[i] = g_strdup (dict_suggs[i]);
-			if(dict_suggs)
-				enchant_dict_free_string_list_impl (dict, dict_suggs);
+      if(dict_suggs)
+            enchant_provider_free_string_list (session->provider, dict_suggs);
 
 			/* Copy over suggestions from pwl, except dupes */
 			for(j = 0; j < n_pwl_suggs; j++) {
@@ -798,7 +785,12 @@ enchant_dict_store_replacement (EnchantDict * dict,
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 {
+	EnchantSession * session;
+
+	g_return_if_fail (dict);
 	g_return_if_fail (string_list);
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
     g_strfreev(string_list);
 }
 
