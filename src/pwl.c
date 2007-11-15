@@ -240,7 +240,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 
 	g_return_val_if_fail (file != NULL, NULL);
 
-	fd = open(file, O_CREAT | O_RDONLY, S_IREAD | S_IWRITE);
+	fd = g_open(file, O_CREAT | O_RDONLY, S_IREAD | S_IWRITE);
 	if(fd == -1)
 		{
 			return NULL;
@@ -304,7 +304,7 @@ static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 		{
 			FILE *f;
 			
-			f = fopen(pwl->filename, "a");
+			f = g_fopen(pwl->filename, "a");
 			if (f)
 				{
 					enchant_lock_file (f);

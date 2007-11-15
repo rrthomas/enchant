@@ -61,9 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glib-2.0.lib UnitTest++.vsnet2005.lib shlwapi.lib"
+				AdditionalDependencies="glib-2.0-vs8.lib UnitTest++.vsnet2005.lib shlwapi.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\lib&quot;; &quot;$(SolutionDir)..\lib\UnitTest++\$(ConfigurationName)&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\$(ConfigurationName)&quot;; &quot;$(SolutionDir)..\lib\UnitTest++\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -139,9 +139,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glib-2.0.lib UnitTest++.vsnet2005.lib shlwapi.lib"
+				AdditionalDependencies="glib-2.0-vs8.lib UnitTest++.vsnet2005.lib shlwapi.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\lib&quot;; &quot;$(SolutionDir)..\lib\UnitTest++\$(ConfigurationName)&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\$(ConfigurationName)&quot;; &quot;$(SolutionDir)..\lib\UnitTest++\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

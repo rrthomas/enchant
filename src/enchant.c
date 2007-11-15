@@ -1021,7 +1021,7 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 
 	FILE * f;
 
-	f = fopen (file, "r");
+	f = g_fopen (file, "r");
 	if (!f)
 		return;
 
@@ -1232,6 +1232,9 @@ enchant_broker_free (EnchantBroker * broker)
  * enchant_broker_request_pwl_dict
  *
  * PWL is a personal wordlist file, 1 entry per line
+ *
+ * @pwl: A non-null pathname in the GLib file name encoding (UTF-8 on Windows)
+ *       to the personal wordlist file
  *
  * Returns: 
  */

@@ -62,9 +62,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glib-2.0.lib gmodule-2.0.lib"
+				AdditionalDependencies="glib-2.0-vs8.lib gmodule-2.0-vs8.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -93,7 +93,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy dependencies"
-				CommandLine="copy &quot;$(SolutionDir)..\lib\glib\*.dll&quot; &quot;$(OutDir)\&quot;"
+				CommandLine="copy &quot;$(SolutionDir)..\lib\glib\$(ConfigurationName)\*.dll&quot; &quot;$(OutDir)\&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -141,9 +141,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glib-2.0.lib gmodule-2.0.lib"
+				AdditionalDependencies="glib-2.0-vs8.lib gmodule-2.0-vs8.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -174,7 +174,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy dependencies"
-				CommandLine="copy &quot;$(SolutionDir)..\lib\glib\*.dll&quot; &quot;$(OutDir)\&quot;"
+				CommandLine="copy &quot;$(SolutionDir)..\lib\glib\$(ConfigurationName)\*.dll&quot; &quot;$(OutDir)\&quot;"
 			/>
 		</Configuration>
 	</Configurations>
