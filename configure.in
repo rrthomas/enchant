@@ -49,7 +49,7 @@ AM_CONDITIONAL(WITH_CXX, test "x$have_cxx" = "xyes")
 
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 
-PKG_CHECK_MODULES(ENCHANT, [glib-2.0 gmodule-2.0])
+PKG_CHECK_MODULES(ENCHANT, [glib-2.0 >= 2.6 gmodule-2.0])
 
 AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
