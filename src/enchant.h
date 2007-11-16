@@ -31,10 +31,6 @@
 #ifndef ENCHANT_H
 #define ENCHANT_H
 
-#if defined(HAVE_CONFIG_H)
-#include "config.h"
-#endif
-
 /* for size_t, ssize_t */
 #include <sys/types.h>
 
