@@ -74,6 +74,13 @@ TEST_FIXTURE(EnchantDictionarySetErrorTests,
     CHECK_EQUAL(std::string(), GetErrorMessage());
 }
 
+TEST_FIXTURE(EnchantDictionarySetErrorTests,
+             SetErrorMessageOnDictionary_InvalidUtf8ErrorMessage_NoErrorSet)
+{
+    enchant_dict_set_error(_dict, "\xa5\xf1\x08");
+
+    CHECK_EQUAL(std::string(), GetErrorMessage());
+}
 
 TEST_FIXTURE(EnchantDictionarySetErrorTests, 
              SetErrorMessageOnDictionary_MessageCopied)

@@ -484,7 +484,8 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 
 	g_return_if_fail (dict);
 	g_return_if_fail (err);
-	
+	g_return_if_fail (g_utf8_validate(err, -1, NULL));
+
 	session = (EnchantSession*)dict->enchant_private_data;
 
 	enchant_session_clear_error (session);
@@ -495,7 +496,7 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
  * enchant_dict_get_error
  * @dict: A non-null dictionary
  *
- * Returns a const char string or NULL describing the last exception.
+ * Returns a const char string or NULL describing the last exception in UTF8 encoding.
  * WARNING: error is transient. It will likely be cleared as soon as 
  * the next dictionary operation is called
  *
@@ -536,6 +537,7 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 		len = strlen (word);
 
 	g_return_val_if_fail (len, -1);
+	g_return_val_if_fail (g_utf8_validate(word, len, NULL),-1);
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
@@ -550,6 +552,52 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 		return 1;
 
 	return -1;
+}
+
+/*@suggs must have at least n_suggs + n_new_suggs space allocated
+@n_suggs is the number if items currently appearing in @suggs
+
+returns the number of items in @suggs after merge is complete
+*/
+static int
+enchant_dict_merge_suggestions(EnchantDict * dict, 
+								const char ** suggs, 
+								size_t n_suggs,
+								const char * const* const new_suggs,
+								size_t n_new_suggs)
+{
+	EnchantSession * session;
+	size_t i, j;
+
+	session = (EnchantSession*)dict->enchant_private_data;
+
+	for(i = 0; i < n_new_suggs; i++)
+		{
+			int copy = 1;
+			size_t sugg_len = strlen(new_suggs[i]);
+
+			if (!g_utf8_validate(new_suggs[i], sugg_len, NULL))
+				copy = 0;
+			else
+				{
+					for(j = 0; j < n_suggs; j++) 
+						{
+							if(strcmp(suggs[j],new_suggs[i])==0) 
+								{
+									copy = 0; /*duplicate*/
+									break;
+								}
+						}
+				}
+
+			if(copy)
+				{
+					suggs[n_suggs] = g_strdup (new_suggs[i]);
+					++n_suggs;
+				}
+		}
+
+	return n_suggs;
 }
 
 /**
@@ -579,6 +627,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 		len = strlen (word);
 
 	g_return_val_if_fail (len, NULL);
+	g_return_val_if_fail (g_utf8_validate(word, len, NULL), NULL);
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
@@ -597,29 +646,17 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 	n_suggs = n_pwl_suggs + n_dict_suggs;
 	if (n_suggs > 0)
 		{
-			size_t i, j, k;
-			
 			suggs = g_new0 (char *, n_suggs + 1);
 
-			/* Copy over suggestions from dict */
-			for(i = 0; i < n_dict_suggs; i++)
-				suggs[i] = g_strdup (dict_suggs[i]);
+			/* Copy over suggestions from dict, if good */
+			n_suggs = enchant_dict_merge_suggestions(dict, 
+													suggs, 0, 
+													dict_suggs, n_dict_suggs);
 
-			/* Copy over suggestions from pwl, except dupes */
-			for(j = 0; j < n_pwl_suggs; j++) {
-				int dupe = 0;
-				for(k = 0; k < n_dict_suggs; k++) {
-					if(strcmp(suggs[k],pwl_suggs[j])==0) {
-						dupe = 1;
-						--n_suggs;
-						break;
-					}
-				}
-				if(!dupe) {
-					suggs[i] = g_strdup (pwl_suggs[j]);
-					i++;
-				}
-			}
+			/* Copy over suggestions from pwl, if good and no dupes */
+			n_suggs = enchant_dict_merge_suggestions(dict, 
+													suggs, n_suggs, 
+													pwl_suggs, n_pwl_suggs);
 		}
 	else 
 		{
@@ -658,6 +695,8 @@ enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
 		len = strlen (word);
 
 	g_return_if_fail (len);
+	g_return_if_fail (g_utf8_validate(word, len, NULL));
+
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 	enchant_session_add_personal (session, word, len);
@@ -701,7 +740,8 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 		len = strlen (word);
 	
 	g_return_if_fail (len);
-	
+	g_return_if_fail (g_utf8_validate(word, len, NULL));
+
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
@@ -713,7 +753,7 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 /**
  * enchant_dict_is_in_session
  * @dict: A non-null #EnchantDict
- * @word: The word you wish to see if it's in your session
+ * @word: The word you wish to see if it's in your session in UTF8 encoding
  * @len: the byte length of @word, or -1 for strlen (@word)
  */
 ENCHANT_MODULE_EXPORT (int)
@@ -729,6 +769,7 @@ enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
 		len = strlen (word);
 	
 	g_return_val_if_fail (len, 0);
+	g_return_val_if_fail (g_utf8_validate(word, len, NULL), 0);
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
@@ -767,6 +808,9 @@ enchant_dict_store_replacement (EnchantDict * dict,
 
 	g_return_if_fail (mis_len);
 	g_return_if_fail (cor_len);
+
+	g_return_if_fail (g_utf8_validate(mis, mis_len, NULL));
+	g_return_if_fail (g_utf8_validate(cor, cor_len, NULL));
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
@@ -881,10 +925,20 @@ enchant_provider_is_valid(EnchantProvider * provider)
 			g_warning ("EnchantProvider's identify method cannot be NULL\n");
 			return 0;
 		}
+	else if(!g_utf8_validate((*provider->identify)(provider), -1, NULL))
+		{
+			g_warning ("EnchantProvider's identify method does not return valid utf8.\n");
+			return 0;
+		}
 
 	if(provider->describe == NULL)
 		{
 			g_warning ("EnchantProvider's describe method cannot be NULL\n");
+			return 0;
+		}
+	else if(!g_utf8_validate((*provider->describe)(provider), -1, NULL))
+		{
+			g_warning ("EnchantProvider's describe method does not return valid utf8.\n");
 			return 0;
 		}
 
@@ -1638,6 +1692,7 @@ enchant_provider_set_error (EnchantProvider * provider, const char * const err)
 
 	g_return_if_fail (provider);
 	g_return_if_fail (err);
+	g_return_if_fail (g_utf8_validate(err, -1, NULL));
 
 	broker = provider->owner;
 	g_return_if_fail (broker);
@@ -1650,7 +1705,7 @@ enchant_provider_set_error (EnchantProvider * provider, const char * const err)
  * enchant_broker_get_error
  * @broker: A non-null broker
  *
- * Returns a const char string or NULL describing the last exception.
+ * Returns a const char string or NULL describing the last exception in UTF8 encoding.
  * WARNING: error is transient and is likely cleared as soon as the 
  * next broker operation happens
  */

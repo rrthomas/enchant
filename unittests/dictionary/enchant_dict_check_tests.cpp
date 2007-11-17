@@ -192,6 +192,13 @@ TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
     CHECK(!dictCheckCalled);
 }
 
+TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
+             EnchantDictionaryCheck_InvalidUtf8Word_Negative1)
+{
+    CHECK_EQUAL(-1, enchant_dict_check(_dict, "\xa5\xf1\x08", -1));
+    CHECK(!dictCheckCalled);
+}
+
 TEST_FIXTURE(EnchantDictionaryCheckNotImplemented_TestFixture,
              EnchantDictionaryCheckNotImplemented_Negative1)
 {

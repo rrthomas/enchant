@@ -34,6 +34,7 @@ static enum SuggestBehavior{
     returnNull,
     returnZero,
     returnFour,
+    returnFourOneInvalidUtf8,
 } suggestBehavior;
 
 struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
@@ -54,7 +55,7 @@ struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
         FreeStringList(_suggestions);
     }
 
-    std::vector<std::string> GetExpectedSuggestions(const std::string& s)
+    std::vector<std::string> GetExpectedSuggestions(const std::string& s, size_t begin = 0)
     {
         size_t cSuggestions;
         char** expectedSuggestions = MockDictionarySuggest (_dict, 
@@ -63,8 +64,8 @@ struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
                                                             &cSuggestions);
 
         std::vector<std::string> result;
-        if(expectedSuggestions != NULL){
-            result.insert(result.begin(), expectedSuggestions, expectedSuggestions+cSuggestions);
+        if(expectedSuggestions != NULL && begin < cSuggestions){
+            result.insert(result.begin(), expectedSuggestions+begin, expectedSuggestions+cSuggestions);
             FreeStringList(expectedSuggestions);
         }
 
@@ -81,18 +82,27 @@ MyMockDictionarySuggest (EnchantDict * dict, const char *const word, size_t len,
     dictSuggestCalled = true;
     suggestWord = std::string(word,len);
     *out_n_suggs = 0;
+    char **sugg_arr = NULL;
 
     switch(suggestBehavior)
     {
         case returnNull:
-            return NULL;
+            sugg_arr = NULL;
+            break;
         case returnZero:
-            return g_new0 (char *, *out_n_suggs + 1);
+            sugg_arr = g_new0 (char *, *out_n_suggs + 1);
+            break;
         case returnFour:
-            return MockDictionarySuggest(dict, word, len, out_n_suggs);
+            sugg_arr = MockDictionarySuggest(dict, word, len, out_n_suggs);
+            break;
+        case returnFourOneInvalidUtf8:
+            sugg_arr = MockDictionarySuggest(dict, word, len, out_n_suggs);
+            g_free(sugg_arr[0]);
+            sugg_arr[0] = g_strdup ("\xa5\xf1\x08");
+            break;
     }
 
-    return NULL;
+    return sugg_arr;
 }
 
 static void
@@ -345,6 +355,17 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     CHECK(!providerFreeStringListCalled);
 }
 
+TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
+             EnchantDictionarySuggest_InvalidUtf8Correction_DoNothing)
+{
+    _suggestions = enchant_dict_suggest(_dict, "\xa5\xf1\x08", -1, NULL);
+
+    CHECK(!_suggestions);
+    CHECK(!dictSuggestCalled);
+    CHECK(!providerFreeStringListCalled);
+}
+
+
 TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
              EnchantDictionarySuggestNotImplemented_NullSuggestions)
 {
@@ -387,5 +408,26 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     CHECK_EQUAL(0, cSuggs);
     CHECK(dictSuggestCalled);
     CHECK(!providerFreeStringListCalled);
+}
+
+
+TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
+             EnchantDictionarySuggest_SuggetionListWithInvalidUtf8_InvalidSuggestionIgnored_FreeCalled)
+{
+    suggestBehavior = returnFourOneInvalidUtf8;
+    size_t cSuggestions;
+    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
+    CHECK(_suggestions);
+    CHECK(dictSuggestCalled);
+    CHECK(providerFreeStringListCalled);
+
+    CHECK_EQUAL(3, cSuggestions);
+
+    std::vector<std::string> suggestions;
+    if(_suggestions != NULL){
+        suggestions.insert(suggestions.begin(), _suggestions, _suggestions+cSuggestions);
+    }
+
+    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo",1), suggestions, std::min((size_t)3,cSuggestions));
 }
 

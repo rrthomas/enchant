@@ -157,6 +157,42 @@ struct EnchantBrokerDescribe_ProviderLacksDescribe_TestFixture : EnchantBrokerDe
     }
 };
 
+static char *
+MockProviderIllegalUtf8 (EnchantProvider *)
+{
+	return "\xa5\xf1\x08";
+}
+
+static void List_Providers_ProviderConfigurationInvalidIdentify (EnchantProvider * me, const char *)
+{
+     me->identify = MockProviderIllegalUtf8;
+}
+
+struct EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_TestFixture : EnchantBrokerDescribeTestFixtureBase
+{
+    //Setup
+    EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_TestFixture():
+            EnchantBrokerDescribeTestFixtureBase(List_Providers_ProviderConfigurationInvalidIdentify)
+    {
+        global_user_data = NULL;
+    }
+};
+
+static void List_Providers_ProviderConfigurationInvalidDescribe (EnchantProvider * me, const char *)
+{
+     me->describe = MockProviderIllegalUtf8;
+}
+
+struct EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture : EnchantBrokerDescribeTestFixtureBase
+{
+    //Setup
+    EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture():
+            EnchantBrokerDescribeTestFixtureBase(List_Providers_ProviderConfigurationInvalidDescribe)
+    {
+        global_user_data = NULL;
+    }
+};
+
 /**
  * enchant_broker_describe
  * @broker: A non-null #EnchantBroker
@@ -170,7 +206,7 @@ struct EnchantBrokerDescribe_ProviderLacksDescribe_TestFixture : EnchantBrokerDe
 
 /*
  * Providers are discovered by probing first in the .enchant directory 
- * in the user's home directory.
+ * in the user's home directory. 
  * 
  * The user's home directory on windows can be overridden using the registry
  * setting HKEY_CURRENT_USER\Software\Enchant\Config\Home_Dir
@@ -265,6 +301,26 @@ TEST_FIXTURE(EnchantBrokerDescribe_ProviderLacksIdentify_TestFixture,
 
 TEST_FIXTURE(EnchantBrokerDescribe_ProviderLacksDescribe_TestFixture, 
              EnchantBrokerDescribe_ProviderLacksDescribe_NotLoaded)
+{
+    enchant_broker_describe(_broker, EnchantBrokerDescribeCallback, &_providerList);
+    CHECK_EQUAL((unsigned int)1, _providerList.size());
+    CHECK_EQUAL(1, std::count_if(_providerList.begin(), 
+                                 _providerList.end(), 
+                                 std::mem_fun_ref(&ProviderDescription::DataIsComplete)));
+}
+
+TEST_FIXTURE(EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture, 
+             EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_NotLoaded)
+{
+    enchant_broker_describe(_broker, EnchantBrokerDescribeCallback, &_providerList);
+    CHECK_EQUAL((unsigned int)1, _providerList.size());
+    CHECK_EQUAL(1, std::count_if(_providerList.begin(), 
+                                 _providerList.end(), 
+                                 std::mem_fun_ref(&ProviderDescription::DataIsComplete)));
+}
+
+TEST_FIXTURE(EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_TestFixture, 
+             EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_NotLoaded)
 {
     enchant_broker_describe(_broker, EnchantBrokerDescribeCallback, &_providerList);
     CHECK_EQUAL((unsigned int)1, _providerList.size());

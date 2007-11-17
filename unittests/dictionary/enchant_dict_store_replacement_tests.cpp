@@ -187,6 +187,20 @@ TEST_FIXTURE(EnchantDictionaryStoreReplacement_TestFixture,
     CHECK(!storeReplacementCalled);
 }
 
+TEST_FIXTURE(EnchantDictionaryStoreReplacement_TestFixture,
+             EnchantDictStoreReplacement_InvalidUtf8Misspelling_DoNothing)
+{
+    enchant_dict_store_replacement(_dict, "\xa5\xf1\x08", -1, "hello", -1);
+    CHECK(!storeReplacementCalled);
+}
+
+TEST_FIXTURE(EnchantDictionaryStoreReplacement_TestFixture,
+             EnchantDictStoreReplacement_InvalidUtf8Correction_DoNothing)
+{
+    enchant_dict_store_replacement(_dict, "helo", -1, "\xa5\xf1\x08", -1);
+    CHECK(!storeReplacementCalled);
+}
+
 TEST_FIXTURE(EnchantDictionaryLacksStoreReplacement_TestFixture,
              EnchantDictStoreReplacment_ProviderLacksStoreReplacement_DoNothing)
 {

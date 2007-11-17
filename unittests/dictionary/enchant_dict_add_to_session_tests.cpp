@@ -188,6 +188,13 @@ TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
     CHECK(!addToSessionCalled);
 }
 
+TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
+             EnchantDictionaryAddToSession_InvalidUtf8Word_NotAdded)
+{
+    enchant_dict_add_to_session(_dict, "\xa5\xf1\x08", -1);
+    CHECK(!addToSessionCalled);
+}
+
 TEST_FIXTURE(EnchantDictionaryAddToSessionNotImplemented_TestFixture,
              EnchantDictionaryAddToSessionNotImplemented_WordAddedToSession)
 {

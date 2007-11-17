@@ -185,6 +185,12 @@ TEST_FIXTURE(EnchantDictionaryAddToPersonal_TestFixture,
     CHECK(!addToPersonalCalled);
 }
 
+TEST_FIXTURE(EnchantDictionaryAddToPersonal_TestFixture,
+             EnchantDictionaryAddToPersonal_InvalidUtf8Word_NotAdded)
+{
+    enchant_dict_add_to_pwl(_dict, "\xa5\xf1\x08", -1);
+    CHECK(!addToPersonalCalled);
+}
 
 TEST_FIXTURE(EnchantDictionaryAddToPersonalNotImplemented_TestFixture,
              EnchantDictionaryAddToPersonalNotImplemented_WordAddedToEnchantPwlFile)

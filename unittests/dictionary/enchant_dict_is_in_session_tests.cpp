@@ -113,3 +113,9 @@ TEST_FIXTURE(EnchantDictionaryIsInSession_TestFixture,
 {
     CHECK_EQUAL(0, enchant_dict_is_in_session(_dict, "hello", 0));
 }
+
+TEST_FIXTURE(EnchantDictionaryIsInSession_TestFixture,
+             EnchantDictionaryIsInSession_InvalidUtf8Word_0)
+{
+    CHECK_EQUAL(0, enchant_dict_is_in_session(_dict, "\xa5\xf1\x08", -1));
+}
