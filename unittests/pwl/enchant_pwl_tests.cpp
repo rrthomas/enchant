@@ -45,3 +45,30 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 
     CHECK( IsWordInDictionary("cat") );
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// DictionaryHasInvalidUtf8
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_DictionaryHasInvalidUtf8Data_OnlyReadsToValidData)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  std::vector<const std::string>::const_iterator bad = sWords.insert(sWords.begin()+2, "\xa5\xf1\x08"); //invalid utf8 data
+  ExternalAddWordsToDictionary(sWords);
+
+  ReloadTestDictionary();
+
+  for(std::vector<const std::string>::const_iterator itWord = sWords.begin(); itWord != bad; ++itWord){
+    CHECK( IsWordInDictionary(*itWord) );
+  }
+  CHECK(!IsWordInDictionary(*bad) );
+
+  for(std::vector<const std::string>::const_iterator itWord = bad+1; itWord != sWords.end(); ++itWord){
+    CHECK(IsWordInDictionary(*itWord) );
+  }
+}

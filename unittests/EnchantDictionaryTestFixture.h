@@ -33,6 +33,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <vector>
 
 static EnchantDict*
 MockProviderRequestEmptyMockDictionary(EnchantProvider *, const char *)
@@ -209,6 +210,21 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 			fclose(f);
 		}
     }
+
+	void ExternalAddWordsToDictionary(const std::vector<const std::string>& sWords)
+    {
+        FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+		if(f) 
+		{
+			for(std::vector<const std::string>::const_iterator 
+				itWord = sWords.begin(); itWord != sWords.end(); ++itWord) {
+				fputs(itWord->c_str(), f);
+				fputc('\n', f);
+			}
+			fclose(f);
+		}
+    }
+
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)

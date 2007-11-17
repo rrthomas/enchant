@@ -271,7 +271,11 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 					if (line[l]=='\n') 
 						line[l] = '\0';
 					
-					enchant_pwl_add_to_trie(pwl, line, strlen(line), FALSE);
+					if(g_utf8_validate(line, -1, NULL))
+						enchant_pwl_add_to_trie(pwl, line, strlen(line), FALSE);
+    				else
+						g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
+
 					++line_number;
 				}
 			
