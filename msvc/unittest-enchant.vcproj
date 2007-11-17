@@ -304,6 +304,14 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="pwl"
+				>
+				<File
+					RelativePath="..\unittests\pwl\enchant_pwl_tests.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"

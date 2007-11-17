@@ -160,7 +160,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
     bool PersonalWordListFileHasContents()
     {
         bool hasContents = false;
-        int fd = open(GetPersonalDictFileName().c_str(), O_RDONLY);
+        int fd = g_open(GetPersonalDictFileName().c_str(), O_RDONLY, S_IREAD );
         if(fd == -1){
             return false;
         }
@@ -197,6 +197,17 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     bool IsWordInDictionary(const std::string& word){
         return enchant_dict_check(_dict, word.c_str(), word.size())==0;
+    }
+
+    void ExternalAddWordToDictionary(const std::string& word)
+    {
+        FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+		if(f)
+		{
+			fputs(word.c_str(), f);
+			fputc('\n', f);
+			fclose(f);
+		}
     }
 };
 #if defined(_MSC_VER)

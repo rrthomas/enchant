@@ -252,17 +252,27 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 	f = fdopen(fd, "r");
 	if (f) 
 		{
-			char line[BUFSIZ];
-
+			char buffer[BUFSIZ];
+			char* line;
+		    size_t line_number = 1;
+			
 			enchant_lock_file (f);
 			
-			while (NULL != (fgets (line, sizeof (line), f)))
+			while (NULL != (fgets (buffer, sizeof (buffer), f)))
 				{
-					size_t l = strlen(line)-1;
+					const gunichar BOM = 0xfeff;
+					size_t l;
+
+					line = buffer;
+					if(line_number == 1 && BOM == g_utf8_get_char(line))
+		                line = g_utf8_next_char(line);
+		
+					l = strlen(line)-1;
 					if (line[l]=='\n') 
 						line[l] = '\0';
 					
 					enchant_pwl_add_to_trie(pwl, line, strlen(line), FALSE);
+					++line_number;
 				}
 			
 			enchant_unlock_file (f);
