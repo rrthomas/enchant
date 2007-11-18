@@ -200,7 +200,21 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         return enchant_dict_check(_dict, word.c_str(), word.size())==0;
     }
 
-    void ExternalAddWordToDictionary(const std::string& word)
+    void AddWordToDictionary(const std::string& word)
+    {
+		enchant_dict_add_to_pwl(_dict, word.c_str(), word.size());
+    }
+
+    void AddWordsToDictionary(const std::vector<const std::string>& sWords)
+    {
+        for(std::vector<const std::string>::const_iterator itWord = sWords.begin();
+                                                              itWord != sWords.end();
+                                                              ++itWord){
+            AddWordToDictionary(*itWord);
+        }
+    }
+
+	void ExternalAddWordToDictionary(const std::string& word)
     {
         FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
 		if(f)
@@ -223,6 +237,22 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 			}
 			fclose(f);
 		}
+    }
+
+    std::vector<const std::string> GetSuggestionsFromWord(const std::string& word)
+    {
+        std::vector<const std::string> result;
+
+        size_t cSuggestions;
+        char** suggestions = enchant_dict_suggest(_dict, word.c_str(), word.size(), &cSuggestions);
+
+        if(suggestions != NULL){
+            result.insert(result.begin(), suggestions, suggestions+cSuggestions);
+        }
+
+        FreeStringList(suggestions);
+        
+        return result;
     }
 
 };

@@ -49,7 +49,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // DictionaryHasInvalidUtf8
 TEST_FIXTURE(EnchantPwl_TestFixture, 
-             IsWordInDictionary_DictionaryHasInvalidUtf8Data_OnlyReadsToValidData)
+             IsWordInDictionary_DictionaryHasInvalidUtf8Data_OnlyReadsValidLines)
 {
   std::vector<const std::string> sWords;
   sWords.push_back("cat");
@@ -71,4 +71,22 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
   for(std::vector<const std::string>::const_iterator itWord = bad+1; itWord != sWords.end(); ++itWord){
     CHECK(IsWordInDictionary(*itWord) );
   }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// Pwl Bugs
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_DistanceUsesUnicodeChar)
+{
+	std::string puaWord("\xF4\x80\x80\x80ord"); // private use character 
+	AddWordToDictionary(puaWord); //edit distance 1 using unichar; 4 using utf8
+
+    std::vector<const std::string> suggestions = GetSuggestionsFromWord("word");
+
+	CHECK( !suggestions.empty());
+
+	if(!suggestions.empty()){
+		CHECK_EQUAL(puaWord, suggestions[0]);
+	}
 }

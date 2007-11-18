@@ -698,14 +698,15 @@ static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num)
 	matcher->path[matcher->path_pos] = '\0';
 }
 
-static int edit_dist(const char* word1, const char* word2)
+static int edit_dist(const char* utf8word1, const char* utf8word2)
 {
+	gunichar * word1, * word2;
 	int len1, len2, cost, i, j;
 	int v1, v2, v3;
 	int* table;
 
-	len1 = strlen(word1);
-	len2 = strlen(word2);
+    word1 = g_utf8_to_ucs4_fast(utf8word1, -1, &len1);
+    word2 = g_utf8_to_ucs4_fast(utf8word2, -1, &len2);
 
 	table = g_new0(int,(len1+1)*(len2+1));
 	
