@@ -90,3 +90,113 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 		CHECK_EQUAL(puaWord, suggestions[0]);
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Capitalization
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_AddedAllCaps_OnlyAllCapsSuccessful)
+{
+  AddWordToDictionary("CIA");
+
+  CHECK( IsWordInDictionary("CIA") );
+  CHECK(!IsWordInDictionary("CIa") );
+  CHECK(!IsWordInDictionary("Cia") );
+  CHECK(!IsWordInDictionary("cia") );
+  CHECK(!IsWordInDictionary("cIa") );
+
+  CHECK( IsWordInSession("CIA") );
+  CHECK(!IsWordInSession("CIa") );
+  CHECK(!IsWordInSession("Cia") );
+  CHECK(!IsWordInSession("cia") );
+  CHECK(!IsWordInSession("cIa") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_AddedTitle_lowerCaseAndMixedCaseNotSuccessful)
+{
+  AddWordToDictionary("Eric");
+
+  CHECK( IsWordInDictionary("ERIC") );
+  CHECK(!IsWordInDictionary("ERic") );
+  CHECK( IsWordInDictionary("Eric") );
+  CHECK(!IsWordInDictionary("eric") );
+  CHECK(!IsWordInDictionary("eRic") );
+
+  CHECK( IsWordInSession("ERIC") );
+  CHECK(!IsWordInSession("ERic") );
+  CHECK( IsWordInSession("Eric") );
+  CHECK(!IsWordInSession("eric") );
+  CHECK(!IsWordInSession("eRic") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_Addedlower_MixedCaseNotSuccessful)
+{
+  AddWordToDictionary("rice");
+
+  CHECK( IsWordInDictionary("RICE") );
+  CHECK(!IsWordInDictionary("RIce") );
+  CHECK( IsWordInDictionary("Rice") );
+  CHECK( IsWordInDictionary("rice") );
+  CHECK(!IsWordInDictionary("rIce") );
+
+  CHECK( IsWordInSession("RICE") );
+  CHECK(!IsWordInSession("RIce") );
+  CHECK( IsWordInSession("Rice") );
+  CHECK( IsWordInSession("rice") );
+  CHECK(!IsWordInSession("rIce") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_AddedAllCapsOfTrueTitleCase_OnlyAllCapsSuccessful)
+{
+  AddWordToDictionary(Convert(L"\x01f1IE")); // u01f1 is Latin captial letter Dz
+
+  CHECK( IsWordInDictionary(Convert(L"\x01f1IE")) ); // u01f1 is Latin captial letter Dz
+  CHECK(!IsWordInDictionary(Convert(L"\x01f2IE")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK(!IsWordInDictionary(Convert(L"\x01f2ie")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK(!IsWordInDictionary(Convert(L"\x01f3ie")) ); // u01f3 is Latin small letter dz
+  CHECK(!IsWordInDictionary(Convert(L"\x01f3Ie")) );
+
+  CHECK( IsWordInSession(Convert(L"\x01f1IE")) ); // u01f1 is Latin captial letter Dz
+  CHECK(!IsWordInSession(Convert(L"\x01f2IE")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK(!IsWordInSession(Convert(L"\x01f2ie")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK(!IsWordInSession(Convert(L"\x01f3ie")) ); // u01f3 is Latin small letter dz
+  CHECK(!IsWordInSession(Convert(L"\x01f3Ie")) );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_AddedTrueTitleCase_lowerCaseAndMixedCaseNotSuccessful)
+{
+  AddWordToDictionary(Convert(L"\x01f2ie")); // u01f2 is Latin capital letter d with small letter z
+
+  CHECK( IsWordInDictionary(Convert(L"\x01f1IE")) ); // u01f1 is Latin captial letter Dz
+  CHECK(!IsWordInDictionary(Convert(L"\x01f2IE")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK( IsWordInDictionary(Convert(L"\x01f2ie")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK(!IsWordInDictionary(Convert(L"\x01f3ie")) ); // u01f3 is Latin small letter dz
+  CHECK(!IsWordInDictionary(Convert(L"\x01f3Ie")) );
+
+  CHECK( IsWordInSession(Convert(L"\x01f1IE")) ); // u01f1 is Latin captial letter Dz
+  CHECK(!IsWordInSession(Convert(L"\x01f2IE")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK( IsWordInSession(Convert(L"\x01f2ie")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK(!IsWordInSession(Convert(L"\x01f3ie")) ); // u01f3 is Latin small letter dz
+  CHECK(!IsWordInSession(Convert(L"\x01f3Ie")) );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_AddedLowerOfTrueTitleCase_MixedCaseNotSuccessful)
+{
+  AddWordToDictionary(Convert(L"\x01f3ie")); // u01f2 is Latin small letter dz
+
+  CHECK( IsWordInDictionary(Convert(L"\x01f1IE")) ); // u01f1 is Latin captial letter Dz
+  CHECK(!IsWordInDictionary(Convert(L"\x01f2IE")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK( IsWordInDictionary(Convert(L"\x01f2ie")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK( IsWordInDictionary(Convert(L"\x01f3ie")) ); // u01f3 is Latin small letter dz
+  CHECK(!IsWordInDictionary(Convert(L"\x01f3Ie")) );
+
+  CHECK( IsWordInSession(Convert(L"\x01f1IE")) ); // u01f1 is Latin captial letter Dz
+  CHECK(!IsWordInSession(Convert(L"\x01f2IE")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK( IsWordInSession(Convert(L"\x01f2ie")) ); // u01f2 is Latin capital letter d with small letter z
+  CHECK( IsWordInSession(Convert(L"\x01f3ie")) ); // u01f3 is Latin small letter dz
+  CHECK(!IsWordInSession(Convert(L"\x01f3Ie")) );
+}

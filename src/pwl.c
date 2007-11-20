@@ -302,17 +302,17 @@ static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 				    const char *const word, size_t len,
 				    gboolean add_to_file)
 {
-	char * case_folded_word;
+	char * szWord;
 
-	case_folded_word = g_utf8_casefold (word, len);
-	if(NULL != g_hash_table_lookup (pwl->words_in_trie, case_folded_word)) {
-		g_free (case_folded_word);
+	szWord = g_strndup (word, len);
+	if(NULL != g_hash_table_lookup (pwl->words_in_trie, szWord)) {
+		g_free (szWord);
 		return;
 	}
 	
-	g_hash_table_insert (pwl->words_in_trie, case_folded_word, GINT_TO_POINTER(1));
+	g_hash_table_insert (pwl->words_in_trie, szWord, GINT_TO_POINTER(1));
 
-	pwl->trie = enchant_trie_insert(pwl->trie, case_folded_word);
+	pwl->trie = enchant_trie_insert(pwl->trie, szWord);
 
 	if (add_to_file && (pwl->filename != NULL))
 		{
@@ -336,22 +336,132 @@ void enchant_pwl_add(EnchantPWL *pwl,
 	enchant_pwl_add_to_trie(pwl, word, len, TRUE);
 }
 
-int enchant_pwl_check(EnchantPWL *pwl, const char *const word, size_t len)
+int enchant_pwl_contains(EnchantPWL *pwl, const char *const word, size_t len)
 {
 	EnchantTrieMatcher* matcher;
-	char * case_folded_word;
+	char * szWord;
 	int count = 0;
 	
-	case_folded_word = g_utf8_casefold (word, len);
+	szWord = g_strndup (word, len);
 
-	matcher = enchant_trie_matcher_init(case_folded_word,0,enchant_pwl_check_cb,
+	matcher = enchant_trie_matcher_init(szWord,0,enchant_pwl_check_cb,
 					    &count);
 	enchant_trie_find_matches(pwl->trie,matcher);
 	enchant_trie_matcher_free(matcher);
-	g_free(case_folded_word);
+	g_free(szWord);
 
-	return (count != 0 ? 0 : 1);
+	return (count == 0 ? 0 : 1);
 }
+
+int enchant_is_all_caps(const char*const word, size_t len)
+{
+    const char* it;
+    int hasCap = 0;
+
+    g_return_val_if_fail (word && *word, 0);
+
+    for(it = word; it < word + len; it = g_utf8_next_char(it))
+        {
+            GUnicodeType type = g_unichar_type(g_utf8_get_char(it));
+            switch(type)
+                {
+                    case G_UNICODE_UPPERCASE_LETTER:
+                        hasCap = 1;
+                        break;
+                    case G_UNICODE_TITLECASE_LETTER:
+                    case G_UNICODE_LOWERCASE_LETTER:
+                        return 0;
+                }
+        }
+
+    return hasCap;
+}
+
+int enchant_is_title_case(const char*const word, size_t len)
+{
+    gunichar ch;
+    GUnicodeType type;
+    const char* it = word;
+
+    g_return_val_if_fail (word && *word, 0);
+
+    ch = g_utf8_get_char(it);
+    
+    type = g_unichar_type(ch);
+    if(type != G_UNICODE_UPPERCASE_LETTER && type != G_UNICODE_TITLECASE_LETTER)
+        return 0;
+
+    if(ch != g_unichar_totitle(ch) )
+        return 0;
+            
+    for(it = g_utf8_next_char(it); it < word + len; it = g_utf8_next_char(it))
+        {
+            type = g_unichar_type(g_utf8_get_char(it));
+            if(type == G_UNICODE_UPPERCASE_LETTER || type == G_UNICODE_TITLECASE_LETTER)
+                return 0;
+        }
+    return 1;
+}
+
+gchar* enchant_utf8_strtitle(const gchar*str, gssize len)
+{
+    gunichar title_case_char;
+    gchar* result;
+    gchar* upperStr, * upperTail, * lowerTail;
+    gchar title_case_utf8[7];
+    gint utf8len;
+
+    upperStr = g_utf8_strup(str, len); /* for locale sensitive casing */
+
+    title_case_char = g_unichar_totitle(g_utf8_get_char(upperStr));
+
+    utf8len = g_unichar_to_utf8(title_case_char, title_case_utf8);
+    title_case_utf8[utf8len] = '\0';
+
+    upperTail = g_utf8_next_char(upperStr);
+    lowerTail = g_utf8_strdown(upperTail, -1);
+
+    result = g_strconcat(title_case_utf8, 
+                         lowerTail, 
+                         NULL);
+
+    g_free(upperStr);
+    g_free(lowerTail);
+
+    return result;
+}
+
+int enchant_pwl_check(EnchantPWL *pwl, const char *const word, size_t len)
+{
+    int exists = 0;
+    int isAllCaps = 0;
+
+    exists = enchant_pwl_contains(pwl, word, len);
+	
+    if(exists)
+        return 0;
+
+    if(enchant_is_title_case(word, len) || (isAllCaps = enchant_is_all_caps(word, len)))
+        {
+            char * lower_case_word = g_utf8_strdown(word, len);
+            exists = enchant_pwl_contains(pwl, lower_case_word, strlen(lower_case_word));
+            g_free(lower_case_word);
+            if(exists)
+                return 0;
+
+            if(isAllCaps)
+            {
+                char * title_case_word = enchant_utf8_strtitle(word, len);
+                exists = enchant_pwl_contains(pwl, title_case_word, strlen(title_case_word));
+                g_free(title_case_word);
+                if(exists)
+                    return 0;
+            }
+        }
+
+	return 1; /* not found */
+}
+
 
 static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher)
 {
