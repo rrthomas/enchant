@@ -444,6 +444,8 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 
     ExternalAddWordToDictionary(Convert(L"fiance\x301")); // NFD u0301 = Combining acute accent
 
+    ReloadTestDictionary();
+
     size_t cSuggestions;
     _suggestions = enchant_dict_suggest(_dict, "fiance", -1, &cSuggestions);
     CHECK(_suggestions);

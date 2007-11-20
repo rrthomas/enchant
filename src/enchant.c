@@ -580,9 +580,16 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 				copy = 0;
 			else
 				{
+					char * normalized_new_sugg;
+
+					normalized_new_sugg = g_utf8_normalize (new_suggs[i], sugg_len, G_NORMALIZE_NFD);
+
 					for(j = 0; j < n_suggs; j++) 
 						{
-							if(strcmp(suggs[j],new_suggs[i])==0) 
+							char* normalized_sugg;
+							normalized_sugg = g_utf8_normalize (suggs[j], -1, G_NORMALIZE_NFD);
+
+							if(strcmp(normalized_sugg,normalized_new_sugg)==0) 
 								{
 									copy = 0; /*duplicate*/
 									break;
