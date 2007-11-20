@@ -56,25 +56,7 @@ struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
         FreeStringList(_suggestions);
     }
 
-    std::vector<std::string> GetExpectedSuggestions(const std::string& s, size_t begin = 0)
-    {
-        size_t cSuggestions;
-        char** expectedSuggestions = MockDictionarySuggest (_dict, 
-                                                            s.c_str(),
-		                                                    s.size(), 
-                                                            &cSuggestions);
-
-        std::vector<std::string> result;
-        if(expectedSuggestions != NULL && begin < cSuggestions){
-            result.insert(result.begin(), expectedSuggestions+begin, expectedSuggestions+cSuggestions);
-            FreeStringList(expectedSuggestions);
-        }
-
-        return result;
-    }
-
     char** _suggestions;
-
 };
 
 static char **
@@ -265,7 +247,7 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
              EnchantDictionarySuggest_InBrokerPwlSession)
 {
-    enchant_dict_add_to_pwl(_pwl, "hello", -1);
+    enchant_dict_add(_pwl, "hello", -1);
     _suggestions = enchant_dict_suggest(_pwl, "helo", -1, NULL);
     CHECK(_suggestions);
     CHECK(!dictSuggestCalled);
@@ -275,7 +257,7 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
              EnchantDictionarySuggest_SuggestionsFromPersonal_addedToEnd)
 {
     size_t cSuggestions;
-    enchant_dict_add_to_pwl(_dict, "hello", -1);
+    enchant_dict_add(_dict, "hello", -1);
     _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
     CHECK(_suggestions);
     CHECK_EQUAL(5, cSuggestions);
@@ -297,7 +279,7 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 {
     size_t cSuggestions;
 
-    enchant_dict_add_to_pwl(_dict, "aelo", -1);
+    enchant_dict_add(_dict, "aelo", -1);
     _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
     CHECK(_suggestions);
     CHECK_EQUAL(4, cSuggestions);
@@ -453,3 +435,17 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     CHECK_EQUAL(1, cSuggestions);
     CHECK_EQUAL(Convert(L"fianc\xe9"), _suggestions[0]);
 }
+
+TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
+             EnchantDictionarySuggest_WordInDictionaryAndExclude_NotInSuggestions)
+{
+    ExternalAddWordToExclude("hello");
+    ExternalAddWordToDictionary("hello");
+
+    size_t cSuggestions;
+    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
+    CHECK(!_suggestions);
+
+    CHECK_EQUAL(0, cSuggestions);
+}
+

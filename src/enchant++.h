@@ -113,8 +113,8 @@ namespace enchant
 				return result;
 			}
 			
-			void add_to_pwl (const std::string & utf8word) {
-				enchant_dict_add_to_pwl (m_dict, utf8word.c_str(), 
+			void add (const std::string & utf8word) {
+				enchant_dict_add (m_dict, utf8word.c_str(), 
 							 utf8word.size());
 			}
 			
@@ -123,6 +123,26 @@ namespace enchant
 							     utf8word.size());
 			}
 			
+			void is_added (const std::string & utf8word) {
+				enchant_dict_is_added (m_dict, utf8word.c_str(), 
+							     utf8word.size());
+			}
+			
+			void remove (const std::string & utf8word) {
+				enchant_dict_remove (m_dict, utf8word.c_str(), 
+							 utf8word.size());
+			}
+			
+			void remove_from_session (const std::string & utf8word) {
+				enchant_dict_remove_from_session (m_dict, utf8word.c_str(), 
+							     utf8word.size());
+			}
+
+			void is_removed (const std::string & utf8word) {
+				enchant_dict_is_removed (m_dict, utf8word.c_str(), 
+							     utf8word.size());
+			}
+
 			void store_replacement (const std::string & utf8bad, 
 						const std::string & utf8good) {
 				enchant_dict_store_replacement (m_dict, 
@@ -148,9 +168,13 @@ namespace enchant
 
 			/* deprecated */
 			void add_to_personal (const std::string & utf8word) {
-				return add_to_pwl (utf8word);
+				return add (utf8word);
 			}
 
+			/* deprecated */
+			void add_to_pwl (const std::string & utf8word) {
+				return add (utf8word);
+			}
 		private:
 
 			// space reserved for API/ABI expansion

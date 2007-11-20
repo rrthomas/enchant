@@ -98,18 +98,27 @@ ENCHANT_MODULE_EXPORT (char **)
      enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			   ssize_t len, size_t * out_n_suggs);
 ENCHANT_MODULE_EXPORT (void)
+     enchant_dict_add (EnchantDict * dict, const char *const word,
+			      ssize_t len);
+ENCHANT_MODULE_EXPORT (void)
      enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 				  ssize_t len);
+ENCHANT_MODULE_EXPORT (void)
+     enchant_dict_remove (EnchantDict * dict, const char *const word,
+			      ssize_t len);
+ENCHANT_MODULE_EXPORT (void)
+     enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
+				  ssize_t len);
 ENCHANT_MODULE_EXPORT (int)
-     enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
+     enchant_dict_is_added (EnchantDict * dict, const char *const word,
+				 ssize_t len);
+ENCHANT_MODULE_EXPORT (int)
+     enchant_dict_is_removed (EnchantDict * dict, const char *const word,
 				 ssize_t len);
 ENCHANT_MODULE_EXPORT (void)
      enchant_dict_store_replacement (EnchantDict * dict,
 				     const char *const mis, ssize_t mis_len,
 				     const char *const cor, ssize_t cor_len);
-ENCHANT_MODULE_EXPORT (void)
-     enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
-			      ssize_t len);
 ENCHANT_MODULE_EXPORT (void)
 	     enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
 
@@ -119,6 +128,12 @@ ENCHANT_MODULE_EXPORT (void)
 ENCHANT_MODULE_EXPORT (void)
      enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 				   ssize_t len);
+ENCHANT_MODULE_EXPORT (void)
+     enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
+			      ssize_t len);
+ENCHANT_MODULE_EXPORT (int)
+     enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
+				 ssize_t len);
 #endif /* ENCHANT_DISABLE_DEPRECATED */
 
 /* const */

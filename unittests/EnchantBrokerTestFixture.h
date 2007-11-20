@@ -311,12 +311,19 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         g_rmdir(dir.c_str());
     }
 
-    EnchantDict* RequestPersonalDictionary(){
+    EnchantDict* RequestPersonalDictionary()
+	{
         std::string pwlFileName = GetTemporaryFilename("epwl");
         CreateFile(pwlFileName);
         pwlFilenames.push(pwlFileName);
         return enchant_broker_request_pwl_dict(_broker, pwlFileName.c_str());
     }
+
+    std::string GetLastPersonalDictionaryFileName()
+    {
+      return pwlFilenames.top();
+    }
+
 
     void FreeDictionary(EnchantDict* dictionary){
         if(dictionary != NULL){

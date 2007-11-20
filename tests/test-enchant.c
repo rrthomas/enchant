@@ -100,7 +100,7 @@ run_dict_tests (EnchantDict * dict)
 		}
 
 	printf ("Adding 'helllo' to personal\n");
-	enchant_dict_add_to_pwl (dict, "helllo", 6);
+	enchant_dict_add (dict, "helllo", 6);
 	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
 		{
 			printf ("enchant_dict_check (%s): %s\n", check_checks[i],

@@ -70,10 +70,13 @@ struct str_enchant_broker
 
 typedef struct str_enchant_session
 {
-	GHashTable *session;
+	GHashTable *session_include;
+    GHashTable *session_exclude;
 	EnchantPWL *personal;
+    EnchantPWL *exclude;
 
 	char * personal_filename;
+    char * exclude_filename;
 	char * language_tag;
 
 	char * error;
@@ -355,9 +358,12 @@ enchant_iso_639_from_tag (const char * const dict_tag)
 static void
 enchant_session_destroy (EnchantSession * session)
 {
-	g_hash_table_destroy (session->session);
+	g_hash_table_destroy (session->session_include);
+	g_hash_table_destroy (session->session_exclude);
 	enchant_pwl_free (session->personal);
+	enchant_pwl_free (session->exclude);
 	g_free (session->personal_filename);
+	g_free (session->exclude_filename);
 	g_free (session->language_tag);
 
 	if (session->error)
@@ -367,11 +373,15 @@ enchant_session_destroy (EnchantSession * session)
 }
 
 static EnchantSession *
-enchant_session_new_with_pwl (EnchantProvider * provider, const char * const pwl, const char * const lang,
-				  gboolean fail_if_no_pwl)
+enchant_session_new_with_pwl (EnchantProvider * provider, 
+                              const char * const pwl, 
+                              const char * const excl,
+                              const char * const lang,
+				              gboolean fail_if_no_pwl)
 {
 	EnchantSession * session;
 	EnchantPWL *personal = NULL;
+    EnchantPWL *exclude = NULL;
 
 	if (pwl)
 		personal = enchant_pwl_init_with_file (pwl);
@@ -383,13 +393,20 @@ enchant_session_new_with_pwl (EnchantProvider * provider, const char * const pwl
 			personal = enchant_pwl_init ();
 	}
 	
+    if (excl)
+        exclude = enchant_pwl_init_with_file (excl);
+    if (exclude == NULL)
+        exclude = enchant_pwl_init ();
 
 	session = g_new0 (EnchantSession, 1);
-	session->session = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	session->session_include = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	session->session_exclude = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	session->personal = personal;
+    session->exclude = exclude;
 	session->provider = provider;
 	session->language_tag = g_strdup (lang);
 	session->personal_filename = g_strdup (pwl);
+    session->exclude_filename = g_strdup (excl);
 	
 	return session;
 }
@@ -398,7 +415,7 @@ static EnchantSession *
 enchant_session_new (EnchantProvider *provider, const char * const lang)
 {
 	EnchantSession * session;
-	char * home_dir, * dic = NULL, * filename;
+	char * home_dir, * dic = NULL, *excl = NULL, * filename;
 
 	home_dir = enchant_get_user_home_dir ();
 	if (home_dir) 
@@ -410,10 +427,18 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 									filename,
 									NULL);
 			g_free (filename);
+
+   			filename = g_strdup_printf ("%s.exc", lang);
+			excl = g_build_filename (home_dir,
+									ENCHANT_USER_PATH_EXTENSION,
+									filename,
+									NULL);
+			g_free (filename);
+
 			g_free (home_dir);
 		}
 
-	session = enchant_session_new_with_pwl (provider, dic, lang, FALSE);	
+	session = enchant_session_new_with_pwl (provider, dic, excl, lang, FALSE);	
 	
 	if (dic)
 		g_free (dic);
@@ -424,13 +449,60 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 static void
 enchant_session_add (EnchantSession * session, const char * const word, size_t len)
 {
-	g_hash_table_insert (session->session, g_strndup (word, len), GINT_TO_POINTER(TRUE));
+    char* key = g_strndup (word, len);
+    g_hash_table_remove (session->session_exclude, key);
+	g_hash_table_insert (session->session_include, key, GINT_TO_POINTER(TRUE));
+}
+
+static void
+enchant_session_remove (EnchantSession * session, const char * const word, size_t len)
+{
+    char* key = g_strndup (word, len);
+	g_hash_table_remove (session->session_include, key);
+	g_hash_table_insert (session->session_exclude, key, GINT_TO_POINTER(TRUE));
 }
 
 static void
 enchant_session_add_personal (EnchantSession * session, const char * const word, size_t len)
 {
 	enchant_pwl_add(session->personal, word, len);
+}
+
+static void
+enchant_session_remove_personal (EnchantSession * session, const char * const word, size_t len)
+{
+	enchant_pwl_remove(session->personal, word, len);
+}
+
+static void
+enchant_session_add_exclude (EnchantSession * session, const char * const word, size_t len)
+{
+	enchant_pwl_add(session->exclude, word, len);
+}
+
+static void
+enchant_session_remove_exclude (EnchantSession * session, const char * const word, size_t len)
+{
+	enchant_pwl_remove(session->exclude, word, len);
+}
+
+/* a word is excluded if it is in the exclude dictionary or in the session exclude list
+ *  AND the word has not been added to the session include list
+ */
+static gboolean
+enchant_session_exclude (EnchantSession * session, const char * const word, size_t len)
+{
+	gboolean result = FALSE;
+	
+	char * utf = g_strndup (word, len);
+	
+    if (!g_hash_table_lookup (session->session_include, utf) &&
+            (g_hash_table_lookup (session->session_exclude, utf)||
+             enchant_pwl_check (session->exclude, word, len) == 0 ))
+		    result = TRUE;
+	g_free (utf);
+
+	return result;
 }
 
 static gboolean
@@ -440,8 +512,9 @@ enchant_session_contains (EnchantSession * session, const char * const word, siz
 	
 	char * utf = g_strndup (word, len);
 	
-	if (g_hash_table_lookup (session->session, utf) ||
-		enchant_pwl_check (session->personal, utf, len) == 0)
+	if (g_hash_table_lookup (session->session_include, utf) ||
+		(enchant_pwl_check (session->personal, word, len) == 0 &&
+         !enchant_pwl_check (session->exclude, word, len) == 0))
 		result = TRUE;
 	
 	g_free (utf);
@@ -542,10 +615,14 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
-	/* first, see if it's in our session */
-	if (enchant_session_contains (session, word, len))
-		return 0;
+    /* first, see if it's to be excluded*/
+    if (enchant_session_exclude (session, word, len)) 
+        return 1;
 
+	/* then, see if it's in our pwl or session*/
+    if (enchant_session_contains(session, word, len))
+        return 0;
+    
 	if (dict->check)
 		return (*dict->check) (dict, word, len);
 	else if (session->is_pwl)
@@ -578,6 +655,8 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 
 			if (!g_utf8_validate(new_suggs[i], sugg_len, NULL))
 				copy = 0;
+            else if (enchant_session_exclude(session, new_suggs[i], sugg_len))
+                copy = 0;
 			else
 				{
 					char * normalized_new_sugg;
@@ -686,14 +765,16 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 }
 
 /**
- * enchant_dict_add_to_pwl
+ * enchant_dict_add
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
  * @len: The byte length of @word, or -1 for strlen (@word)
  *
+ * Remarks: if the word exists in the exclude dictionary, it will be removed from the 
+ *          exclude dictionary
  */
 ENCHANT_MODULE_EXPORT (void)
-enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
+enchant_dict_add (EnchantDict * dict, const char *const word,
 			 ssize_t len)
 {
 	EnchantSession * session;
@@ -710,9 +791,25 @@ enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 	enchant_session_add_personal (session, word, len);
+	enchant_session_remove_exclude (session, word, len);
 	
 	if (dict->add_to_personal)
 		(*dict->add_to_personal) (dict, word, len);
+}
+
+/**
+ * enchant_dict_add_to_pwl
+ * @dict: A non-null #EnchantDict
+ * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
+ * @len: The byte length of @word, or -1 for strlen (@word)
+ *
+ * DEPRECATED. Please use enchant_dict_add() instead.
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
+			 ssize_t len)
+{
+    enchant_dict_add(dict,word,len);
 }
 
 /**
@@ -721,13 +818,13 @@ enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
  * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
  * @len: The byte length of @word, or -1 for strlen (@word)
  *
- * DEPRECATED. Please use enchant_dict_add_to_pwl() instead.
+ * DEPRECATED. Please use enchant_dict_add() instead.
  */
 ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
 				  ssize_t len)
 {
-	enchant_dict_add_to_pwl (dict, word, len);
+	enchant_dict_add(dict, word, len);
 }
 
 /**
@@ -761,14 +858,14 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 }
 
 /**
- * enchant_dict_is_in_session
+ * enchant_dict_is_added
  * @dict: A non-null #EnchantDict
- * @word: The word you wish to see if it's in your session in UTF8 encoding
+ * @word: The word you wish to see if it has been added (to your session or dict) in UTF8 encoding
  * @len: the byte length of @word, or -1 for strlen (@word)
  */
 ENCHANT_MODULE_EXPORT (int)
-enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
-				ssize_t len)
+enchant_dict_is_added (EnchantDict * dict, const char *const word,
+			    ssize_t len)
 {
 	EnchantSession * session;
 
@@ -785,6 +882,109 @@ enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
 	enchant_session_clear_error (session);
 
 	return enchant_session_contains (session, word, len);
+}
+
+/**
+ * enchant_dict_is_in_session
+ * @dict: A non-null #EnchantDict
+ * @word: The word you wish to see if it's in your session in UTF8 encoding
+ * @len: the byte length of @word, or -1 for strlen (@word)
+ *
+ * DEPRECATED. Please use enchant_dict_is_added() instead.
+*/
+ENCHANT_MODULE_EXPORT (int)
+enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
+				ssize_t len)
+{
+    return enchant_dict_is_added(dict, word, len);
+}
+
+/**
+ * enchant_dict_remove
+ * @dict: A non-null #EnchantDict
+ * @word: The non-null word you wish to add to your exclude dictionary and 
+ *        remove from the personal dictionary, in UTF-8 encoding
+ * @len: The byte length of @word, or -1 for strlen (@word)
+ *
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_dict_remove (EnchantDict * dict, const char *const word,
+			 ssize_t len)
+{
+	EnchantSession * session;
+
+	g_return_if_fail (dict);
+	g_return_if_fail (word);
+
+	if (len < 0)
+		len = strlen (word);
+
+	g_return_if_fail (len);
+    g_return_if_fail (g_utf8_validate(word, len, NULL));
+
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
+
+	enchant_session_remove_personal (session, word, len);
+    enchant_session_add_exclude(session, word, len);
+	
+	if (dict->add_to_exclude)
+		(*dict->add_to_exclude) (dict, word, len);
+}
+
+/**
+ * enchant_dict_remove_from_session
+ * @dict: A non-null #EnchantDict
+ * @word: The non-null word you wish to exclude from this spell-checking session, in UTF-8 encoding
+ * @len: The byte length of @word, or -1 for strlen (@word)
+ *
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
+			 ssize_t len)
+{
+	EnchantSession * session;
+
+	g_return_if_fail (dict);
+	g_return_if_fail (word);
+
+	if (len < 0)
+		len = strlen (word);
+	
+	g_return_if_fail (len);
+    g_return_if_fail (g_utf8_validate(word, len, NULL));
+
+    session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
+
+	enchant_session_remove (session, word, len);
+}
+
+/**
+ * enchant_dict_is_removed
+ * @dict: A non-null #EnchantDict
+ * @word: The word you wish to see if it has been removed (from your session or dict) in UTF8 encoding
+ * @len: the byte length of @word, or -1 for strlen (@word)
+ */
+ENCHANT_MODULE_EXPORT (int)
+enchant_dict_is_removed (EnchantDict * dict, const char *const word,
+			    ssize_t len)
+{
+	EnchantSession * session;
+
+	g_return_val_if_fail (dict, 0);
+	g_return_val_if_fail (word, 0);
+
+	if (len < 0)
+		len = strlen (word);
+	
+   	g_return_val_if_fail (len, 0);
+    g_return_val_if_fail (g_utf8_validate(word, len, NULL), 0);
+
+	session = (EnchantSession*)dict->enchant_private_data;
+	enchant_session_clear_error (session);
+
+    return enchant_session_exclude (session, word, len);
 }
 
 /**
@@ -1318,8 +1518,12 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 		return dict;
 	}
 
-	session = enchant_session_new_with_pwl (NULL, pwl, "Personal Wordlist", TRUE);
-	if (!session) 
+    /* since the broker pwl file is a read/write file (there is no readonly dictionary associated)
+     * there is no need for complementary exclude file to add a word to. The word just needs to be
+     * removed from the broker pwl file
+     */
+	session = enchant_session_new_with_pwl (NULL, pwl, NULL, "Personal Wordlist", TRUE);
+ 	if (!session) 
 		{
 			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
 			return NULL;

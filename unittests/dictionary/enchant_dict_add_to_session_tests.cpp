@@ -115,13 +115,24 @@ TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
 TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
              EnchantDictionaryAddToSession_WordExistsInPersonal_StillCallsProvider)
 {
-    enchant_dict_add_to_pwl(_dict, "personal", -1);
+    enchant_dict_add(_dict, "personal", -1);
     CHECK(!addToSessionCalled);
 
     enchant_dict_add_to_session(_dict, "personal", -1);
     CHECK(addToSessionCalled);
     CHECK_EQUAL(std::string("personal"), wordToAdd);
 }
+
+TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
+             EnchantDictionaryAddToSession_WordExistsInExclude_AddedToSessionNotRemovedFromExcludeFile)
+{
+    enchant_dict_remove(_dict, "personal", -1);
+
+    enchant_dict_add_to_session(_dict, "personal", -1);
+    CHECK(IsWordInDictionary("personal"));
+    CHECK(ExcludeFileHasContents());
+}
+
 
 TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
              EnchantDictionaryAddToSession_WordAddedToSession)

@@ -100,6 +100,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 {
     EnchantDict* _dict;
     EnchantDict* _pwl;
+    std::string _pwlFileName;
     std::string origLangEnv;
     bool hasLangEnv;
     std::string languageTag;
@@ -111,6 +112,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
     {
         InitializeTestDictionary();
         _pwl = RequestPersonalDictionary();
+        _pwlFileName = GetLastPersonalDictionaryFileName();
 
         bool hasLangEnv = (g_getenv("LANG") != NULL);
         if(hasLangEnv)
@@ -160,8 +162,23 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     bool PersonalWordListFileHasContents()
     {
+        return FileHasContents(GetPersonalDictFileName());
+    }
+
+    bool ExcludeFileHasContents()
+    {
+        return FileHasContents(GetExcludeDictFileName());
+    }
+
+	bool BrokerPWLFileHasContents()
+    {
+        return FileHasContents(_pwlFileName);
+    }
+
+    bool FileHasContents(const std::string & filename)
+    {
         bool hasContents = false;
-        int fd = g_open(GetPersonalDictFileName().c_str(), O_RDONLY, S_IREAD );
+        int fd = g_open(filename.c_str(), O_RDONLY, S_IREAD );
         if(fd == -1){
             return false;
         }
@@ -177,6 +194,10 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     std::string GetPersonalDictFileName(){
         return AddToPath(GetEnchantPersonalDir(), "qaa.dic");
+    }
+
+	std::string GetExcludeDictFileName(){
+        return AddToPath(GetEnchantPersonalDir(), "qaa.exc");
     }
 
     void SetErrorOnMockDictionary(const std::string& error)
@@ -200,9 +221,14 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         return enchant_dict_check(_dict, word.c_str(), word.size())==0;
     }
 
+    void RemoveWordFromDictionary(const std::string& word)
+    {
+         enchant_dict_remove(_dict, word.c_str(), word.size());
+    }
+
     void AddWordToDictionary(const std::string& word)
     {
-		enchant_dict_add_to_pwl(_dict, word.c_str(), word.size());
+		enchant_dict_add(_dict, word.c_str(), word.size());
     }
 
     void AddWordsToDictionary(const std::vector<const std::string>& sWords)
@@ -216,7 +242,17 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
 	void ExternalAddWordToDictionary(const std::string& word)
     {
-        FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+        ExternalAddWordToFile(word, GetPersonalDictFileName());
+    }
+
+    void ExternalAddWordToExclude(const std::string& word)
+    {
+        ExternalAddWordToFile(word, GetExcludeDictFileName());
+    }
+
+    static void ExternalAddWordToFile(const std::string& word, const std::string& filename)
+    {
+        FILE * f = g_fopen(filename.c_str(), "at");
 		if(f)
 		{
 			fputs(word.c_str(), f);
@@ -239,6 +275,24 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 		}
     }
 
+   std::vector<std::string> GetExpectedSuggestions(const std::string& s, size_t begin = 0)
+    {
+        size_t cSuggestions;
+        char** expectedSuggestions = MockDictionarySuggest (_dict, 
+                                                            s.c_str(),
+		                                                    s.size(), 
+                                                            &cSuggestions);
+
+        std::vector<std::string> result;
+        if(expectedSuggestions != NULL && begin < cSuggestions){
+            result.insert(result.begin(), expectedSuggestions+begin, expectedSuggestions+cSuggestions);
+            FreeStringList(expectedSuggestions);
+        }
+
+        return result;
+    }
+
+
     std::vector<const std::string> GetSuggestionsFromWord(const std::string& word)
     {
         std::vector<const std::string> result;
@@ -255,6 +309,10 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         return result;
     }
 
+    std::vector<const std::string> GetSuggestions(const std::string& s)
+    {
+        return GetSuggestionsFromWord("helo");
+    }
 };
 #if defined(_MSC_VER)
 #pragma warning(pop)

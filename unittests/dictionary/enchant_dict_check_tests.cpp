@@ -127,7 +127,7 @@ TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
 TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
              EnchantDictionaryCheck_WordExistsInPersonal_0_DoesNotCallProvider)
 {
-    enchant_dict_add_to_pwl(_dict, "personal", -1);
+    enchant_dict_add(_dict, "personal", -1);
 
     CHECK_EQUAL(0, enchant_dict_check(_dict, "personal", -1));
     CHECK(!dictCheckCalled);
@@ -143,7 +143,7 @@ TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
 TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
              EnchantDictionaryCheck_WordDoesExists_InBrokerPwl_0)
 {
-    enchant_dict_add_to_pwl(_pwl, "personal", -1);
+    enchant_dict_add(_pwl, "personal", -1);
     CHECK_EQUAL(0, enchant_dict_check(_pwl, "personal", -1));
 }
 
@@ -211,4 +211,14 @@ TEST_FIXTURE(EnchantDictionaryCheckNotImplemented_TestFixture,
 {
     CHECK_EQUAL(1, enchant_dict_check(_pwl, "hello", -1));
     CHECK(!dictCheckCalled);
+}
+
+TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
+             EnchantDictionaryCheck_WordInDictionaryAndExclude_1)
+{
+    ExternalAddWordToExclude("hello");
+    ExternalAddWordToDictionary("hello");
+
+	ReloadTestDictionary();
+	CHECK_EQUAL(1, enchant_dict_check(_dict, "hello", -1));
 }

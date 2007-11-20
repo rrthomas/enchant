@@ -44,6 +44,7 @@ EnchantPWL* enchant_pwl_init(void);
 EnchantPWL* enchant_pwl_init_with_file(const char * file);
 
 void enchant_pwl_add(EnchantPWL * me, const char *const word, size_t len);
+void enchant_pwl_remove(EnchantPWL * me, const char *const word, size_t len);
 int enchant_pwl_check(EnchantPWL * me,const char *const word, size_t len);
 char** enchant_pwl_suggest(EnchantPWL *me,const char *const word,
 			   size_t len, size_t* out_n_suggs);

@@ -622,3 +622,293 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
       CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
   }
 }
+
+/////////////////////////////////////////////////////////////////////////////
+// Remove from PWL
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_SharedPrefix1)
+{
+  AddWordToDictionary("help");
+  AddWordToDictionary("hello");
+
+  CHECK( IsWordInDictionary("help") );
+  CHECK( IsWordInDictionary("hello") );
+
+  RemoveWordFromDictionary("help");
+
+  CHECK(!IsWordInDictionary("help") );
+  CHECK( IsWordInDictionary("hello") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_SharedPrefix2)
+{
+  AddWordToDictionary("help");
+  AddWordToDictionary("hello");
+
+  CHECK( IsWordInDictionary("help") );
+  CHECK( IsWordInDictionary("hello") );
+
+  RemoveWordFromDictionary("hello");
+
+  CHECK( IsWordInDictionary("help") );
+  CHECK(!IsWordInDictionary("hello") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_SharedPrefix3)
+{
+  AddWordToDictionary("help");
+  AddWordToDictionary("hello");
+  AddWordToDictionary("helm");
+
+  CHECK( IsWordInDictionary("help") );
+  CHECK( IsWordInDictionary("hello") );
+  CHECK( IsWordInDictionary("helm") );
+
+  RemoveWordFromDictionary("hello");
+
+  CHECK( IsWordInDictionary("help") );
+  CHECK(!IsWordInDictionary("hello") );
+  CHECK( IsWordInDictionary("helm") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_SharedPrefix4)
+{
+  AddWordToDictionary("help");
+  AddWordToDictionary("hello");
+  AddWordToDictionary("helm");
+
+  CHECK( IsWordInDictionary("help") );
+  CHECK( IsWordInDictionary("hello") );
+  CHECK( IsWordInDictionary("helm") );
+
+  RemoveWordFromDictionary("help");
+
+  CHECK(!IsWordInDictionary("help") );
+  CHECK( IsWordInDictionary("hello") );
+  CHECK( IsWordInDictionary("helm") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_SingleWord)
+{
+  AddWordToDictionary("hello");
+
+  CHECK( IsWordInDictionary("hello") );
+
+  RemoveWordFromDictionary("hello");
+
+  CHECK(!IsWordInDictionary("hello") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_MultipleWords1)
+{
+  AddWordToDictionary("special");
+  AddWordToDictionary("hello");
+
+  CHECK( IsWordInDictionary("special") );
+  CHECK( IsWordInDictionary("hello") );
+
+  RemoveWordFromDictionary("hello");
+
+  CHECK( IsWordInDictionary("special") );
+  CHECK(!IsWordInDictionary("hello") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_MultipleWords2)
+{
+  AddWordToDictionary("special");
+  AddWordToDictionary("hello");
+
+  CHECK( IsWordInDictionary("special") );
+  CHECK( IsWordInDictionary("hello") );
+
+  RemoveWordFromDictionary("special");
+
+  CHECK(!IsWordInDictionary("special") );
+  CHECK( IsWordInDictionary("hello") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ProperPrefix1)
+{
+  AddWordToDictionary("ant");
+  AddWordToDictionary("anteater");
+
+  CHECK( IsWordInDictionary("ant") );
+  CHECK( IsWordInDictionary("anteater") );
+
+  RemoveWordFromDictionary("ant");
+
+  CHECK(!IsWordInDictionary("ant") );
+  CHECK( IsWordInDictionary("anteater") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ProperPrefix2)
+{
+  AddWordToDictionary("anteater");
+  AddWordToDictionary("ant");
+
+  CHECK( IsWordInDictionary("ant") );
+  CHECK( IsWordInDictionary("anteater") );
+
+  RemoveWordFromDictionary("ant");
+
+  CHECK(!IsWordInDictionary("ant") );
+  CHECK( IsWordInDictionary("anteater") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ProperPrefix3)
+{
+  AddWordToDictionary("ant");
+  AddWordToDictionary("anteater");
+
+  CHECK( IsWordInDictionary("ant") );
+  CHECK( IsWordInDictionary("anteater") );
+
+  RemoveWordFromDictionary("anteater");
+
+  CHECK( IsWordInDictionary("ant") );
+  CHECK(!IsWordInDictionary("anteater") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ProperPrefix4)
+{
+  AddWordToDictionary("anteater");
+  AddWordToDictionary("ant");
+
+  CHECK( IsWordInDictionary("ant") );
+  CHECK( IsWordInDictionary("anteater") );
+
+  RemoveWordFromDictionary("anteater");
+
+  CHECK( IsWordInDictionary("ant") );
+  CHECK(!IsWordInDictionary("anteater") );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ItemRemovedFromFile)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  std::vector<const std::string>::const_iterator removed = sWords.insert(sWords.begin()+2, "hello");
+  AddWordsToDictionary(sWords);
+
+  RemoveWordFromDictionary("hello");
+
+  ReloadTestDictionary(); // to see what actually persisted
+
+  for(std::vector<const std::string>::const_iterator itWord = sWords.begin(); itWord != removed; ++itWord){
+    CHECK( IsWordInDictionary(*itWord) );
+  }
+  CHECK(!IsWordInDictionary(*removed) );
+
+  for(std::vector<const std::string>::const_iterator itWord = removed+1; itWord != sWords.end(); ++itWord){
+    CHECK(IsWordInDictionary(*itWord) );
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ItemRemovedFromBeginningOfFile)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  std::vector<const std::string>::const_iterator removed = sWords.insert(sWords.begin(), "hello");
+  AddWordsToDictionary(sWords);
+
+  RemoveWordFromDictionary("hello");
+
+  ReloadTestDictionary(); // to see what actually persisted
+
+  CHECK(!IsWordInDictionary(*removed) );
+
+  for(std::vector<const std::string>::const_iterator itWord = removed+1; itWord != sWords.end(); ++itWord){
+    CHECK(IsWordInDictionary(*itWord) );
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ItemRemovedFromBeginningOfFileWithBOM)
+{
+  std::string Utf8Bom ("\xef\xbb\xbf");
+
+  std::vector<const std::string> sWords;
+  sWords.push_back(Utf8Bom + "hello");
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+
+  ExternalAddWordsToDictionary(sWords);
+
+  RemoveWordFromDictionary("hello");
+
+  ReloadTestDictionary(); // to see what actually persisted
+
+  CHECK(!IsWordInDictionary("hello") );
+
+  for(std::vector<const std::string>::const_iterator itWord = sWords.begin()+1; itWord != sWords.end(); ++itWord){
+    CHECK(IsWordInDictionary(*itWord) );
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ItemRemovedFromEndOfFile)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  std::vector<const std::string>::const_iterator removed = sWords.insert(sWords.end(), "hello");
+  AddWordsToDictionary(sWords);
+
+  RemoveWordFromDictionary("hello");
+
+  ReloadTestDictionary(); // to see what actually persisted
+
+  for(std::vector<const std::string>::const_iterator itWord = sWords.begin(); itWord != removed; ++itWord){
+    CHECK( IsWordInDictionary(*itWord) );
+  }
+  CHECK(!IsWordInDictionary(*removed) );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_FileHasProperSubset_ItemRemovedFromFile)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+  sWords.push_back("anteater");
+
+  std::vector<const std::string>::const_iterator removed = sWords.insert(sWords.end(), "ant");
+  AddWordsToDictionary(sWords);
+  RemoveWordFromDictionary("ant");
+
+  ReloadTestDictionary(); // to see what actually persisted
+
+  for(std::vector<const std::string>::const_iterator itWord = sWords.begin(); itWord != removed; ++itWord){
+    CHECK( IsWordInDictionary(*itWord) );
+  }
+  CHECK(!IsWordInDictionary(*removed) );
+}
