@@ -594,7 +594,9 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 									copy = 0; /*duplicate*/
 									break;
 								}
+							g_free(normalized_sugg);
 						}
+					g_free(normalized_new_sugg);
 				}
 
 			if(copy)
