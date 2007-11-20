@@ -349,7 +349,7 @@ static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
 		{
 			enchant_trie_remove(pwl->trie, normalized_word);
 			if(pwl->trie && pwl->trie->subtries == NULL && pwl->trie->value == NULL)
-				pwl->trie = NULL; // make trie empty if has no content
+				pwl->trie = NULL; /* make trie empty if has no content */
 		}
 	
     g_free(normalized_word);
