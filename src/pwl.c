@@ -137,7 +137,7 @@ struct str_enchant_trie_matcher
 	int num_errors;		/* Num errors encountered so far. */
 	int max_errors;		/* Max errors before search should terminate */
 
-	char* word;	        /* Word being searched for */
+	char* word;	/* Word being searched for */
 	ssize_t word_pos;	/* Current position in the word */
 
 	char* path;		    /* Path taken through the trie so far */
@@ -226,7 +226,7 @@ EnchantPWL* enchant_pwl_init(void)
 	EnchantPWL *pwl;
 
 	pwl = g_new0(EnchantPWL, 1);
-	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 	return pwl;
 }
@@ -311,17 +311,17 @@ static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 					const char *const word, size_t len,
 					gboolean add_to_file)
 {
-	char * szWord;
+	char * normalized_word;
 
-	szWord = g_strndup (word, len);
-	if(NULL != g_hash_table_lookup (pwl->words_in_trie, szWord)) {
-		g_free (szWord);
+    normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
+	if(NULL != g_hash_table_lookup (pwl->words_in_trie, normalized_word)) {
+		g_free (normalized_word);
 		return;
 	}
 	
-	g_hash_table_insert (pwl->words_in_trie, szWord, GINT_TO_POINTER(1));
+	g_hash_table_insert (pwl->words_in_trie, normalized_word, g_strndup(word,len));
 
-	pwl->trie = enchant_trie_insert(pwl->trie, szWord);
+	pwl->trie = enchant_trie_insert(pwl->trie, normalized_word);
 
 	if (add_to_file && (pwl->filename != NULL))
 		{
@@ -474,9 +474,9 @@ static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher)
 	(*((int*)(matcher->cbdata)))++;
 }
 
-void enchant_pwl_case_suggestions(EnchantPWL *pwl, 
-								  const char *const word, size_t len, 
-								  EnchantSuggList* suggs_list)
+void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl, 
+								                  const char *const word, size_t len, 
+								                  EnchantSuggList* suggs_list)
 {
 	size_t i;
 	gchar* (*utf8_case_convert_function)(const gchar*str, gssize len);
@@ -494,7 +494,7 @@ void enchant_pwl_case_suggestions(EnchantPWL *pwl,
 			gchar* suggestion;
 			size_t suggestion_len;
 
-			suggestion = suggs_list->suggs[i];
+	        suggestion = g_hash_table_lookup (pwl->words_in_trie, suggs_list->suggs[i]);
 			suggestion_len = strlen(suggestion);
 			
 			if(utf8_case_convert_function &&
@@ -517,6 +517,7 @@ char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
 {
 	EnchantTrieMatcher* matcher;
 	EnchantSuggList sugg_list;
+    size_t i;
 
 	sugg_list.suggs = g_new0(char*,ENCHANT_PWL_MAX_SUGGS+1);
 	sugg_list.sugg_errs = g_new0(int,ENCHANT_PWL_MAX_SUGGS);
@@ -533,8 +534,8 @@ char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
 	sugg_list.suggs[sugg_list.n_suggs] = NULL;
 	(*out_n_suggs) = sugg_list.n_suggs;
 
-	enchant_pwl_case_suggestions(pwl, word, len, &sugg_list);
-
+	enchant_pwl_case_and_denormalize_suggestions(pwl, word, len, &sugg_list);
+	
 	return sugg_list.suggs;
 }
 
@@ -822,12 +823,17 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 				void* cbdata)
 {
 	EnchantTrieMatcher* matcher;
-	char * pattern;
+    char * normalized_word, * pattern;
 
-	if(mode == case_insensitive)
-		pattern = g_utf8_strdown (word, len);
+    normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
+
+    if(mode == case_insensitive)
+        {
+		    pattern = g_utf8_strdown (normalized_word, -1);
+            g_free(normalized_word);
+        }
 	else
-		pattern = g_strndup(word, len);
+		pattern = normalized_word;
 
 	matcher = g_new(EnchantTrieMatcher,1);
 	matcher->num_errors = 0;
@@ -847,7 +853,7 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 
 static void enchant_trie_matcher_free(EnchantTrieMatcher* matcher)
 {
-	g_free(matcher->word);
+    g_free(matcher->word);
 	g_free(matcher->path);
 	g_free(matcher);
 }

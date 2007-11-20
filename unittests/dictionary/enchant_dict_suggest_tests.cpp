@@ -35,6 +35,7 @@ static enum SuggestBehavior{
     returnZero,
     returnFour,
     returnFourOneInvalidUtf8,
+    returnFianceNfc
 } suggestBehavior;
 
 struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
@@ -91,6 +92,11 @@ MyMockDictionarySuggest (EnchantDict * dict, const char *const word, size_t len,
             break;
         case returnZero:
             sugg_arr = g_new0 (char *, *out_n_suggs + 1);
+            break;
+        case returnFianceNfc:
+            *out_n_suggs = 1;
+            sugg_arr = g_new0 (char *, *out_n_suggs + 1);
+            sugg_arr[0] = g_strdup ("fianc\xc3\xa9");  // c3 a9 = utf8 for u00e9 = Latin small letter e with acute
             break;
         case returnFour:
             sugg_arr = MockDictionarySuggest(dict, word, len, out_n_suggs);
@@ -387,7 +393,7 @@ TEST_FIXTURE(EnchantDictionaryFreeNotImplemented_TestFixture,
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_EmptySuggetionList_FreeCalled)
+             EnchantDictionarySuggest_EmptySuggestionList_FreeCalled)
 {
     suggestBehavior = returnZero;
     size_t cSuggs;
@@ -399,7 +405,7 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_NullSuggetionList_FreeNotCalled)
+             EnchantDictionarySuggest_NullSuggestionList_FreeNotCalled)
 {
     suggestBehavior = returnNull;
     size_t cSuggs;
@@ -412,7 +418,7 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_SuggetionListWithInvalidUtf8_InvalidSuggestionIgnored_FreeCalled)
+             EnchantDictionarySuggest_SuggestionListWithInvalidUtf8_InvalidSuggestionIgnored_FreeCalled)
 {
     suggestBehavior = returnFourOneInvalidUtf8;
     size_t cSuggestions;
@@ -431,3 +437,17 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo",1), suggestions, std::min((size_t)3,cSuggestions));
 }
 
+TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
+             EnchantDictionarySuggest_WordNfcInDictionaryNfdInPwl_ReturnsFromDict)
+{
+    suggestBehavior = returnFianceNfc;
+
+    ExternalAddWordToDictionary(Convert(L"fiance\x301")); // NFD u0301 = Combining acute accent
+
+    size_t cSuggestions;
+    _suggestions = enchant_dict_suggest(_dict, "fiance", -1, &cSuggestions);
+    CHECK(_suggestions);
+
+    CHECK_EQUAL(1, cSuggestions);
+    CHECK_EQUAL(Convert(L"fianc\xe9"), _suggestions[0]);
+}

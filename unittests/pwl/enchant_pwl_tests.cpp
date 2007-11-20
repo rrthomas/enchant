@@ -92,6 +92,116 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
+// Unicode normalization
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_DictionaryHasComposed_SuccessfulCheckWithComposedAndDecomposed)
+{
+  ExternalAddWordToDictionary(Convert(L"fianc\xe9")); // u00e9 = Latin small letter e with acute
+
+  ReloadTestDictionary();
+
+  CHECK( IsWordInDictionary(Convert(L"fianc\xe9")) ); //NFC
+  CHECK( IsWordInDictionary(Convert(L"fiance\x301")) ); //NFD u0301 = Combining acute accent
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_AddedComposed_SuccessfulCheckWithComposedAndDecomposed)
+{
+  AddWordToDictionary(Convert(L"fianc\xe9")); // u00e9 = Latin small letter e with acute
+
+  CHECK( IsWordInDictionary(Convert(L"fianc\xe9")) ); //NFC
+  CHECK( IsWordInDictionary(Convert(L"fiance\x301")) ); //NFD u0301 = Combining acute accent
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_DictionaryHasDecomposed_SuccessfulCheckWithComposedAndDecomposed)
+{
+  ExternalAddWordToDictionary(Convert(L"fiance\x301")); // u0301 = Combining acute accent
+
+  ReloadTestDictionary();
+
+  CHECK( IsWordInDictionary(Convert(L"fianc\xe9")) ); //NFC
+  CHECK( IsWordInDictionary(Convert(L"fiance\x301")) ); //NFD
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_AddedDecomposed_SuccessfulCheckWithComposedAndDecomposed)
+{
+  AddWordToDictionary(Convert(L"fiance\x301")); // u0301 = Combining acute accent
+
+  CHECK( IsWordInDictionary(Convert(L"fianc\xe9")) ); //NFC
+  CHECK( IsWordInDictionary(Convert(L"fiance\x301")) ); //NFD
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             Suggest_DictionaryHasComposed_ReturnsComposed)
+{
+  ExternalAddWordToDictionary(Convert(L"fianc\xe9")); // u00e9 = Latin small letter e with acute
+
+  ReloadTestDictionary();
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("fiance");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"fianc\xe9")); // u00e9 = Latin small letter e with acute
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             Suggest_AddedComposed_ReturnsComposed)
+{
+  AddWordToDictionary(Convert(L"fianc\xe9")); // u00e9 = Latin small letter e with acute
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("fiance");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"fianc\xe9")); // u00e9 = Latin small letter e with acute
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             Suggest_DictionaryHasDecomposed_ReturnsDecomposed)
+{
+  ExternalAddWordToDictionary(Convert(L"fiance\x301")); // u0301 = Combining acute accent
+
+  ReloadTestDictionary();
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("fiance");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"fiance\x301"));  // u0301 = Combining acute accent
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             Suggest_AddedDecomposed_ReturnsDecomposed)
+{
+  AddWordToDictionary(Convert(L"fiance\x301")); // u0301 = Combining acute accent
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("fiance");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"fiance\x301")); // u0301 = Combining acute accent
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
 // Capitalization
 TEST_FIXTURE(EnchantPwl_TestFixture, 
              IsWordInDictionary_AddedAllCaps_OnlyAllCapsSuccessful)
