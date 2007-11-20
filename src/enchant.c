@@ -592,6 +592,7 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 							if(strcmp(normalized_sugg,normalized_new_sugg)==0) 
 								{
 									copy = 0; /*duplicate*/
+									g_free(normalized_sugg);
 									break;
 								}
 							g_free(normalized_sugg);
