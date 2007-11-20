@@ -113,6 +113,14 @@ struct str_enchant_pwl
 static EnchantTrie n_EOSTrie;
 static EnchantTrie* EOSTrie = &n_EOSTrie;
 
+/* mode for searching trie */
+typedef enum enum_matcher_mode EnchantTrieMatcherMode;
+enum enum_matcher_mode
+{
+	case_sensitive,
+	case_insensitive
+};
+
 /*  The EnchantTrieMatcher structure maintains the state necessary to
  *  search for matching strings within an EnchantTrie.  It includes a
  *  callback function which will be called with each matching string
@@ -129,17 +137,18 @@ struct str_enchant_trie_matcher
 	int num_errors;		/* Num errors encountered so far. */
 	int max_errors;		/* Max errors before search should terminate */
 
-	const char* word;	/* Word being searched for */
+	char* word;	        /* Word being searched for */
 	ssize_t word_pos;	/* Current position in the word */
 
-	char* path;		/* Path taken through the trie so far */
+	char* path;		    /* Path taken through the trie so far */
 	ssize_t path_len;	/* Length of allocated path string */
 	ssize_t path_pos;	/* Current end pos of path string */
+
+	EnchantTrieMatcherMode mode;
 
 	void (*cbfunc)(char*,EnchantTrieMatcher*); /* callback func */
 	void* cbdata;		/* Private data for use by callback func */
 };
-
 
 /*  To allow the list of suggestions to be built up an item at a time,
  *  its state is maintained in an EnchantSuggList object.
@@ -151,14 +160,13 @@ typedef struct str_enchant_sugg_list
 	size_t n_suggs;
 } EnchantSuggList;
 
-
 /*
  *   Function Prototypes
  */
 
 static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
-				    const char *const word, size_t len,
-				    gboolean add_to_file);
+					const char *const word, size_t len,
+					gboolean add_to_file);
 
 static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher);
 static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher);
@@ -168,9 +176,10 @@ static void enchant_trie_free_cb(void*,void*,void*);
 static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word);
 static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matcher);
 static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcherV);
-static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
+static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word, size_t len,
 				int maxerrs,
-		 		void(*cbfunc)(char*,EnchantTrieMatcher*),
+				EnchantTrieMatcherMode mode,
+				void(*cbfunc)(char*,EnchantTrieMatcher*),
 				void* cbdata);
 static void enchant_trie_matcher_free(EnchantTrieMatcher* matcher);
 static void enchant_trie_matcher_pushpath(EnchantTrieMatcher* matcher,char* newchars);
@@ -187,7 +196,7 @@ enchant_lock_file (FILE * f)
 #elif defined(HAVE_LOCKF)
 	lockf (fileno (f), F_LOCK, 0);
 #elif defined(_WIN32)
-    _lock_file(f);
+	_lock_file(f);
 #else
 	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
@@ -201,7 +210,7 @@ enchant_unlock_file (FILE * f)
 #elif defined(HAVE_LOCKF)
 	lockf (fileno (f), F_ULOCK, 0);
 #elif defined(_WIN32)
-    _unlock_file(f);
+	_unlock_file(f);
 #else
 	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
@@ -254,7 +263,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 		{
 			char buffer[BUFSIZ];
 			char* line;
-		    size_t line_number = 1;
+			size_t line_number = 1;
 			
 			enchant_lock_file (f);
 			
@@ -265,7 +274,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 
 					line = buffer;
 					if(line_number == 1 && BOM == g_utf8_get_char(line))
-		                line = g_utf8_next_char(line);
+						line = g_utf8_next_char(line);
 		
 					l = strlen(line)-1;
 					if (line[l]=='\n') 
@@ -273,7 +282,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 					
 					if(g_utf8_validate(line, -1, NULL))
 						enchant_pwl_add_to_trie(pwl, line, strlen(line), FALSE);
-    				else
+					else
 						g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
 
 					++line_number;
@@ -299,8 +308,8 @@ void enchant_pwl_free(EnchantPWL *pwl)
 }
 
 static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
-				    const char *const word, size_t len,
-				    gboolean add_to_file)
+					const char *const word, size_t len,
+					gboolean add_to_file)
 {
 	char * szWord;
 
@@ -331,7 +340,7 @@ static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 }
 
 void enchant_pwl_add(EnchantPWL *pwl,
-		     const char *const word, size_t len)
+			 const char *const word, size_t len)
 {
 	enchant_pwl_add_to_trie(pwl, word, len, TRUE);
 }
@@ -339,125 +348,121 @@ void enchant_pwl_add(EnchantPWL *pwl,
 int enchant_pwl_contains(EnchantPWL *pwl, const char *const word, size_t len)
 {
 	EnchantTrieMatcher* matcher;
-	char * szWord;
 	int count = 0;
 	
-	szWord = g_strndup (word, len);
-
-	matcher = enchant_trie_matcher_init(szWord,0,enchant_pwl_check_cb,
-					    &count);
+	matcher = enchant_trie_matcher_init(word,len,0,case_sensitive,enchant_pwl_check_cb,
+						&count);
 	enchant_trie_find_matches(pwl->trie,matcher);
 	enchant_trie_matcher_free(matcher);
-	g_free(szWord);
 
 	return (count == 0 ? 0 : 1);
 }
 
 int enchant_is_all_caps(const char*const word, size_t len)
 {
-    const char* it;
-    int hasCap = 0;
+	const char* it;
+	int hasCap = 0;
 
-    g_return_val_if_fail (word && *word, 0);
+	g_return_val_if_fail (word && *word, 0);
 
-    for(it = word; it < word + len; it = g_utf8_next_char(it))
-        {
-            GUnicodeType type = g_unichar_type(g_utf8_get_char(it));
-            switch(type)
-                {
-                    case G_UNICODE_UPPERCASE_LETTER:
-                        hasCap = 1;
-                        break;
-                    case G_UNICODE_TITLECASE_LETTER:
-                    case G_UNICODE_LOWERCASE_LETTER:
-                        return 0;
-                }
-        }
+	for(it = word; it < word + len; it = g_utf8_next_char(it))
+		{
+			GUnicodeType type = g_unichar_type(g_utf8_get_char(it));
+			switch(type)
+				{
+					case G_UNICODE_UPPERCASE_LETTER:
+						hasCap = 1;
+						break;
+					case G_UNICODE_TITLECASE_LETTER:
+					case G_UNICODE_LOWERCASE_LETTER:
+						return 0;
+				}
+		}
 
-    return hasCap;
+	return hasCap;
 }
 
 int enchant_is_title_case(const char*const word, size_t len)
 {
-    gunichar ch;
-    GUnicodeType type;
-    const char* it = word;
+	gunichar ch;
+	GUnicodeType type;
+	const char* it = word;
 
-    g_return_val_if_fail (word && *word, 0);
+	g_return_val_if_fail (word && *word, 0);
 
-    ch = g_utf8_get_char(it);
-    
-    type = g_unichar_type(ch);
-    if(type != G_UNICODE_UPPERCASE_LETTER && type != G_UNICODE_TITLECASE_LETTER)
-        return 0;
+	ch = g_utf8_get_char(it);
+	
+	type = g_unichar_type(ch);
+	if(type != G_UNICODE_UPPERCASE_LETTER && type != G_UNICODE_TITLECASE_LETTER)
+		return 0;
 
-    if(ch != g_unichar_totitle(ch) )
-        return 0;
-            
-    for(it = g_utf8_next_char(it); it < word + len; it = g_utf8_next_char(it))
-        {
-            type = g_unichar_type(g_utf8_get_char(it));
-            if(type == G_UNICODE_UPPERCASE_LETTER || type == G_UNICODE_TITLECASE_LETTER)
-                return 0;
-        }
-    return 1;
+	if(ch != g_unichar_totitle(ch) )
+		return 0;
+			
+	for(it = g_utf8_next_char(it); it < word + len; it = g_utf8_next_char(it))
+		{
+			type = g_unichar_type(g_utf8_get_char(it));
+			if(type == G_UNICODE_UPPERCASE_LETTER || type == G_UNICODE_TITLECASE_LETTER)
+				return 0;
+		}
+	return 1;
 }
 
 gchar* enchant_utf8_strtitle(const gchar*str, gssize len)
 {
-    gunichar title_case_char;
-    gchar* result;
-    gchar* upperStr, * upperTail, * lowerTail;
-    gchar title_case_utf8[7];
-    gint utf8len;
+	gunichar title_case_char;
+	gchar* result;
+	gchar* upperStr, * upperTail, * lowerTail;
+	gchar title_case_utf8[7];
+	gint utf8len;
 
-    upperStr = g_utf8_strup(str, len); /* for locale sensitive casing */
+	upperStr = g_utf8_strup(str, len); /* for locale sensitive casing */
 
-    title_case_char = g_unichar_totitle(g_utf8_get_char(upperStr));
+	title_case_char = g_unichar_totitle(g_utf8_get_char(upperStr));
 
-    utf8len = g_unichar_to_utf8(title_case_char, title_case_utf8);
-    title_case_utf8[utf8len] = '\0';
+	utf8len = g_unichar_to_utf8(title_case_char, title_case_utf8);
+	title_case_utf8[utf8len] = '\0';
 
-    upperTail = g_utf8_next_char(upperStr);
-    lowerTail = g_utf8_strdown(upperTail, -1);
+	upperTail = g_utf8_next_char(upperStr);
+	lowerTail = g_utf8_strdown(upperTail, -1);
 
-    result = g_strconcat(title_case_utf8, 
-                         lowerTail, 
-                         NULL);
+	result = g_strconcat(title_case_utf8, 
+						 lowerTail, 
+						 NULL);
 
-    g_free(upperStr);
-    g_free(lowerTail);
+	g_free(upperStr);
+	g_free(lowerTail);
 
-    return result;
+	return result;
 }
 
 int enchant_pwl_check(EnchantPWL *pwl, const char *const word, size_t len)
 {
-    int exists = 0;
-    int isAllCaps = 0;
+	int exists = 0;
+	int isAllCaps = 0;
 
-    exists = enchant_pwl_contains(pwl, word, len);
+	exists = enchant_pwl_contains(pwl, word, len);
 	
-    if(exists)
-        return 0;
+	if(exists)
+		return 0;
 
-    if(enchant_is_title_case(word, len) || (isAllCaps = enchant_is_all_caps(word, len)))
-        {
-            char * lower_case_word = g_utf8_strdown(word, len);
-            exists = enchant_pwl_contains(pwl, lower_case_word, strlen(lower_case_word));
-            g_free(lower_case_word);
-            if(exists)
-                return 0;
+	if(enchant_is_title_case(word, len) || (isAllCaps = enchant_is_all_caps(word, len)))
+		{
+			char * lower_case_word = g_utf8_strdown(word, len);
+			exists = enchant_pwl_contains(pwl, lower_case_word, strlen(lower_case_word));
+			g_free(lower_case_word);
+			if(exists)
+				return 0;
 
-            if(isAllCaps)
-            {
-                char * title_case_word = enchant_utf8_strtitle(word, len);
-                exists = enchant_pwl_contains(pwl, title_case_word, strlen(title_case_word));
-                g_free(title_case_word);
-                if(exists)
-                    return 0;
-            }
-        }
+			if(isAllCaps)
+			{
+				char * title_case_word = enchant_utf8_strtitle(word, len);
+				exists = enchant_pwl_contains(pwl, title_case_word, strlen(title_case_word));
+				g_free(title_case_word);
+				if(exists)
+					return 0;
+			}
+		}
 
 	return 1; /* not found */
 }
@@ -469,29 +474,67 @@ static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher)
 	(*((int*)(matcher->cbdata)))++;
 }
 
+void enchant_pwl_case_suggestions(EnchantPWL *pwl, 
+								  const char *const word, size_t len, 
+								  EnchantSuggList* suggs_list)
+{
+	size_t i;
+	gchar* (*utf8_case_convert_function)(const gchar*str, gssize len);
+
+	if(enchant_is_title_case(word, len))
+		utf8_case_convert_function = enchant_utf8_strtitle;
+	else if (enchant_is_all_caps(word, len))
+		utf8_case_convert_function = g_utf8_strup;
+	else
+		utf8_case_convert_function = NULL;
+	
+	for(i = 0; i < suggs_list->n_suggs; ++i)
+		{
+			gchar* cased_suggestion;
+			gchar* suggestion;
+			size_t suggestion_len;
+
+			suggestion = suggs_list->suggs[i];
+			suggestion_len = strlen(suggestion);
+			
+			if(utf8_case_convert_function &&
+					!enchant_is_all_caps(suggestion, suggestion_len))
+				{
+					 cased_suggestion = utf8_case_convert_function(suggestion, suggestion_len);
+				}
+			else
+				{
+					 cased_suggestion = g_strndup(suggestion, suggestion_len);
+				}
+			
+			g_free(suggs_list->suggs[i]);
+			suggs_list->suggs[i] = cased_suggestion;
+		}
+}
+
 char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
 			   size_t len, size_t* out_n_suggs)
 {
 	EnchantTrieMatcher* matcher;
 	EnchantSuggList sugg_list;
-	char *case_folded_word;
 
 	sugg_list.suggs = g_new0(char*,ENCHANT_PWL_MAX_SUGGS+1);
 	sugg_list.sugg_errs = g_new0(int,ENCHANT_PWL_MAX_SUGGS);
 	sugg_list.n_suggs = 0;
 
-	case_folded_word = g_utf8_casefold (word, len);
-	matcher = enchant_trie_matcher_init(case_folded_word,ENCHANT_PWL_MAX_ERRORS,
-					    enchant_pwl_suggest_cb,
-					    &sugg_list);
+	matcher = enchant_trie_matcher_init(word,len, ENCHANT_PWL_MAX_ERRORS,
+						case_insensitive,
+						enchant_pwl_suggest_cb,
+						&sugg_list);
 	enchant_trie_find_matches(pwl->trie,matcher);
 	enchant_trie_matcher_free(matcher);
-	g_free(case_folded_word);
 
 	g_free(sugg_list.sugg_errs);
 	sugg_list.suggs[sugg_list.n_suggs] = NULL;
 	(*out_n_suggs) = sugg_list.n_suggs;
-	
+
+	enchant_pwl_case_suggestions(pwl, word, len, &sugg_list);
+
 	return sugg_list.suggs;
 }
 
@@ -579,9 +622,9 @@ static void enchant_trie_free(EnchantTrie* trie)
 	}
 
 	/* Because we have not set a destroy function for the hashtable
- 	 * (to make code cleaner below), we need to explicitly free all
- 	 * subtries with a callback function.
- 	 */
+	 * (to make code cleaner below), we need to explicitly free all
+	 * subtries with a callback function.
+	 */
 	if (trie->subtries != NULL) {
 		g_hash_table_foreach(trie->subtries,enchant_trie_free_cb,NULL);
 		g_hash_table_destroy(trie->subtries);
@@ -625,7 +668,7 @@ static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word
 				tmpWord = g_strndup(word,nxtCh);
 				subtrie = g_hash_table_lookup(trie->subtries,
 								tmpWord);
-                        	subtrie = enchant_trie_insert(subtrie,
+							subtrie = enchant_trie_insert(subtrie,
 								(word+nxtCh));
 				g_hash_table_insert(trie->subtries,
 							tmpWord,subtrie);
@@ -678,9 +721,20 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 
 	/* If there is a value, just check it, no recursion */
 	if (trie->value != NULL) {
+		gchar* value;
 		errs = matcher->num_errors;
-		matcher->num_errors = errs + edit_dist(trie->value,
-					&(matcher->word[matcher->word_pos]));
+		value = trie->value;
+		if(matcher->mode == case_insensitive)
+			{
+				value = g_utf8_strdown(value, -1);
+			}
+		matcher->num_errors = errs + edit_dist(value, 
+					   &(matcher->word[matcher->word_pos]));
+		if(matcher->mode == case_insensitive)
+			{
+				g_free(value);
+			}
+
 		if (matcher->num_errors <= matcher->max_errors) {
 			matcher->cbfunc(g_strconcat(matcher->path,
 							trie->value,NULL),
@@ -696,6 +750,13 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 
 	/* Precisely match the first character, and recurse */
 	subtrie = g_hash_table_lookup(trie->subtries,nxtChS);
+	if(subtrie == NULL && matcher->mode == case_insensitive) {
+		char* nxtChSUp = g_utf8_strup(nxtChS, nxtChI - matcher->word_pos); /* we ignore the title case scenario since that will give us an edit_distance of one which is acceptable since this mode is used for suggestions*/
+		g_free(nxtChS);
+		nxtChS = nxtChSUp;
+		subtrie = g_hash_table_lookup(trie->subtries,nxtChSUp);
+	}
+
 	if (subtrie != NULL) {
 		enchant_trie_matcher_pushpath(matcher,nxtChS);
 		oldPos = matcher->word_pos;
@@ -754,21 +815,30 @@ static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcher
 }
 
 static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
+													 size_t len,
 				int maxerrs,
-		 		void(*cbfunc)(char*,EnchantTrieMatcher*),
+				EnchantTrieMatcherMode mode,
+				void(*cbfunc)(char*,EnchantTrieMatcher*),
 				void* cbdata)
 {
 	EnchantTrieMatcher* matcher;
+	char * pattern;
+
+	if(mode == case_insensitive)
+		pattern = g_utf8_strdown (word, len);
+	else
+		pattern = g_strndup(word, len);
 
 	matcher = g_new(EnchantTrieMatcher,1);
 	matcher->num_errors = 0;
 	matcher->max_errors = maxerrs;
-	matcher->word = word;
+	matcher->word = pattern;
 	matcher->word_pos = 0;
 	matcher->path = g_new0(char,10);
 	matcher->path[0] = '\0';
 	matcher->path_len = 10;
 	matcher->path_pos = 0;
+	matcher->mode = mode;
 	matcher->cbfunc = cbfunc;
 	matcher->cbdata = cbdata;
 
@@ -777,6 +847,7 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 
 static void enchant_trie_matcher_free(EnchantTrieMatcher* matcher)
 {
+	g_free(matcher->word);
 	g_free(matcher->path);
 	g_free(matcher);
 }
@@ -815,8 +886,8 @@ static int edit_dist(const char* utf8word1, const char* utf8word2)
 	int v1, v2, v3;
 	int* table;
 
-    word1 = g_utf8_to_ucs4_fast(utf8word1, -1, &len1);
-    word2 = g_utf8_to_ucs4_fast(utf8word2, -1, &len2);
+	word1 = g_utf8_to_ucs4_fast(utf8word1, -1, &len1);
+	word2 = g_utf8_to_ucs4_fast(utf8word2, -1, &len2);
 
 	table = g_new0(int,(len1+1)*(len2+1));
 	

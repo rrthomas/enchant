@@ -200,3 +200,315 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
   CHECK( IsWordInSession(Convert(L"\x01f3ie")) ); // u01f3 is Latin small letter dz
   CHECK(!IsWordInSession(Convert(L"\x01f3Ie")) );
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// Capitalization on Suggestions
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedAllCaps_WordAllCaps_SuggestionAllCaps)
+{
+  AddWordToDictionary("CIA");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("CEA");
+
+  std::vector<const std::string> expected;
+  expected.push_back("CIA");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedAllCaps_WordTitleCase_SuggestionAllCaps)
+{
+  AddWordToDictionary("CIA");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("Cea");
+
+  std::vector<const std::string> expected;
+  expected.push_back("CIA");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedAllCaps_WordLowerCase_SuggestionAllCaps)
+{
+  AddWordToDictionary("CIA");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("cea");
+
+  std::vector<const std::string> expected;
+  expected.push_back("CIA");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedTitleCase_WordAllCaps_SuggestionAllCaps)
+{
+  AddWordToDictionary("Eric");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("RIC");
+
+  std::vector<const std::string> expected;
+  expected.push_back("ERIC");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedTitleCase_WordTitleCase_SuggestionTitleCase)
+{
+  AddWordToDictionary("Eric");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("Ric");
+
+  std::vector<const std::string> expected;
+  expected.push_back("Eric");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedTitleCase_WordLowerCase_SuggestionTitleCase)
+{
+  AddWordToDictionary("Eric");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("ric");
+
+  std::vector<const std::string> expected;
+  expected.push_back("Eric");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedLowerCase_WordAllCaps_SuggestionAllCaps)
+{
+  AddWordToDictionary("rice");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("RIC");
+
+  std::vector<const std::string> expected;
+  expected.push_back("RICE");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedLowerCase_WordTitleCase_SuggestionTitleCase)
+{
+  AddWordToDictionary("rice");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("Ric");
+
+  std::vector<const std::string> expected;
+  expected.push_back("Rice");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedLowerCase_WordLowerCase_SuggestionLowerCase)
+{
+  AddWordToDictionary("rice");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("ric");
+
+  std::vector<const std::string> expected;
+  expected.push_back("rice");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+}
+
+
+
+
+
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedAllCapsOfTrueTitleCase_WordAllCaps_SuggestionAllCaps)
+{
+  AddWordToDictionary(Convert(L"\x01f1IE"));  // u01f1 is Latin captial letter Dz
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("RIE");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f1IE")); // u01f1 is Latin captial letter Dz
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedAllCapsOfTrueTitleCase_WordTitleCase_SuggestionAllCaps)
+{
+  AddWordToDictionary(Convert(L"\x01f1IE"));  // u01f1 is Latin captial letter Dz
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("Rie");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f1IE")); // u01f1 is Latin captial letter Dz
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedAllCapsOfTrueTitleCase_WordLowerCase_SuggestionAllCaps)
+{
+  AddWordToDictionary(Convert(L"\x01f1IE"));  // u01f1 is Latin captial letter Dz
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("rie");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f1IE")); // u01f1 is Latin captial letter Dz
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedTitleCaseOfTrueTitleCase_WordAllCaps_SuggestionAllCaps)
+{
+  AddWordToDictionary(Convert(L"\x01f2ie"));  // u01f2 is Latin capital letter d with small letter z
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("RIE");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f1IE")); // u01f1 is Latin captial letter Dz
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedTitleCaseOfTrueTitleCase_WordTitleCase_SuggestionTitleCase)
+{
+  AddWordToDictionary(Convert(L"\x01f2ie"));  // u01f2 is Latin capital letter d with small letter z
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("Rie");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f2ie")); // u01f2 is Latin capital letter d with small letter z
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedTitleCaseOfTrueTitleCase_WordLowerCase_SuggestionTitleCase)
+{
+  AddWordToDictionary(Convert(L"\x01f2ie"));  // u01f2 is Latin capital letter d with small letter z
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("rie");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f2ie")); // u01f2 is Latin capital letter d with small letter z
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedLowerCaseOfTrueTitleCase_WordAllCaps_SuggestionAllCaps)
+{
+  AddWordToDictionary(Convert(L"\x01f3ie"));  // u01f3 is Latin small letter dz
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("RIE");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f1IE")); // u01f1 is Latin captial letter Dz
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedLowerCaseOfTrueTitleCase_WordTitleCase_SuggestionTitleCase)
+{
+  AddWordToDictionary(Convert(L"\x01f3ie"));  // u01f3 is Latin small letter dz
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("Rie");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f2ie")); // u01f2 is Latin capital letter d with small letter z
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedLowerCaseOfTrueTitleCase_WordLowerCase_SuggestionLowerCase)
+{
+  AddWordToDictionary(Convert(L"\x01f3ie"));  // u01f3 is Latin small letter dz
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("rie");
+
+  std::vector<const std::string> expected;
+  expected.push_back(Convert(L"\x01f3ie")); // u01f3 is Latin small letter dz
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedAllCapsWithPrefix_WordLowerCase_SuggestionAllCaps)
+{
+  AddWordToDictionary("CIAL");
+  AddWordToDictionary("CIALAND");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("ceal");
+
+  std::vector<const std::string> expected;
+  expected.push_back("CIAL");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestions_AddedTitleCaseWithPrefix_WordLowerCase_SuggestionTitlecase)
+{
+  AddWordToDictionary("Eric");
+  AddWordToDictionary("Ericson");
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("eric");
+
+  std::vector<const std::string> expected;
+  expected.push_back("Eric");
+  CHECK_EQUAL(expected.size(), suggestions.size());
+  if(expected.size() == suggestions.size())
+  {
+      CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
+  }
+}
