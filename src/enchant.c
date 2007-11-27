@@ -71,12 +71,12 @@ struct str_enchant_broker
 typedef struct str_enchant_session
 {
 	GHashTable *session_include;
-    GHashTable *session_exclude;
+	GHashTable *session_exclude;
 	EnchantPWL *personal;
-    EnchantPWL *exclude;
+	EnchantPWL *exclude;
 
 	char * personal_filename;
-    char * exclude_filename;
+	char * exclude_filename;
 	char * language_tag;
 
 	char * error;
@@ -309,6 +309,22 @@ enchant_ascii_strdown (gchar *str,
 	return enchant_modify_string_chars(str, len, g_ascii_tolower);
 }
 
+/* returns TRUE if tag is valid
+ * for requires alphanumeric ASCII or underscore
+ */
+static int
+enchant_is_valid_dictionary_tag(const char * const tag)
+{
+	const char * it;
+	for (it = tag; *it; ++it)
+		{
+			if(!g_ascii_isalnum(*it) && *it != '_')
+				return 0;
+		}
+
+	return it != tag; /*empty tag invalid*/
+}
+
 static char *
 enchant_normalize_dictionary_tag (const char * const dict_tag)
 {
@@ -374,14 +390,14 @@ enchant_session_destroy (EnchantSession * session)
 
 static EnchantSession *
 enchant_session_new_with_pwl (EnchantProvider * provider, 
-                              const char * const pwl, 
-                              const char * const excl,
-                              const char * const lang,
-				              gboolean fail_if_no_pwl)
+							  const char * const pwl, 
+							  const char * const excl,
+							  const char * const lang,
+							  gboolean fail_if_no_pwl)
 {
 	EnchantSession * session;
 	EnchantPWL *personal = NULL;
-    EnchantPWL *exclude = NULL;
+	EnchantPWL *exclude = NULL;
 
 	if (pwl)
 		personal = enchant_pwl_init_with_file (pwl);
@@ -393,20 +409,20 @@ enchant_session_new_with_pwl (EnchantProvider * provider,
 			personal = enchant_pwl_init ();
 	}
 	
-    if (excl)
-        exclude = enchant_pwl_init_with_file (excl);
-    if (exclude == NULL)
-        exclude = enchant_pwl_init ();
+	if (excl)
+		exclude = enchant_pwl_init_with_file (excl);
+	if (exclude == NULL)
+		exclude = enchant_pwl_init ();
 
 	session = g_new0 (EnchantSession, 1);
 	session->session_include = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	session->session_exclude = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 	session->personal = personal;
-    session->exclude = exclude;
+	session->exclude = exclude;
 	session->provider = provider;
 	session->language_tag = g_strdup (lang);
 	session->personal_filename = g_strdup (pwl);
-    session->exclude_filename = g_strdup (excl);
+	session->exclude_filename = g_strdup (excl);
 	
 	return session;
 }
@@ -428,7 +444,7 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 									NULL);
 			g_free (filename);
 
-   			filename = g_strdup_printf ("%s.exc", lang);
+			filename = g_strdup_printf ("%s.exc", lang);
 			excl = g_build_filename (home_dir,
 									ENCHANT_USER_PATH_EXTENSION,
 									filename,
@@ -449,15 +465,15 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 static void
 enchant_session_add (EnchantSession * session, const char * const word, size_t len)
 {
-    char* key = g_strndup (word, len);
-    g_hash_table_remove (session->session_exclude, key);
+	char* key = g_strndup (word, len);
+	g_hash_table_remove (session->session_exclude, key);
 	g_hash_table_insert (session->session_include, key, GINT_TO_POINTER(TRUE));
 }
 
 static void
 enchant_session_remove (EnchantSession * session, const char * const word, size_t len)
 {
-    char* key = g_strndup (word, len);
+	char* key = g_strndup (word, len);
 	g_hash_table_remove (session->session_include, key);
 	g_hash_table_insert (session->session_exclude, key, GINT_TO_POINTER(TRUE));
 }
@@ -496,10 +512,10 @@ enchant_session_exclude (EnchantSession * session, const char * const word, size
 	
 	char * utf = g_strndup (word, len);
 	
-    if (!g_hash_table_lookup (session->session_include, utf) &&
-            (g_hash_table_lookup (session->session_exclude, utf)||
-             enchant_pwl_check (session->exclude, word, len) == 0 ))
-		    result = TRUE;
+	if (!g_hash_table_lookup (session->session_include, utf) &&
+			(g_hash_table_lookup (session->session_exclude, utf)||
+			 enchant_pwl_check (session->exclude, word, len) == 0 ))
+			result = TRUE;
 	g_free (utf);
 
 	return result;
@@ -514,7 +530,7 @@ enchant_session_contains (EnchantSession * session, const char * const word, siz
 	
 	if (g_hash_table_lookup (session->session_include, utf) ||
 		(enchant_pwl_check (session->personal, word, len) == 0 &&
-         !enchant_pwl_check (session->exclude, word, len) == 0))
+		 !enchant_pwl_check (session->exclude, word, len) == 0))
 		result = TRUE;
 	
 	g_free (utf);
@@ -615,14 +631,14 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
-    /* first, see if it's to be excluded*/
-    if (enchant_session_exclude (session, word, len)) 
-        return 1;
+	/* first, see if it's to be excluded*/
+	if (enchant_session_exclude (session, word, len)) 
+		return 1;
 
 	/* then, see if it's in our pwl or session*/
-    if (enchant_session_contains(session, word, len))
-        return 0;
-    
+	if (enchant_session_contains(session, word, len))
+		return 0;
+	
 	if (dict->check)
 		return (*dict->check) (dict, word, len);
 	else if (session->is_pwl)
@@ -655,8 +671,8 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 
 			if (!g_utf8_validate(new_suggs[i], sugg_len, NULL))
 				copy = 0;
-            else if (enchant_session_exclude(session, new_suggs[i], sugg_len))
-                copy = 0;
+			else if (enchant_session_exclude(session, new_suggs[i], sugg_len))
+				copy = 0;
 			else
 				{
 					char * normalized_new_sugg;
@@ -809,7 +825,7 @@ ENCHANT_MODULE_EXPORT (void)
 enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
 			 ssize_t len)
 {
-    enchant_dict_add(dict,word,len);
+	enchant_dict_add(dict,word,len);
 }
 
 /**
@@ -865,7 +881,7 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
  */
 ENCHANT_MODULE_EXPORT (int)
 enchant_dict_is_added (EnchantDict * dict, const char *const word,
-			    ssize_t len)
+				ssize_t len)
 {
 	EnchantSession * session;
 
@@ -896,7 +912,7 @@ ENCHANT_MODULE_EXPORT (int)
 enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
 				ssize_t len)
 {
-    return enchant_dict_is_added(dict, word, len);
+	return enchant_dict_is_added(dict, word, len);
 }
 
 /**
@@ -920,13 +936,13 @@ enchant_dict_remove (EnchantDict * dict, const char *const word,
 		len = strlen (word);
 
 	g_return_if_fail (len);
-    g_return_if_fail (g_utf8_validate(word, len, NULL));
+	g_return_if_fail (g_utf8_validate(word, len, NULL));
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
 	enchant_session_remove_personal (session, word, len);
-    enchant_session_add_exclude(session, word, len);
+	enchant_session_add_exclude(session, word, len);
 	
 	if (dict->add_to_exclude)
 		(*dict->add_to_exclude) (dict, word, len);
@@ -952,9 +968,9 @@ enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
 		len = strlen (word);
 	
 	g_return_if_fail (len);
-    g_return_if_fail (g_utf8_validate(word, len, NULL));
+	g_return_if_fail (g_utf8_validate(word, len, NULL));
 
-    session = (EnchantSession*)dict->enchant_private_data;
+	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
 	enchant_session_remove (session, word, len);
@@ -968,7 +984,7 @@ enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
  */
 ENCHANT_MODULE_EXPORT (int)
 enchant_dict_is_removed (EnchantDict * dict, const char *const word,
-			    ssize_t len)
+				ssize_t len)
 {
 	EnchantSession * session;
 
@@ -978,13 +994,13 @@ enchant_dict_is_removed (EnchantDict * dict, const char *const word,
 	if (len < 0)
 		len = strlen (word);
 	
-   	g_return_val_if_fail (len, 0);
-    g_return_val_if_fail (g_utf8_validate(word, len, NULL), 0);
+	g_return_val_if_fail (len, 0);
+	g_return_val_if_fail (g_utf8_validate(word, len, NULL), 0);
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
 
-    return enchant_session_exclude (session, word, len);
+	return enchant_session_exclude (session, word, len);
 }
 
 /**
@@ -1119,6 +1135,13 @@ enchant_broker_clear_error (EnchantBroker * broker)
 			g_free (broker->error);
 			broker->error = NULL;
 		}
+}
+
+static void
+enchant_broker_set_error (EnchantBroker * broker, const char * const err)
+{
+	enchant_broker_clear_error (broker);
+	broker->error = g_strdup (err);	
 }
 
 static int
@@ -1518,12 +1541,12 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 		return dict;
 	}
 
-    /* since the broker pwl file is a read/write file (there is no readonly dictionary associated)
-     * there is no need for complementary exclude file to add a word to. The word just needs to be
-     * removed from the broker pwl file
-     */
+	/* since the broker pwl file is a read/write file (there is no readonly dictionary associated)
+	 * there is no need for complementary exclude file to add a word to. The word just needs to be
+	 * removed from the broker pwl file
+	 */
 	session = enchant_session_new_with_pwl (NULL, pwl, NULL, "Personal Wordlist", TRUE);
- 	if (!session) 
+	if (!session) 
 		{
 			broker->error = g_strdup_printf ("Couldn't open personal wordlist '%s'", pwl);
 			return NULL;
@@ -1596,7 +1619,11 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	enchant_broker_clear_error (broker);
 	
 	normalized_tag = enchant_normalize_dictionary_tag (tag);
-	if ((dict = _enchant_broker_request_dict (broker, normalized_tag)) == NULL)
+	if(!enchant_is_valid_dictionary_tag(normalized_tag))
+		{
+			enchant_broker_set_error (broker, "invalid tag character found");
+		}
+	else if ((dict = _enchant_broker_request_dict (broker, normalized_tag)) == NULL)
 		{
 			char * iso_639_only_tag;
 
@@ -1696,7 +1723,8 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 					for (i = 0; i < n_dicts; i++)
 						{
 							tag = dicts[i];
-							if (!g_hash_table_lookup (tags, tag))
+							if(enchant_is_valid_dictionary_tag(tag) &&
+							   !g_hash_table_lookup (tags, tag))
 								{
 									g_hash_table_insert (tags, g_strdup (tag), GINT_TO_POINTER(TRUE));
 									(*fn) (tag, name, desc, file, user_data);
@@ -1828,7 +1856,11 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 
 	normalized_tag = enchant_normalize_dictionary_tag (tag);
 
-	if ((exists = _enchant_broker_dict_exists (broker, normalized_tag)) == 0)
+	if(!enchant_is_valid_dictionary_tag(normalized_tag))
+		{
+			enchant_broker_set_error (broker, "invalid tag character found");
+		}
+	else if ((exists = _enchant_broker_dict_exists (broker, normalized_tag)) == 0)
 		{
 			char * iso_639_only_tag;
 
@@ -1911,8 +1943,7 @@ enchant_provider_set_error (EnchantProvider * provider, const char * const err)
 	broker = provider->owner;
 	g_return_if_fail (broker);
 	
-	enchant_broker_clear_error (broker);
-	broker->error = g_strdup (err);	
+	enchant_broker_set_error (broker, err);	
 }
 
 /**
