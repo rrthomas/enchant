@@ -64,6 +64,7 @@
 #endif
 
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include "pwl.h"
 
@@ -1042,7 +1043,7 @@ static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num)
 static int edit_dist(const char* utf8word1, const char* utf8word2)
 {
 	gunichar * word1, * word2;
-	int len1, len2, cost, i, j;
+	glong len1, len2, cost, i, j;
 	int v1, v2, v3;
 	int* table;
 

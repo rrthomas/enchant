@@ -34,6 +34,7 @@
 
 #include <glib.h>
 #include <gmodule.h>
+#include <glib/gstdio.h>
 #include <locale.h>
 
 #include "enchant.h"
@@ -791,13 +792,13 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 
 			/* Copy over suggestions from dict, if good */
 			n_suggs = enchant_dict_merge_suggestions(dict, 
-													suggs, 0, 
-													dict_suggs, n_dict_suggs);
+								 suggs, 0, 
+								 dict_suggs, n_dict_suggs);
 
 			/* Copy over suggestions from pwl, if good and no dupes */
 			n_suggs = enchant_dict_merge_suggestions(dict, 
-													suggs, n_suggs, 
-													pwl_suggs, n_pwl_suggs);
+								 suggs, n_suggs, 
+								 pwl_suggs, n_pwl_suggs);
 		}
 	else 
 		{
