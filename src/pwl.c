@@ -165,8 +165,7 @@ typedef struct str_enchant_sugg_list
  */
 
 static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
-					const char *const word, size_t len,
-					gboolean add_to_file);
+					const char *const word, size_t len);
 
 static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher);
 static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher);
@@ -282,7 +281,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 						line[l] = '\0';
 					
 					if(g_utf8_validate(line, -1, NULL))
-						enchant_pwl_add_to_trie(pwl, line, strlen(line), FALSE);
+						enchant_pwl_add_to_trie(pwl, line, strlen(line));
 					else
 						g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
 
@@ -309,8 +308,7 @@ void enchant_pwl_free(EnchantPWL *pwl)
 }
 
 static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
-					const char *const word, size_t len,
-					gboolean add_to_file)
+					const char *const word, size_t len)
 {
 	char * normalized_word;
 
@@ -323,21 +321,6 @@ static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 	g_hash_table_insert (pwl->words_in_trie, normalized_word, g_strndup(word,len));
 
 	pwl->trie = enchant_trie_insert(pwl->trie, normalized_word);
-
-	if (add_to_file && (pwl->filename != NULL))
-		{
-			FILE *f;
-			
-			f = g_fopen(pwl->filename, "a");
-			if (f)
-				{
-					enchant_lock_file (f);
-					fwrite (word, sizeof(char), len, f);
-					fwrite ("\n", sizeof(char), 1, f);
-					enchant_unlock_file (f);
-					fclose (f);
-				}	
-		}
 }
 
 static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
@@ -358,7 +341,22 @@ static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
 void enchant_pwl_add(EnchantPWL *pwl,
 			 const char *const word, size_t len)
 {
-	enchant_pwl_add_to_trie(pwl, word, len, TRUE);
+	enchant_pwl_add_to_trie(pwl, word, len);
+
+	if (pwl->filename != NULL)
+	{
+		FILE *f;
+		
+		f = g_fopen(pwl->filename, "a");
+		if (f)
+			{
+				enchant_lock_file (f);
+				fwrite (word, sizeof(char), len, f);
+				fwrite ("\n", sizeof(char), 1, f);
+				enchant_unlock_file (f);
+				fclose (f);
+			}	
+	}
 }
 
 void enchant_pwl_remove(EnchantPWL *pwl,
