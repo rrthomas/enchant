@@ -267,7 +267,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 			
 			enchant_lock_file (f);
 			
-			while (NULL != (fgets (buffer, sizeof (buffer), f)))
+			for (;NULL != (fgets (buffer, sizeof (buffer), f));++line_number)
 				{
 					const gunichar BOM = 0xfeff;
 					size_t l;
@@ -279,6 +279,16 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 					l = strlen(line)-1;
 					if (line[l]=='\n') 
 						line[l] = '\0';
+                    else if(!feof(f)) /* ignore lines longer than BUFSIZ. */ 
+                        {
+                            g_warning ("Line too long (ignored) in %s at line:%u\n", pwl->filename, line_number);
+	                        while (NULL != (fgets (buffer, sizeof (buffer), f)))
+                                {
+			                        if (line[strlen(buffer)-1]=='\n') 
+				                        break;
+                                }
+                            continue;
+                        }
 								
 					if( line[0] != '#')
 						{
@@ -287,7 +297,6 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 							else
 								g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
 						}
-					++line_number;
 				}
 			
 			enchant_unlock_file (f);
