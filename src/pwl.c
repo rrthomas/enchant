@@ -279,12 +279,14 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 					l = strlen(line)-1;
 					if (line[l]=='\n') 
 						line[l] = '\0';
-					
-					if(g_utf8_validate(line, -1, NULL))
-						enchant_pwl_add_to_trie(pwl, line, strlen(line));
-					else
-						g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
-
+								
+					if( line[0] != '#')
+						{
+							if(g_utf8_validate(line, -1, NULL))
+								enchant_pwl_add_to_trie(pwl, line, strlen(line));
+							else
+								g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
+						}
 					++line_number;
 				}
 			
@@ -312,7 +314,7 @@ static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 {
 	char * normalized_word;
 
-    normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
+	normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
 	if(NULL != g_hash_table_lookup (pwl->words_in_trie, normalized_word)) {
 		g_free (normalized_word);
 		return;
@@ -324,9 +326,9 @@ static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 }
 
 static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
-				    const char *const word, size_t len)
+					const char *const word, size_t len)
 {
-    char * normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
+	char * normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
 
 	if( g_hash_table_remove (pwl->words_in_trie, normalized_word) )
 		{
@@ -335,7 +337,7 @@ static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
 				pwl->trie = NULL; /* make trie empty if has no content */
 		}
 	
-    g_free(normalized_word);
+	g_free(normalized_word);
 }
 
 void enchant_pwl_add(EnchantPWL *pwl,
@@ -360,75 +362,75 @@ void enchant_pwl_add(EnchantPWL *pwl,
 }
 
 void enchant_pwl_remove(EnchantPWL *pwl,
-		     const char *const word, size_t len)
+			 const char *const word, size_t len)
 {
-    if(enchant_pwl_check(pwl, word, len) == 1)
-        return;
+	if(enchant_pwl_check(pwl, word, len) == 1)
+		return;
 
 	enchant_pwl_remove_from_trie(pwl, word, len);
 
 	if (pwl->filename)
 		{
-            char * contents;
-            size_t length;
+			char * contents;
+			size_t length;
 
 			FILE *f;
 
-            if(!g_file_get_contents(pwl->filename, &contents, &length, NULL))
-                return;
+			if(!g_file_get_contents(pwl->filename, &contents, &length, NULL))
+				return;
 
 			f = g_fopen(pwl->filename, "wb"); /*binary because g_file_get_contents reads binary*/
 			if (f)
 				{
-                    const gunichar BOM = 0xfeff;
-                    char * filestart, *searchstart, *needle;
-                    char * key;
+					const gunichar BOM = 0xfeff;
+					char * filestart, *searchstart, *needle;
+					char * key;
 
-                    enchant_lock_file (f);
-                    key = g_strndup(word, len);
+					enchant_lock_file (f);
+					key = g_strndup(word, len);
 
-                    if(BOM == g_utf8_get_char(contents))
-                        {
-                            filestart = g_utf8_next_char(contents);
-                            fwrite (contents, sizeof(char), filestart-contents, f);
-                        }
-                    else
-                        filestart = contents;
+					if(BOM == g_utf8_get_char(contents))
+						{
+							filestart = g_utf8_next_char(contents);
+							fwrite (contents, sizeof(char), filestart-contents, f);
+						}
+					else
+						filestart = contents;
 
-                    searchstart = filestart;
-                    for(;;)
-                        {
-                            /*find word*/
-                            needle = strstr(searchstart, key);
-                            if(needle == NULL)
-                                {
-    					            fwrite (searchstart, sizeof(char), length - (searchstart - contents), f);
-                                    break;
-                                }
-                            else 
-                                {
-                                    char* foundend = needle+len;
-                                    if((needle == filestart || contents[needle-contents-1] == '\n' || contents[needle-contents-1] == '\r') &&
-                                        (foundend == contents + length || *foundend == '\n' || *foundend == '\r'))
-                                        {
-   					                        fwrite (searchstart, sizeof(char), needle - searchstart, f);
-                                            searchstart = foundend;
-                                            while (*searchstart == '\n' || *searchstart == '\r')
-                                                ++searchstart;
-                                        }
-                                    else {
-    					                fwrite (searchstart, sizeof(char), needle - searchstart+1, f);
-                                        searchstart = needle+1;
-                                    }
-                                }
-                        }
-                    g_free(key);
+					searchstart = filestart;
+					for(;;)
+						{
+							/*find word*/
+							needle = strstr(searchstart, key);
+							if(needle == NULL)
+								{
+									fwrite (searchstart, sizeof(char), length - (searchstart - contents), f);
+									break;
+								}
+							else 
+								{
+									char* foundend = needle+len;
+									if((needle == filestart || contents[needle-contents-1] == '\n' || contents[needle-contents-1] == '\r') &&
+										(foundend == contents + length || *foundend == '\n' || *foundend == '\r'))
+										{
+											fwrite (searchstart, sizeof(char), needle - searchstart, f);
+											searchstart = foundend;
+											while (*searchstart == '\n' || *searchstart == '\r')
+												++searchstart;
+										}
+									else {
+										fwrite (searchstart, sizeof(char), needle - searchstart+1, f);
+										searchstart = needle+1;
+									}
+								}
+						}
+					g_free(key);
 
 					enchant_unlock_file (f);
 
 					fclose (f);
 				}	
-            g_free(contents);
+			g_free(contents);
 		}
 }
 
@@ -562,8 +564,8 @@ static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher)
 }
 
 void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl, 
-								                  const char *const word, size_t len, 
-								                  EnchantSuggList* suggs_list)
+												  const char *const word, size_t len, 
+												  EnchantSuggList* suggs_list)
 {
 	size_t i;
 	gchar* (*utf8_case_convert_function)(const gchar*str, gssize len);
@@ -581,7 +583,7 @@ void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl,
 			gchar* suggestion;
 			size_t suggestion_len;
 
-	        suggestion = g_hash_table_lookup (pwl->words_in_trie, suggs_list->suggs[i]);
+			suggestion = g_hash_table_lookup (pwl->words_in_trie, suggs_list->suggs[i]);
 			suggestion_len = strlen(suggestion);
 			
 			if(utf8_case_convert_function &&
@@ -789,46 +791,46 @@ static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
 			/* Store multiple words in subtries */
 			if (word[0] == '\0') {
 				/* Mark end-of-string with special node */
-                g_hash_table_remove(trie->subtries, "");
+				g_hash_table_remove(trie->subtries, "");
 			} else {
 				nxtCh = (ssize_t)(g_utf8_next_char(word)-word);
 				tmpWord = g_strndup(word,nxtCh);
 				subtrie = g_hash_table_lookup(trie->subtries,
 								tmpWord);
-                enchant_trie_remove(subtrie,
+				enchant_trie_remove(subtrie,
 								(word+nxtCh));
 
-                if(subtrie->subtries == NULL && subtrie->value == NULL)
-                    g_hash_table_remove(trie->subtries, tmpWord);
+				if(subtrie->subtries == NULL && subtrie->value == NULL)
+					g_hash_table_remove(trie->subtries, tmpWord);
 
-                g_free(tmpWord);
+				g_free(tmpWord);
 			}
 
-            if(g_hash_table_size(trie->subtries) == 1)
-                {
-                    char* key;
-                    GList* keys = g_hash_table_get_keys(trie->subtries);
-                    key = (char*) keys->data;
-				    subtrie = g_hash_table_lookup(trie->subtries, key);
+			if(g_hash_table_size(trie->subtries) == 1)
+				{
+					char* key;
+					GList* keys = g_hash_table_get_keys(trie->subtries);
+					key = (char*) keys->data;
+					subtrie = g_hash_table_lookup(trie->subtries, key);
 
-                    /* only remove trie nodes that have values by propogating these up */
-                    if(subtrie->value)
-                        {
-                            trie->value = g_strconcat(key, subtrie->value, NULL);
-	                        enchant_trie_free(subtrie);
-                            g_hash_table_destroy(trie->subtries);
-                            trie->subtries = NULL;
-                        }
+					/* only remove trie nodes that have values by propogating these up */
+					if(subtrie->value)
+						{
+							trie->value = g_strconcat(key, subtrie->value, NULL);
+							enchant_trie_free(subtrie);
+							g_hash_table_destroy(trie->subtries);
+							trie->subtries = NULL;
+						}
 
-                    g_list_free(keys);
-                }
+					g_list_free(keys);
+				}
 		}
 	} else {
-        if(strcmp(trie->value, word) == 0)
-        {
-            g_free(trie->value);
-            trie->value = NULL;
-        }
+		if(strcmp(trie->value, word) == 0)
+		{
+			g_free(trie->value);
+			trie->value = NULL;
+		}
 	}
 }
 
@@ -966,15 +968,15 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 				void* cbdata)
 {
 	EnchantTrieMatcher* matcher;
-    char * normalized_word, * pattern;
+	char * normalized_word, * pattern;
 
-    normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
+	normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
 
-    if(mode == case_insensitive)
-        {
-		    pattern = g_utf8_strdown (normalized_word, -1);
-            g_free(normalized_word);
-        }
+	if(mode == case_insensitive)
+		{
+			pattern = g_utf8_strdown (normalized_word, -1);
+			g_free(normalized_word);
+		}
 	else
 		pattern = normalized_word;
 
@@ -996,7 +998,7 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 
 static void enchant_trie_matcher_free(EnchantTrieMatcher* matcher)
 {
-    g_free(matcher->word);
+	g_free(matcher->word);
 	g_free(matcher->path);
 	g_free(matcher);
 }

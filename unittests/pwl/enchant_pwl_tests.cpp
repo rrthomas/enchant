@@ -92,6 +92,34 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
+// Commented Lines ignored
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_DictionaryHasCommentedLines_DoesNotReadCommentedLines)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  std::vector<const std::string>::const_iterator comment = sWords.insert(sWords.begin()+2, "#sat"); //comment
+  ExternalAddWordsToDictionary(sWords);
+  ReloadTestDictionary();
+
+  for(std::vector<const std::string>::const_iterator itWord = sWords.begin(); itWord != comment; ++itWord){
+    CHECK( IsWordInDictionary(*itWord) );
+  }
+
+  CHECK(!IsWordInDictionary(*comment) );
+  CHECK(!IsWordInDictionary("sat") );
+
+  for(std::vector<const std::string>::const_iterator itWord = comment+1; itWord != sWords.end(); ++itWord){
+    CHECK(IsWordInDictionary(*itWord) );
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
 // Unicode normalization
 TEST_FIXTURE(EnchantPwl_TestFixture, 
              IsWordInDictionary_DictionaryHasComposed_SuccessfulCheckWithComposedAndDecomposed)
