@@ -184,15 +184,15 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 static void
 s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
-	char * tmp, * private_dir, * home_dir, * myspell_prefix, * dict_dic;
+	char * tmp, * private_dir, * config_dir, * myspell_prefix, * dict_dic;
 
 	names.clear ();
 
 	dict_dic = g_strconcat(dict, ".dic", NULL);
 
-	home_dir = enchant_get_user_home_dir ();
-	if (home_dir) {
-		private_dir = g_build_filename (home_dir, ".enchant", 
+	config_dir = enchant_get_user_config_dir ();
+	if (config_dir) {
+		private_dir = g_build_filename (config_dir, 
 						"myspell", NULL);
 		
 		tmp = g_build_filename (private_dir, dict_dic, NULL);
@@ -200,7 +200,7 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 		g_free (tmp);
 
 		g_free (private_dir);
-		g_free (home_dir);
+		g_free (config_dir);
 	}
 
 	myspell_prefix = myspell_checker_get_prefix ();
@@ -314,15 +314,15 @@ myspell_provider_list_dicts (EnchantProvider * me,
 	char ** dictionary_list = NULL;
 	std::vector<std::string> dicts;
        	
-	char * home_dir = enchant_get_user_home_dir ();
-	if (home_dir) {
-		char * private_dir = g_build_filename (home_dir, ".enchant", 
+	char * config_dir = enchant_get_user_config_dir ();
+	if (config_dir) {
+		char * private_dir = g_build_filename (config_dir,
 						       "myspell", NULL);
 		
 		myspell_provider_enum_dicts (private_dir, dicts);
 
 		g_free (private_dir);
-		g_free (home_dir);
+		g_free (config_dir);
 	}
 
 	char * myspell_prefix = myspell_checker_get_prefix ();

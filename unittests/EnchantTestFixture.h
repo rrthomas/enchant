@@ -287,6 +287,29 @@ struct EnchantTestFixture
     }
   }
 
+
+  static std::string AddToPath(const std::string & path, const std::string & fileOrDirName)
+    {
+        std::string result;
+        gchar* filename = g_build_filename(path.c_str(), fileOrDirName.c_str(), NULL);
+        result = std::string(filename);
+        g_free(filename);
+
+        return result;
+    }
+
+    static std::string GetEnchantHomeDirFromBase(const std::string& basePath)
+    {
+#ifdef XP_TARGET_COCOA
+        return AddToPath(AddToPath(AddToPath(basePath,"Library"), 
+                                                       "Application Support"), 
+                                                       "Enchant");
+#elif defined(_WIN32)
+        return AddToPath(basePath,"enchant");
+#else
+        return AddToPath(basePath,".enchant");
+#endif
+    }
 };
 
 #endif

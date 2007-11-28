@@ -302,6 +302,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\unittests\provider\enchant_provider_get_config_home_dir_tests.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\unittests\provider\enchant_provider_get_prefix_dir_tests.cpp"
 					>
 				</File>

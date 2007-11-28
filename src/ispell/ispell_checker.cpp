@@ -41,7 +41,7 @@
 #include "enchant.h"
 
 #ifndef ENCHANT_ISPELL_HOME_DIR
-#define ENCHANT_ISPELL_HOME_DIR ".enchant", "ispell"
+#define ENCHANT_ISPELL_HOME_DIR "ispell"
 #endif
 
 ENCHANT_PLUGIN_DECLARE("Ispell")
@@ -325,26 +325,26 @@ ispell_checker_get_prefix (void)
 static void
 s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
-	char * tmp, * private_dir, * home_dir, * ispell_prefix;
+	char * tmp, * private_dir, * config_dir, * ispell_prefix;
 
 	names.clear ();
 
 	/* until I work out how to link the modules against enchant in MacOSX - fjf
 	 */
 #ifndef XP_TARGET_COCOA
-	home_dir = enchant_get_user_home_dir ();
+	config_dir = enchant_get_user_config_dir ();
 #else
-	home_dir = g_strdup (g_getenv ("HOME"));
+	config_dir = g_strdup (g_getenv ("HOME"));
 #endif
-	if (home_dir) {
-		private_dir = g_build_filename (home_dir, ENCHANT_ISPELL_HOME_DIR, NULL);
+	if (config_dir) {
+		private_dir = g_build_filename (config_dir, ENCHANT_ISPELL_HOME_DIR, NULL);
 		
 		tmp = g_build_filename (private_dir, dict, NULL);
 		names.push_back (tmp);
 		g_free (tmp);
 
 		g_free (private_dir);
-		g_free (home_dir);
+		g_free (config_dir);
 	}
 
 	ispell_prefix = ispell_checker_get_prefix ();

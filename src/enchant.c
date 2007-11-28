@@ -46,6 +46,8 @@
 
 #ifdef XP_TARGET_COCOA
 #define ENCHANT_USER_PATH_EXTENSION "Library", "Application Support", "Enchant"
+#elif defined(_WIN32)
+#define ENCHANT_USER_PATH_EXTENSION "enchant"
 #else
 #define ENCHANT_USER_PATH_EXTENSION ".enchant"
 #endif
@@ -55,6 +57,9 @@
 #endif
 
 ENCHANT_PLUGIN_DECLARE("Enchant")
+
+static char *
+enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key);
 
 /********************************************************************************/
 /********************************************************************************/
@@ -96,24 +101,19 @@ static void
 _enchant_ensure_private_datadir (void)
 {
 	/* test if ~/.enchant exists  */
-	char * home_dir;
+	char * config_dir;
 
-	home_dir = enchant_get_user_home_dir ();
-		if (home_dir) {
-				char * enchant_path;
-		
-		enchant_path = g_build_filename (home_dir, ENCHANT_USER_PATH_EXTENSION, NULL);
-		if (enchant_path && !g_file_test (enchant_path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
-			{
-				(void)g_remove (enchant_path);
-				g_mkdir (enchant_path, 0700);                        
-			}
-		
-		g_free (enchant_path);
-		g_free (home_dir);
-	}
+	config_dir = enchant_get_user_config_dir ();
+	if (config_dir && !g_file_test (config_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
+		{
+			(void)g_remove (config_dir);
+			g_mkdir_with_parents (config_dir, 0700);                        
+		}
+	
+	g_free (config_dir);
 }
 
+/* place to look for system level providers */
 static char *
 enchant_get_module_dir (void)
 {
@@ -154,7 +154,7 @@ enchant_get_conf_dir (void)
 	char * ordering_dir = NULL, * prefix = NULL;;
 
 	/* Look for explicitly set registry values */
-	ordering_dir = enchant_get_registry_value ("Config", "Data_Dir");
+	ordering_dir = enchant_get_registry_value_ex (0, "Config", "Data_Dir");
 	if (ordering_dir)
 		return ordering_dir;
 
@@ -173,6 +173,48 @@ enchant_get_conf_dir (void)
 	return NULL;
 #endif
 }
+
+/**
+ * enchant_get_user_config_dir
+ *
+ * Returns: the user's enchant directory, or %null. Returned value
+ * must be free'd.
+ *
+ * The enchant directory is the place where enchant finds user providers and 
+ * dictionaries and settings related to enchant
+ *
+ * This API is private to the providers.
+ */
+ENCHANT_MODULE_EXPORT (char *)
+enchant_get_user_config_dir (void)
+{
+    char* user_config;
+
+    char* base_dir = NULL;
+
+	user_config = enchant_get_registry_value_ex (1, "Config", "Data_Dir");
+	if (user_config)
+		return user_config;
+
+#ifdef _WIN32
+    base_dir = g_strdup (g_get_user_config_dir());
+#endif
+
+	if (!base_dir)
+		base_dir = enchant_get_user_home_dir ();
+
+    if(base_dir)
+    {
+        user_config = 	g_build_filename (base_dir,
+						                  ENCHANT_USER_PATH_EXTENSION,
+						                  NULL);
+        g_free(base_dir);
+        return user_config;
+    }
+    else
+        return NULL;
+}
+
 
 /*
  * Returns: the value if it exists and is not an empty string ("") or %null otherwise. Must be free'd.
@@ -431,27 +473,21 @@ static EnchantSession *
 enchant_session_new (EnchantProvider *provider, const char * const lang)
 {
 	EnchantSession * session;
-	char * home_dir, * dic = NULL, *excl = NULL, * filename;
+	char * user_config_dir, * dic = NULL, *excl = NULL, * filename;
 
-	home_dir = enchant_get_user_home_dir ();
-	if (home_dir) 
+	user_config_dir = enchant_get_user_config_dir ();
+	if (user_config_dir) 
 		{
 			_enchant_ensure_private_datadir ();
 			filename = g_strdup_printf ("%s.dic", lang);
-			dic = g_build_filename (home_dir,
-									ENCHANT_USER_PATH_EXTENSION,
-									filename,
-									NULL);
+			dic = g_build_filename (user_config_dir, filename, NULL);
 			g_free (filename);
 
 			filename = g_strdup_printf ("%s.exc", lang);
-			excl = g_build_filename (home_dir,
-									ENCHANT_USER_PATH_EXTENSION,
-									filename,
-									NULL);
+			excl = g_build_filename (user_config_dir, filename,	NULL);
 			g_free (filename);
 
-			g_free (home_dir);
+			g_free (user_config_dir);
 		}
 
 	session = enchant_session_new_with_pwl (provider, dic, excl, lang, FALSE);	
@@ -1275,19 +1311,17 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	gchar *user_dir, *home_dir, *system_dir;
+	gchar *user_dir, *system_dir;
 	
 	/* load USER providers first. since the GSList is ordered,
 	   this intentionally gives preference to USER providers */
 
-	home_dir = enchant_get_user_home_dir ();
+	user_dir = enchant_get_user_config_dir ();
 
-	if (home_dir) 
+	if (user_dir) 
 		{
-			user_dir = g_build_filename (home_dir, ENCHANT_USER_PATH_EXTENSION, NULL);
 			enchant_load_providers_in_dir (broker, user_dir);
 			g_free (user_dir);
-			g_free (home_dir);
 		}
 
 	system_dir = enchant_get_module_dir ();
@@ -1334,27 +1368,27 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 static void
 enchant_load_provider_ordering (EnchantBroker * broker)
 {
-	char * ordering_file, * home_dir, * global_ordering;
+	char * ordering_file, * user_config_dir, * global_config_dir;
 
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	global_ordering = enchant_get_conf_dir ();
-	if (global_ordering) 
+	global_config_dir = enchant_get_conf_dir ();
+	if (global_config_dir) 
 		{
-			ordering_file = g_build_filename (global_ordering, "enchant.ordering", NULL);
+			ordering_file = g_build_filename (global_config_dir, "enchant.ordering", NULL);
 			enchant_load_ordering_from_file (broker, ordering_file);
 			g_free (ordering_file);
-			g_free (global_ordering);
+			g_free (global_config_dir);
 		}
 	
-	home_dir = enchant_get_user_home_dir ();
+	user_config_dir = enchant_get_user_config_dir ();
 	
-	if (home_dir) 
+	if (user_config_dir) 
 		{
-			ordering_file = g_build_filename (home_dir, ENCHANT_USER_PATH_EXTENSION, "enchant.ordering", NULL);
+			ordering_file = g_build_filename (user_config_dir, "enchant.ordering", NULL);
 			enchant_load_ordering_from_file (broker, ordering_file);
 			g_free (ordering_file);
-			g_free (home_dir);
+			g_free (user_config_dir);
 		}
 }
 

@@ -161,7 +161,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
             CopyProvider("libenchant", "libenchant"); //not a provider
         }
 
-        SetRegistryHomeDir(GetDirectoryOfThisModule());
+        SetUserRegistryConfigDir(GetEnchantPersonalDir());
         InitializeBroker();
     }
 
@@ -234,16 +234,6 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         return AddToPath(AddToPath(GetDirectoryOfThisModule(), "share"), "enchant");
     }
 
-    static std::string AddToPath(const std::string & path, const std::string & fileOrDirName)
-    {
-        std::string result;
-        gchar* filename = g_build_filename(path.c_str(), fileOrDirName.c_str(), NULL);
-        result = std::string(filename);
-        g_free(filename);
-
-        return result;
-    }
-
     EnchantProvider* GetMockProvider(){
         return mock_provider;
     }
@@ -274,7 +264,10 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
     }
     static void CreateFile(const std::string& filepath)
     {
-        g_creat(filepath.c_str(), _S_IREAD | _S_IWRITE);
+        int fh = g_creat(filepath.c_str(), _S_IREAD | _S_IWRITE);
+        if(fh != -1) {
+            close(fh);
+        }
     }
     static void DeleteFile(const std::string& filepath)
     {
@@ -351,7 +344,6 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
             userMockProvider2Configuration(me, dir_name);
         }
     }
-
 };
 
 struct DictionaryDescription 

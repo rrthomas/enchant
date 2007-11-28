@@ -29,13 +29,13 @@ static bool mock2ProviderRequestDictionaryCalled;
 
 static EnchantDict * RequestDictionary1 (EnchantProvider *me, const char *tag)
 {
-    mock1ProviderRequestDictionaryCalled = true;
-    return MockEnGbAndQaaProviderRequestDictionary(me, tag);
+	mock1ProviderRequestDictionaryCalled = true;
+	return MockEnGbAndQaaProviderRequestDictionary(me, tag);
 }
 static EnchantDict * RequestDictionary2 (EnchantProvider *me, const char *tag)
 {
-    mock2ProviderRequestDictionaryCalled = true;
-    return MockEnGbAndQaaProviderRequestDictionary(me, tag);
+	mock2ProviderRequestDictionaryCalled = true;
+	return MockEnGbAndQaaProviderRequestDictionary(me, tag);
 }
 static char *
 MockProvider1Identify (EnchantProvider *)
@@ -50,89 +50,89 @@ MockProvider2Identify (EnchantProvider *)
 }
 static void Request_Dictionary_ProviderConfiguration1 (EnchantProvider * me, const char *)
 {
-     me->request_dict = RequestDictionary1;
-     me->dispose_dict = MockProviderDisposeDictionary;
-     me->identify = MockProvider1Identify;
+	 me->request_dict = RequestDictionary1;
+	 me->dispose_dict = MockProviderDisposeDictionary;
+	 me->identify = MockProvider1Identify;
 }
 static void Request_Dictionary_ProviderConfiguration2 (EnchantProvider * me, const char *)
 {
-     me->request_dict = RequestDictionary2;
-     me->dispose_dict = MockProviderDisposeDictionary;
-     me->identify = MockProvider2Identify;
+	 me->request_dict = RequestDictionary2;
+	 me->dispose_dict = MockProviderDisposeDictionary;
+	 me->identify = MockProvider2Identify;
 }
 
 
 enum ProviderOrder {
-    Mock1ThenMock2=1,
-    Mock2ThenMock1=2,
-    ErrorBothCalled=3,
-    ErrorNeitherCalled=4
+	Mock1ThenMock2=1,
+	Mock2ThenMock1=2,
+	ErrorBothCalled=3,
+	ErrorNeitherCalled=4
 };
 
 struct EnchantBrokerSetOrdering_TestFixture : EnchantBrokerTestFixture
 {
-    //Setup
-    EnchantBrokerSetOrdering_TestFixture():
-            EnchantBrokerTestFixture(Request_Dictionary_ProviderConfiguration1,Request_Dictionary_ProviderConfiguration2)
+	//Setup
+	EnchantBrokerSetOrdering_TestFixture():
+			EnchantBrokerTestFixture(Request_Dictionary_ProviderConfiguration1,Request_Dictionary_ProviderConfiguration2)
 
-    {  
-        mock1ProviderRequestDictionaryCalled = false;
-        mock2ProviderRequestDictionaryCalled = false;
-    }
+	{  
+		mock1ProviderRequestDictionaryCalled = false;
+		mock2ProviderRequestDictionaryCalled = false;
+	}
 
-    ProviderOrder GetProviderOrder(const std::string & languageTag) 
-    {
-        ProviderOrder result = ErrorBothCalled;
+	ProviderOrder GetProviderOrder(const std::string & languageTag) 
+	{
+		ProviderOrder result = ErrorBothCalled;
 
-        EnchantDict* dict = enchant_broker_request_dict(_broker, languageTag.c_str());
+		EnchantDict* dict = enchant_broker_request_dict(_broker, languageTag.c_str());
 
-        if(mock2ProviderRequestDictionaryCalled && !mock1ProviderRequestDictionaryCalled)
-        {
-            result = Mock2ThenMock1;
-        }
-        else if(mock1ProviderRequestDictionaryCalled && !mock2ProviderRequestDictionaryCalled)
-        {
-            result = Mock1ThenMock2;
-        }
-        else if(!mock2ProviderRequestDictionaryCalled && !mock1ProviderRequestDictionaryCalled)
-        {
-            result = ErrorNeitherCalled;
-        }
-        
-        FreeDictionary(dict);
+		if(mock2ProviderRequestDictionaryCalled && !mock1ProviderRequestDictionaryCalled)
+		{
+			result = Mock2ThenMock1;
+		}
+		else if(mock1ProviderRequestDictionaryCalled && !mock2ProviderRequestDictionaryCalled)
+		{
+			result = Mock1ThenMock2;
+		}
+		else if(!mock2ProviderRequestDictionaryCalled && !mock1ProviderRequestDictionaryCalled)
+		{
+			result = ErrorNeitherCalled;
+		}
+		
+		FreeDictionary(dict);
 
-        mock1ProviderRequestDictionaryCalled = false;
-        mock2ProviderRequestDictionaryCalled = false;
+		mock1ProviderRequestDictionaryCalled = false;
+		mock2ProviderRequestDictionaryCalled = false;
 
-        return result;
-    }
+		return result;
+	}
 };
 
 struct EnchantBrokerFileSetOrdering_TestFixture: EnchantBrokerSetOrdering_TestFixture
 {
-    std::string _tempPath;
+	std::string _tempPath;
 
-    EnchantBrokerFileSetOrdering_TestFixture()
-    {
-        if(_broker){ // this is now freed so that individual tests can set up the file state they
-                     // need before calling         _broker = enchant_broker_init ();
-            enchant_broker_free (_broker);
-            _broker = NULL;
-        }
-        _tempPath = GetTemporaryFilename("");
-    }
+	EnchantBrokerFileSetOrdering_TestFixture()
+	{
+		if(_broker){ // this is now freed so that individual tests can set up the file state they
+					 // need before calling         _broker = enchant_broker_init ();
+			enchant_broker_free (_broker);
+			_broker = NULL;
+		}
+		_tempPath = GetTemporaryFilename("");
+	}
 
-    ~EnchantBrokerFileSetOrdering_TestFixture()
-    {
-        DeleteDirAndFiles(_tempPath);
-    }
+	~EnchantBrokerFileSetOrdering_TestFixture()
+	{
+		DeleteDirAndFiles(_tempPath);
+	}
 
-    static void WriteStringToOrderingFile(const std::string& path, const std::string& contents)
-    {
-        CreateDirectory(path);
-        std::ofstream file(AddToPath(path, "enchant.ordering").c_str());
-        file << contents;
-    }
+	static void WriteStringToOrderingFile(const std::string& path, const std::string& contents)
+	{
+		CreateDirectory(path);
+		std::ofstream file(AddToPath(path, "enchant.ordering").c_str());
+		file << contents;
+	}
 
 };
 
@@ -154,41 +154,41 @@ struct EnchantBrokerFileSetOrdering_TestFixture: EnchantBrokerSetOrdering_TestFi
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_AsteriskForLanguage_SetsDefaultOrdering)
+			 EnchantBrokerSetOrdering_AsteriskForLanguage_SetsDefaultOrdering)
 {
-    enchant_broker_set_ordering(_broker, "*", "mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "*", "mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 
-    enchant_broker_set_ordering(_broker, "*", "mock1,mock2");
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "*", "mock1,mock2");
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_NoSpaces)
+			 EnchantBrokerSetOrdering_NoSpaces)
 {
-    enchant_broker_set_ordering(_broker, "qaa", "mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "qaa", "mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_WhitespaceAroundProvider)
+			 EnchantBrokerSetOrdering_WhitespaceAroundProvider)
 {
-    enchant_broker_set_ordering(_broker, "qaa", "\n\f\t\r mock2\n \f\t\r,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "qaa", "\n\f\t\r mock2\n \f\t\r,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_WhitespaceAroundProviderAfterComma)
+			 EnchantBrokerSetOrdering_WhitespaceAroundProviderAfterComma)
 {
-    enchant_broker_set_ordering(_broker, "qaa", "aspell,\n\f\t \rmock2\n\f \r\t,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "qaa", "aspell,\n\f\t \rmock2\n\f \r\t,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 /* Vertical tab is not considered to be whitespace in glib!
-    See bug# 59388 http://bugzilla.gnome.org/show_bug.cgi?id=59388
+	See bug# 59388 http://bugzilla.gnome.org/show_bug.cgi?id=59388
 */
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_VerticalTabSurroundingProvider_NotRemoved)
+			 EnchantBrokerSetOrdering_VerticalTabSurroundingProvider_NotRemoved)
 {
   enchant_broker_set_ordering(_broker, "qaa", "\vmock2,mock1");
   CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("qaa"));
@@ -205,35 +205,35 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_SpecificLanguage_SetsOrderingForSpecific)
+			 EnchantBrokerSetOrdering_SpecificLanguage_SetsOrderingForSpecific)
 {
-    enchant_broker_set_ordering(_broker, "qaa", "mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "qaa", "mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 
-    enchant_broker_set_ordering(_broker, "qaa", "mock1,mock2");
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "qaa", "mock1,mock2");
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_UnknownProvider_Ignored)
+			 EnchantBrokerSetOrdering_UnknownProvider_Ignored)
 {
-    enchant_broker_set_ordering(_broker, "qaa", "unknown,mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "qaa", "unknown,mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_WhitespaceSurroundingLanguageTag_Removed)
+			 EnchantBrokerSetOrdering_WhitespaceSurroundingLanguageTag_Removed)
 {
-    enchant_broker_set_ordering(_broker, "\n\r qaa \t\f", "mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "\n\r qaa \t\f", "mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 /* Vertical tab is not considered to be whitespace in glib!
-    See bug# 59388 http://bugzilla.gnome.org/show_bug.cgi?id=59388
+	See bug# 59388 http://bugzilla.gnome.org/show_bug.cgi?id=59388
 */
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_VerticalTabPreceedingLanguageTag_NotRemoved)
+			 EnchantBrokerSetOrdering_VerticalTabPreceedingLanguageTag_NotRemoved)
 {
   enchant_broker_set_ordering(_broker, "*", "mock1,mock2");
   enchant_broker_set_ordering(_broker, "\vqaa", "mock2,mock1");
@@ -241,10 +241,10 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 }
 
 /* Vertical tab is not considered to be whitespace in glib!
-    See bug# 59388 http://bugzilla.gnome.org/show_bug.cgi?id=59388
+	See bug# 59388 http://bugzilla.gnome.org/show_bug.cgi?id=59388
 */
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_VerticalTabFollowingLanguageTag_NotRemoved)
+			 EnchantBrokerSetOrdering_VerticalTabFollowingLanguageTag_NotRemoved)
 {
   enchant_broker_set_ordering(_broker, "*", "mock1,mock2");
   enchant_broker_set_ordering(_broker, "qaa\v", "mock2,mock1");
@@ -252,42 +252,42 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_AtSignInLanguageTag_RemovesToTail)
+			 EnchantBrokerSetOrdering_AtSignInLanguageTag_RemovesToTail)
 {
-    enchant_broker_set_ordering(_broker, "en_GB@euro", "mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	enchant_broker_set_ordering(_broker, "en_GB@euro", "mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerDictExists_PeriodInLanguageTag_RemovesToTail)
+			 EnchantBrokerDictExists_PeriodInLanguageTag_RemovesToTail)
 {
-    enchant_broker_set_ordering(_broker, "en_GB.UTF-8", "unknown,mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	enchant_broker_set_ordering(_broker, "en_GB.UTF-8", "unknown,mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_HyphensInLanguageTag_SubstitutedWithUnderscore)
+			 EnchantBrokerSetOrdering_HyphensInLanguageTag_SubstitutedWithUnderscore)
 {
-    enchant_broker_set_ordering(_broker, "en-GB", "mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	enchant_broker_set_ordering(_broker, "en-GB", "mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_DifferentCaseInLanguageTag_SubstitutedWithCorrectCase)
+			 EnchantBrokerSetOrdering_DifferentCaseInLanguageTag_SubstitutedWithCorrectCase)
 {
-    enchant_broker_set_ordering(_broker, "EN-gb", "mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	enchant_broker_set_ordering(_broker, "EN-gb", "mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_DifferentCaseInLanguageTagNoRegion_SubstitutedWithCorrectCase)
+			 EnchantBrokerSetOrdering_DifferentCaseInLanguageTagNoRegion_SubstitutedWithCorrectCase)
 {
-    enchant_broker_set_ordering(_broker, "QAA", "mock2,mock1");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "QAA", "mock2,mock1");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-             EnchantBrokerSetOrdering_HasPreviousError_ErrorCleared)
+			 EnchantBrokerSetOrdering_HasPreviousError_ErrorCleared)
 {
   SetErrorOnMockProvider("something bad happened");
 
@@ -299,47 +299,47 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_NullBroker_DoNothing)
+			 EnchantBrokerSetOrdering_NullBroker_DoNothing)
 {
-    enchant_broker_set_ordering(_broker, "qaa", "mock2,mock1");
-    enchant_broker_set_ordering(NULL, "qaa", "mock1,mock2");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "qaa", "mock2,mock1");
+	enchant_broker_set_ordering(NULL, "qaa", "mock1,mock2");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_NullLanguageTag_DoNothing)
+			 EnchantBrokerSetOrdering_NullLanguageTag_DoNothing)
 {
-    enchant_broker_set_ordering(_broker, "*", "mock2,mock1");
-    enchant_broker_set_ordering(_broker, NULL, "mock1,mock2");
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	enchant_broker_set_ordering(_broker, "*", "mock2,mock1");
+	enchant_broker_set_ordering(_broker, NULL, "mock1,mock2");
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_EmptyAfterNormalization_DoNothing)
+			 EnchantBrokerSetOrdering_EmptyAfterNormalization_DoNothing)
 {
-    testResults_;
-    enchant_broker_set_ordering(_broker, "  @  ", "mock1,mock2");
+	testResults_;
+	enchant_broker_set_ordering(_broker, "  @  ", "mock1,mock2");
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_EmptyLanguageTag_DoNothing)
+			 EnchantBrokerSetOrdering_EmptyLanguageTag_DoNothing)
 {
-    testResults_;
-    enchant_broker_set_ordering(_broker, "", "aspell,myspell,ispell");
+	testResults_;
+	enchant_broker_set_ordering(_broker, "", "aspell,myspell,ispell");
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_NullOrdering_DoNothing)
+			 EnchantBrokerSetOrdering_NullOrdering_DoNothing)
 {
-    testResults_;
-    enchant_broker_set_ordering(_broker, "en_GB", NULL);
+	testResults_;
+	enchant_broker_set_ordering(_broker, "en_GB", NULL);
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-             EnchantBrokerSetOrdering_EmptyOrdering_DoNothing)
+			 EnchantBrokerSetOrdering_EmptyOrdering_DoNothing)
 {
-    testResults_;
-    enchant_broker_set_ordering(_broker, "en_GB", "");
+	testResults_;
+	enchant_broker_set_ordering(_broker, "en_GB", "");
 }
 
 
@@ -370,163 +370,143 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrderingMock1ThenMock2_DefaultConfigDirectory)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2");
-     InitializeBroker();
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2");
+	 InitializeBroker();
 
-     CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	 CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrderingMock2ThenMock1_DefaultConfigDirectory)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1");
-     InitializeBroker();
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1");
+	 InitializeBroker();
 
-     CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	 CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrderingMock1ThenMock2_UserOverriddenConfigDirectory)
 {
-    WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
-    SetUserRegistryConfigDir(_tempPath);
-     InitializeBroker();
+	WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
+	SetUserRegistryConfigDir(_tempPath);
+	InitializeBroker();
 
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrderingMock2ThenMock1_UserOverriddenConfigDirectory)
 {
-    WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
-    SetUserRegistryConfigDir(_tempPath);
-     InitializeBroker();
+	WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
+	SetUserRegistryConfigDir(_tempPath);
+	InitializeBroker();
 
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrderingMock1ThenMock2_MachineOverriddenConfigDirectory)
 {
-    WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
-    SetMachineRegistryConfigDir(_tempPath);
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
+	SetMachineRegistryConfigDir(_tempPath);
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrderingMock2ThenMock1_MachineOverriddenConfigDirectory)
 {
-    WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
-    SetMachineRegistryConfigDir(_tempPath);
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
-}
-
-TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
- EnchantBrokerFileOrderingMock1ThenMock2_HomeDirectory)
-{
-    WriteStringToOrderingFile(AddToPath(_tempPath,".enchant"), "en_GB:mock1,mock2");
-    SetRegistryHomeDir(_tempPath);
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
-}
-
-TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
- EnchantBrokerFileOrderingMock2ThenMock1_HomeDirectory)
-{
-    WriteStringToOrderingFile(AddToPath(_tempPath,".enchant"), "en_GB:mock2,mock1");
-    SetRegistryHomeDir(_tempPath);
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
+	SetMachineRegistryConfigDir(_tempPath);
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 // if config registry "" global from share/enchant
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_OverriddenConfigDirectoryIsBlank_UsesSettingsFromDefaultConfigDirectory_Mock1Then2)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2");
-    SetUserRegistryConfigDir("");
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2");
+	SetMachineRegistryConfigDir("");
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_OverriddenConfigDirectoryIsBlank_UsesSettingsFromDefaultConfigDirectory_Mock2Then1)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1");
-    SetUserRegistryConfigDir("");
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1");
+	SetMachineRegistryConfigDir("");
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_ExtraSpacesAndTabs_Mock1Then2)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"\t en_GB\f \t:\r\t mock1\t , \tmock2\t ");
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"\t en_GB\f \t:\r\t mock1\t , \tmock2\t ");
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_ExtraSpaces_Mock2Then1)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir()," \ten_GB\t \f:\r \tmock2 \t,\t mock1 \t");
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	WriteStringToOrderingFile(GetEnchantConfigDir()," \ten_GB\t \f:\r \tmock2 \t,\t mock1 \t");
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_ExtraNewLines_Mock1Then2)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"\nen_GB:mock1,mock2\n\nqaa:mock2,mock1\n*:mock2\n");
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"\nen_GB:mock1,mock2\n\nqaa:mock2,mock1\n*:mock2\n");
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_ExtraNewLines_Mock2Then1)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"\nen_GB:mock2,mock1\n\nqaa:mock2,mock1\n*:mock2\n");
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"\nen_GB:mock2,mock1\n\nqaa:mock2,mock1\n*:mock2\n");
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_HomeAndGlobal_HomeMergedWithGlobal_HomeTakesPrecedence_Mock1Then2)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1\nqaa:mock1,mock2");
-    WriteStringToOrderingFile(AddToPath(_tempPath,".enchant"), "en_GB:mock1,mock2");
-    SetRegistryHomeDir(_tempPath);
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1\nqaa:mock1,mock2");
+	WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
+	SetUserRegistryConfigDir(_tempPath);
 
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("qaa"));
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_HomeAndGlobal_HomeMergedWithGlobal_HomeTakesPrecedence_Mock2Then1)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2\nqaa:mock2,mock1");
-    WriteStringToOrderingFile(AddToPath(_tempPath,".enchant"), "en_GB:mock2,mock1");
-    SetRegistryHomeDir(_tempPath);
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2\nqaa:mock2,mock1");
+	WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
+	SetUserRegistryConfigDir(_tempPath);
 
-     InitializeBroker();
-    
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
+	InitializeBroker();
+	
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -534,64 +514,64 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_EmptyFile)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"");
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"");
 
-     InitializeBroker();
+	InitializeBroker();
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_NoLanguageTag)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),":mock1,mock2");
+	WriteStringToOrderingFile(GetEnchantConfigDir(),":mock1,mock2");
 
-     InitializeBroker();
+	InitializeBroker();
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_NoColon)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB  mock1,mock2");
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB  mock1,mock2");
 
-     InitializeBroker();
+	InitializeBroker();
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_NoProviders_DoesNotOverridePreviousOrdering_Mock1Then2)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:");
-    WriteStringToOrderingFile(AddToPath(_tempPath,".enchant"), "en_GB:mock1,mock2");
-    SetRegistryHomeDir(_tempPath);
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:");
+	WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
+	SetUserRegistryConfigDir(_tempPath);
 
-     InitializeBroker();
+	InitializeBroker();
 
-    CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_NoProviders_DoesNotOverridePreviousOrdering_Mock2Then1)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:");
-    WriteStringToOrderingFile(AddToPath(_tempPath,".enchant"), "en_GB:mock2,mock1");
-    SetRegistryHomeDir(_tempPath);
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:");
+	WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
+	SetUserRegistryConfigDir(_tempPath);
 
-     InitializeBroker();
-    CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	InitializeBroker();
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrdering_ListedTwice_LastTakesPrecedence_Mock1ThenMock2)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1\nen_GB:mock1,mock2");
-     InitializeBroker();
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1\nen_GB:mock1,mock2");
+	 InitializeBroker();
 
-     CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	 CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrdering_ListedTwice_LastTakesPrecedence_Mock2ThenMock1)
 {
-    WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2\nen_GB:mock2,mock1");
-     InitializeBroker();
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2\nen_GB:mock2,mock1");
+	InitializeBroker();
 
-     CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }

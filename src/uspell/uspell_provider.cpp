@@ -220,14 +220,14 @@ s_buildHashNames (std::vector<std::string> & names, const char * tag)
 
 	if (mapIndex < n_mappings) {
 
-		char * tmp, * private_dir, * home_dir, * uspell_prefix;
+		char * tmp, * private_dir, * config_dir, * uspell_prefix;
 		
 		char * dict = mapping[mapIndex].language_tag;
 
-		home_dir = enchant_get_user_home_dir ();
+		config_dir = enchant_get_user_config_dir ();
 		
-		if (home_dir) {
-			private_dir = g_build_filename (home_dir, ".enchant", 
+		if (config_dir) {
+			private_dir = g_build_filename (config_dir,
 							"uspell", NULL);
 			
 			tmp = g_build_filename (private_dir, dict, NULL);
@@ -235,7 +235,7 @@ s_buildHashNames (std::vector<std::string> & names, const char * tag)
 			g_free (tmp);
 			
 			g_free (private_dir);
-			g_free (home_dir);
+			g_free (config_dir);
 		}
 		
 		uspell_prefix = uspell_checker_get_prefix ();
@@ -281,7 +281,7 @@ uspell_request_dict (const char * base, const char * mapping, const int flags)
 static uSpell *
 uspell_request_manager (const char * private_dir, size_t mapIndex)
 {
-	char * uspell_prefix, * home_dir;
+	char * uspell_prefix, * config_dir;
 
 	uSpell * manager = NULL;
 
@@ -302,13 +302,13 @@ uspell_request_manager (const char * private_dir, size_t mapIndex)
 
 	if (!manager) return NULL;
 	// look for a supplementary private dictionary
-	home_dir = enchant_get_user_home_dir ();
-	if (home_dir) {
+	config_dir = enchant_get_user_config_dir ();
+	if (config_dir) {
 		gchar * auxFileName, * transPart;
 		transPart = g_strconcat (mapping[mapIndex].language_tag, ".dic", NULL);
-		auxFileName = g_build_filename (home_dir, ".enchant", transPart, NULL);
+		auxFileName = g_build_filename (config_dir, transPart, NULL);
 		g_free (transPart);
-		g_free (home_dir);
+		g_free (config_dir);
 
 		(void) manager->assimilateFile (auxFileName);
 		g_free (auxFileName);
@@ -323,14 +323,14 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	uSpell *manager = NULL;
 	int mapIndex;
 
-	char * private_dir = NULL, * home_dir;
+	char * private_dir = NULL, * config_dir;
 
-	home_dir = enchant_get_user_home_dir ();
+	config_dir = enchant_get_user_config_dir ();
 
-	if (home_dir) {
-		private_dir = g_build_filename (home_dir, ".enchant",
+	if (config_dir) {
+		private_dir = g_build_filename (config_dir,
 						"uspell", NULL);
-		g_free (home_dir);
+		g_free (config_dir);
 	}
 
 	for (mapIndex = 0; mapIndex < n_mappings; mapIndex++) {

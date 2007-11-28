@@ -24,55 +24,62 @@
 #include <enchant-provider.h>
 
 /**
- * enchant_get_user_home_dir
+ * enchant_get_user_config_dir
  *
- * Returns: the user's home directory, or %null. Returned value
+ * Returns: the user's enchant directory, or %null. Returned value
  * must be free'd.
+ *
+ * The enchant directory is the place where enchant finds user providers and 
+ * dictionaries and settings related to enchant
  *
  * This API is private to the providers.
  */
 
 /*
- * The user's home directory on windows can be overridden using the registry
- * setting HKEY_CURRENT_USER\Software\Enchant\Config\Home_Dir
+ * The user's config directory on windows can be overridden using the registry
+ * setting HKEY_CURRENT_USER\Software\Enchant\Config\Data_Dir
  */
 #ifdef _WIN32
 TEST_FIXTURE(EnchantTestFixture, 
-             GetUserHomeDir_FromRegistry)
+             GetUserConfigDir_FromRegistry)
 {
-  std::string homeDir("here I am");
-  SetRegistryHomeDir(homeDir);
+  std::string configDir("here I am");
+  SetUserRegistryConfigDir(configDir);
 
-  char * enchantUserHomeDir = enchant_get_user_home_dir();
+  char * enchantUserConfigDir = enchant_get_user_config_dir();
 
-  CHECK(enchantUserHomeDir);
-  CHECK_EQUAL(homeDir, enchantUserHomeDir);
+  CHECK(enchantUserConfigDir);
+  CHECK_EQUAL(configDir, enchantUserConfigDir);
 
-  g_free(enchantUserHomeDir);
+  g_free(enchantUserConfigDir);
 }
 
 TEST_FIXTURE(EnchantTestFixture, 
-             GetUserHomeDir_BlankFromRegistry_RegistryEntryIgnored)
+             GetUserConfigDir_BlankFromRegistry_RegistryEntryIgnored)
 {
-  std::string homeDir("");
-  SetRegistryHomeDir(homeDir);
+  std::string configDir("");
+  SetUserRegistryConfigDir(configDir);
 
-  char * enchantUserHomeDir = enchant_get_user_home_dir();
+  char * enchantUserConfigDir = enchant_get_user_config_dir();
 
-  CHECK(enchantUserHomeDir);
-  CHECK_EQUAL(g_get_home_dir(), enchantUserHomeDir);
+  CHECK(enchantUserConfigDir);
+  
+  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), enchantUserConfigDir);
 
-  g_free(enchantUserHomeDir);
+  g_free(enchantUserConfigDir);
 }
 #endif
 
 TEST_FIXTURE(EnchantTestFixture,
-             GetUserHomeDir)
+             GetUserConfigDir)
 {
-  char * enchantUserHomeDir = enchant_get_user_home_dir();
+  char * enchantUserConfigDir = enchant_get_user_config_dir();
 
-  CHECK(enchantUserHomeDir);
-  CHECK_EQUAL(g_get_home_dir(), enchantUserHomeDir);
-
-  g_free(enchantUserHomeDir);
+  CHECK(enchantUserConfigDir);
+#ifdef _WIN32
+  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), enchantUserConfigDir);
+#else
+  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_home_dir()), enchantUserConfigDir);
+#endif
+  g_free(enchantUserConfigDir);
 }

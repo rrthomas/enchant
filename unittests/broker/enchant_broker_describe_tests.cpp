@@ -74,6 +74,7 @@ struct EnchantBrokerNoProvidersTestFixture : EnchantTestFixture
 #ifdef _WIN32
         SetRegistryHomeDir("someplace_that_does_not_exist");
         SetUserRegistryModuleDir("someplace_that_does_not_exist");
+        SetUserRegistryConfigDir("someplace_that_does_not_exist");
 #endif
     _broker = enchant_broker_init ();
     }
@@ -207,9 +208,11 @@ struct EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture : Enchan
 /*
  * Providers are discovered by probing first in the .enchant directory 
  * in the user's home directory. 
+ * [on windows in the enchant directory in the user's Application Data
+ *   directory]
  * 
- * The user's home directory on windows can be overridden using the registry
- * setting HKEY_CURRENT_USER\Software\Enchant\Config\Home_Dir
+ * The user's provider directory on windows can be overridden using the registry
+ * setting HKEY_CURRENT_USER\Software\Enchant\Config\Data_Dir
  * 
  * Then from the module directory (that libenchant is in).
  *
