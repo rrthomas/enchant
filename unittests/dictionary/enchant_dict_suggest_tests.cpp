@@ -292,6 +292,16 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo"), suggestions, std::min((size_t)4,cSuggestions));
 }
 
+TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
+             EnchantDictionarySuggest_SuggestionExcluded_Null)
+{
+    suggestBehavior = returnFianceNfc;
+    RemoveWordFromDictionary(Convert(L"fianc\xe9"));  // u00e9 = Latin small letter e with acute
+
+    _suggestions = enchant_dict_suggest(_dict, "fiance", -1, NULL);
+    CHECK(!_suggestions);
+}
+
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture, 
              EnchantDictionarySuggest_HasPreviousError_ErrorCleared)
 {

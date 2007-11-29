@@ -799,6 +799,11 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			n_suggs = enchant_dict_merge_suggestions(dict, 
 								 suggs, n_suggs, 
 								 pwl_suggs, n_pwl_suggs);
+            if(n_suggs == 0)
+            {
+                g_free(suggs);
+                suggs = NULL;
+            }
 		}
 	else 
 		{
