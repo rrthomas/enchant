@@ -107,6 +107,7 @@ struct str_enchant_pwl
 {
 	EnchantTrie* trie;
 	char * filename;
+    time_t file_changed;
 	GHashTable *words_in_trie;
 };
 
@@ -167,7 +168,7 @@ typedef struct str_enchant_sugg_list
 
 static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 					const char *const word, size_t len);
-
+static void enchant_pwl_refresh_from_file(EnchantPWL* pwl);
 static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher);
 static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher);
 static EnchantTrie* enchant_trie_init(void);
@@ -237,14 +238,13 @@ EnchantPWL* enchant_pwl_init(void)
 #endif
 
 /**
- * enchant_pwl_init
+ * enchant_pwl_init_with_file
  *
  * Returns: a new PWL object used to store/check/suggest words
  * or NULL if the file cannot be opened or created
  */ 
 EnchantPWL* enchant_pwl_init_with_file(const char * file)
 {
-	FILE *f;
 	int fd;
 	EnchantPWL *pwl;
 
@@ -255,60 +255,79 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 		{
 			return NULL;
 		}
-
+    close(fd);
 	pwl = enchant_pwl_init();
 	pwl->filename = g_strdup(file);
-	
-	f = fdopen(fd, "r");
-	if (f) 
-		{
-			char buffer[BUFSIZ];
-			char* line;
-			size_t line_number = 1;
-			
-			enchant_lock_file (f);
-			
-			for (;NULL != (fgets (buffer, sizeof (buffer), f));++line_number)
-				{
-					const gunichar BOM = 0xfeff;
-					size_t l;
+    pwl->file_changed = 0;
 
-					line = buffer;
-					if(line_number == 1 && BOM == g_utf8_get_char(line))
-						line = g_utf8_next_char(line);
-		
-					l = strlen(line)-1;
-					if (line[l]=='\n') 
-						line[l] = '\0';
-                    else if(!feof(f)) /* ignore lines longer than BUFSIZ. */ 
-                        {
-                            g_warning ("Line too long (ignored) in %s at line:%u\n", pwl->filename, line_number);
-	                        while (NULL != (fgets (buffer, sizeof (buffer), f)))
-                                {
-			                        if (line[strlen(buffer)-1]=='\n') 
-				                        break;
-                                }
-                            continue;
-                        }
-								
-					if( line[0] != '#')
-						{
-							if(g_utf8_validate(line, -1, NULL))
-								enchant_pwl_add_to_trie(pwl, line, strlen(line));
-							else
-								g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
-						}
-				}
-			
-			enchant_unlock_file (f);
-			fclose (f);
-		}
-	else 
-		{
-			close(fd);
-		}
-
+    enchant_pwl_refresh_from_file(pwl);
 	return pwl;
+}
+
+static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
+{
+	char buffer[BUFSIZ];
+	char* line;
+	size_t line_number = 1;
+	FILE *f;
+    struct stat stats;
+
+    if(!pwl->filename)
+        return;
+
+    if(g_stat(pwl->filename, &stats)!=0)
+        return;    /*presumably I won't be able to open the file either*/
+    
+    if(pwl->file_changed == stats.st_mtime)
+        return;  /*nothing changed since last read*/
+
+	enchant_trie_free(pwl->trie);
+    pwl->trie = NULL;
+  	g_hash_table_destroy (pwl->words_in_trie);
+    pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+
+    f = g_fopen(pwl->filename, "r");
+	if (!f) 
+        return;
+
+    pwl->file_changed = stats.st_mtime;
+
+	enchant_lock_file (f);
+	
+	for (;NULL != (fgets (buffer, sizeof (buffer), f));++line_number)
+		{
+			const gunichar BOM = 0xfeff;
+			size_t l;
+
+			line = buffer;
+			if(line_number == 1 && BOM == g_utf8_get_char(line))
+				line = g_utf8_next_char(line);
+
+			l = strlen(line)-1;
+			if (line[l]=='\n') 
+				line[l] = '\0';
+            else if(!feof(f)) /* ignore lines longer than BUFSIZ. */ 
+                {
+                    g_warning ("Line too long (ignored) in %s at line:%u\n", pwl->filename, line_number);
+                    while (NULL != (fgets (buffer, sizeof (buffer), f)))
+                        {
+	                        if (line[strlen(buffer)-1]=='\n') 
+		                        break;
+                        }
+                    continue;
+                }
+						
+			if( line[0] != '#')
+				{
+					if(g_utf8_validate(line, -1, NULL))
+						enchant_pwl_add_to_trie(pwl, line, strlen(line));
+					else
+						g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
+				}
+		}
+	
+	enchant_unlock_file (f);
+	fclose (f);
 }
 
 void enchant_pwl_free(EnchantPWL *pwl)
@@ -353,7 +372,9 @@ static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
 void enchant_pwl_add(EnchantPWL *pwl,
 			 const char *const word, size_t len)
 {
-	enchant_pwl_add_to_trie(pwl, word, len);
+    enchant_pwl_refresh_from_file(pwl);
+
+    enchant_pwl_add_to_trie(pwl, word, len);
 
 	if (pwl->filename != NULL)
 	{
@@ -362,7 +383,12 @@ void enchant_pwl_add(EnchantPWL *pwl,
 		f = g_fopen(pwl->filename, "a");
 		if (f)
 			{
-				enchant_lock_file (f);
+                struct stat stats;
+
+                enchant_lock_file (f);
+                if(g_stat(pwl->filename, &stats)==0)
+                    pwl->file_changed = stats.st_mtime;
+
 				fwrite (word, sizeof(char), len, f);
 				fwrite ("\n", sizeof(char), 1, f);
 				enchant_unlock_file (f);
@@ -377,7 +403,9 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 	if(enchant_pwl_check(pwl, word, len) == 1)
 		return;
 
-	enchant_pwl_remove_from_trie(pwl, word, len);
+    enchant_pwl_refresh_from_file(pwl);
+
+    enchant_pwl_remove_from_trie(pwl, word, len);
 
 	if (pwl->filename)
 		{
@@ -395,6 +423,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 					const gunichar BOM = 0xfeff;
 					char * filestart, *searchstart, *needle;
 					char * key;
+                    struct stat stats;
 
 					enchant_lock_file (f);
 					key = g_strndup(word, len);
@@ -435,6 +464,9 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 								}
 						}
 					g_free(key);
+                    
+                    if(g_stat(pwl->filename, &stats)==0)
+                        pwl->file_changed = stats.st_mtime;
 
 					enchant_unlock_file (f);
 
@@ -540,6 +572,8 @@ int enchant_pwl_check(EnchantPWL *pwl, const char *const word, size_t len)
 	int exists = 0;
 	int isAllCaps = 0;
 
+    enchant_pwl_refresh_from_file(pwl);
+
 	exists = enchant_pwl_contains(pwl, word, len);
 	
 	if(exists)
@@ -616,6 +650,8 @@ char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
 {
 	EnchantTrieMatcher* matcher;
 	EnchantSuggList sugg_list;
+
+    enchant_pwl_refresh_from_file(pwl);
 
 	sugg_list.suggs = g_new0(char*,ENCHANT_PWL_MAX_SUGGS+1);
 	sugg_list.sugg_errs = g_new0(int,ENCHANT_PWL_MAX_SUGGS);

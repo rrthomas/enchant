@@ -252,6 +252,9 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     static void ExternalAddWordToFile(const std::string& word, const std::string& filename)
     {
+        Sleep(1000); // FAT systems have a 2 second resolution
+                     // NTFS is appreciably faster but no specs on what it is exactly
+                     // c runtime library's time_t has a 1 second resolution
         FILE * f = g_fopen(filename.c_str(), "at");
 		if(f)
 		{
@@ -263,6 +266,9 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
 	void ExternalAddWordsToDictionary(const std::vector<const std::string>& sWords)
     {
+        Sleep(1000); // FAT systems have a 2 second resolution
+                     // NTFS is appreciably faster but no specs on what it is exactly
+                     // c runtime library's time_t has a 1 second resolution
         FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
 		if(f) 
 		{

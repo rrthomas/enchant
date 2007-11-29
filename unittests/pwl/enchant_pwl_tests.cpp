@@ -25,6 +25,8 @@
 
 #include "../EnchantDictionaryTestFixture.h"
 
+#include <algorithm>
+
 struct EnchantPwl_TestFixture : EnchantDictionaryTestFixture
 {
     //Setup
@@ -32,6 +34,62 @@ struct EnchantPwl_TestFixture : EnchantDictionaryTestFixture
         EnchantDictionaryTestFixture(EmptyDictionary_ProviderConfiguration, languageTag)
     { }
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// External File change
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_DictionaryChangedExternally_Successful)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  ExternalAddWordsToDictionary(sWords);
+
+  for(std::vector<const std::string>::const_iterator itWord = sWords.begin(); itWord != sWords.end(); ++itWord){
+    CHECK( IsWordInDictionary(*itWord) );
+  }
+
+  std::vector<const std::string> sNewWords;
+  sNewWords.push_back("potatoe");
+  sNewWords.push_back("grow");
+  sNewWords.push_back("another");
+
+  ExternalAddWordsToDictionary(sNewWords);
+
+  for(std::vector<const std::string>::const_iterator itWord = sNewWords.begin(); itWord != sNewWords.end(); ++itWord){
+    CHECK( IsWordInDictionary(*itWord) );
+    if(!IsWordInDictionary(*itWord)){
+         testResults_.OnTestFailure(UnitTest::TestDetails(m_details, __LINE__), itWord->c_str());
+    }
+  }
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             Suggest_DictionaryChangedExternally_Successful)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  ExternalAddWordsToDictionary(sWords);
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("tat");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // DictionaryBeginsWithBOM

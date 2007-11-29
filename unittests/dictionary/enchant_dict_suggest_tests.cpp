@@ -442,6 +442,8 @@ TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
     ExternalAddWordToExclude("hello");
     ExternalAddWordToDictionary("hello");
 
+    ReloadTestDictionary();
+
     size_t cSuggestions;
     _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
     CHECK(!_suggestions);
