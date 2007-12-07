@@ -889,7 +889,7 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 
 	g_return_if_fail(matcher);
 
-	/* Cant match in the empty trie */
+	/* Can't match in the empty trie */
 	if(trie == NULL) {
 		return;
 	}
@@ -960,19 +960,19 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 
 	g_free(nxtChS);
 
+	matcher->num_errors++;
 	if (matcher->word[matcher->word_pos] != '\0') {
-		matcher->num_errors++;
 		/* Match on inserting word[0] */
 		oldPos = matcher->word_pos;
 		matcher->word_pos = nxtChI;
 		enchant_trie_find_matches(trie,matcher);
 		matcher->word_pos = oldPos;
-		/* for each subtrie, match on delete or swap word[0] */
-		g_hash_table_foreach(trie->subtries,
-					enchant_trie_find_matches_cb,
-					matcher);
-		matcher->num_errors--;
-	}
+    }
+	/* for each subtrie, match on delete or substitute word[0] */
+	g_hash_table_foreach(trie->subtries,
+				enchant_trie_find_matches_cb,
+				matcher);
+	matcher->num_errors--;
 }
 
 static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcherV)
