@@ -1033,7 +1033,27 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Pwl Edit distance bugs
+// Pwl Edit distance
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_SubstituteFirstChar)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");  //1
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("catsup"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("tat");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
 TEST_FIXTURE(EnchantPwl_TestFixture, 
              PwlSuggest_HasProperSubset_SubstituteFirstChar_Insert1)
 {
@@ -1124,6 +1144,124 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
   AddWordToDictionary("catchy"); //4
 
   std::vector<const std::string> suggestions = GetSuggestionsFromWord("ca");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Delete1)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("tape");  //1
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("tapestry"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("tapen");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Delete2)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("tot"); //2
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("totality"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("totil");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Delete3)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat"); //3
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("catcher"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("catsip");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Substitute1)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("small");  //1
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("smallest"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("skall");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Substitute2)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("catch"); //2
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("catcher"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("cafdh");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Substitute3)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("hasten"); //3
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("hastens"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("hasopo");
 
   CHECK_EQUAL(sWords.size(), suggestions.size());
 
