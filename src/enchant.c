@@ -189,31 +189,31 @@ enchant_get_conf_dir (void)
 ENCHANT_MODULE_EXPORT (char *)
 enchant_get_user_config_dir (void)
 {
-    char* user_config;
+	char* user_config;
 
-    char* base_dir = NULL;
+	char* base_dir = NULL;
 
 	user_config = enchant_get_registry_value_ex (1, "Config", "Data_Dir");
 	if (user_config)
 		return user_config;
 
 #ifdef _WIN32
-    base_dir = g_strdup (g_get_user_config_dir());
+	base_dir = g_strdup (g_get_user_config_dir());
 #endif
 
 	if (!base_dir)
 		base_dir = enchant_get_user_home_dir ();
 
-    if(base_dir)
-    {
-        user_config = 	g_build_filename (base_dir,
-						                  ENCHANT_USER_PATH_EXTENSION,
-						                  NULL);
-        g_free(base_dir);
-        return user_config;
-    }
-    else
-        return NULL;
+	if(base_dir)
+	{
+		user_config = 	g_build_filename (base_dir,
+										  ENCHANT_USER_PATH_EXTENSION,
+										  NULL);
+		g_free(base_dir);
+		return user_config;
+	}
+	else
+		return NULL;
 }
 
 
@@ -684,11 +684,11 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	return -1;
 }
 
-/*@suggs must have at least n_suggs + n_new_suggs space allocated
-@n_suggs is the number if items currently appearing in @suggs
-
-returns the number of items in @suggs after merge is complete
-*/
+/* @suggs must have at least n_suggs + n_new_suggs space allocated
+ * @n_suggs is the number if items currently appearing in @suggs
+ *
+ * returns the number of items in @suggs after merge is complete
+ */
 static int
 enchant_dict_merge_suggestions(EnchantDict * dict, 
 								const char ** suggs, 
@@ -703,36 +703,27 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 
 	for(i = 0; i < n_new_suggs; i++)
 		{
-			int copy = 1;
-			size_t sugg_len = strlen(new_suggs[i]);
+			int is_duplicate = 0;
+			char * normalized_new_sugg;
 
-			if (!g_utf8_validate(new_suggs[i], sugg_len, NULL))
-				copy = 0;
-			else if (enchant_session_exclude(session, new_suggs[i], sugg_len))
-				copy = 0;
-			else
+			normalized_new_sugg = g_utf8_normalize (new_suggs[i], -1, G_NORMALIZE_NFD);
+
+			for(j = 0; j < n_suggs; j++) 
 				{
-					char * normalized_new_sugg;
+					char* normalized_sugg;
+					normalized_sugg = g_utf8_normalize (suggs[j], -1, G_NORMALIZE_NFD);
 
-					normalized_new_sugg = g_utf8_normalize (new_suggs[i], sugg_len, G_NORMALIZE_NFD);
-
-					for(j = 0; j < n_suggs; j++) 
+					if(strcmp(normalized_sugg,normalized_new_sugg)==0) 
 						{
-							char* normalized_sugg;
-							normalized_sugg = g_utf8_normalize (suggs[j], -1, G_NORMALIZE_NFD);
-
-							if(strcmp(normalized_sugg,normalized_new_sugg)==0) 
-								{
-									copy = 0; /*duplicate*/
-									g_free(normalized_sugg);
-									break;
-								}
+							is_duplicate = 1;
 							g_free(normalized_sugg);
+							break;
 						}
-					g_free(normalized_new_sugg);
+					g_free(normalized_sugg);
 				}
+			g_free(normalized_new_sugg);
 
-			if(copy)
+			if(!is_duplicate)
 				{
 					suggs[n_suggs] = g_strdup (new_suggs[i]);
 					++n_suggs;
@@ -740,6 +731,39 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 		}
 
 	return n_suggs;
+}
+
+static char **
+enchant_dict_get_good_suggestions(EnchantDict * dict, 
+								const char * const* const suggs, 
+								size_t n_suggs,
+								size_t* out_n_filtered_suggs)
+{
+	EnchantSession * session;
+	size_t i, n_filtered_suggs;
+	char ** filtered_suggs;
+
+	session = (EnchantSession*)dict->enchant_private_data;
+
+	filtered_suggs = g_new0 (char *, n_suggs + 1);
+	n_filtered_suggs = 0;
+
+	for(i = 0; i < n_suggs; i++)
+		{
+			size_t sugg_len = strlen(suggs[i]);
+
+			if(g_utf8_validate(suggs[i], sugg_len, NULL) && 
+			   !enchant_session_exclude(session, suggs[i], sugg_len) )
+				{
+					filtered_suggs[n_filtered_suggs] = g_strdup (suggs[i]);
+					++n_filtered_suggs;
+				}
+		}
+
+	if(out_n_filtered_suggs)
+		*out_n_filtered_suggs = n_filtered_suggs;
+
+	return filtered_suggs;
 }
 
 /**
@@ -759,8 +783,8 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			  ssize_t len, size_t * out_n_suggs)
 {
 	EnchantSession * session;
-	size_t n_suggs = 0, n_dict_suggs = 0, n_pwl_suggs = 0;
-	char **suggs, **dict_suggs = NULL, **pwl_suggs = NULL;
+	size_t n_suggs = 0, n_dict_suggs = 0, n_pwl_suggs = 0, n_suggsT = 0;
+	char **suggs, **dict_suggs = NULL, **pwl_suggs = NULL, **suggsT;
 
 	g_return_val_if_fail (dict, NULL);
 	g_return_val_if_fail (word, NULL);
@@ -773,48 +797,60 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 
 	session = (EnchantSession*)dict->enchant_private_data;
 	enchant_session_clear_error (session);
-	/* Check for suggestions from personal dictionary */
-	if(session->personal)
-			pwl_suggs = enchant_pwl_suggest(session->personal, word, len, &n_pwl_suggs);
-		
 	/* Check for suggestions from provider dictionary */
 	if (dict->suggest) 
 		{
 			dict_suggs = (*dict->suggest) (dict, word, len,	
 							&n_dict_suggs);
+			if(dict_suggs)
+				{
+					suggsT = enchant_dict_get_good_suggestions(dict, dict_suggs, n_dict_suggs, &n_suggsT);
+					enchant_provider_free_string_list (session->provider, dict_suggs);
+					dict_suggs = suggsT;
+					n_dict_suggs = n_suggsT;
+				}
 		}
 
+	/* Check for suggestions from personal dictionary */
+	if(session->personal)
+		{
+			pwl_suggs = enchant_pwl_suggest(session->personal, word, len, dict_suggs, &n_pwl_suggs);
+			if(pwl_suggs)
+				{
+					suggsT = enchant_dict_get_good_suggestions(dict, pwl_suggs, n_pwl_suggs, &n_suggsT);
+					enchant_pwl_free_string_list (session->personal, pwl_suggs);
+					pwl_suggs = suggsT;
+					n_pwl_suggs = n_suggsT;
+				}
+		}	
 	/* Clone suggestions if there are any */
 	n_suggs = n_pwl_suggs + n_dict_suggs;
 	if (n_suggs > 0)
 		{
 			suggs = g_new0 (char *, n_suggs + 1);
 
-			/* Copy over suggestions from dict, if good */
+			/* Copy over suggestions from dict, if no dupes */
 			n_suggs = enchant_dict_merge_suggestions(dict, 
 								 suggs, 0, 
 								 dict_suggs, n_dict_suggs);
 
-			/* Copy over suggestions from pwl, if good and no dupes */
+			/* Copy over suggestions from pwl, if no dupes */
 			n_suggs = enchant_dict_merge_suggestions(dict, 
 								 suggs, n_suggs, 
 								 pwl_suggs, n_pwl_suggs);
-            if(n_suggs == 0)
-            {
-                g_free(suggs);
-                suggs = NULL;
-            }
+			if(n_suggs == 0)
+			{
+				g_free(suggs);
+				suggs = NULL;
+			}
 		}
 	else 
 		{
 			suggs = NULL;
 		}
 	
-	if(dict_suggs)
-			enchant_provider_free_string_list (session->provider, dict_suggs);
-
-	if(pwl_suggs)
-			enchant_pwl_free_string_list(session->personal,pwl_suggs);
+	g_strfreev(dict_suggs);
+	g_strfreev(pwl_suggs);
 
 	if (out_n_suggs)
 		*out_n_suggs = n_suggs;

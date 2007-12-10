@@ -27,6 +27,41 @@
 
 #include <algorithm>
 
+static char **
+DictionarySuggestsSat (EnchantDict * dict, const char *const word, size_t len, size_t * out_n_suggs)
+{
+    *out_n_suggs = 1;
+    char **sugg_arr = NULL;
+
+    sugg_arr = g_new0 (char *, *out_n_suggs + 1);
+    sugg_arr[0] = g_strdup ("sat");
+
+    return sugg_arr;
+}
+
+static EnchantDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
+{
+    
+    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
+    dict->suggest = DictionarySuggestsSat;
+    return dict;
+}
+
+static void DictionarySuggest_ProviderConfiguration (EnchantProvider * me, const char *)
+{
+     me->request_dict = MockProviderRequestSuggestMockDictionary;
+     me->dispose_dict = MockProviderDisposeDictionary;
+     me->free_string_list = MockProviderFreeStringList;
+}
+
+
+struct EnchantPwlWithDictSuggs_TestFixture : EnchantDictionaryTestFixture
+{
+    EnchantPwlWithDictSuggs_TestFixture(const std::string& languageTag="qaa"):
+        EnchantDictionaryTestFixture(DictionarySuggest_ProviderConfiguration, languageTag)
+    { }
+};
+
 struct EnchantPwl_TestFixture : EnchantDictionaryTestFixture
 {
     //Setup
@@ -34,6 +69,65 @@ struct EnchantPwl_TestFixture : EnchantDictionaryTestFixture
         EnchantDictionaryTestFixture(EmptyDictionary_ProviderConfiguration, languageTag)
     { }
 };
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             GetSuggestionsFromWord_MultipleSuggestions_ReturnsOnlyClosest)
+{
+  std::vector<const std::string> sNoiseWords;
+  sNoiseWords.push_back("spat");
+  sNoiseWords.push_back("tots");
+  sNoiseWords.push_back("tater");
+  sNoiseWords.push_back("ton");
+  sNoiseWords.push_back("gnat");
+
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  AddWordsToDictionary(sWords);
+  AddWordsToDictionary(sNoiseWords);
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("tat");
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+  
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwlWithDictSuggs_TestFixture,
+             GetSuggestionsFromWord_MultipleSuggestions_ReturnsOnlyAsCloseAsDict)
+{
+  std::vector<const std::string> sNoiseWords;
+  sNoiseWords.push_back("spat");
+  sNoiseWords.push_back("tots");
+  sNoiseWords.push_back("tater");
+  sNoiseWords.push_back("ton");
+  sNoiseWords.push_back("gnat");
+
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  AddWordsToDictionary(sWords);
+  AddWordsToDictionary(sNoiseWords);
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("tat");
+  sWords.push_back("sat");
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // External File change
@@ -148,6 +242,34 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 		CHECK_EQUAL(puaWord, suggestions[0]);
 	}
 }
+
+// Word which is prefix of another gets edit distance which is one less. 
+// This means it moves to the top of the list normally but once we only bring
+// back the best matches, it means the rest of the mathes aren't returned
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_EditDistanceOnWordWhichIsPrefixOfAnother)
+{
+  std::vector<const std::string> sNoiseWords;
+  sNoiseWords.push_back("hastens"); //4
+
+  std::vector<const std::string> sWords;
+  sWords.push_back("cashes"); //3
+  sWords.push_back("hasten"); //3
+  sWords.push_back("washes"); //3
+
+  AddWordsToDictionary(sWords);
+  AddWordsToDictionary(sNoiseWords);
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("saskep");
+  CHECK(suggestions[0] != "hasten");
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // Commented Lines ignored

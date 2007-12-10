@@ -107,7 +107,7 @@ struct str_enchant_pwl
 {
 	EnchantTrie* trie;
 	char * filename;
-    time_t file_changed;
+	time_t file_changed;
 	GHashTable *words_in_trie;
 };
 
@@ -255,12 +255,12 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 		{
 			return NULL;
 		}
-    close(fd);
+	close(fd);
 	pwl = enchant_pwl_init();
 	pwl->filename = g_strdup(file);
-    pwl->file_changed = 0;
+	pwl->file_changed = 0;
 
-    enchant_pwl_refresh_from_file(pwl);
+	enchant_pwl_refresh_from_file(pwl);
 	return pwl;
 }
 
@@ -270,27 +270,27 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	char* line;
 	size_t line_number = 1;
 	FILE *f;
-    struct stat stats;
+	struct stat stats;
 
-    if(!pwl->filename)
-        return;
+	if(!pwl->filename)
+		return;
 
-    if(g_stat(pwl->filename, &stats)!=0)
-        return;    /*presumably I won't be able to open the file either*/
-    
-    if(pwl->file_changed == stats.st_mtime)
-        return;  /*nothing changed since last read*/
+	if(g_stat(pwl->filename, &stats)!=0)
+		return;    /*presumably I won't be able to open the file either*/
+	
+	if(pwl->file_changed == stats.st_mtime)
+		return;  /*nothing changed since last read*/
 
 	enchant_trie_free(pwl->trie);
-    pwl->trie = NULL;
-  	g_hash_table_destroy (pwl->words_in_trie);
-    pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	pwl->trie = NULL;
+	g_hash_table_destroy (pwl->words_in_trie);
+	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-    f = g_fopen(pwl->filename, "r");
+	f = g_fopen(pwl->filename, "r");
 	if (!f) 
-        return;
+		return;
 
-    pwl->file_changed = stats.st_mtime;
+	pwl->file_changed = stats.st_mtime;
 
 	enchant_lock_file (f);
 	
@@ -306,16 +306,16 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 			l = strlen(line)-1;
 			if (line[l]=='\n') 
 				line[l] = '\0';
-            else if(!feof(f)) /* ignore lines longer than BUFSIZ. */ 
-                {
-                    g_warning ("Line too long (ignored) in %s at line:%u\n", pwl->filename, line_number);
-                    while (NULL != (fgets (buffer, sizeof (buffer), f)))
-                        {
-	                        if (line[strlen(buffer)-1]=='\n') 
-		                        break;
-                        }
-                    continue;
-                }
+			else if(!feof(f)) /* ignore lines longer than BUFSIZ. */ 
+				{
+					g_warning ("Line too long (ignored) in %s at line:%u\n", pwl->filename, line_number);
+					while (NULL != (fgets (buffer, sizeof (buffer), f)))
+						{
+							if (line[strlen(buffer)-1]=='\n') 
+								break;
+						}
+					continue;
+				}
 						
 			if( line[0] != '#')
 				{
@@ -372,9 +372,9 @@ static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
 void enchant_pwl_add(EnchantPWL *pwl,
 			 const char *const word, size_t len)
 {
-    enchant_pwl_refresh_from_file(pwl);
+	enchant_pwl_refresh_from_file(pwl);
 
-    enchant_pwl_add_to_trie(pwl, word, len);
+	enchant_pwl_add_to_trie(pwl, word, len);
 
 	if (pwl->filename != NULL)
 	{
@@ -383,11 +383,11 @@ void enchant_pwl_add(EnchantPWL *pwl,
 		f = g_fopen(pwl->filename, "a");
 		if (f)
 			{
-                struct stat stats;
+				struct stat stats;
 
-                enchant_lock_file (f);
-                if(g_stat(pwl->filename, &stats)==0)
-                    pwl->file_changed = stats.st_mtime;
+				enchant_lock_file (f);
+				if(g_stat(pwl->filename, &stats)==0)
+					pwl->file_changed = stats.st_mtime;
 
 				fwrite (word, sizeof(char), len, f);
 				fwrite ("\n", sizeof(char), 1, f);
@@ -403,9 +403,9 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 	if(enchant_pwl_check(pwl, word, len) == 1)
 		return;
 
-    enchant_pwl_refresh_from_file(pwl);
+	enchant_pwl_refresh_from_file(pwl);
 
-    enchant_pwl_remove_from_trie(pwl, word, len);
+	enchant_pwl_remove_from_trie(pwl, word, len);
 
 	if (pwl->filename)
 		{
@@ -423,7 +423,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 					const gunichar BOM = 0xfeff;
 					char * filestart, *searchstart, *needle;
 					char * key;
-                    struct stat stats;
+					struct stat stats;
 
 					enchant_lock_file (f);
 					key = g_strndup(word, len);
@@ -464,9 +464,9 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 								}
 						}
 					g_free(key);
-                    
-                    if(g_stat(pwl->filename, &stats)==0)
-                        pwl->file_changed = stats.st_mtime;
+					
+					if(g_stat(pwl->filename, &stats)==0)
+						pwl->file_changed = stats.st_mtime;
 
 					enchant_unlock_file (f);
 
@@ -572,7 +572,7 @@ int enchant_pwl_check(EnchantPWL *pwl, const char *const word, size_t len)
 	int exists = 0;
 	int isAllCaps = 0;
 
-    enchant_pwl_refresh_from_file(pwl);
+	enchant_pwl_refresh_from_file(pwl);
 
 	exists = enchant_pwl_contains(pwl, word, len);
 	
@@ -645,19 +645,55 @@ void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl,
 		}
 }
 
+int best_distance(const char*const*const suggs, const char *const word, size_t len)
+{
+	int best_dist;
+	const char*const* sugg_it;
+	char* normalized_word;
+
+	normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
+	best_dist = g_utf8_strlen(normalized_word, -1);
+
+	if(suggs)
+		{
+			for(sugg_it = suggs; *sugg_it; ++sugg_it)
+				{
+					char* normalized_sugg;
+					int dist;
+
+					normalized_sugg = g_utf8_normalize (*sugg_it, -1, G_NORMALIZE_NFD);
+
+					dist = edit_dist(normalized_word, normalized_sugg);
+					g_free(normalized_sugg);
+					if (dist < best_dist)
+						best_dist = dist;
+				}
+		}
+
+	g_free(normalized_word);
+	return best_dist;
+}
+
+/* gives the best set of suggestions from pwl that are at least as good as the 
+ * given suggs (if suggs == NULL just best from pwl) */
 char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
-			   size_t len, size_t* out_n_suggs)
+			   size_t len, const char*const*const suggs, size_t* out_n_suggs)
 {
 	EnchantTrieMatcher* matcher;
 	EnchantSuggList sugg_list;
+	int max_dist;
 
-    enchant_pwl_refresh_from_file(pwl);
+	max_dist = suggs? best_distance(suggs, word, len) : ENCHANT_PWL_MAX_ERRORS;
+	if(max_dist > ENCHANT_PWL_MAX_ERRORS)
+		max_dist = ENCHANT_PWL_MAX_ERRORS;
+
+	enchant_pwl_refresh_from_file(pwl);
 
 	sugg_list.suggs = g_new0(char*,ENCHANT_PWL_MAX_SUGGS+1);
 	sugg_list.sugg_errs = g_new0(int,ENCHANT_PWL_MAX_SUGGS);
 	sugg_list.n_suggs = 0;
 
-	matcher = enchant_trie_matcher_init(word,len, ENCHANT_PWL_MAX_ERRORS,
+	matcher = enchant_trie_matcher_init(word,len, max_dist,
 						case_insensitive,
 						enchant_pwl_suggest_cb,
 						&sugg_list);
@@ -676,10 +712,15 @@ char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
 static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher)
 {
 	EnchantSuggList* sugg_list;
-	size_t loc, i, shuffleTo;
+	size_t loc, i;
 	int changes = 0;  /* num words added to list */
 
 	sugg_list = (EnchantSuggList*)(matcher->cbdata);
+
+	/* only get best errors so adapt */
+	if(matcher->num_errors < matcher->max_errors)
+		matcher->max_errors = matcher->num_errors;
+
 
 	/* Find appropriate location in the array, if any */
 	/* In future, this could be done using binary search...  */
@@ -702,29 +743,10 @@ static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher)
 
 	changes++;
 	
-	/* Find the location to shuffle other elements up to.
-	 * If the new word already exists, delete it and stuffle up to there
-	 * Otherwise, if we reach max suggs, delete last one
-	 * Otherwise, shuffle up to end of list
-	 */
+	/* Remove all elements with worse score */
 	for(i=loc; i < sugg_list->n_suggs; i++){
-		if(strcmp(match,sugg_list->suggs[i]) == 0) {
-			g_free(sugg_list->suggs[i]);
-			changes--;
-			break;
-		}
-	}
-	if(i == ENCHANT_PWL_MAX_SUGGS) {
-		i--;
-		changes--;
 		g_free(sugg_list->suggs[i]);
-	}
-	shuffleTo = i;
-
-	/* Shuffle other entries along to make space for new one */
-	for(i=shuffleTo; i > loc; i--) {
-		sugg_list->suggs[i] = sugg_list->suggs[i-1];
-		sugg_list->sugg_errs[i] = sugg_list->sugg_errs[i-1];
+		changes--;
 	}
 
 	sugg_list->suggs[loc] = match;
@@ -901,9 +923,11 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 
 	/* If the end of a string has been reached, no point recursing */
 	if (trie == EOSTrie) {
+		size_t word_len = strlen(matcher->word);
 		errs = matcher->num_errors;
-		matcher->num_errors = errs + strlen(matcher->word) \
-						- matcher->word_pos;
+		if(word_len > matcher->word_pos) {
+			matcher->num_errors = errs + word_len - matcher->word_pos;
+		}
 		if (matcher->num_errors <= matcher->max_errors) {
 			matcher->cbfunc(g_strdup(matcher->path),matcher);
 		}
@@ -967,7 +991,7 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 		matcher->word_pos = nxtChI;
 		enchant_trie_find_matches(trie,matcher);
 		matcher->word_pos = oldPos;
-    }
+	}
 	/* for each subtrie, match on delete or substitute word[0] */
 	g_hash_table_foreach(trie->subtries,
 				enchant_trie_find_matches_cb,
