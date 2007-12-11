@@ -75,9 +75,9 @@ ENCHANT_MODULE_EXPORT(char *)
 
 /**
  * EnchantBrokerDescribeFn
- * @provider_name: The provider's identifier, such as "ispell" or "aspell"
- * @provider_desc: A description of the provider, such as "Aspell 0.53"
- * @provider_dll_file: The provider's DLL filename
+ * @provider_name: The provider's identifier, such as "ispell" or "aspell" in UTF8 encoding
+ * @provider_desc: A description of the provider, such as "Aspell 0.53" in UTF8 encoding
+ * @provider_dll_file: The provider's DLL filename in Glib file encoding (UTF8 on Windows)
  * @user_data: Supplied user data, or %null if you don't care
  *
  * Callback used to enumerate and describe Enchant's various providers
@@ -143,9 +143,9 @@ ENCHANT_MODULE_EXPORT(char *)
 /**
  * EnchantDictDescribeFn
  * @lang_tag: The dictionary's language tag (eg: en_US, de_AT, ...)
- * @provider_name: The provider's name (eg: Aspell)
- * @provider_desc: The provider's description (eg: Aspell 0.50.3)
- * @provider_file: The DLL/SO where this dict's provider was loaded from
+ * @provider_name: The provider's name (eg: Aspell) in UTF8 encoding
+ * @provider_desc: The provider's description (eg: Aspell 0.50.3) in UTF8 encoding
+ * @provider_file: The DLL/SO where this dict's provider was loaded from in Glib file encoding (UTF8 on Windows)
  * @user_data: Supplied user data, or %null if you don't care
  *
  * Callback used to describe an individual dictionary

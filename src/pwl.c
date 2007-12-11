@@ -600,7 +600,7 @@ int enchant_pwl_check(EnchantPWL *pwl, const char *const word, size_t len)
 	return 1; /* not found */
 }
 
-
+/* matcher callback when a match is found*/
 static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher)
 {
 	g_free(match);
@@ -709,6 +709,7 @@ char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
 	return sugg_list.suggs;
 }
 
+/* matcher callback when a match is found*/
 static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher)
 {
 	EnchantSuggList* sugg_list;

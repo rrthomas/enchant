@@ -44,7 +44,7 @@ extern "C" {
 
 /* private */ 
 ENCHANT_MODULE_EXPORT(char *) 
-	     enchant_get_user_language(void);
+		 enchant_get_user_language(void);
 
 #ifdef _WIN32
 #define ENCHANT_PLUGIN_DECLARE(name) static HANDLE s_hModule = (HANDLE)(NULL); BOOL APIENTRY DllMain( HANDLE hModule, DWORD ul_reason_for_call, LPVOID lpReserved ) { s_hModule = hModule; return TRUE; } 
@@ -78,8 +78,9 @@ struct str_enchant_dict
 	void *enchant_private_data;
 
 	int (*check) (struct str_enchant_dict * me, const char *const word,
-		      size_t len);
+			  size_t len);
 	
+	/* returns utf8*/
 	char **(*suggest) (struct str_enchant_dict * me,
 			   const char *const word, size_t len,
 			   size_t * out_n_suggs);
@@ -94,7 +95,7 @@ struct str_enchant_dict
 				   const char *const mis, size_t mis_len,
 				   const char *const cor, size_t cor_len);
 	
-  	void (*add_to_exclude) (struct str_enchant_dict * me,
+	void (*add_to_exclude) (struct str_enchant_dict * me,
 				 const char *const word, size_t len);
 	
 	void * _reserved[5];
@@ -109,15 +110,17 @@ struct str_enchant_provider
 	void (*dispose) (struct str_enchant_provider * me);
 	
 	EnchantDict *(*request_dict) (struct str_enchant_provider * me,
-				      const char *const tag);
+					  const char *const tag);
 	
 	void (*dispose_dict) (struct str_enchant_provider * me,
-			      EnchantDict * dict);
+				  EnchantDict * dict);
 	
 	int (*dictionary_exists) (struct str_enchant_provider * me,
 				  const char *const tag);
 
+	/* returns utf8*/
 	/* const */ char * (*identify) (struct str_enchant_provider * me);
+	/* returns utf8*/
 	/* const */ char * (*describe) (struct str_enchant_provider * me);
 
 	/* frees string lists returned by list_dicts and dict->suggest */
@@ -125,7 +128,7 @@ struct str_enchant_provider
 				  char **str_list);
 
 	char ** (*list_dicts) (struct str_enchant_provider * me,
-                               size_t * out_n_dicts);
+							   size_t * out_n_dicts);
 
 	void * _reserved[5];
 };
