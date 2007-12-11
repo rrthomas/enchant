@@ -902,6 +902,25 @@ static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
 	}
 }
 
+static EnchantTrie* enchant_trie_get_subtrie(EnchantTrie* trie, 
+											 EnchantTrieMatcher* matcher,
+											 char** nxtChS)
+{
+	EnchantTrie* subtrie;
+
+	if(trie->subtries == NULL || *nxtChS == NULL)
+		return NULL;
+
+	subtrie = g_hash_table_lookup(trie->subtries,*nxtChS);
+	if(subtrie == NULL && matcher->mode == case_insensitive) {
+		char* nxtChSUp = g_utf8_strup(*nxtChS, -1); /* we ignore the title case scenario since that will give us an edit_distance of one which is acceptable since this mode is used for suggestions*/
+		g_free(*nxtChS);
+		*nxtChS = nxtChSUp;
+		subtrie = g_hash_table_lookup(trie->subtries,nxtChSUp);
+	}
+	return subtrie;
+}
+
 static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matcher)
 {
 	int errs = 0;
@@ -965,13 +984,7 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 			(nxtChI - matcher->word_pos));
 
 	/* Precisely match the first character, and recurse */
-	subtrie = g_hash_table_lookup(trie->subtries,nxtChS);
-	if(subtrie == NULL && matcher->mode == case_insensitive) {
-		char* nxtChSUp = g_utf8_strup(nxtChS, nxtChI - matcher->word_pos); /* we ignore the title case scenario since that will give us an edit_distance of one which is acceptable since this mode is used for suggestions*/
-		g_free(nxtChS);
-		nxtChS = nxtChSUp;
-		subtrie = g_hash_table_lookup(trie->subtries,nxtChSUp);
-	}
+	subtrie = enchant_trie_get_subtrie(trie, matcher, &nxtChS);
 
 	if (subtrie != NULL) {
 		enchant_trie_matcher_pushpath(matcher,nxtChS);
@@ -992,7 +1005,7 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 		enchant_trie_find_matches(trie,matcher);
 		matcher->word_pos = oldPos;
 	}
-	/* for each subtrie, match on delete or substitute word[0] */
+	/* for each subtrie, match on delete or substitute word[0] or transpose word[0] and word[1] */
 	g_hash_table_foreach(trie->subtries,
 				enchant_trie_find_matches_cb,
 				matcher);
@@ -1001,8 +1014,8 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 
 static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcherV)
 {
-	char* key;
-	EnchantTrie* subtrie;
+	char* key, *key2;
+	EnchantTrie* subtrie, *subtrie2;
 	EnchantTrieMatcher* matcher;
 	ssize_t nxtChI, oldPos;
 
@@ -1021,13 +1034,33 @@ static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcher
 
 	/* Match on deleting word[0] */
 	enchant_trie_find_matches(subtrie,matcher);
-	/* Match on transposing word[0] */
+	/* Match on substituting word[0] */
 	oldPos = matcher->word_pos;
 	matcher->word_pos = nxtChI;
 	enchant_trie_find_matches(subtrie,matcher);
-	matcher->word_pos = oldPos;
 
 	enchant_trie_matcher_poppath(matcher,strlen(key));
+
+	/* Match on transposing word[0] and word[1] */
+	key2 = g_strndup(&matcher->word[oldPos],nxtChI-oldPos);
+	subtrie2 = enchant_trie_get_subtrie(subtrie, matcher, &key2);
+
+	if(subtrie2 != NULL) {
+		nxtChI = (ssize_t) (g_utf8_next_char(&matcher->word[matcher->word_pos]) - matcher->word);
+		if (strncmp(key,&matcher->word[matcher->word_pos],nxtChI-matcher->word_pos) == 0) {
+			matcher->word_pos = nxtChI;
+			enchant_trie_matcher_pushpath(matcher,key);
+			enchant_trie_matcher_pushpath(matcher,key2);
+
+			enchant_trie_find_matches(subtrie2,matcher);
+			enchant_trie_matcher_poppath(matcher,strlen(key2));
+			enchant_trie_matcher_poppath(matcher,strlen(key));
+}
+	}
+
+	g_free(key2);
+	
+	matcher->word_pos = oldPos;
 }
 
 static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
@@ -1104,7 +1137,7 @@ static int edit_dist(const char* utf8word1, const char* utf8word2)
 {
 	gunichar * word1, * word2;
 	glong len1, len2, cost, i, j;
-	int v1, v2, v3;
+	int v1, v2, v3, v4;
 	int* table;
 
 	word1 = g_utf8_to_ucs4_fast(utf8word1, -1, &len1);
@@ -1131,6 +1164,13 @@ static int edit_dist(const char* utf8word1, const char* utf8word2)
 			v1 = table[(i-1)*(len2+1)+j] + 1;
 			v2 = table[i*(len2+1)+(j-1)] + 1;
 			v3 = table[(i-1)*(len2+1)+(j-1)] + cost;
+
+			if(i > 1 && j > 1 && word1[i-1] == word2[j-2] && word1[i-2] == word2[j-1]) {
+				v4 = table[(i-2)*(len2+1)+(j-2)] + cost;
+				if(v4 < v1)
+					v1 = v4;
+			}
+
 			if (v1 < v2 && v1 < v3) {
 				cost = v1;
 			} else if (v2 < v3) {
@@ -1146,4 +1186,5 @@ static int edit_dist(const char* utf8word1, const char* utf8word2)
 	g_free(table);
 	return cost;
 }
+
 

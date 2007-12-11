@@ -1392,3 +1392,100 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 
   CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
 }
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Transpose1)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("small");  //1
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("smallest"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("smlal");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Transpose2)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("catch"); //2
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("catcher"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("acthc");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_HasProperSubset_Transpose3)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("hasten"); //3
+
+  AddWordsToDictionary(sWords);
+
+  AddWordToDictionary("hastens"); //4
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("ahtsne");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_Transpose1Insert2)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("catch"); //3
+
+  AddWordsToDictionary(sWords);
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("act");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlSuggest_Transpose2)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("catch"); //2
+
+  AddWordsToDictionary(sWords);
+
+  std::vector<const std::string> suggestions = GetSuggestionsFromWord("acthc");
+
+  CHECK_EQUAL(sWords.size(), suggestions.size());
+
+  std::sort(sWords.begin(), sWords.end());
+  std::sort(suggestions.begin(), suggestions.end());
+
+  CHECK_ARRAY_EQUAL(sWords, suggestions, std::min(sWords.size(), suggestions.size()));
+}
+
