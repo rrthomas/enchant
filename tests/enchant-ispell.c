@@ -483,7 +483,7 @@ int main (int argc, char ** argv)
 	}
 	else {
 		if (file) {
-			fp = fopen (file, "rb");
+			fp = g_fopen (file, "rb");
 			if (!fp) {
 				fprintf (stderr, "Error: Could not open the file \"%s\" for reading.\n", file);
 				exit (1);

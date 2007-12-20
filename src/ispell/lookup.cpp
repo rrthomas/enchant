@@ -277,7 +277,7 @@ int ISpellChecker::linit (char *hashname)
     int			viazero;
     register ichar_t *	cp;
 
-    if ((fpHash = fopen (hashname, "rb")) == NULL)
+    if ((fpHash = g_fopen (hashname, "rb")) == NULL)
 	{
 		return (-1);
 	}
