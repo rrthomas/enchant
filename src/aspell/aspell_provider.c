@@ -295,6 +295,20 @@ init_enchant_provider (void)
 {
 	EnchantProvider *provider;
 	
+#if defined(_WIN32)
+    char* szModule;
+
+   	szModule = enchant_get_registry_value ("Aspell", "Module");
+    if(szModule)
+    {
+        WCHAR* wszModule;
+
+	    wszModule = g_utf8_to_utf16 (szModule, -1, NULL, NULL, NULL);
+        LoadLibrary(wszModule);
+        g_free(wszModule);
+    }
+#endif
+
 	provider = g_new0 (EnchantProvider, 1);
 	provider->dispose = aspell_provider_dispose;
 	provider->request_dict = aspell_provider_request_dict;
