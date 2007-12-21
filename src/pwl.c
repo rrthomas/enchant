@@ -1075,10 +1075,11 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 	char * normalized_word, * pattern;
 
 	normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
+	len = strlen(normalized_word);
 
 	if(mode == case_insensitive)
 		{
-			pattern = g_utf8_strdown (normalized_word, -1);
+			pattern = g_utf8_strdown (normalized_word, len);
 			g_free(normalized_word);
 		}
 	else
@@ -1089,9 +1090,9 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 	matcher->max_errors = maxerrs;
 	matcher->word = pattern;
 	matcher->word_pos = 0;
-	matcher->path = g_new0(char,10);
+	matcher->path = g_new0(char,len+maxerrs+1);
 	matcher->path[0] = '\0';
-	matcher->path_len = 10;
+	matcher->path_len = len+maxerrs+1;
 	matcher->path_pos = 0;
 	matcher->mode = mode;
 	matcher->cbfunc = cbfunc;
@@ -1187,5 +1188,6 @@ static int edit_dist(const char* utf8word1, const char* utf8word2)
 	g_free(table);
 	return cost;
 }
+
 
 
