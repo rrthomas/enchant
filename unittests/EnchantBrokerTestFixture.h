@@ -292,7 +292,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
                     break;
                 }
                 std::string filepath = AddToPath(dir, filename);
-                if(g_file_test(filename, G_FILE_TEST_IS_DIR)){
+				if(g_file_test(filepath.c_str(), G_FILE_TEST_IS_DIR)){
                     DeleteDirAndFiles(filepath);
                 }
                 else {
