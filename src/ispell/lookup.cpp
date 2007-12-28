@@ -244,6 +244,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <glib/gstdio.h>
+
 #include "ispell_checker.h"
 #include "msgs.h"
 
