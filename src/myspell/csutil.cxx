@@ -125,7 +125,7 @@ int u8_u16(w_char * dest, int size, const char * src) {
         case 0x90:
         case 0xa0:
         case 0xb0: {
-            HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Unexpected continuation bytes in %d. character position\n%s\n", u8 - src, src);    
+            HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Unexpected continuation bytes in %ld. character position\n%s\n", static_cast<long>(u8 - src), src);    
             u2->h = 0xff;
             u2->l = 0xfd;
             break;
@@ -137,7 +137,7 @@ int u8_u16(w_char * dest, int size, const char * src) {
                 u2->l = (*u8 << 6) + (*(u8+1) & 0x3f);
                 u8++;
             } else {
-                HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
+                HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %ld. character position:\n%s\n", static_cast<long>(u8 - src), src);
                 u2->h = 0xff;
                 u2->l = 0xfd;
             }
@@ -151,12 +151,12 @@ int u8_u16(w_char * dest, int size, const char * src) {
                     u2->l = (*u8 << 6) + (*(u8+1) & 0x3f);
                     u8++;
                 } else {
-                    HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
+                    HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %ld. character position:\n%s\n", static_cast<long>(u8 - src), src);
                     u2->h = 0xff;
                     u2->l = 0xfd;
                 }
             } else {
-                HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %d. character position:\n%s\n", u8 - src, src);
+                HUNSPELL_WARNING(stderr, "UTF-8 encoding error. Missing continuation byte in %ld. character position:\n%s\n", static_cast<long>(u8 - src), src);
                 u2->h = 0xff;
                 u2->l = 0xfd;
             }
@@ -221,13 +221,11 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
  
  char * mystrsep(char ** stringp, const char delim)
  {
-   char * rv = NULL;
    char * mp = *stringp;
-   int n = strlen(mp);
-   if (n > 0) {
+   if (*mp != '\0') {
       char * dp;
       if (delim) {
-        dp = (char *)memchr(mp,(int)((unsigned char)delim),n);
+        dp = strchr(mp, delim);
       } else {
         // don't use isspace() here, the string can be in some random charset
         // that's way different than the locale's
@@ -237,20 +235,11 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
       if (dp) {
          *stringp = dp+1;
          int nc = (int)((unsigned long)dp - (unsigned long)mp);
-         rv = (char *) malloc(nc+1);
-	 if (rv) {
-            memcpy(rv,mp,nc);
-            *(rv+nc) = '\0';
-            return rv;
-	 }
+         *(mp+nc) = '\0';
+         return mp;
       } else {
-         rv = (char *) malloc(n+1);
-         if (rv) {
-    	    memcpy(rv, mp, n);
-            *(rv+n) = '\0';
-            *stringp = mp + n;
-            return rv;
-         }
+         *stringp = mp + strlen(mp);
+         return mp;
       }
    }
    return NULL;
@@ -296,7 +285,104 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
      return d;
  }
 
-#ifdef HUNSPELL_EXPERIMENTAL
+// break text to lines
+// return number of lines
+int line_tok(const char * text, char *** lines, char breakchar) {
+    int linenum = 0;
+    char * dup = mystrdup(text);
+    char * p = strchr(dup, breakchar);
+    while (p) {
+        linenum++;
+        *p = '\0';
+        p++;
+        p = strchr(p, breakchar);
+    }
+    linenum++;
+    *lines = (char **) malloc(linenum * sizeof(char *));
+    if (!(*lines)) {
+        free(dup);
+        return 0;
+    }
+
+    p = dup;
+    int l = 0;
+    for (int i = 0; i < linenum; i++) {
+        if (*p != '\0') {
+            (*lines)[l] = mystrdup(p);
+            l++;
+        }
+        p += strlen(p) + 1;
+    }
+    free(dup);
+    if (!l) free(*lines);
+    return l;
+}
+
+// uniq line in place
+char * line_uniq(char * text, char breakchar) {
+    char ** lines;
+    int linenum = line_tok(text, &lines, breakchar);
+    int i;
+    strcpy(text, lines[0]);
+    for ( i = 1; i < linenum; i++ ) {
+        int dup = 0;
+        for (int j = 0; j < i; j++) {
+            if (strcmp(lines[i], lines[j]) == 0) dup = 1;
+        }
+        if (!dup) {
+            if ((i > 1) || (*(lines[0]) != '\0')) {
+                sprintf(text + strlen(text), "%c", breakchar);
+            }
+            strcat(text, lines[i]);
+        }
+    }
+    for ( i = 0; i < linenum; i++ ) {
+        if (lines[i]) free(lines[i]);
+    }
+    if (lines) free(lines);
+    return text;
+}
+
+// uniq and boundary for compound analysis: "1\n\2\n\1" -> " ( \1 | \2 ) "
+char * line_uniq_app(char ** text, char breakchar) {
+    if (!strchr(*text, breakchar)) {
+        return *text;
+    }
+    
+    char ** lines;
+    int linenum = line_tok(*text, &lines, breakchar);
+    int dup = 0;
+    for (int i = 0; i < linenum; i++) {
+        for (int j = 0; j < (i - 1); j++) {
+            if (strcmp(lines[i], lines[j]) == 0) {
+                *(lines[i]) = '\0';
+                dup++;
+                break;
+            }
+        }
+    }
+    if ((linenum - dup) == 1) {
+        strcpy(*text, lines[0]);
+        freelist(&lines, linenum);
+        return *text;
+    }
+    char * newtext = (char *) malloc(strlen(*text) + 2 * linenum + 3 + 1);
+    if (newtext) {
+        free(*text);
+        *text = newtext;
+    } else {
+        freelist(&lines, linenum);
+        return *text;
+    }    
+    strcpy(*text," ( ");
+    for (int i = 0; i < linenum; i++) if (*(lines[i])) {
+        sprintf(*text + strlen(*text), "%s%s", lines[i], " | ");
+    }
+    (*text)[strlen(*text) - 2] = ')'; // " ) "
+    freelist(&lines, linenum);
+    return *text;
+}
+
  // append s to ends of every lines in text
  void strlinecat(char * dest, const char * s)
  {
@@ -315,93 +401,132 @@ int flag_bsearch(unsigned short flags[], unsigned short flag, int length) {
     free(dup);
  }
 
-// break text to lines
-// return number of lines
-int line_tok(const char * text, char *** lines) {
-    int linenum = 0;
-    char * dup = mystrdup(text);
-    char * p = strchr(dup, '\n');
-    while (p) {
-        linenum++;
-        *p = '\0';
-        p++;
-        p = strchr(p, '\n');
-    }
-    *lines = (char **) calloc(linenum + 1, sizeof(char *));
-    if (!(*lines)) return -1;
-
-    p = dup; 
-    for (int i = 0; i < linenum + 1; i++) {
-        (*lines)[i] = mystrdup(p);
-        p += strlen(p) + 1;
-    }
-    free(dup);
-    return linenum;
-}
-
-// uniq line in place
-char * line_uniq(char * text) {
-    char ** lines;
-    int linenum = line_tok(text, &lines);
-    int i;
-    strcpy(text, lines[0]);
-    for ( i = 1; i<=linenum; i++ ) {
-        int dup = 0;
-        for (int j = 0; j < i; j++) {
-            if (strcmp(lines[i], lines[j]) == 0) dup = 1;
-        }
-        if (!dup) {
-            if ((i > 1) || (*(lines[0]) != '\0')) strcat(text, "\n");
-            strcat(text, lines[i]);
-        }
-    }
-    for ( i = 0; i<=linenum; i++ ) {
-        if (lines[i]) free(lines[i]);
-    }
-    if (lines) free(lines);
-    return text;
-}
-
 // change \n to char c
-char * line_join(char * text, char c) {
+char * tr(char * text, char oldc, char newc) {
     char * p;
-    for (p = text; *p; p++) if (*p == '\n') *p = c;
+    for (p = text; *p; p++) if (*p == oldc) *p = newc;
     return text;
 }
 
-// leave only last {[^}]*} substring for handling zero morphemes
-char * delete_zeros(char * morphout) {
-    char * p = morphout;
-    char * q = p;
-    char * q2 = NULL;
-    int suffix = 0;
-    
-    for (;*p && *(p+1);) {
-        switch (*p) {
-            case '{': 
-                q2 = q;
-                q--;
-                break;
-            case '}':
-                if (q2) {
-                    suffix = 1;
-                    q--;
-                }
-                break; 
-            default:
-                if (suffix) {
-                    q = q2;
-                }
-                suffix = 0;
-                *q = *p;
-        }
-        p++;
-        q++;
+// morphcmp(): compare MORPH_DERI_SFX, MORPH_INFL_SFX and MORPH_TERM_SFX fields
+// in the first line of the inputs
+// return 0, if inputs equal
+// return 1, if inputs may equal with a secondary suffix
+// otherwise return -1
+int morphcmp(const char * s, const char * t)
+{
+    int se;
+    int te;
+    char * sl;
+    char * tl;    
+    const char * olds;
+    const char * oldt;
+    if (!s || !t) return 1;
+    olds = s;
+    sl = strchr(s, '\n');
+    s = strstr(s, MORPH_DERI_SFX);
+    if (!s || (sl && sl < s)) s = strstr(olds, MORPH_INFL_SFX);
+    if (!s || (sl && sl < s)) {
+        s= strstr(olds, MORPH_TERM_SFX);
+        olds = NULL;
     }
-    *q = '\0';
-    return morphout;
+    oldt = t;
+    tl = strchr(t, '\n');
+    t = strstr(t, MORPH_DERI_SFX);
+    if (!t || (tl && tl < t)) t = strstr(oldt, MORPH_INFL_SFX);
+    if (!t || (tl && tl < t)) {
+        t = strstr(oldt, MORPH_TERM_SFX);
+        oldt = NULL;
+    }
+    while (s && t && (!sl || sl > s) && (!tl || tl > t)) {
+        s += MORPH_TAG_LEN;
+        t += MORPH_TAG_LEN;
+        se = 0;
+        te = 0;
+        while ((*s == *t) && !se && !te) {
+            s++;
+            t++;
+            switch(*s) {
+                case ' ':
+                case '\n':
+                case '\t':
+                case '\0': se = 1;
+            }
+            switch(*t) {
+                case ' ':
+                case '\n':
+                case '\t':
+                case '\0': te = 1;
+            }
+        }
+        if (!se || !te) {
+            // not terminal suffix difference
+            if (olds) return -1;
+            return 1;
+        }
+        olds = s;
+        s = strstr(s, MORPH_DERI_SFX);
+        if (!s || (sl && sl < s)) s = strstr(olds, MORPH_INFL_SFX);
+        if (!s || (sl && sl < s)) {
+            s = strstr(olds, MORPH_TERM_SFX);
+            olds = NULL;
+        }
+        oldt = t;
+        t = strstr(t, MORPH_DERI_SFX);
+        if (!t || (tl && tl < t)) t = strstr(oldt, MORPH_INFL_SFX);
+        if (!t || (tl && tl < t)) {
+            t = strstr(oldt, MORPH_TERM_SFX);
+            oldt = NULL;
+        }
+    }
+    if (!s && !t && se && te) return 0;
+    return 1;
 }
-#endif // END OF HUNSPELL_EXPERIMENTAL CODE
+
+int get_sfxcount(const char * morph)
+{
+    if (!morph || !*morph) return 0;
+    int n = 0;
+    const char * old = morph;
+    morph = strstr(morph, MORPH_DERI_SFX);
+    if (!morph) morph = strstr(old, MORPH_INFL_SFX);
+    if (!morph) morph = strstr(old, MORPH_TERM_SFX);
+    while (morph) {
+        n++;
+        old = morph;
+        morph = strstr(morph + 1, MORPH_DERI_SFX);
+        if (!morph) morph = strstr(old + 1, MORPH_INFL_SFX);
+        if (!morph) morph = strstr(old + 1, MORPH_TERM_SFX);
+    }
+    return n;
+}
+
+
+int fieldlen(const char * r)
+{
+    int n = 0;
+    while (r && *r != '\t' && *r != '\0' && *r != '\n' && *r != ' ') {
+        r++;
+        n++;
+    }
+    return n;
+}
+
+char * copy_field(char * dest, const char * morph, const char * var)
+{
+    if (!morph) return NULL;
+    char * beg = strstr(morph, var);
+    if (beg) {
+       char * d = dest;
+       for (beg += MORPH_TAG_LEN; *beg != ' ' && *beg != '\t' &&
+            *beg != '\n' && *beg != '\0'; d++, beg++) {
+         *d = *beg;
+       }
+       *d = '\0';
+       return dest;
+  }
+  return NULL;
+}
 
 char * mystrrep(char * word, const char * pat, const char * rep) {
     char * pos = strstr(word, pat);
@@ -451,6 +576,33 @@ char * mystrrep(char * word, const char * pat, const char * rep) {
    }
    u16_u8(word, MAXWORDUTF8LEN, w, l);
    return 0;
+ }
+
+ int uniqlist(char ** list, int n) {
+   if (n < 2) return n;
+   for (int i = 0; i < n; i++) {
+     for (int j = 0; j < i; j++) {
+        if (list[j] && list[i] && (strcmp(list[j], list[i]) == 0)) {
+            free(list[i]);
+            list[i] = NULL;
+            break;
+        }
+     }
+   } 
+   int m = 1;  
+   for (int i = 1; i < n; i++) if (list[i]) {
+        list[m] = list[i];
+        m++;
+    }
+   return m;
+ }
+ 
+ void freelist(char *** list, int n) {
+   if (list && (n > 0)) {
+      for (int i = 0; i < n; i++) if ((*list)[i]) free((*list)[i]);
+      free(*list);
+      *list = NULL;
+   }
  }
  
  // convert null terminated string to all caps
@@ -5319,7 +5471,7 @@ int parse_string(char * line, char ** out, const char * warnvar)
           }
           i++;
       }
-      free(piece);
+      // free(piece);
       piece = mystrsep(&tp, 0);
    }
    if (np != 2) {

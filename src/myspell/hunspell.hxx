@@ -73,17 +73,59 @@ public:
    */
 
   int suggest(char*** slst, const char * word);
+
   char * get_dic_encoding();
 
-  /* handling custom dictionary */
-  
-  int put_word(const char * word);
+ /* morphological functions */
 
-  /* pattern is a sample dictionary word 
-   * put word into custom dictionary with affix flags of pattern word
+ /* analyze(result, word) - morphological analysis of the word */
+ 
+  int analyze(char*** slst, const char * word);
+
+ /* stem(result, word) - stemmer function */
+  
+  int stem(char*** slst, const char * word);
+  
+ /* stem(result, analysis, n) - get stems from a morph. analysis
+  * example:
+  * char ** result, result2;
+  * int n1 = analyze(result, "words");
+  * int n2 = stem(result2, result, n1);   
+  */
+ 
+  int stem(char*** slst, char ** morph, int n);
+
+ /* generate(result, word, word2) - morphological generation by example(s) */
+
+  int generate(char*** slst, const char * word, const char * word2);
+
+ /* generate(result, word, desc, n) - generation by morph. description(s)
+  * example:
+  * char ** result;
+  * char * affix = "is:plural"; // description depends from dictionaries, too
+  * int n = generate(result, "word", &affix, 1);
+  * for (int i = 0; i < n; i++) printf("%s\n", result[i]);
+  */
+
+  int generate(char*** slst, const char * word, char ** desc, int n);
+
+  /* functions for run-time modification of the dictionary */
+
+  /* add word to the run-time dictionary */
+  
+  int add(const char * word);
+
+  /* add word to the run-time dictionary with affix flags of
+   * the example (a dictionary word): Hunspell will recognize
+   * affixed forms of the new word, too.
    */
   
-  int put_word_pattern(const char * word, const char * pattern);
+  int add_with_affix(const char * word, const char * example);
+
+  /* remove word from the run-time dictionary */
+  /* NOTE: not implemented yet */
+
+  int remove(const char * word);
 
   /* other */
 
@@ -93,24 +135,13 @@ public:
 
   struct cs_info * get_csconv();
   const char * get_version();
-
-  /* experimental functions */
+  
+  /* experimental and deprecated functions */
 
 #ifdef HUNSPELL_EXPERIMENTAL
-  /* suffix is an affix flag string, similarly in dictionary files */
-  
+  /* suffix is an affix flag string, similarly in dictionary files */  
   int put_word_suffix(const char * word, const char * suffix);
-  
-  /* morphological analysis */
-  
-  char * morph(const char * word);
-  int analyze(char*** out, const char *word);
-
   char * morph_with_correction(const char * word);
-
-  /* stemmer function */
-  
-  int stem(char*** slst, const char * word);
 
   /* spec. suggestions */
   int suggest_auto(char*** slst, const char * word);
@@ -133,6 +164,8 @@ private:
    hentry * spellsharps(char * base, char *, int, int, char * tmp, int * info, char **root);
    int    is_keepcase(const hentry * rv);
    int    insert_sug(char ***slst, char * word, int ns);
+   char * cat_result(char * result, char * st);
+   char * stem_description(const char * desc);
 
 };
 

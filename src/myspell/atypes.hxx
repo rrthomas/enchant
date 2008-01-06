@@ -26,7 +26,7 @@ static inline void HUNSPELL_WARNING(FILE *, const char *, ...) {}
 #define aeUTF8          (1 << 1)
 #define aeALIASF        (1 << 2)
 #define aeALIASM        (1 << 3)
-#define aeINFIX         (1 << 4)
+#define aeLONGCOND      (1 << 4)
 
 // compound options
 #define IN_CPD_NOT   0
@@ -38,6 +38,8 @@ static inline void HUNSPELL_WARNING(FILE *, const char *, ...) {}
 
 #define MINCPDLEN       3
 #define MAXCOMPOUND     10
+#define MAXCONDLEN      20
+#define MAXCONDLEN_1    (MAXCONDLEN - sizeof(char *))
 
 #define MAXACC          1000
 
@@ -56,21 +58,16 @@ struct affentry
    char  numconds;
    char  opts;
    unsigned short aflag;
-   union {
-        char   base[SETSIZE];
-        struct {
-                char ascii[SETSIZE/2];
-                char neg[8];
-                char all[8];
-                w_char * wchars[8];
-                int wlen[8];
-        } utf8;
-   } conds;
-#ifdef HUNSPELL_EXPERIMENTAL
-   char *       morphcode;
-#endif
    unsigned short * contclass;
    short        contclasslen;
+   union {
+     char conds[MAXCONDLEN];
+     struct {
+       char conds1[MAXCONDLEN_1];
+       char * conds2;
+     } l;
+   } c;
+   char *       morphcode;
 };
 
 struct mapentry {
@@ -91,8 +88,3 @@ struct guessword {
 };
 
 #endif
-
-
-
-
-

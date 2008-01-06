@@ -42,18 +42,16 @@ public:
   int hash(const char *) const;
   struct hentry * walk_hashtable(int & col, struct hentry * hp) const;
 
-  int put_word(const char * word, char * ap);
-  int put_word_pattern(const char * word, const char * pattern);
+  int add(const char * word, char * aff);
+  int add_with_affix(const char * word, const char * pattern);
+  int remove(const char * word);
   int decode_flags(unsigned short ** result, char * flags);
   unsigned short        decode_flag(const char * flag);
   char *                encode_flag(unsigned short flag);
   int is_aliasf();
   int get_aliasf(int index, unsigned short ** fvec);
-#ifdef HUNSPELL_EXPERIMENTAL
   int is_aliasm();
   char * get_aliasm(int index);
-#endif
-
   
 private:
   int get_clen_and_captype(const char * word, int wbl, int * captype);
@@ -64,9 +62,7 @@ private:
   int parse_aliasf(char * line, FILE * af);
   int add_hidden_capitalized_word(char * word, int wbl, int wcl,
     unsigned short * flags, int al, char * dp, int captype);
-#ifdef HUNSPELL_EXPERIMENTAL
   int parse_aliasm(char * line, FILE * af);
-#endif
 
 };
 

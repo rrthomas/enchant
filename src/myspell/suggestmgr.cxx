@@ -14,6 +14,7 @@
 #endif
 
 #include "suggestmgr.hxx"
+#include "htypes.hxx"
 
 #ifndef MOZILLA_CLIENT
 #ifndef W32
@@ -278,7 +279,7 @@ int SuggestMgr::suggest_auto(char*** slst, const char * w, int nsug)
     if ((nsug < maxSug) && (nsug > -1))
       nsug = mapchars(wlst, word, nsug, cpdsuggest);
 
-    if ((cpdsuggest==0) && (nsug>0)) nocompoundtwowords=1; else *
+    if ((cpdsuggest==0) && (nsug>0)) nocompoundtwowords=1;
 
     // perhaps we forgot to hit space and two words ran together
 
@@ -1055,6 +1056,7 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
   scphon = scoresphon[MAX_ROOTS-1];
   
   char w2[MAXWORDUTF8LEN];
+  char f[MAXSWUTF8L];
   char * word = w;
 
   // word reversing wrapper for complex prefixes
@@ -1085,7 +1087,6 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
     strcpy(candidate, word);
     mkallcap(candidate, csconv);
     phonet(candidate, target, n, *ph);
-//    fprintf(stderr, "Tip: %s->%s\n", candidate, target);
   }
   
   while ((hp = pHMgr->walk_hashtable(col, hp))) {
@@ -1095,19 +1096,19 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
           TESTAFF(hp->astr, pAMgr->get_nosuggest(), hp->alen) ||
           TESTAFF(hp->astr, pAMgr->get_onlyincompound(), hp->alen))) continue;
 
-    sc = ngram(3, word, &(hp->word), NGRAM_LONGER_WORSE + NGRAM_LOWERING) +
-	leftcommonsubstring(word, &(hp->word));
+    sc = ngram(3, word, HENTRY_WORD(hp), NGRAM_LONGER_WORSE + NGRAM_LOWERING) +
+	leftcommonsubstring(word, HENTRY_WORD(hp));
 
     // check special pronounciation
-    if (hp->var) {
-	int sc2 = ngram(3, word, &(hp->word) + hp->blen + 1, NGRAM_LONGER_WORSE + NGRAM_LOWERING) +
-	leftcommonsubstring(word, &(hp->word) + hp->blen + 1);
+    if ((hp->var & H_OPT_PHON) && copy_field(f, HENTRY_DATA(hp), MORPH_PHON)) {
+	int sc2 = ngram(3, word, f, NGRAM_LONGER_WORSE + NGRAM_LOWERING) +
+	leftcommonsubstring(word, f);
 	if (sc2 > sc) sc = sc2;
     }
     
     if (ph && (sc > 2) && (abs(n - (int) hp->clen) <= 3)) {
 	char target2[MAXSWUTF8L];
-        strcpy(candidate, &(hp->word));
+        strcpy(candidate, HENTRY_WORD(hp));
         mkallcap(candidate, csconv);
         phonet(candidate, target2, -1, *ph);
         scphon = 2 * ngram(3, target, target2, NGRAM_LONGER_WORSE);
@@ -1126,7 +1127,7 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
 
     if (scphon > scoresphon[lpphon]) {
       scoresphon[lpphon] = scphon;
-      rootsphon[lpphon] = &(hp->word);
+      rootsphon[lpphon] = HENTRY_WORD(hp);
       lval = scphon;
       for (j=0; j < MAX_ROOTS; j++)
         if (scoresphon[j] < lval) {
@@ -1178,9 +1179,9 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
   for (i = 0; i < MAX_ROOTS; i++) {
       if (roots[i]) {
         struct hentry * rp = roots[i];
-        int nw = pAMgr->expand_rootword(glst, MAX_WORDS, &(rp->word), rp->blen,
+        int nw = pAMgr->expand_rootword(glst, MAX_WORDS, HENTRY_WORD(rp), rp->blen,
             	    rp->astr, rp->alen, word, nc, 
-                    ((rp->var) ? &(rp->word) + rp->blen + 1 : NULL));
+                    ((rp->var & H_OPT_PHON) ? copy_field(f, HENTRY_DATA(rp), MORPH_PHON) : NULL));
 
         for (int k = 0; k < nw ; k++) {
            sc = ngram(n, word, glst[k].word, NGRAM_ANY_MISMATCH + NGRAM_LOWERING) +
@@ -1383,7 +1384,7 @@ int SuggestMgr::checkword(const char * word, int len, int cpdsuggest, int * time
         if ((rv->astr) && (TESTAFF(rv->astr,pAMgr->get_forbiddenword(),rv->alen)
                || TESTAFF(rv->astr,pAMgr->get_nosuggest(),rv->alen))) return 0;
         while (rv) {
-    	    if (rv->astr && (TESTAFF(rv->astr,pAMgr->get_pseudoroot(),rv->alen) ||
+    	    if (rv->astr && (TESTAFF(rv->astr,pAMgr->get_needaffix(),rv->alen) ||
                   TESTAFF(rv->astr, ONLYUPCASEFLAG, rv->alen) ||
             TESTAFF(rv->astr,pAMgr->get_onlyincompound(),rv->alen))) {
         	rv = rv->next_homonym;
@@ -1423,7 +1424,7 @@ int SuggestMgr::check_forbidden(const char * word, int len)
 
   if (pAMgr) { 
     rv = pAMgr->lookup(word);
-    if (rv && rv->astr && (TESTAFF(rv->astr,pAMgr->get_pseudoroot(),rv->alen) ||
+    if (rv && rv->astr && (TESTAFF(rv->astr,pAMgr->get_needaffix(),rv->alen) ||
         TESTAFF(rv->astr,pAMgr->get_onlyincompound(),rv->alen))) rv = NULL;
     if (!(pAMgr->prefix_check(word,len,1)))
         rv = pAMgr->suffix_check(word,len, 0, NULL, NULL, 0, NULL); // prefix+suffix, suffix
@@ -1434,184 +1435,6 @@ int SuggestMgr::check_forbidden(const char * word, int len)
 }
 
 #ifdef HUNSPELL_EXPERIMENTAL
-// suggest stems, XXX experimental code
-int SuggestMgr::suggest_stems(char*** slst, const char * w, int nsug)
-{
-    char buf[MAXSWUTF8L];
-    char ** wlst;    
-    int prevnsug = nsug;
-
-  char w2[MAXWORDUTF8LEN];
-  const char * word = w;
-
-  // word reversing wrapper for complex prefixes
-  if (complexprefixes) {
-    strcpy(w2, w);
-    if (utf8) reverseword_utf(w2); else reverseword(w2);
-    word = w2;
-  }
-
-    if (*slst) {
-        wlst = *slst;
-    } else {
-        wlst = (char **) calloc(maxSug, sizeof(char *));
-        if (wlst == NULL) return -1;
-    }
-    // perhaps there are a fix stem in the dictionary
-    if ((nsug < maxSug) && (nsug > -1)) {
-    
-    nsug = fixstems(wlst, word, nsug);
-    if (nsug == prevnsug) {
-        char * s = mystrdup(word);
-        char * p = s + strlen(s);
-        while ((*p != '-') && (p != s)) p--;
-        if (*p == '-') {
-            *p = '\0';
-            nsug = fixstems(wlst, s, nsug);
-            if ((nsug == prevnsug) && (nsug < maxSug) && (nsug >= 0)) {
-                char * t;
-                buf[0] = '\0';
-                for (t = s; (t[0] != '\0') && ((t[0] >= '0') || (t[0] <= '9')); t++); // is a number?
-                if (*t != '\0') strcpy(buf, "# ");
-                strcat(buf, s);
-                wlst[nsug] = mystrdup(buf);
-                if (wlst[nsug] == NULL) return -1;
-                nsug++;
-            }
-            p++;
-            nsug = fixstems(wlst, p, nsug);
-        }
-
-        free(s);
-    }
-    }
-    
-    if (nsug < 0) {
-       for (int i=0;i<maxSug; i++)
-         if (wlst[i] != NULL) free(wlst[i]);
-         free(wlst);
-       return -1;
-    }
-
-    *slst = wlst;
-    return nsug;
-}
-
-
-// there are fix stems in dictionary
-int SuggestMgr::fixstems(char ** wlst, const char * word, int ns)
-{
-    char buf[MAXSWUTF8L];
-    char prefix[MAXSWUTF8L] = "";
-
-    int dicstem = 1; // 0 = lookup, 1= affix, 2 = compound
-    int cpdindex = 0;
-    struct hentry * rv = NULL;
-
-    int wl = strlen(word);
-    int cmpdstemnum;
-    int cmpdstem[MAXCOMPOUND];
-
-    if (pAMgr) { 
-        rv = pAMgr->lookup(word);
-        if (rv) {
-            dicstem = 0;
-        } else {
-            // try stripping off affixes 
-            rv = pAMgr->affix_check(word, wl);
-
-            // else try check compound word
-            if (!rv && pAMgr->get_compound()) {
-                rv = pAMgr->compound_check(word, wl,
-                     0, 0, 100, 0, NULL, 0, &cmpdstemnum, cmpdstem,1);
-
-                if (rv) {
-                    dicstem = 2;
-                    for (int j = 0; j < cmpdstemnum; j++) {
-                        cpdindex += cmpdstem[j];
-                    }
-                    if(! (pAMgr->lookup(word + cpdindex)))
-                        pAMgr->affix_check(word + cpdindex, wl - cpdindex); // for prefix
-                }
-            }
-
-
-            if (pAMgr->get_prefix()) {
-                strcpy(prefix, pAMgr->get_prefix());
-            }
-
-            // XXX obsolete, will be a general solution for stemming
-            if ((prefix) && (strncmp(prefix, "leg", 3)==0)) prefix[0] = '\0'; // (HU)       
-        }
-
-    }
-
-
-
-    if ((rv) && (ns < maxSug)) {
-    
-        // check fixstem flag and not_valid_stem flag
-        // first word
-        if ((ns < maxSug) && (dicstem < 2)) { 
-            strcpy(buf, prefix);
-            if ((dicstem > 0) && pAMgr->get_derived()) {
-                // XXX obsolote
-                   if (strlen(prefix) == 1) {
-                        strcat(buf, (pAMgr->get_derived()) + 1);
-                   } else {
-                        strcat(buf, pAMgr->get_derived());
-                   }
-                } else {
-                        // special stem in affix description
-                        const char * wordchars = pAMgr->get_wordchars();
-                        if (rv->description && 
-                           (strchr(wordchars, *(rv->description)))) {
-                           char * desc = (rv->description) + 1;
-                           while (strchr(wordchars, *desc)) desc++;
-                           strncat(buf, rv->description, desc - (rv->description));
-                        } else {
-                            strcat(buf, rv->word);
-                        }
-                }
-            wlst[ns] = mystrdup(buf);
-            if (wlst[ns] == NULL) return -1;
-            ns++;
-        }
-
-        if (dicstem == 2) {
-
-            // compound stem
-
-//          if (rv->astr && (strchr(rv->astr, '0') == NULL)) {
-            if (rv->astr) {
-                strcpy(buf, word);
-                buf[cpdindex] = '\0';
-                if (prefix) strcat(buf, prefix);
-                if (pAMgr->get_derived()) {
-                        strcat(buf, pAMgr->get_derived());
-                } else {
-                        // special stem in affix description
-                        const char * wordchars = pAMgr->get_wordchars();
-                        if (rv->description && 
-                           (strchr(wordchars, *(rv->description)))) {
-                           char * desc = (rv->description) + 1;
-                           while (strchr(wordchars, *desc)) desc++;
-                           strncat(buf, rv->description, desc - (rv->description));
-                        } else {
-                            strcat(buf, rv->word);
-                        }
-                }
-                if (ns < maxSug) {
-                    wlst[ns] = mystrdup(buf);
-                    if (wlst[ns] == NULL) return -1;
-                    ns++;
-                }
-            }
-        }
-    }
-    return ns;
-}
-
 // suggest possible stems
 int SuggestMgr::suggest_pos_stems(char*** slst, const char * w, int nsug)
 {
@@ -1651,6 +1474,7 @@ int SuggestMgr::suggest_pos_stems(char*** slst, const char * w, int nsug)
     *slst = wlst;
     return nsug;
 }
+#endif // END OF HUNSPELL_EXPERIMENTAL CODE
 
 
 char * SuggestMgr::suggest_morph(const char * w)
@@ -1679,13 +1503,18 @@ char * SuggestMgr::suggest_morph(const char * w)
     
     while (rv) {
         if ((!rv->astr) || !(TESTAFF(rv->astr, pAMgr->get_forbiddenword(), rv->alen) ||
-            TESTAFF(rv->astr, pAMgr->get_pseudoroot(), rv->alen) ||
+            TESTAFF(rv->astr, pAMgr->get_needaffix(), rv->alen) ||
             TESTAFF(rv->astr,pAMgr->get_onlyincompound(),rv->alen))) {
-            if (rv->description && ((!rv->astr) || 
-                !TESTAFF(rv->astr, pAMgr->get_lemma_present(), rv->alen)))
+                if (!HENTRY_FIND(rv, MORPH_STEM)) {
+                    strcat(result, " ");                                
+                    strcat(result, MORPH_STEM);
                     strcat(result, word);
-            if (rv->description) strcat(result, rv->description);
-            strcat(result, "\n");
+                }
+                if (HENTRY_DATA(rv)) {
+                    strcat(result, " ");                                
+                    strcat(result, HENTRY_DATA(rv));
+                }
+                strcat(result, "\n");
         }
         rv = rv->next_homonym;
     }
@@ -1700,9 +1529,10 @@ char * SuggestMgr::suggest_morph(const char * w)
         pAMgr->compound_check_morph(word, strlen(word),
                      0, 0, 100, 0,NULL, 0, &r, NULL);
     
-    return (*result) ? mystrdup(line_uniq(delete_zeros(result))) : NULL;
+    return (*result) ? mystrdup(line_uniq(result, MSEP_REC)) : NULL;
 }
 
+#ifdef HUNSPELL_EXPERIMENTAL
 char * SuggestMgr::suggest_morph_for_spelling_error(const char * word)
 {
     char * p = NULL;
@@ -1710,7 +1540,7 @@ char * SuggestMgr::suggest_morph_for_spelling_error(const char * word)
     if (!**wlst) return NULL;
     // we will use only the first suggestion
     for (int i = 0; i < maxSug - 1; i++) wlst[i] = "";
-    int ns = suggest(&wlst, word, maxSug - 1);
+    int ns = suggest(&wlst, word, maxSug - 1, NULL);
     if (ns == maxSug) {
         p = suggest_morph(wlst[maxSug - 1]);
         free(wlst[maxSug - 1]);
@@ -1719,6 +1549,153 @@ char * SuggestMgr::suggest_morph_for_spelling_error(const char * word)
     return p;
 }
 #endif // END OF HUNSPELL_EXPERIMENTAL CODE
+
+/* affixation */
+char * SuggestMgr::suggest_hentry_gen(hentry * rv, char * pattern)
+{
+    char result[MAXLNLEN];
+    *result = '\0';
+    int sfxcount = get_sfxcount(pattern);
+
+//    if (get_sfxcount(HENTRY_DATA(rv)) > sfxcount) return NULL;
+
+    if (HENTRY_DATA(rv)) {
+        char * aff = pAMgr->morphgen(HENTRY_WORD(rv), rv->blen, rv->astr, rv->alen,
+            HENTRY_DATA(rv), pattern, 0);
+        if (aff) {
+            strcat(result, aff);
+            strcat(result, "\n");
+            free(aff);
+        }
+    }
+
+    // check all allomorphs
+    char allomorph[MAXLNLEN];
+    char * p = NULL;
+    if (HENTRY_DATA(rv)) p = strstr(HENTRY_DATA(rv), MORPH_ALLOMORPH);
+    while (p) {
+        struct hentry * rv2 = NULL;
+        p += MORPH_TAG_LEN;
+        int plen = fieldlen(p);
+        strncpy(allomorph, p, plen);
+        allomorph[plen] = '\0';
+        rv2 = pAMgr->lookup(allomorph);
+        while (rv2) {
+//            if (HENTRY_DATA(rv2) && get_sfxcount(HENTRY_DATA(rv2)) <= sfxcount) {
+            if (HENTRY_DATA(rv2)) {
+                char * st = strstr(HENTRY_DATA(rv2), MORPH_STEM);
+                if (st && (strncmp(st + MORPH_TAG_LEN, 
+                   HENTRY_WORD(rv), fieldlen(st + MORPH_TAG_LEN)) == 0)) {
+                    char * aff = pAMgr->morphgen(HENTRY_WORD(rv2), rv2->blen, rv2->astr, rv2->alen,
+                        HENTRY_DATA(rv2), pattern, 0);
+                    if (aff) {
+                        strcat(result, aff);
+                        strcat(result, "\n");
+                        free(aff);
+                    }    
+                }
+            }
+            rv2 = rv2->next_homonym;
+        }
+        p = strstr(p + plen, MORPH_ALLOMORPH);
+    }
+        
+    return (*result) ? mystrdup(result) : NULL;
+}
+
+char * SuggestMgr::suggest_gen(char ** desc, int n, char * pattern) {
+  char result[MAXLNLEN];
+  char result2[MAXLNLEN];
+  char newpattern[MAXLNLEN];
+  *newpattern = '\0';
+  if (n == 0) return 0;
+  *result2 = '\0';
+  struct hentry * rv = NULL;
+  if (!pAMgr) return NULL;
+
+// search affixed forms with and without derivational suffixes
+  while(1) {
+
+  for (int k = 0; k < n; k++) {
+    *result = '\0';
+    // add compound word parts (except the last one)
+    char * s = (char *) desc[k];
+    char * part = strstr(s, MORPH_PART);
+    if (part) {
+        char * nextpart = strstr(part + 1, MORPH_PART);
+        while (nextpart) {
+            copy_field(result + strlen(result), part, MORPH_PART);
+            part = nextpart;
+            nextpart = strstr(part + 1, MORPH_PART);
+        }
+        s = part;
+    }
+
+    char **pl;
+    char tok[MAXLNLEN];
+    strcpy(tok, s);
+    char * alt = strstr(tok, " | ");
+    while (alt) {
+        alt[1] = MSEP_ALT;
+        alt = strstr(alt, " | ");
+    }
+    int pln = line_tok(tok, &pl, MSEP_ALT);
+    for (int i = 0; i < pln; i++) {
+            // remove inflectional and terminal suffixes
+            char * is = strstr(pl[i], MORPH_INFL_SFX);
+            if (is) *is = '\0';
+            char * ts = strstr(pl[i], MORPH_TERM_SFX);
+            while (ts) {
+                *ts = '_';
+                ts = strstr(pl[i], MORPH_TERM_SFX);
+            }
+            char * st = strstr(s, MORPH_STEM);
+            if (st) {
+                copy_field(tok, st, MORPH_STEM);
+                rv = pAMgr->lookup(tok);
+                while (rv) {
+                    char newpat[MAXLNLEN];
+                    strcpy(newpat, pl[i]);
+                    strcat(newpat, pattern);
+                    char * sg = suggest_hentry_gen(rv, newpat);
+                    if (!sg) sg = suggest_hentry_gen(rv, pattern);
+                    if (sg) {
+                        char ** gen;
+                        int genl = line_tok(sg, &gen, MSEP_REC);
+                        free(sg);
+                        sg = NULL;
+                        for (int j = 0; j < genl; j++) {
+                            if (strstr(pl[i], MORPH_SURF_PFX)) {
+                                int r2l = strlen(result2);
+                                result2[r2l] = MSEP_REC;
+                                strcpy(result2 + r2l + 1, result);
+                                copy_field(result2 + strlen(result2), pl[i], MORPH_SURF_PFX);
+                                strcat(result2, gen[j]);
+                            } else {
+                                sprintf(result2 + strlen(result2), "%c%s%s",
+                                    MSEP_REC, result, gen[j]);
+                            }
+                        }
+                        freelist(&gen, genl);
+                    }
+                    rv = rv->next_homonym;
+                }
+            }
+    }
+    freelist(&pl, pln);
+  }
+
+  if (*result2 || !strstr(pattern, MORPH_DERI_SFX)) break;
+  strcpy(newpattern, pattern);
+  pattern = newpattern;
+  char * ds = strstr(pattern, MORPH_DERI_SFX);
+  while (ds) {
+    strncpy(ds, MORPH_TERM_SFX, MORPH_TAG_LEN);
+    ds = strstr(pattern, MORPH_DERI_SFX);
+  }
+ }
+  return (*result2 ? mystrdup(result2) : NULL);
+}
 
 
 // generate an n-gram score comparing s1 and s2

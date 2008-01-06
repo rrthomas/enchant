@@ -47,7 +47,7 @@ HashMgr::HashMgr(const char * tpath, const char * apath)
   aliasf = NULL;
   numaliasm = 0;
   aliasm = NULL;
-  forbiddenword = FLAG_NULL; // forbidden word signing flag
+  forbiddenword = FORBIDDENWORD; // forbidden word signing flag
   load_config(apath);  
   int ec = load_tables(tpath);
   if (ec) {
@@ -70,20 +70,9 @@ HashMgr::~HashMgr()
     for (int i=0; i < tablesize; i++) {
       struct hentry * pt = tableptr[i];
       struct hentry * nt = NULL;
-/*      if (pt) {
-        if (pt->astr && (!aliasf || TESTAFF(pt->astr, ONLYUPCASEFLAG, pt->alen))) free(pt->astr);
-#ifdef HUNSPELL_EXPERIMENTAL
-        if (pt->description && !aliasm) free(pt->description);
-#endif
-        pt = pt->next;
-      }
-*/
       while(pt) {
         nt = pt->next;
         if (pt->astr && (!aliasf || TESTAFF(pt->astr, ONLYUPCASEFLAG, pt->alen))) free(pt->astr);
-#ifdef HUNSPELL_EXPERIMENTAL
-        if (pt->description && !aliasm) free(pt->description);
-#endif
         free(pt);
         pt = nt;
       }
@@ -140,20 +129,13 @@ int HashMgr::add_word(const char * word, int wbl, int wcl, unsigned short * aff,
     int al, const char * desc, bool onlyupcase)
 {
     bool upcasehomonym = false;
-    int descl = (desc) ? strlen(desc) : 0;
+    int descl = desc ? (aliasm ? sizeof(char *) : strlen(desc) + 1) : 0;
     // variable-length hash record with word and optional fields
-    // instead of mmap implementation temporarily
     struct hentry* hp = 
-	(struct hentry *) malloc (sizeof(struct hentry) + wbl + descl + 1);
+	(struct hentry *) malloc (sizeof(struct hentry) + wbl + descl);
     if (!hp) return 1;
     char * hpw = &(hp->word);
     strcpy(hpw, word);
-    if (desc && strncmp(desc, FIELD_PHON, strlen(FIELD_PHON)) == 0) {
-	strcpy(hpw + wbl + 1, desc + strlen(FIELD_PHON));
-	hp->var = 1;
-    } else {
-	hp->var = 0;
-    }
     if (ignorechars != NULL) {
       if (utf8) {
         remove_ignored_chars_utf(hpw, ignorechars_utf16, ignorechars_utf16_len);
@@ -167,29 +149,29 @@ int HashMgr::add_word(const char * word, int wbl, int wcl, unsigned short * aff,
 
     int i = hash(hpw);
 
-       hp->blen = (unsigned char) wbl;
-       hp->clen = (unsigned char) wcl;
-       hp->alen = (short) al;
-       hp->astr = aff;
-       hp->next = NULL;      
-       hp->next_homonym = NULL;
-#ifdef HUNSPELL_EXPERIMENTAL       
-       if (aliasm) {
-            hp->description = (desc) ? get_aliasm(atoi(desc)) : mystrdup(desc);
-       } else {
-            hp->description = mystrdup(desc);
-            if (desc && !hp->description)
-            {
-                free(hp->astr);
-                free(hp);
-                return 1;
+    hp->blen = (unsigned char) wbl;
+    hp->clen = (unsigned char) wcl;
+    hp->alen = (short) al;
+    hp->astr = aff;
+    hp->next = NULL;      
+    hp->next_homonym = NULL;
+
+    // store the description string or its pointer
+    if (desc) {
+        hp->var = H_OPT;
+        if (aliasm) {
+            hp->var += H_OPT_ALIASM;
+            *((char **) (hpw + wbl + 1)) = get_aliasm(atoi(desc));
+        } else {
+	    strcpy(hpw + wbl + 1, desc);
+            if (complexprefixes) {
+                if (utf8) reverseword_utf(HENTRY_DATA(hp));
+                else reverseword(HENTRY_DATA(hp));
             }
-            if (hp->description && complexprefixes) {
-                if (utf8) reverseword_utf(hp->description); else reverseword(hp->description);
-            }
-       }
-#endif
-       
+        }
+	if (strstr(HENTRY_DATA(hp), MORPH_PHON)) hp->var += H_OPT_PHON;
+    } else hp->var = 0;
+
        struct hentry * dp = tableptr[i];
        if (!dp) {
          tableptr[i] = hp;
@@ -284,8 +266,31 @@ int HashMgr::get_clen_and_captype(const char * word, int wbl, int * captype) {
     return len;
 }
 
+// remove word with FORBIDDENWORD flag (not implemented)
+int HashMgr::remove(const char * word)
+{
+    struct hentry * dp = lookup(word);    
+/*
+    if (!word || (!dp->astr || !TESTAFF(dp->astr, forbiddenword, pt->alen))) {
+        int wbl = strlen(word);
+        int wcl = get_clen_and_captype(word, wbl, &captype);
+        if (aliasf) {
+            add_word(word, wbl, wcl, dp->astr, dp->alen, NULL, false);	
+        } else {
+            unsigned short * flags = (unsigned short *) malloc (dp->alen * sizeof(short));
+            if (flags) {
+                memcpy((void *) flags, (void *) dp->astr, dp->alen * sizeof(short));
+                add_word(word, wbl, wcl, flags, dp->alen, NULL, false);
+            } else return 1;
+        }
+        return add_hidden_capitalized_word((char *) word, wbl, wcl, dp->astr, dp->alen, NULL, captype);
+    }
+*/
+    return 1;
+}
+
 // add a custom dic. word to the hash table (public)
-int HashMgr::put_word(const char * word, char * aff)
+int HashMgr::add(const char * word, char * aff)
 {
     unsigned short * flags;
     int al = 0;
@@ -303,10 +308,10 @@ int HashMgr::put_word(const char * word, char * aff)
     return add_hidden_capitalized_word((char *) word, wbl, wcl, flags, al, NULL, captype);
 }
 
-int HashMgr::put_word_pattern(const char * word, const char * pattern)
+int HashMgr::add_with_affix(const char * word, const char * example)
 {
     // detect captype and modify word length for UTF-8 encoding
-    struct hentry * dp = lookup(pattern);
+    struct hentry * dp = lookup(example);
     if (dp && dp->astr) {
         int captype;
         int wbl = strlen(word);
@@ -389,6 +394,8 @@ int HashMgr::load_tables(const char * tpath)
     mychomp(ts);
     // split each line into word and morphological description
     dp = strchr(ts,'\t');
+    char * dp2 = strchr(ts,' ');
+    if (dp2 && (!dp || (dp2 < dp))) dp = dp2;
 
     if (dp) {
       *dp = '\0';
@@ -644,16 +651,15 @@ int  HashMgr::load_config(const char * affpath)
           }
        }
 
-#ifdef HUNSPELL_EXPERIMENTAL
        if ((strncmp(line,"AM",2) == 0) && isspace(line[2])) {
           if (parse_aliasm(line, afflst)) {
              fclose(afflst);
              return 1;
           }
        }
-#endif
-        if (strncmp(line,"COMPLEXPREFIXES",15) == 0) complexprefixes = 1;
-        if (((strncmp(line,"SFX",3) == 0) || (strncmp(line,"PFX",3) == 0)) && isspace(line[3])) break;
+
+       if (strncmp(line,"COMPLEXPREFIXES",15) == 0) complexprefixes = 1;
+       if (((strncmp(line,"SFX",3) == 0) || (strncmp(line,"PFX",3) == 0)) && isspace(line[3])) break;
     }
     if (csconv == NULL) csconv = get_current_cs("ISO8859-1");
     fclose(afflst);
@@ -683,7 +689,7 @@ int  HashMgr::parse_aliasf(char * line, FILE * af)
                           aliasf = NULL;
                           aliasflen = NULL;
                           HUNSPELL_WARNING(stderr, "incorrect number of entries in AF table\n");
-                          free(piece);
+                          // free(piece);
                           return 1;
                        }
                        aliasf = (unsigned short **) malloc(numaliasf * sizeof(unsigned short *));
@@ -703,7 +709,7 @@ int  HashMgr::parse_aliasf(char * line, FILE * af)
           }
           i++;
        }
-       free(piece);
+       // free(piece);
        piece = mystrsep(&tp, 0);
    }
    if (np != 2) {
@@ -737,7 +743,7 @@ int  HashMgr::parse_aliasf(char * line, FILE * af)
                                  aliasf = NULL;
                                  aliasflen = NULL;
                                  HUNSPELL_WARNING(stderr, "error: AF table is corrupt\n");
-                                 free(piece);
+                                 // free(piece);
                                  return 1;
                              }
                              break;
@@ -751,7 +757,7 @@ int  HashMgr::parse_aliasf(char * line, FILE * af)
                }
                i++;
            }
-           free(piece);
+           // free(piece);
            piece = mystrsep(&tp, 0);
         }
         if (!aliasf[j]) {
@@ -781,7 +787,6 @@ int HashMgr::get_aliasf(int index, unsigned short ** fvec) {
     return 0;
 }
 
-#ifdef HUNSPELL_EXPERIMENTAL
 /* parse morph alias definitions */
 int  HashMgr::parse_aliasm(char * line, FILE * af)
 {
@@ -802,7 +807,7 @@ int  HashMgr::parse_aliasm(char * line, FILE * af)
                        numaliasm = atoi(piece);
                        if (numaliasm < 1) {
                           HUNSPELL_WARNING(stderr, "incorrect number of entries in AM table\n");
-                          free(piece);
+                          // free(piece);
                           return 1;
                        }
                        aliasm = (char **) malloc(numaliasm * sizeof(char *));
@@ -817,7 +822,7 @@ int  HashMgr::parse_aliasm(char * line, FILE * af)
           }
           i++;
        }
-       free(piece);
+       // free(piece);
        piece = mystrsep(&tp, 0);
    }
    if (np != 2) {
@@ -836,14 +841,14 @@ int  HashMgr::parse_aliasm(char * line, FILE * af)
         tp = nl;
         i = 0;
         aliasm[j] = NULL;
-        piece = mystrsep(&tp, 0);
+        piece = mystrsep(&tp, ' ');
         while (piece) {
            if (*piece != '\0') {
                switch(i) {
                   case 0: {
                              if (strncmp(piece,"AM",2) != 0) {
                                  HUNSPELL_WARNING(stderr, "error: AM table is corrupt\n");
-                                 free(piece);
+                                 // free(piece);
                                  numaliasm = 0;
                                  free(aliasm);
                                  aliasm = NULL;
@@ -852,6 +857,11 @@ int  HashMgr::parse_aliasm(char * line, FILE * af)
                              break;
                           }
                   case 1: {
+                            // add the remaining of the line                  
+                            if (*tp) {
+                                *(tp - 1) = ' ';
+                                tp = tp + strlen(tp);
+                            }
                             if (complexprefixes) {
                                 if (utf8) reverseword_utf(piece);
                                     else reverseword(piece);
@@ -862,8 +872,8 @@ int  HashMgr::parse_aliasm(char * line, FILE * af)
                }
                i++;
            }
-           free(piece);
-           piece = mystrsep(&tp, 0);
+           // free(piece);
+           piece = mystrsep(&tp, ' ');
         }
         if (!aliasm[j]) {
              numaliasm = 0;
@@ -885,4 +895,3 @@ char * HashMgr::get_aliasm(int index) {
     HUNSPELL_WARNING(stderr, "error: bad morph. alias index: %d\n", index);
     return NULL;
 }
-#endif

@@ -26,6 +26,60 @@ char *Hunspell_get_dic_encoding(Hunhandle *pHunspell);
  */
 int Hunspell_suggest(Hunhandle *pHunspell, char*** slst, const char * word);
 
+ /* morphological functions */
+
+ /* analyze(result, word) - morphological analysis of the word */
+
+int Hunspell_analyze(Hunhandle *pHunspell, char*** slst, const char * word);
+
+ /* stem(result, word) - stemmer function */
+
+int Hunspell_stem(Hunhandle *pHunspell, char*** slst, const char * word);
+
+ /* stem(result, analysis, n) - get stems from a morph. analysis
+  * example:
+  * char ** result, result2;
+  * int n1 = Hunspell_analyze(result, "words");
+  * int n2 = Hunspell_stem2(result2, result, n1);   
+  */
+
+int Hunspell_stem2(Hunhandle *pHunspell, char*** slst, char** desc, int n);
+
+ /* generate(result, word, word2) - morphological generation by example(s) */
+
+int Hunspell_generate(Hunhandle *pHunspell, char*** slst, const char * word,
+    const char * word2);
+
+ /* generate(result, word, desc, n) - generation by morph. description(s)
+  * example:
+  * char ** result;
+  * char * affix = "is:plural"; // description depends from dictionaries, too
+  * int n = Hunspell_generate2(result, "word", &affix, 1);
+  * for (int i = 0; i < n; i++) printf("%s\n", result[i]);
+  */
+
+int Hunspell_generate2(Hunhandle *pHunspell, char*** slst, const char * word,
+    char** desc, int n);
+
+  /* functions for run-time modification of the dictionary */
+
+  /* add word to the run-time dictionary */
+  
+int Hunspell_add(const char * word);
+
+  /* add word to the run-time dictionary with affix flags of
+   * the example (a dictionary word): Hunspell will recognize
+   * affixed forms of the new word, too.
+   */
+  
+int Hunspell_add_with_affix(const char * word, const char * example);
+
+  /* remove word from the run-time dictionary */
+  /* NOTE: not implemented yet */
+
+int Hunspell_remove(const char * word);
+
+
 #ifdef __cplusplus
 }
 #endif
