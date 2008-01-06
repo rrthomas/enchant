@@ -168,12 +168,10 @@ if test "x$with_myspell_dir" != "x" ; then
 fi
 
 MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dir\"'"
-if test "x$with_system_myspell" != "xno"; then
-   MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DWITH_SYSTEM_MYSPELL=1"
-fi
-
+PKG_CHECK_MODULES(MYSPELL, [hunspell], have_system_myspell=true, have_system_myspell=false)
 AC_SUBST(MYSPELL_CFLAGS)
 AC_SUBST(MYSPELL_LIBS)
+AM_CONDITIONAL(WITH_SYSTEM_MYSPELL, test "x$have_system_myspell" = "xtrue")
 
 check_aspell=yes
 build_aspell=no
