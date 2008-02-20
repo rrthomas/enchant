@@ -417,8 +417,8 @@ int morphcmp(const char * s, const char * t)
 {
     int se;
     int te;
-    char * sl;
-    char * tl;    
+    const char * sl;
+    const char * tl;    
     const char * olds;
     const char * oldt;
     if (!s || !t) return 1;
@@ -515,7 +515,7 @@ int fieldlen(const char * r)
 char * copy_field(char * dest, const char * morph, const char * var)
 {
     if (!morph) return NULL;
-    char * beg = strstr(morph, var);
+    const char * beg = strstr(morph, var);
     if (beg) {
        char * d = dest;
        for (beg += MORPH_TAG_LEN; *beg != ' ' && *beg != '\t' &&

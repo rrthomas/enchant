@@ -1258,6 +1258,7 @@ char * Hunspell::cat_result(char * result, char * st)
         strcat(result, st);
         free(st);
     }
+    return result;
 }
 
 int Hunspell::analyze(char*** slst, const char * word)
