@@ -295,20 +295,6 @@ init_enchant_provider (void)
 {
 	EnchantProvider *provider;
 	
-#if defined(_WIN32)
-    char* szModule;
-
-   	szModule = enchant_get_registry_value ("Aspell", "Module");
-    if(szModule)
-    {
-        WCHAR* wszModule;
-
-	    wszModule = g_utf8_to_utf16 (szModule, -1, NULL, NULL, NULL);
-        LoadLibrary(wszModule);
-        g_free(wszModule);
-    }
-#endif
-
 	provider = g_new0 (EnchantProvider, 1);
 	provider->dispose = aspell_provider_dispose;
 	provider->request_dict = aspell_provider_request_dict;
@@ -327,6 +313,130 @@ init_enchant_provider (void)
 
 	return provider;
 }
+
+
+#if defined(_WIN32)
+
+static WCHAR* GetDirectoryOfThisLibrary()
+{
+	WCHAR dll_path[MAX_PATH];
+    gchar* utf8_dll_path;
+    gchar* utf8_prefix;
+    gunichar2* utf16_prefix;
+
+    if(!GetModuleFileName(s_hModule,dll_path,MAX_PATH))
+        { /* unable to determine filename of this library */
+            return NULL;
+        }
+	utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
+	utf8_prefix = g_path_get_dirname(utf8_dll_path);
+	g_free(utf8_dll_path);
+
+    utf16_prefix = g_utf8_to_utf16 (utf8_prefix, -1, NULL, NULL, NULL);
+	g_free(utf8_prefix);
+
+    return utf16_prefix;
+}
+
+static HMODULE LoadLibraryFromPath(const WCHAR* path, const WCHAR* libraryName)
+{
+    HMODULE h;
+	WCHAR* wszFullLibraryPath;
+    size_t fullLibraryPathLen;
+
+    fullLibraryPathLen = wcslen(path) +  1 /* '\\' */+ wcslen(libraryName);
+    wszFullLibraryPath = g_new0(WCHAR, fullLibraryPathLen + 1);
+
+    wcscpy(wszFullLibraryPath, path);
+    wcscat(wszFullLibraryPath, L"\\");
+    wcscat(wszFullLibraryPath, libraryName);
+
+    h = LoadLibrary(wszFullLibraryPath);
+
+    g_free(wszFullLibraryPath);
+    return h;
+}
+
+static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR * uKey)
+{
+  	HKEY hKey;
+	unsigned long lType;	
+	DWORD dwSize;
+	WCHAR* wszValue = NULL;
+
+	if(RegOpenKeyEx(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+		{
+			/* Determine size of string */
+			if(RegQueryValueEx( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
+				{
+					wszValue = g_new0(WCHAR, dwSize + 1);
+					RegQueryValueEx(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
+				}
+		}
+
+	return wszValue;
+}
+#endif
+
+ENCHANT_MODULE_EXPORT(void)
+configure_enchant_provider(EnchantProvider * me, const char *dir_name)
+{
+#if defined(_WIN32)
+    const WCHAR* aspell_module_name = L"aspell-15.dll";
+    HMODULE aspell_module = NULL;
+    char* szModule;
+
+    /* first try load from registry path */
+   	szModule = enchant_get_registry_value ("Aspell", "Module");
+    if(szModule)
+    {
+        WCHAR* wszModule;
+
+	    wszModule = g_utf8_to_utf16 (szModule, -1, NULL, NULL, NULL);
+        aspell_module = LoadLibrary(wszModule);
+        g_free(wszModule);
+    }
+
+    if (aspell_module == NULL)
+        {
+            /* next try load from aspell registry path */
+            WCHAR* wszDirectory = GetRegistryValue (HKEY_LOCAL_MACHINE, L"Software\\Aspell", L"Path");
+            if(wszDirectory)
+                {
+                    aspell_module = LoadLibraryFromPath(wszDirectory, aspell_module_name);
+                    g_free(wszDirectory);
+                }
+        }
+
+    if (aspell_module == NULL)
+        {
+            /* then try from same directory as provider */
+            WCHAR* wszDirectory = GetDirectoryOfThisLibrary();
+            if(wszDirectory)
+                {
+                    aspell_module = LoadLibraryFromPath(wszDirectory, aspell_module_name);
+                    g_free(wszDirectory);
+                }
+        }
+
+    if (aspell_module == NULL) 
+        {
+            /* then try default lookup */
+            aspell_module = LoadLibrary(aspell_module_name);
+        }
+
+    if (aspell_module == NULL) 
+        {
+            /* we can't seem to load aspell. Avoid late binding problems later */
+            g_warning("Unable to load library aspell-15.dll.");
+            me->request_dict = NULL;
+            me->dispose_dict = NULL;
+            me->list_dicts = NULL;
+        }
+#endif
+
+}
+
 
 #ifdef __cplusplus
 }
