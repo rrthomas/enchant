@@ -92,6 +92,12 @@ typedef struct str_enchant_session
 	EnchantProvider * provider;
 } EnchantSession;
 
+typedef struct str_enchant_dict_private_data
+{
+	unsigned int reference_count;
+	EnchantSession* session;
+} EnchantDictPrivateData;
+
 typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
 typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider, const char * module_dir);
 
@@ -612,7 +618,7 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 	g_return_if_fail (err);
 	g_return_if_fail (g_utf8_validate(err, -1, NULL));
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 
 	enchant_session_clear_error (session);
 	session->error = g_strdup (err);	
@@ -635,8 +641,7 @@ enchant_dict_get_error (EnchantDict * dict)
 
 	g_return_val_if_fail (dict, NULL);
 	
-	session = (EnchantSession*)dict->enchant_private_data;
-
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	return session->error;
 }
 
@@ -665,7 +670,7 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	g_return_val_if_fail (len, -1);
 	g_return_val_if_fail (g_utf8_validate(word, len, NULL),-1);
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
 	/* first, see if it's to be excluded*/
@@ -699,7 +704,7 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 	EnchantSession * session;
 	size_t i, j;
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 
 	for(i = 0; i < n_new_suggs; i++)
 		{
@@ -743,7 +748,7 @@ enchant_dict_get_good_suggestions(EnchantDict * dict,
 	size_t i, n_filtered_suggs;
 	char ** filtered_suggs;
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 
 	filtered_suggs = g_new0 (char *, n_suggs + 1);
 	n_filtered_suggs = 0;
@@ -795,7 +800,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 	g_return_val_if_fail (len, NULL);
 	g_return_val_if_fail (g_utf8_validate(word, len, NULL), NULL);
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 	/* Check for suggestions from provider dictionary */
 	if (dict->suggest) 
@@ -882,7 +887,7 @@ enchant_dict_add (EnchantDict * dict, const char *const word,
 	g_return_if_fail (len);
 	g_return_if_fail (g_utf8_validate(word, len, NULL));
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 	enchant_session_add_personal (session, word, len);
 	enchant_session_remove_exclude (session, word, len);
@@ -943,7 +948,7 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 	g_return_if_fail (len);
 	g_return_if_fail (g_utf8_validate(word, len, NULL));
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
 	enchant_session_add (session, word, len);
@@ -972,7 +977,7 @@ enchant_dict_is_added (EnchantDict * dict, const char *const word,
 	g_return_val_if_fail (len, 0);
 	g_return_val_if_fail (g_utf8_validate(word, len, NULL), 0);
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
 	return enchant_session_contains (session, word, len);
@@ -1016,7 +1021,7 @@ enchant_dict_remove (EnchantDict * dict, const char *const word,
 	g_return_if_fail (len);
 	g_return_if_fail (g_utf8_validate(word, len, NULL));
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
 	enchant_session_remove_personal (session, word, len);
@@ -1048,7 +1053,7 @@ enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
 	g_return_if_fail (len);
 	g_return_if_fail (g_utf8_validate(word, len, NULL));
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
 	enchant_session_remove (session, word, len);
@@ -1075,7 +1080,7 @@ enchant_dict_is_removed (EnchantDict * dict, const char *const word,
 	g_return_val_if_fail (len, 0);
 	g_return_val_if_fail (g_utf8_validate(word, len, NULL), 0);
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
 	return enchant_session_exclude (session, word, len);
@@ -1116,7 +1121,7 @@ enchant_dict_store_replacement (EnchantDict * dict,
 	g_return_if_fail (g_utf8_validate(mis, mis_len, NULL));
 	g_return_if_fail (g_utf8_validate(cor, cor_len, NULL));
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 	
 	/* if it's not implemented, it's not worth emulating */
@@ -1138,7 +1143,7 @@ enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 
 	g_return_if_fail (dict);
 	g_return_if_fail (string_list);
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 	g_strfreev(string_list);
 }
@@ -1180,7 +1185,7 @@ enchant_dict_describe (EnchantDict * dict,
 	g_return_if_fail (dict);
 	g_return_if_fail (fn);
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 	provider = session->provider;
 
@@ -1495,7 +1500,7 @@ enchant_dict_destroyed (gpointer data)
 	g_return_if_fail (data);
 	
 	dict = (EnchantDict *) data;
-	session = (EnchantSession*)dict->enchant_private_data;
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	owner = session->provider;
 	
 	if (owner && owner->dispose_dict) 
@@ -1605,6 +1610,7 @@ ENCHANT_MODULE_EXPORT (EnchantDict *)
 enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 {
 	EnchantSession *session;
+	EnchantDictPrivateData *enchant_dict_private_data;
 	EnchantDict *dict = NULL;
 
 	g_return_val_if_fail (broker, NULL);
@@ -1614,6 +1620,7 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 
 	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) pwl);
 	if (dict) {
+		((EnchantDictPrivateData*)dict->enchant_private_data)->reference_count++;
 		return dict;
 	}
 
@@ -1631,7 +1638,11 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 	session->is_pwl = 1;
 
 	dict = g_new0 (EnchantDict, 1);
-	dict->enchant_private_data = (void *)session;
+	enchant_dict_private_data = g_new0 (EnchantDictPrivateData, 1);
+	enchant_dict_private_data->reference_count = 1;
+	enchant_dict_private_data->session = session;
+	dict->enchant_private_data = (void *)enchant_dict_private_data;
+	
 
 	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (pwl), dict);
 
@@ -1646,6 +1657,7 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 
 	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
 	if (dict) {
+		((EnchantDictPrivateData*)dict->enchant_private_data)->reference_count++;
 		return dict;
 	}
 
@@ -1662,9 +1674,13 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 					if (dict)
 						{
 							EnchantSession *session;
+							EnchantDictPrivateData *enchant_dict_private_data;
 	
 							session = enchant_session_new (provider, tag);
-							dict->enchant_private_data = (void*)session;
+							enchant_dict_private_data = g_new0 (EnchantDictPrivateData, 1);
+							enchant_dict_private_data->reference_count = 1;
+							enchant_dict_private_data->session = session;
+							dict->enchant_private_data = (void *)enchant_dict_private_data;
 							g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (tag), dict);
 							break;
 						}
@@ -1825,18 +1841,24 @@ ENCHANT_MODULE_EXPORT (void)
 enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 {
 	EnchantSession * session;
+	EnchantDictPrivateData * dict_private_data;
 
 	g_return_if_fail (broker);
 	g_return_if_fail (dict);
 
 	enchant_broker_clear_error (broker);
 
-	session = (EnchantSession*)dict->enchant_private_data;
+	dict_private_data = (EnchantDictPrivateData*)dict->enchant_private_data;
+	dict_private_data->reference_count--;
+	if(dict_private_data->reference_count == 0)
+		{
+			session = dict_private_data->session;
 	
-	if (session->provider)
-		g_hash_table_remove (broker->dict_map, session->language_tag);
-	else
-		g_hash_table_remove (broker->dict_map, session->personal_filename);
+			if (session->provider)
+				g_hash_table_remove (broker->dict_map, session->language_tag);
+			else
+				g_hash_table_remove (broker->dict_map, session->personal_filename);
+		}
 }
 
 static int

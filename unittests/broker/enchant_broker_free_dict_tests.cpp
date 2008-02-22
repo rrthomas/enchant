@@ -109,6 +109,15 @@ TEST_FIXTURE(EnchantBrokerFreeDictTestFixture,
     CHECK_EQUAL((void*)NULL, (void*)enchant_broker_get_error(_broker));
 }
 
+TEST_FIXTURE(EnchantBrokerFreeDictTestFixture, 
+             EnchantBrokerFreeDict_HasTwoInstances_NoCrash)
+{
+    EnchantDict* dictionary1 = enchant_broker_request_dict(_broker, "en-GB");
+    EnchantDict* dictionary2 = enchant_broker_request_dict(_broker, "en-GB");
+    enchant_broker_free_dict(_broker, dictionary1);
+    enchant_broker_free_dict(_broker, dictionary2);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerFreeDictTestFixture, 
