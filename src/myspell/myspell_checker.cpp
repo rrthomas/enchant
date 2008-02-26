@@ -95,6 +95,56 @@ myspell_checker_get_prefix (void)
 #endif
 }
 
+#if defined(_WIN32)
+static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR * uKey)
+{
+  	HKEY hKey;
+	unsigned long lType;	
+	DWORD dwSize;
+	WCHAR* wszValue = NULL;
+
+	if(RegOpenKeyEx(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+		{
+			/* Determine size of string */
+			if(RegQueryValueEx( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
+				{
+					wszValue = g_new0(WCHAR, dwSize + 1);
+					RegQueryValueEx(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
+				}
+		}
+
+	return wszValue;
+}
+
+static char * 
+myspell_checker_get_open_office_dicts_dir(void)
+{
+    WCHAR* wszDirectory;
+    char* open_office_dir, * open_office_dicts_dir;
+
+    /*start by trying current user*/
+    wszDirectory = GetRegistryValue (HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\soffice.exe", L"Path");
+    if(wszDirectory == NULL)
+    {
+        /*next try local machine*/
+        wszDirectory = GetRegistryValue (HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\soffice.exe", L"Path");
+    }
+
+    if(wszDirectory == NULL)
+    {
+        return NULL;
+    }
+
+    else {
+       	open_office_dir = g_utf16_to_utf8 ((gunichar2*)wszDirectory, -1, NULL, NULL, NULL);
+		open_office_dicts_dir = g_build_filename(open_office_dir, "share", "dict", "ooo", NULL);
+        g_free(wszDirectory);
+        g_free(open_office_dir);
+        return open_office_dicts_dir;
+    }
+}
+#endif
+
 static bool
 g_iconv_is_valid(GIConv i)
 {
@@ -211,7 +261,20 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 		g_free (myspell_prefix);
 	}
 
-	g_free(dict_dic);
+#if defined(_WIN32)
+    {
+	char* open_office_dicts_dir = myspell_checker_get_open_office_dicts_dir ();
+	if (open_office_dicts_dir) 
+        {
+		    tmp = g_build_filename (open_office_dicts_dir, dict_dic, NULL);
+		    names.push_back (tmp);
+		    g_free (tmp);
+		    g_free (open_office_dicts_dir);
+	    }
+    }
+#endif
+
+    g_free(dict_dic);
 }
 
 static char *
@@ -298,7 +361,10 @@ myspell_provider_enum_dicts (const char * const directory,
 
 				int hit = dir_entry.rfind (".dic");
 				if (hit != -1) {
-					out_dicts.push_back (dir_entry.substr (0, hit));
+                    /* don't include hyphenation dictionaries */
+                    if(dir_entry.compare (0, 5, "hyph_") != 0){
+					    out_dicts.push_back (dir_entry.substr (0, hit));
+                    }
 				}
 			}
 		}
@@ -330,6 +396,14 @@ myspell_provider_list_dicts (EnchantProvider * me,
 		myspell_provider_enum_dicts (myspell_prefix, dicts);
 		g_free (myspell_prefix);
 	}
+
+#if defined(_WIN32)
+    char * open_office_dicts_dir = myspell_checker_get_open_office_dicts_dir ();
+	if (open_office_dicts_dir) {
+		myspell_provider_enum_dicts (open_office_dicts_dir, dicts);
+		g_free (open_office_dicts_dir);
+	}
+#endif
 
 	if (dicts.size () > 0) {
 		dictionary_list = g_new0 (char *, dicts.size() + 1);
