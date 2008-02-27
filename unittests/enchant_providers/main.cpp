@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     int result = 0;
     for(int i=1; i < argc; ++i)
     {
-        int resultT = Test(argv[argc]);
+        int resultT = Test(argv[i]);
         if(resultT != 0)
         {
             result = resultT;
@@ -81,6 +81,7 @@ char* GetErrorMessage(EnchantProvider* provider)
 //path is provider filename or directory containing providers
 int Test(char* path)
 {
+    assert(path);
     if (g_file_test (path, (GFileTest)(G_FILE_TEST_IS_DIR))) 
 	{
         return TestProvidersInDirectory(path);
@@ -98,10 +99,7 @@ int TestProvidersInDirectory(char * dir_name)
 	size_t entry_len, g_module_suffix_len;
 	
 	char * filename;
-    int result;
-	
-	EnchantProviderInitFunc init_func;
-	EnchantPreConfigureFunc conf_func;
+    int result = 0;
 	
 	dir = g_dir_open (dir_name, 0, NULL);
 	if (!dir) 
@@ -126,6 +124,7 @@ int TestProvidersInDirectory(char * dir_name)
 		}
 	
 	g_dir_close (dir);
+    return result;
 }
 
 int TestProvider(char* filename)
