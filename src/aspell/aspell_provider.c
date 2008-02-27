@@ -191,7 +191,6 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	
 	if (pspell_error_number (spell_error) != 0)
 		{
-			enchant_provider_set_error (me, pspell_error_message(spell_error));
 			return NULL;
 		}
 	
