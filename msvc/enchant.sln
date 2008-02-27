@@ -7,112 +7,112 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant", "libenchant.vc
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_aspell", "libenchant_aspell.vcproj", "{E948850F-C9DA-4824-876D-4FE97B88E79F}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_hspell", "libenchant_hspell.vcproj", "{AA6839DF-19CB-49DD-8258-ABB86B5B0428}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_uspell", "libenchant_uspell.vcproj", "{6FA58A42-075E-4671-BBB4-F7AA8061F839}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_ispell", "libenchant_ispell.vcproj", "{5DC9EE15-B080-4964-96CC-1BDC90BB873A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_myspell", "libenchant_myspell.vcproj", "{70927F4C-0446-4EF3-9F65-FA78AC210506}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_voikko", "libenchant_voikko.vcproj", "{5612C360-309B-4E73-8512-6A1265590B90}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_zemberek", "libenchant_zemberek.vcproj", "{B35929B8-374C-442B-A0F5-494AD69EDE1A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-enchant", "test-enchant.vcproj", "{3CC7AE6D-FEA3-4EB3-98FA-8AB038541411}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test-enchantxx", "test-enchantxx.vcproj", "{001DB089-3C83-4384-BB2B-1FE37D091B04}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enchant", "enchant.vcproj", "{FE3CD71B-7742-46DD-AAE9-3CCAA110B4DB}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enchant-lsmod", "enchant-lsmod.vcproj", "{8B0F0A17-CEB4-42DF-B97E-375C60DB31E7}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unittest-enchant", "unittest-enchant.vcproj", "{44BF74D0-5462-4A3B-8768-61E0DEF81B7B}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
-		{A8F1C09A-A244-441B-804C-635106305056} = {A8F1C09A-A244-441B-804C-635106305056}
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+	ProjectSection(ProjectDependencies) = postProject
+		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
+		{A8F1C09A-A244-441B-804C-635106305056} = {A8F1C09A-A244-441B-804C-635106305056}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_mock_provider", "libenchant_mock_provider.vcproj", "{A8F1C09A-A244-441B-804C-635106305056}"
@@ -122,24 +122,38 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libenchant_mock_provider", 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{A8947D89-B8C1-479C-8C2B-E0444D624E0E}"
-	ProjectSection(SolutionItems) = preProject
-		Build.win32.readme = Build.win32.readme
-	EndProjectSection
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		Build.win32.readme = Build.win32.readme
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enchant.Net", "..\src\bindings\Enchant.Net\Enchant.Net.csproj", "{249A514E-7212-485B-86D0-E0ACB8967A4C}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
 		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enchant.Net.Tests", "..\unittests\Enchant.Net.Tests\Enchant.Net.Tests.csproj", "{518F02B2-A542-44B3-A10D-CA8144268077}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
 		{5DC9EE15-B080-4964-96CC-1BDC90BB873A} = {5DC9EE15-B080-4964-96CC-1BDC90BB873A}
 		{70927F4C-0446-4EF3-9F65-FA78AC210506} = {70927F4C-0446-4EF3-9F65-FA78AC210506}
 		{E0DB6274-F44C-48E6-AE30-C00D59864569} = {E0DB6274-F44C-48E6-AE30-C00D59864569}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unittest-providers", "unittest-providers.vcproj", "{B38EE40E-078C-427E-82BB-AC517B720F97}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
 Global
@@ -285,21 +299,35 @@ Global
 		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Debug|Win32.Build.0 = Debug|Any CPU
 		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Release|Win32.ActiveCfg = Release|Any CPU
+		{249A514E-7212-485B-86D0-E0ACB8967A4C}.Release|Win32.Build.0 = Release|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{518F02B2-A542-44B3-A10D-CA8144268077}.Debug|Win32.Build.0 = Debug|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Release|Any CPU.Build.0 = Release|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{518F02B2-A542-44B3-A10D-CA8144268077}.Release|Win32.ActiveCfg = Release|Any CPU
+		{518F02B2-A542-44B3-A10D-CA8144268077}.Release|Win32.Build.0 = Release|Any CPU
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Debug|Win32.Build.0 = Debug|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Release|Any CPU.ActiveCfg = Release|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Release|Win32.ActiveCfg = Release|Win32
+		{B38EE40E-078C-427E-82BB-AC517B720F97}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
