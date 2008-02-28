@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -189,7 +190,11 @@ do_mode_l (FILE * out, EnchantDict * dict, GString * word, size_t lineCount)
 static int
 is_word_char (gunichar uc, size_t n)
 {
-	switch (g_unichar_type(uc)) {
+	GUnicodeType type;
+
+	type = g_unichar_type(uc);
+
+	switch (type) {
 	case G_UNICODE_MODIFIER_LETTER:
 	case G_UNICODE_LOWERCASE_LETTER:
 	case G_UNICODE_TITLECASE_LETTER:
@@ -207,6 +212,10 @@ is_word_char (gunichar uc, size_t n)
 		if ((n > 0) && (uc == g_utf8_get_char("'"))) {
 		        return 1;  /** Char ' is accepted only within a word. */
 		}
+		else if ((n > 0) && (type == G_UNICODE_DASH_PUNCTUATION)) {
+			return 1; /* hyphens only accepted within a word. */
+		}
+
 		return 0;
 	}
 }
