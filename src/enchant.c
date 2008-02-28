@@ -254,7 +254,7 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 
 	if(RegOpenKeyEx(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 		{
-			// Determine size of string
+			/* Determine size of string */
 			if(RegQueryValueEx( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
 				{
 					wszValue = g_new0(WCHAR, dwSize + 1);
