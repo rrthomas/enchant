@@ -333,46 +333,27 @@ fi
 
 AM_CONDITIONAL(WITH_HSPELL, test "$build_hspell" = yes)
 
-build_zemberek=no
+build_zemberek=yes
 
-#
-# disable building zemberek unless explicitly requested.
-# since it requires a running server, i'd prefer that this be an
-# "opt-in" backend, rather than an opt-out. this attitude may change.
-#
-AC_ARG_ENABLE(zemberek, [  --disable-zemberek     enable the zemberek backend (https://zemberek.dev.java.net/) [default=no]], build_zemberek="$enableval", build_zemberek=no)
-AC_ARG_WITH(zemberek-server, [  --with-zemberek-server=HOST
-                          specify a zemberek server other than the default.], zemberek_server="$withval", )
-AC_ARG_WITH(zemberek-server-port, [  --with-zemberek-server-port=PORT
-                          specify a zemberek server port other than the default.], zemberek_port="$withval", )
+AC_ARG_ENABLE(zemberek, [  --disable-zemberek     enable the zemberek backend [default=auto]], build_zemberek="$enableval", build_zemberek=yes)
 
 if test "x$have_cxx" = "xno"; then
    build_zemberek=no
 fi
-
-if test "x$build_zemberek" != "xno"; then
-   AC_MSG_NOTICE(checking required headers for zemberek backend)
-   AC_CHECK_HEADERS([sys/socket.h netinet/in.h netdb.h], [], [build_zemberek=no; break])
-   if test "x$build_zemberek" = "xno"; then
-      AC_MSG_WARN([Some headers are missing for zemberek backend])
-   fi
+AC_MSG_CHECKING([For DBus-Glib >= 0.62])
+if pkg-config --atleast-version=0.62 dbus-glib-1; then
+	ZEMBEREK_CFLAGS=`pkg-config --cflags dbus-glib-1`
+	ZEMBEREK_LIBS=`pkg-config --libs dbus-glib-1`
+else
+	build_zemberek=no
 fi
 
-if test "x$build_zemberek" != "xno"; then
-   ZEMBEREK_SERVER=
-   if test "x$zemberek_server" != "x"; then
-      ZEMBEREK_SERVER="-DZEMBEREK_HOST='\"$zemberek_server\"'"
-   fi
+AC_SUBST(ZEMBEREK_CFLAGS)
+AC_SUBST(ZEMBEREK_LIBS)
 
-   ZEMBEREK_PORT=
-   if test "x$zemberek_port" != "x"; then
-      ZEMBEREK_PORT="-DZEMBEREK_PORT=$zemberek_port"
-   fi
-
-   ZEMBEREK_CFLAGS="$ZEMBEREK_SERVER $ZEMBEREK_PORT "$ZEMBEREK_CFLAGS
-   AC_SUBST(ZEMBEREK_CFLAGS)
-fi
 AM_CONDITIONAL(WITH_ZEMBEREK, test "x$build_zemberek" = "xyes")
+
+zemberek_dir=${datadir}/enchant/zemberek
 
 dnl =======================================================================================
 
