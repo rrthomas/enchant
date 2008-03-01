@@ -120,6 +120,31 @@ _enchant_ensure_private_datadir (void)
 	g_free (config_dir);
 }
 
+char *
+enchant_get_user_dir (void)
+{
+	char * base_dir;
+	char * user_dir;
+
+#ifdef _WIN32
+	base_dir = g_strdup (g_get_user_config_dir());
+#endif
+
+	if (!base_dir)
+		base_dir = enchant_get_user_home_dir ();
+
+	if(base_dir)
+	{
+		user_dir = 	g_build_filename (base_dir,
+										  ENCHANT_USER_PATH_EXTENSION,
+										  NULL);
+		g_free(base_dir);
+		return user_dir;
+	}
+	else
+		return NULL;
+}
+
 /* place to look for system level providers */
 static char *
 enchant_get_module_dir (void)
@@ -132,7 +157,7 @@ enchant_get_module_dir (void)
 #endif
 
 	/* Look for explicitly set registry values */
-	module_dir = enchant_get_registry_value ("Config", "Module_Dir");
+	module_dir = enchant_get_registry_value_ex (0, "Config", "Module_Dir");
 	if (module_dir)
 				return module_dir;
 
@@ -150,6 +175,19 @@ enchant_get_module_dir (void)
 #else
 	return NULL;
 #endif
+}
+
+static char *
+enchant_get_user_module_dir (void)
+{
+	char* user_module_dir;
+
+	char* base_dir = NULL;
+
+	user_module_dir = enchant_get_registry_value_ex (1, "Config", "Module_Dir");
+	if (user_module_dir)
+		return user_module_dir;
+	return enchant_get_user_dir();
 }
 
 static char *
@@ -187,7 +225,7 @@ enchant_get_conf_dir (void)
  * Returns: the user's enchant directory, or %null. Returned value
  * must be free'd.
  *
- * The enchant directory is the place where enchant finds user providers and 
+ * The enchant directory is the place where enchant finds user 
  * dictionaries and settings related to enchant
  *
  * This API is private to the providers.
@@ -203,25 +241,8 @@ enchant_get_user_config_dir (void)
 	if (user_config)
 		return user_config;
 
-#ifdef _WIN32
-	base_dir = g_strdup (g_get_user_config_dir());
-#endif
-
-	if (!base_dir)
-		base_dir = enchant_get_user_home_dir ();
-
-	if(base_dir)
-	{
-		user_config = 	g_build_filename (base_dir,
-										  ENCHANT_USER_PATH_EXTENSION,
-										  NULL);
-		g_free(base_dir);
-		return user_config;
+	return enchant_get_user_dir();
 	}
-	else
-		return NULL;
-}
-
 
 /*
  * Returns: the value if it exists and is not an empty string ("") or %null otherwise. Must be free'd.
@@ -1363,7 +1384,7 @@ enchant_load_providers (EnchantBroker * broker)
 	/* load USER providers first. since the GSList is ordered,
 	   this intentionally gives preference to USER providers */
 
-	user_dir = enchant_get_user_config_dir ();
+	user_dir = enchant_get_user_module_dir ();
 
 	if (user_dir) 
 		{
