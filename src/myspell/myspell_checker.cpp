@@ -315,9 +315,15 @@ MySpellChecker::requestDictionary(const char *szLang)
 	aff = g_strdup(dic);
 	int len_dic = strlen(dic);
 	strcpy(aff+len_dic-3, "aff");
-	myspell = new Hunspell(aff, dic);
+	if (g_file_test(aff, G_FILE_TEST_EXISTS))
+	{
+		myspell = new Hunspell(aff, dic);
+	}
 	g_free(dic);
 	g_free(aff);
+	if(myspell == NULL){
+		return false;
+	}
 	char *enc = myspell->get_dic_encoding();
 
 	m_translate_in = g_iconv_open(enc, "UTF-8");
@@ -369,10 +375,19 @@ myspell_provider_enum_dicts (const char * const directory,
 
 				int hit = dir_entry.rfind (".dic");
 				if (hit != -1) {
-                    /* don't include hyphenation dictionaries */
-                    if(dir_entry.compare (0, 5, "hyph_") != 0){
-					    out_dicts.push_back (dir_entry.substr (0, hit));
-                    }
+					/* don't include hyphenation dictionaries
+					   and require .aff file to be present*/
+					if(dir_entry.compare (0, 5, "hyph_") != 0)
+					{
+						std::string name(dir_entry.substr (0, hit));
+						std::string affFileName(name + ".aff");
+						char * aff = g_build_filename(directory, affFileName.c_str(), NULL);
+						if (g_file_test(aff, G_FILE_TEST_EXISTS))
+						{
+							out_dicts.push_back (dir_entry.substr (0, hit));
+						}
+						g_free(aff);
+					}
 				}
 			}
 		}
@@ -475,7 +490,12 @@ myspell_provider_dictionary_exists (struct str_enchant_provider * me,
 	s_buildHashNames (names, tag);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
-			return 1;
+		{
+			std::string aff(names[i]);
+			aff.replace(aff.end() - 3, aff.end(), "aff");
+			if (g_file_test(aff.c_str(), G_FILE_TEST_EXISTS))
+				return 1;
+		}
 	}
 
 	return 0;
