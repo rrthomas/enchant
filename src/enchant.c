@@ -120,7 +120,7 @@ _enchant_ensure_private_datadir (void)
 	g_free (config_dir);
 }
 
-char *
+static char *
 enchant_get_user_dir (void)
 {
 	char * base_dir;
@@ -182,8 +182,6 @@ enchant_get_user_module_dir (void)
 {
 	char* user_module_dir;
 
-	char* base_dir = NULL;
-
 	user_module_dir = enchant_get_registry_value_ex (1, "Config", "Module_Dir");
 	if (user_module_dir)
 		return user_module_dir;
@@ -235,14 +233,12 @@ enchant_get_user_config_dir (void)
 {
 	char* user_config;
 
-	char* base_dir = NULL;
-
 	user_config = enchant_get_registry_value_ex (1, "Config", "Data_Dir");
 	if (user_config)
 		return user_config;
 
 	return enchant_get_user_dir();
-	}
+}
 
 /*
  * Returns: the value if it exists and is not an empty string ("") or %null otherwise. Must be free'd.

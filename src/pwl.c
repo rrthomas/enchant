@@ -188,7 +188,6 @@ static void enchant_trie_matcher_pushpath(EnchantTrieMatcher* matcher,char* newc
 static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num);
 
 static int edit_dist(const char* word1, const char* word2);
-static char* soundex(const char* word);
 
 static void
 enchant_lock_file (FILE * f)
@@ -476,7 +475,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 		}
 }
 
-int enchant_pwl_contains(EnchantPWL *pwl, const char *const word, size_t len)
+static int enchant_pwl_contains(EnchantPWL *pwl, const char *const word, size_t len)
 {
 	EnchantTrieMatcher* matcher;
 	int count = 0;
@@ -489,7 +488,7 @@ int enchant_pwl_contains(EnchantPWL *pwl, const char *const word, size_t len)
 	return (count == 0 ? 0 : 1);
 }
 
-int enchant_is_all_caps(const char*const word, size_t len)
+static int enchant_is_all_caps(const char*const word, size_t len)
 {
 	const char* it;
 	int hasCap = 0;
@@ -507,13 +506,15 @@ int enchant_is_all_caps(const char*const word, size_t len)
 					case G_UNICODE_TITLECASE_LETTER:
 					case G_UNICODE_LOWERCASE_LETTER:
 						return 0;
+				default:
+					break;
 				}
 		}
 
 	return hasCap;
 }
 
-int enchant_is_title_case(const char*const word, size_t len)
+static int enchant_is_title_case(const char*const word, size_t len)
 {
 	gunichar ch;
 	GUnicodeType type;
@@ -539,7 +540,7 @@ int enchant_is_title_case(const char*const word, size_t len)
 	return 1;
 }
 
-gchar* enchant_utf8_strtitle(const gchar*str, gssize len)
+static gchar* enchant_utf8_strtitle(const gchar*str, gssize len)
 {
 	gunichar title_case_char;
 	gchar* result;
@@ -607,9 +608,9 @@ static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher)
 	(*((int*)(matcher->cbdata)))++;
 }
 
-void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl, 
-												  const char *const word, size_t len, 
-												  EnchantSuggList* suggs_list)
+static void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl, 
+							 const char *const word, size_t len, 
+							 EnchantSuggList* suggs_list)
 {
 	size_t i;
 	gchar* (*utf8_case_convert_function)(const gchar*str, gssize len);
@@ -645,7 +646,7 @@ void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl,
 		}
 }
 
-int best_distance(const char*const*const suggs, const char *const word, size_t len)
+static int best_distance(const char*const*const suggs, const char *const word, size_t len)
 {
 	int best_dist;
 	const char*const* sugg_it;
