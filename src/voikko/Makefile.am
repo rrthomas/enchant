@@ -4,7 +4,7 @@ else
 target_lib =
 endif
 
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) @VOIKKO_INC@ -D_ENCHANT_BUILD=1
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(CC_WARN_CFLAGS) @VOIKKO_INC@ -D_ENCHANT_BUILD=1
 
 voikko_LTLIBRARIES = $(target_lib)
 voikkodir= $(libdir)/enchant

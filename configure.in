@@ -70,6 +70,26 @@ AC_DEFUN([ENCHANT_CC_TRY_FLAG], [
   AC_MSG_RESULT([$enchant_cc_flag])
 ])
 
+dnl check compiler flags
+AC_DEFUN([ENCHANT_CXX_TRY_FLAG], [
+  AC_MSG_CHECKING([whether $CXX supports $1])
+
+  AC_LANG_PUSH(C++)
+  enchant_save_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS $1"
+
+  AC_COMPILE_IFELSE([ ], [enchant_cc_flag=yes], [enchant_cc_flag=no])
+  CFLAGS="$enchant_save_CFLAGS"
+
+  if test "x$enchant_cc_flag" = "xyes"; then
+    ifelse([$2], , :, [$2])
+  else
+    ifelse([$3], , :, [$3])
+  fi
+  AC_MSG_RESULT([$enchant_cc_flag])
+  AC_LANG_POP(C++)
+])
+
 dnl Use lots of warning flags with with gcc and compatible compilers
 
 dnl Note: if you change the following variable, the cache is automatically
@@ -77,7 +97,7 @@ dnl skipped and all flags rechecked.  So there's no need to do anything
 dnl else.  If for any reason you need to force a recheck, just change
 dnl MAYBE_WARN in an ignorable way (like adding whitespace)
 
-MAYBE_WARN="-Wall -Wextra \
+CC_MAYBE_WARN="-Wall -Wextra \
 -Wsign-compare -Werror-implicit-function-declaration \
 -Wpointer-arith -Wwrite-strings -Wstrict-prototypes \
 -Wmissing-prototypes -Wmissing-declarations -Wnested-externs \
@@ -85,15 +105,15 @@ MAYBE_WARN="-Wall -Wextra \
 -Wstrict-aliasing=2 -Winit-self -Wunsafe-loop-optimizations \
 -Wdeclaration-after-statement -Wold-style-definition \
 -Wno-missing-field-initializers -Wno-unused-parameter \
--Wno-attributes -Wno-long-long -Winline"
+-Wno-attributes -Wno-long-long -Winline -fno-strict-aliasing"
 
 # invalidate cached value if MAYBE_WARN has changed
-if test "x$enchant_cv_warn_maybe" != "x$MAYBE_WARN"; then
+if test "x$enchant_cv_warn_maybe" != "x$CC_MAYBE_WARN"; then
 	unset enchant_cv_warn_cflags
 fi
-AC_CACHE_CHECK([for supported warning flags], enchant_cv_warn_cflags, [
+AC_CACHE_CHECK([for supported C warning flags], enchant_cv_warn_cflags, [
 	echo
-	WARN_CFLAGS=""
+	CC_WARN_CFLAGS=""
 
 	# Some warning options are not supported by all versions of
 	# gcc, so test all desired options against the current
@@ -106,19 +126,55 @@ AC_CACHE_CHECK([for supported warning flags], enchant_cv_warn_cflags, [
 	# options (-Wall and -Wextra) up front and the -Wno options
 	# last.
 
-	for W in $MAYBE_WARN; do
-		ENCHANT_CC_TRY_FLAG([$W], [WARN_CFLAGS="$WARN_CFLAGS $W"])
+	for W in $CC_MAYBE_WARN; do
+		ENCHANT_CC_TRY_FLAG([$W], [CC_WARN_CFLAGS="$CC_WARN_CFLAGS $W"])
 	done
 
-	enchant_cv_warn_cflags=$WARN_CFLAGS
-	enchant_cv_warn_maybe=$MAYBE_WARN
+	enchant_cv_warn_cflags=$CC_WARN_CFLAGS
+	enchant_cv_warn_maybe=$CC_MAYBE_WARN
 
-	AC_MSG_CHECKING([which warning flags were supported])])
-WARN_CFLAGS="$enchant_cv_warn_cflags"
-ENCHANT_CFLAGS="$ENCHANT_CFLAGS $WARN_CFLAGS"
+	AC_MSG_CHECKING([which C warning flags were supported])])
+CC_WARN_CFLAGS="$enchant_cv_warn_cflags"
+AC_SUBST(CC_WARN_CFLAGS)
 
-ENCHANT_CC_TRY_FLAG([-fno-strict-aliasing],
-		  [ENCHANT_CFLAGS="$ENCHANT_CFLAGS -fno-strict-aliasing"])
+CXX_MAYBE_WARN="-Wall -Wextra \
+-Wsign-compare \
+-Wpointer-arith -Wwrite-strings \
+-Wmissing-prototypes \
+-Wpacked -Wswitch-enum -Wmissing-format-attribute \
+-Wstrict-aliasing=2 -Winit-self -Wunsafe-loop-optimizations \
+-Wno-missing-field-initializers -Wno-unused-parameter \
+-Wno-attributes -Wno-long-long -Winline -fno-strict-aliasing"
+
+# invalidate cached value if MAYBE_WARN has changed
+if test "x$enchant_cxx_cv_warn_maybe" != "x$CXX_MAYBE_WARN"; then
+	unset enchant_cxx_cv_warn_cflags
+fi
+AC_CACHE_CHECK([for supported C++ warning flags], enchant_cxx_cv_warn_cflags, [
+	echo
+	CXX_WARN_CFLAGS=""
+
+	# Some warning options are not supported by all versions of
+	# gcc, so test all desired options against the current
+	# compiler.
+	#
+	# Note that there are some order dependencies
+	# here. Specifically, an option that disables a warning will
+	# have no net effect if a later option then enables that
+	# warnings, (perhaps implicitly). So we put some grouped
+	# options (-Wall and -Wextra) up front and the -Wno options
+	# last.
+
+	for W in $CXX_MAYBE_WARN; do
+		ENCHANT_CXX_TRY_FLAG([$W], [CXX_WARN_CFLAGS="$CXX_WARN_CFLAGS $W"])
+	done
+
+	enchant_cxx_cv_warn_cflags=$CXX_WARN_CFLAGS
+	enchant_cxx_cv_warn_cflags=$CXX_MAYBE_WARN
+
+	AC_MSG_CHECKING([which C++ warning flags were supported])])
+CXX_WARN_CFLAGS="$enchant_cxx_cv_warn_cflags"
+AC_SUBST(CXX_WARN_CFLAGS)
 
 AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
@@ -198,7 +254,7 @@ GLIB_LC_MESSAGES
 dnl ===========================================================================
 
 dnl binreloc
-AM_BINRELOC
+dnl AM_BINRELOC
 AM_CONDITIONAL(WITH_BINRELOC, test "x$br_cv_binreloc" = "xyes")
 
 build_ispell=yes

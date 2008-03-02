@@ -35,7 +35,7 @@ EXTRA_MYSPELL_FILES=$(COPIED_MYSPELL_FILES)
 endif
 
 
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(MYSPELL_CFLAGS) -D_ENCHANT_BUILD=1
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(MYSPELL_CFLAGS) $(CXX_WARN_CFLAGS) -D_ENCHANT_BUILD=1
 
 myspell_LTLIBRARIES = $(target_lib)
 myspelldir= $(libdir)/enchant

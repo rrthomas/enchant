@@ -4,7 +4,7 @@ else
 target_lib =
 endif
 
-AM_CPPFLAGS=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(HSPELL_CFLAGS) -D_ENCHANT_BUILD=1
+AM_CPPFLAGS=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(CC_WARN_CFLAGS) $(HSPELL_CFLAGS) -D_ENCHANT_BUILD=1
 
 hspell_LTLIBRARIES = $(target_lib)
 hspelldir= $(libdir)/enchant
