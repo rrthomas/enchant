@@ -21,6 +21,78 @@
 
 #include "enchant.h"
 #include "enchant-provider.h"
+#include <glib.h>
 
 EnchantProvider* GetProviderForTests();
 char* GetErrorMessage(EnchantProvider* provider);
+
+struct Provider_TestFixture
+{
+    EnchantProvider* _provider;
+
+    //Setup
+    Provider_TestFixture()
+    { 
+        _provider = GetProviderForTests();
+    }
+    //Teardown
+    ~Provider_TestFixture()
+    {
+    }
+
+    std::string Convert(const std::wstring & ws)
+    {
+        gchar* str = g_utf16_to_utf8((gunichar2*)ws.c_str(), (glong)ws.length(), NULL, NULL, NULL);
+        std::string s(str);
+        g_free(str);
+        return s;
+    }
+
+    std::wstring Convert(const std::string & s)
+    {
+        gunichar2* str = g_utf8_to_utf16(s.c_str(), (glong)s.length(), NULL, NULL, NULL);
+        std::wstring ws((wchar_t*)str);
+        g_free(str);
+        return ws;
+    }
+
+    EnchantDict* GetFirstAvailableDictionary()
+    {
+        EnchantDict* dict=NULL;        
+
+        // get the first dictionary listed as being available
+        if(_provider->list_dicts && _provider->request_dict)
+        {
+		    size_t n_dicts;
+
+	    	char ** dicts = (*_provider->list_dicts) (_provider, &n_dicts);
+		    for (size_t i = 0; i < n_dicts; i++)
+		    {
+   			    dict = (*_provider->request_dict) (_provider, dicts[i]);
+                break;
+            }
+            if (dicts && _provider->free_string_list)
+            {
+		        (*_provider->free_string_list) (_provider, dicts);
+            }
+        }
+        return dict;
+    }
+
+    EnchantDict* GetDictionary(const char* language)
+    {
+        if(_provider->request_dict)
+        {
+            return (*_provider->request_dict) (_provider, language);
+        }
+        return NULL;
+    }
+
+    virtual void ReleaseDictionary(EnchantDict* dict)
+    {
+        if (dict && _provider->dispose_dict)
+        {
+            _provider->dispose_dict(_provider, dict);
+        }
+    }
+};

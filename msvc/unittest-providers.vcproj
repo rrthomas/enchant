@@ -196,7 +196,35 @@
 				Name="Provider"
 				>
 				<File
+					RelativePath="..\unittests\enchant_providers\Provider\provider_describe_dict.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\unittests\enchant_providers\Provider\provider_dictionary_exists.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\unittests\enchant_providers\Provider\provider_identify_dict.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\unittests\enchant_providers\Provider\provider_list_dicts.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\unittests\enchant_providers\Provider\provider_request_dict.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Dictionary"
+				>
+				<File
+					RelativePath="..\unittests\enchant_providers\Dictionary\dictionary_check.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\unittests\enchant_providers\Dictionary\dictionary_suggest.cpp"
 					>
 				</File>
 			</Filter>
@@ -209,6 +237,18 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\unittests\enchant_providers\Readme.txt"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				ExcludedFromBuild="true"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+				/>
+			</FileConfiguration>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

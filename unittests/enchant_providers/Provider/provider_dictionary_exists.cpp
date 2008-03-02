@@ -24,44 +24,38 @@
 
 #include "../unittest_enchant_providers.h"
 
-struct ProviderRequestDictionary_TestFixture : Provider_TestFixture
+struct ProviderDictionaryExists_TestFixture : Provider_TestFixture
 {
-    EnchantDict* _dict;
     //Setup
-    ProviderRequestDictionary_TestFixture():_dict(NULL)
+    ProviderDictionaryExists_TestFixture()
     { 
     }
     //Teardown
-    ~ProviderRequestDictionary_TestFixture()
+    ~ProviderDictionaryExists_TestFixture()
     {
-	    if (_dict && _provider->dispose_dict)
-		    {
-                _provider->dispose_dict(_provider, _dict);
-		    }
     }
 };
 
-// request_dict is optional
+// dictionary_exists is optional
 
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 
-TEST_FIXTURE(ProviderRequestDictionary_TestFixture, 
-             ProviderRequestDictionary_ProviderDoesNotHave_ReturnsNull)
+TEST_FIXTURE(ProviderDictionaryExists_TestFixture, 
+             ProviderDictionaryExists_ProviderDoesNotHave_ReturnsFalse)
 {
-	if (_provider->request_dict)
+	if (_provider->dictionary_exists)
 		{
-			_dict = (*_provider->request_dict) (_provider, "zxx"); /*zxx is no linguistic content*/
-			CHECK_EQUAL((void*)NULL, _dict);
+			CHECK_EQUAL(0, (*_provider->dictionary_exists) (_provider, "zxx")); /*zxx is no linguistic content*/
 		}
 }
 
-TEST_FIXTURE(ProviderRequestDictionary_TestFixture, 
-             ProviderRequestDictionary_ProviderDoesNotHave_ProviderDoesNotSetError)
+TEST_FIXTURE(ProviderDictionaryExists_TestFixture, 
+             ProviderDictionaryExists_ProviderDoesNotHave_ProviderDoesNotSetError)
 {
-	if (_provider->request_dict)
+	if (_provider->dictionary_exists)
 		{
-			_dict = (*_provider->request_dict) (_provider, "zxx"); /*zxx is no linguistic content*/
+			int exists = (*_provider->dictionary_exists) (_provider, "zxx"); /*zxx is no linguistic content*/
 			CHECK_EQUAL((void*)NULL, GetErrorMessage(_provider));
 		}
 }

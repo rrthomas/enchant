@@ -21,47 +21,48 @@
 
 #include <UnitTest++.h>
 #include <enchant-provider.h>
+#include <glib.h>
 
 #include "../unittest_enchant_providers.h"
 
-struct ProviderRequestDictionary_TestFixture : Provider_TestFixture
+struct ProviderDescribe_TestFixture : Provider_TestFixture
 {
-    EnchantDict* _dict;
     //Setup
-    ProviderRequestDictionary_TestFixture():_dict(NULL)
+    ProviderDescribe_TestFixture()
     { 
     }
     //Teardown
-    ~ProviderRequestDictionary_TestFixture()
+    ~ProviderDescribe_TestFixture()
     {
-	    if (_dict && _provider->dispose_dict)
-		    {
-                _provider->dispose_dict(_provider, _dict);
-		    }
     }
 };
 
-// request_dict is optional
+// describe is mandatory
 
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 
-TEST_FIXTURE(ProviderRequestDictionary_TestFixture, 
-             ProviderRequestDictionary_ProviderDoesNotHave_ReturnsNull)
+TEST_FIXTURE(ProviderDescribe_TestFixture, 
+             ProviderDescribe_FunctionExists)
 {
-	if (_provider->request_dict)
-		{
-			_dict = (*_provider->request_dict) (_provider, "zxx"); /*zxx is no linguistic content*/
-			CHECK_EQUAL((void*)NULL, _dict);
-		}
+    CHECK(_provider->describe != NULL);
 }
 
-TEST_FIXTURE(ProviderRequestDictionary_TestFixture, 
-             ProviderRequestDictionary_ProviderDoesNotHave_ProviderDoesNotSetError)
+TEST_FIXTURE(ProviderDescribe_TestFixture, 
+             ProviderDescribe_ReturnNonNull)
 {
-	if (_provider->request_dict)
-		{
-			_dict = (*_provider->request_dict) (_provider, "zxx"); /*zxx is no linguistic content*/
-			CHECK_EQUAL((void*)NULL, GetErrorMessage(_provider));
-		}
+    CHECK((*_provider->describe)(_provider) != NULL);
 }
+
+TEST_FIXTURE(ProviderDescribe_TestFixture, 
+             ProviderDescribe_ReturnNotEmpty)
+{
+    CHECK(strlen((*_provider->describe)(_provider)) != 0);
+}
+
+TEST_FIXTURE(ProviderDescribe_TestFixture, 
+             ProviderDescribe_ReturnsValidUtf8String)
+{
+    CHECK(g_utf8_validate((*_provider->describe)(_provider), -1, NULL));
+}
+	

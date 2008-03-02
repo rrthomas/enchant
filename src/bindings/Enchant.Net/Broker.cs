@@ -30,6 +30,9 @@ namespace Enchant
 		private IList<DictionaryInfo> _dictionaries;
 		private bool _disposed = false;
 		private IList<ProviderInfo> _providers;
+	    private Dictionary<string, Dictionary> _dictionaryCache;
+	    private Dictionary<string, Dictionary> _pwlDictionaryCache;
+	    private bool _cacheDictionaries = true;
 
 		public Broker()
 		{
@@ -39,6 +42,8 @@ namespace Enchant
 			{
 				throw new ApplicationException("Unable to initialize broker");
 			}
+            _dictionaryCache = new Dictionary<string, Dictionary>();
+            _pwlDictionaryCache = new Dictionary<string, Dictionary>();
 		}
 
 		public IEnumerable<ProviderInfo> Providers
@@ -78,7 +83,13 @@ namespace Enchant
 			}
 		}
 
-    private void InitializeDictionaryList()
+	    public bool CacheDictionaries
+	    {
+	        get { return this._cacheDictionaries; }
+	        set { this._cacheDictionaries = value; }
+	    }
+
+	    private void InitializeDictionaryList()
     {
       _dictionaries = new List<DictionaryInfo>();
       Bindings.enchant_broker_list_dicts(_handle,
@@ -129,14 +140,26 @@ namespace Enchant
 			{
 				throw new ArgumentNullException("language_tag");
 			}
-
+		    Dictionary dictionary;
+		    if(CacheDictionaries)
+            {
+                if (_dictionaryCache.TryGetValue(language_tag, out dictionary))
+                {
+                    return dictionary;
+                }
+            }
 			SafeDictionaryHandle handle = Bindings.enchant_broker_request_dict(_handle, language_tag);
 			VerifyNoErrors();
 			if (handle.IsInvalid)
 			{
 				throw new ApplicationException("There is no provider that supplies a dictionary for " + language_tag);
 			}
-			return new Dictionary(handle);
+		    dictionary = new Dictionary(handle);
+            if(CacheDictionaries)
+            {
+                _dictionaryCache[language_tag] = dictionary;
+            }
+		    return dictionary;
 		}
 
     public bool DictionaryExists(string language_tag)
@@ -163,6 +186,14 @@ namespace Enchant
 			{
 				throw new ArgumentNullException("pwlFile");
 			}
+            Dictionary dictionary;
+            if (CacheDictionaries)
+            {
+                if (_dictionaryCache.TryGetValue(pwlFile, out dictionary))
+                {
+                    return dictionary;
+                }
+            }
 
 			SafeDictionaryHandle handle = Bindings.enchant_broker_request_pwl_dict(_handle, pwlFile);
 			VerifyNoErrors();
@@ -170,7 +201,12 @@ namespace Enchant
 			{
 				throw new ApplicationException("Unable to create pwl file " + pwlFile);
 			}
-			return new Dictionary(handle);
+            dictionary = new Dictionary(handle);
+            if (CacheDictionaries)
+            {
+                _dictionaryCache[pwlFile] = dictionary;
+            }
+            return dictionary;
 		}
 
 		public void SetOrdering(string language_tag, string ordering)

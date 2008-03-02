@@ -118,6 +118,8 @@ namespace Enchant.Tests
 		}
 
 		[Test]
+        // this test may fail because it picks up dictionaries from the
+        // open office installation present on the machine
 		public void Dictionaries()
 		{
 			using (Broker broker = new Broker())
