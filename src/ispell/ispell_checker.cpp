@@ -52,9 +52,9 @@ ENCHANT_PLUGIN_DECLARE("Ispell")
 
 typedef struct str_ispell_map
 {
-	char * lang;
-	char * dict;
-	char * enc;
+	const char * lang;
+	const char * dict;
+	const char * enc;
 } IspellMap;
 
 static const IspellMap ispell_map [] = {
@@ -391,8 +391,8 @@ ISpellChecker::loadDictionaryForLanguage ( const char * szLang )
 {
 	char *hashname = NULL;
 	
-	char * encoding = NULL;
-	char * szFile = NULL;
+	const char * encoding = NULL;
+	const char * szFile = NULL;
 	
 	for (size_t i = 0; i < size_ispell_map; i++)
 		{
@@ -646,13 +646,13 @@ ispell_provider_dispose (EnchantProvider * me)
 	g_free (me);
 }
 
-static char *
+static const char *
 ispell_provider_identify (EnchantProvider * me)
 {
 	return "ispell";
 }
 
-static char *
+static const char *
 ispell_provider_describe (EnchantProvider * me)
 {
 	return "Ispell Provider";
@@ -661,6 +661,9 @@ ispell_provider_describe (EnchantProvider * me)
 extern "C" {
 
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+	     init_enchant_provider (void);
+
+EnchantProvider *
 init_enchant_provider (void)
 {
 	EnchantProvider *provider;

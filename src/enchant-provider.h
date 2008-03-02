@@ -119,9 +119,9 @@ struct str_enchant_provider
 				  const char *const tag);
 
 	/* returns utf8*/
-	/* const */ char * (*identify) (struct str_enchant_provider * me);
+	const char * (*identify) (struct str_enchant_provider * me);
 	/* returns utf8*/
-	/* const */ char * (*describe) (struct str_enchant_provider * me);
+	const  char * (*describe) (struct str_enchant_provider * me);
 
 	/* frees string lists returned by list_dicts and dict->suggest */
 	void (*free_string_list) (struct str_enchant_provider * me,

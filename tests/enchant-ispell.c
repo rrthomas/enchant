@@ -222,8 +222,8 @@ is_word_char (gunichar uc, size_t n)
 
 
 typedef struct lang_map {
-  char *ispell;
-  char *enchant;
+  const char *ispell;
+  const char *enchant;
 } LangMap;
 
 

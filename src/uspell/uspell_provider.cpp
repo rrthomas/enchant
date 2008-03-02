@@ -416,13 +416,13 @@ uspell_provider_dispose (EnchantProvider * me)
 	g_free (me);
 }
 
-static char *
+static const char *
 uspell_provider_identify (EnchantProvider * me)
 {
 	return "uspell";
 }
 
-static char *
+static const char *
 uspell_provider_describe (EnchantProvider * me)
 {
 	return "Uspell Provider";
@@ -431,6 +431,9 @@ uspell_provider_describe (EnchantProvider * me)
 extern "C" {
 
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+	     init_enchant_provider (void);
+
+EnchantProvider *
 init_enchant_provider (void)
 {
 	EnchantProvider *provider;

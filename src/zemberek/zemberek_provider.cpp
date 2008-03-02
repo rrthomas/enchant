@@ -58,7 +58,6 @@ zemberek_dict_suggest (EnchantDict * me, const char *const word,
     return result;
 }
 
-
 static void
 zemberek_provider_dispose(EnchantProvider *me)
 {
@@ -90,14 +89,13 @@ zemberek_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
     g_free (dict);
 }
 
-
-static char *
+static const char *
 zemberek_provider_identify (EnchantProvider * me)
 {
 	return "zemberek";
 }
 
-static char *
+static const char *
 zemberek_provider_describe (EnchantProvider * me)
 {
 	return "Zemberek Provider";
@@ -121,10 +119,12 @@ zemberek_provider_list_dicts (EnchantProvider * me,
 	return out_list;
 }
 
-
 extern "C" {
 
 ENCHANT_MODULE_EXPORT(EnchantProvider *) 
+  init_enchant_provider(void);
+
+EnchantProvider *
 init_enchant_provider(void)
 {
     EnchantProvider *provider;

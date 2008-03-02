@@ -265,13 +265,13 @@ hspell_provider_dispose (EnchantProvider * me)
 	g_free (me);
 }
 
-static char *
+static const char *
 hspell_provider_identify (EnchantProvider * me)
 {
 	return "hspell";
 }
 
-static char *
+static const char *
 hspell_provider_describe (EnchantProvider * me)
 {
 	return "Hspell Provider";
@@ -283,6 +283,9 @@ extern "C"
 #endif
 	
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+	     init_enchant_provider (void);
+
+EnchantProvider *
 init_enchant_provider (void)
 {
 	EnchantProvider *provider;

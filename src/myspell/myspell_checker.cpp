@@ -152,7 +152,7 @@ g_iconv_is_valid(GIConv i)
 }
 
 MySpellChecker::MySpellChecker()
-	: myspell(0), m_translate_in(G_ICONV_INVALID), m_translate_out(G_ICONV_INVALID)
+	: m_translate_in(G_ICONV_INVALID), m_translate_out(G_ICONV_INVALID), myspell(0)
 {
 }
 
@@ -507,13 +507,13 @@ myspell_provider_dispose (EnchantProvider * me)
 	g_free (me);
 }
 
-static char *
+static const char *
 myspell_provider_identify (EnchantProvider * me)
 {
 	return "myspell";
 }
 
-static char *
+static const char *
 myspell_provider_describe (EnchantProvider * me)
 {
 	return "Myspell Provider";
@@ -522,6 +522,9 @@ myspell_provider_describe (EnchantProvider * me)
 extern "C" {
 
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+	     init_enchant_provider (void);
+
+EnchantProvider *
 init_enchant_provider (void)
 {
 	EnchantProvider *provider;

@@ -336,12 +336,12 @@ static void appleSpell_provider_dispose (EnchantProvider * me)
 	if (pool) [pool release];
 }
 
-static char * appleSpell_provider_identify (EnchantProvider * me)
+static const char * appleSpell_provider_identify (EnchantProvider * me)
 {
 	return "AppleSpell";
 }
 
-static char * appleSpell_provider_describe (EnchantProvider * me)
+static const char * appleSpell_provider_describe (EnchantProvider * me)
 {
 	return "AppleSpell Provider";
 }
@@ -406,7 +406,8 @@ extern "C" {
 
 	static bool s_bReloadSelf = true;
 
-	void configure_enchant_provider (EnchantProvider * me, const char * module_dir)
+	ENCHANT_MODULE_EXPORT (void)
+	     configure_enchant_provider (EnchantProvider * me, const char * module_dir)
 	{
 		NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 

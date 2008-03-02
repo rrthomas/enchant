@@ -77,7 +77,21 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
-ENCHANT_PLUGIN_DECLARE("Pspell")
+ENCHANT_PLUGIN_DECLARE("Aspell")
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+ENCHANT_MODULE_EXPORT(void)
+     configure_enchant_provider(EnchantProvider * me, const char *dir_name);
+
+ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+     init_enchant_provider (void);
+
+#ifdef __cplusplus
+}
+#endif
 
 static int
 aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
@@ -281,13 +295,13 @@ aspell_provider_dispose (EnchantProvider * me)
 	g_free (me);
 }
 
-static char *
+static const char *
 aspell_provider_identify (EnchantProvider * me)
 {
 	return "aspell";
 }
 
-static char *
+static const char *
 aspell_provider_describe (EnchantProvider * me)
 {
 	return "Aspell Provider";
@@ -297,7 +311,7 @@ aspell_provider_describe (EnchantProvider * me)
 extern "C" {
 #endif
 
-ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+EnchantProvider *
 init_enchant_provider (void)
 {
 	EnchantProvider *provider;
@@ -385,8 +399,7 @@ static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR
 }
 #endif
 
-ENCHANT_MODULE_EXPORT(void)
-configure_enchant_provider(EnchantProvider * me, const char *dir_name)
+void configure_enchant_provider(EnchantProvider * me, const char *dir_name)
 {
 #if defined(_WIN32)
     const WCHAR* aspell_module_name = L"aspell-15.dll";

@@ -52,7 +52,7 @@ describe_dict_fn (const char * const lang,
 	printf ("%s: %s '%s' (%s)\n", lang, name, desc, file);
 }
 
-static char * print_found(EnchantDict *dict, const char * word)
+static const char * print_found(EnchantDict *dict, const char * word)
 {
 	if (enchant_dict_check (dict, word, -1) == 0)
 		return "found";

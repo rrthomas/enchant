@@ -159,13 +159,13 @@ voikko_provider_dispose (EnchantProvider * me)
 	g_free (me);
 }
 
-static char *
+static const char *
 voikko_provider_identify (EnchantProvider * me)
 {
 	return "voikko";
 }
 
-static char *
+static const char *
 voikko_provider_describe (EnchantProvider * me)
 {
 	return "Voikko Provider";
@@ -176,6 +176,9 @@ extern "C" {
 #endif
 
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+	     init_enchant_provider (void);
+
+EnchantProvider *
 init_enchant_provider (void)
 {
 	EnchantProvider *provider;
