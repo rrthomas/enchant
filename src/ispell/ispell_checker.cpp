@@ -190,13 +190,17 @@ ISpellChecker::checkWord(const char * const utf8Word, size_t length)
 	else
 		{
 			/* convert to 8bit string and null terminate */
-			size_t len_in, len_out;
-			char *In = (char *)(utf8Word);
+			size_t len_in, len_out, result;
+			// the 8bit encodings use precomposed forms
+			char *normalizedWord = g_utf8_normalize (utf8Word, length, G_NORMALIZE_NFC);
+			char *In = normalizedWord;
 			char *Out = szWord;
 			
-			len_in = length * sizeof(char);
+			len_in = strlen(In);
 			len_out = sizeof( szWord ) - 1;
-			if ((size_t)-1 == g_iconv(m_translate_in, &In, &len_in, &Out, &len_out))
+			result = g_iconv(m_translate_in, &In, &len_in, &Out, &len_out);
+			g_free(normalizedWord);
+			if ((size_t)-1 == result)
 				return false;
 			*Out = '\0';
 		}
@@ -234,12 +238,16 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 		{
 			/* convert to 8bit string and null terminate */
 			
-			size_t len_in, len_out;
-			char *In = (char *)(utf8Word);
+			size_t len_in, len_out, result;
+			// the 8bit encodings use precomposed forms
+			char *normalizedWord = g_utf8_normalize (utf8Word, length, G_NORMALIZE_NFC);
+			char *In = normalizedWord;
 			char *Out = word8;
-			len_in = length;
+			len_in = strlen(In);
 			len_out = sizeof( word8 ) - 1;
-			if ((size_t)-1 == g_iconv(m_translate_in, &In, &len_in, &Out, &len_out))
+			result = g_iconv(m_translate_in, &In, &len_in, &Out, &len_out);
+			g_free(normalizedWord);
+			if ((size_t)-1 == result)
 				return NULL;
 			*Out = '\0';
 		}

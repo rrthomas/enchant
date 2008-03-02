@@ -84,10 +84,14 @@ aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	PspellManager *manager;
 	int val;
+	char *normalizedWord;
 
 	manager = (PspellManager *) me->user_data;
-	
-	val = pspell_manager_check (manager, word, len);
+
+	normalizedWord = g_utf8_normalize (word, len, G_NORMALIZE_NFC);
+	val = pspell_manager_check (manager, normalizedWord, strlen(normalizedWord));
+	g_free(normalizedWord);
+
 	if (val == 0)
 		return 1;
 	else if (val > 0)
@@ -106,6 +110,7 @@ aspell_dict_suggest (EnchantDict * me, const char *const word,
 	
 	const PspellWordList *word_list;
 	PspellStringEmulation *suggestions;
+	char *normalizedWord;
 	
 	char **sugg_arr = NULL;
 	size_t n_suggestions, i;
@@ -113,7 +118,10 @@ aspell_dict_suggest (EnchantDict * me, const char *const word,
 	
 	manager = (PspellManager *) me->user_data;
 	
-	word_list = pspell_manager_suggest (manager, word, len);
+	normalizedWord = g_utf8_normalize (word, len, G_NORMALIZE_NFC);
+	word_list = pspell_manager_suggest (manager, normalizedWord, strlen(normalizedWord));
+	g_free(normalizedWord);
+
 	if (word_list)
 		{
 			suggestions = pspell_word_list_elements (word_list);

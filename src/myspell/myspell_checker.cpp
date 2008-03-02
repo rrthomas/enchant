@@ -171,12 +171,16 @@ MySpellChecker::checkWord(const char *utf8Word, size_t len)
 	if (len > MAXWORDLEN || !g_iconv_is_valid(m_translate_in))
 		return false;
 
-	char *in = (char*) utf8Word;
+	// the 8bit encodings use precomposed forms
+	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
+	char *in = normalizedWord;
 	char word8[MAXWORDLEN + 1];
 	char *out = word8;
-	size_t len_in = len * sizeof(char);
+	size_t len_in = strlen(in);
 	size_t len_out = sizeof( word8 ) - 1;
-	if ((size_t)-1 == g_iconv(m_translate_in, &in, &len_in, &out, &len_out))
+	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
+	g_free(normalizedWord);
+	if ((size_t)-1 == result)
 		return false;
 	*out = '\0';
 	if (myspell->spell(word8))
@@ -193,12 +197,16 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 		|| !g_iconv_is_valid(m_translate_out))
 		return 0;
 
-	char *in = (char*) utf8Word;
+	// the 8bit encodings use precomposed forms
+	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
+	char *in = normalizedWord;
 	char word8[MAXWORDLEN + 1];
 	char *out = word8;
-	size_t len_in = len;
+	size_t len_in = strlen(in);
 	size_t len_out = sizeof(word8) - 1;
-	if ((size_t)-1 == g_iconv(m_translate_in, &in, &len_in, &out, &len_out))
+	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
+	g_free(normalizedWord);
+	if ((size_t)-1 == result)
 		return NULL;
 
 	*out = '\0';
