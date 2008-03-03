@@ -37,13 +37,13 @@ static EnchantDict * RequestDictionary2 (EnchantProvider *me, const char *tag)
 	mock2ProviderRequestDictionaryCalled = true;
 	return MockEnGbAndQaaProviderRequestDictionary(me, tag);
 }
-static char *
+static const char *
 MockProvider1Identify (EnchantProvider *)
 {
 	return "mock1";
 }
 
-static char *
+static const char *
 MockProvider2Identify (EnchantProvider *)
 {
 	return "mock2";

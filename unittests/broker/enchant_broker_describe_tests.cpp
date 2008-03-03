@@ -89,7 +89,7 @@ struct EnchantBrokerNoProvidersTestFixture : EnchantTestFixture
     std::vector<ProviderDescription> _providerList;
 };
 
-static char *
+static const char *
 MockProvider2Identify (EnchantProvider *)
 {
 	return "mock2";
@@ -158,7 +158,7 @@ struct EnchantBrokerDescribe_ProviderLacksDescribe_TestFixture : EnchantBrokerDe
     }
 };
 
-static char *
+static const char *
 MockProviderIllegalUtf8 (EnchantProvider *)
 {
 	return "\xa5\xf1\x08";

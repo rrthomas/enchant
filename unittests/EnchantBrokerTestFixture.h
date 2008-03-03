@@ -75,13 +75,13 @@ MockProviderDisposeDictionary (EnchantProvider *, EnchantDict * dict)
     g_free(dict);
 }
 
-static char *
+static const char *
 MockProviderIdentify (EnchantProvider *)
 {
 	return "mock";
 }
 
-static char *
+static const char *
 MockProviderDescribe (EnchantProvider *)
 {
 	return "Mock Provider";

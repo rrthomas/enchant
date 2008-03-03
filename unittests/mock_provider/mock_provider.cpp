@@ -30,13 +30,13 @@ mock_provider_dispose(EnchantProvider *me)
     g_free(me);
 }
 
-static char *
+static const char *
 mock_provider_identify (EnchantProvider *)
 {
 	return "mock";
 }
 
-static char *
+static const char *
 mock_provider_describe (EnchantProvider *)
 {
 	return "Mock Provider";
