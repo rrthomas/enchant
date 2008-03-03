@@ -123,7 +123,7 @@ _enchant_ensure_private_datadir (void)
 static char *
 enchant_get_user_dir (void)
 {
-	char * base_dir;
+	char * base_dir = NULL;
 	char * user_dir;
 
 #ifdef _WIN32
