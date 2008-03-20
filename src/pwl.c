@@ -500,12 +500,40 @@ static int enchant_is_all_caps(const char*const word, size_t len)
 			GUnicodeType type = g_unichar_type(g_utf8_get_char(it));
 			switch(type)
 				{
-					case G_UNICODE_UPPERCASE_LETTER:
-						hasCap = 1;
-						break;
-					case G_UNICODE_TITLECASE_LETTER:
-					case G_UNICODE_LOWERCASE_LETTER:
-						return 0;
+				case G_UNICODE_UPPERCASE_LETTER:
+					hasCap = 1;
+					break;
+				case G_UNICODE_TITLECASE_LETTER:
+				case G_UNICODE_LOWERCASE_LETTER:
+					return 0;
+
+				case G_UNICODE_CONTROL:
+				case G_UNICODE_FORMAT:
+				case G_UNICODE_UNASSIGNED:
+				case G_UNICODE_PRIVATE_USE:
+				case G_UNICODE_SURROGATE:
+				case G_UNICODE_MODIFIER_LETTER:
+				case G_UNICODE_OTHER_LETTER:
+				case G_UNICODE_COMBINING_MARK:
+				case G_UNICODE_ENCLOSING_MARK:
+				case G_UNICODE_NON_SPACING_MARK:
+				case G_UNICODE_DECIMAL_NUMBER:
+				case G_UNICODE_LETTER_NUMBER:
+				case G_UNICODE_OTHER_NUMBER:
+				case G_UNICODE_CONNECT_PUNCTUATION:
+				case G_UNICODE_DASH_PUNCTUATION:
+				case G_UNICODE_CLOSE_PUNCTUATION:
+				case G_UNICODE_FINAL_PUNCTUATION:
+				case G_UNICODE_INITIAL_PUNCTUATION:
+				case G_UNICODE_OTHER_PUNCTUATION:
+				case G_UNICODE_OPEN_PUNCTUATION:
+				case G_UNICODE_CURRENCY_SYMBOL:
+				case G_UNICODE_MODIFIER_SYMBOL:
+				case G_UNICODE_MATH_SYMBOL:
+				case G_UNICODE_OTHER_SYMBOL:
+				case G_UNICODE_LINE_SEPARATOR:
+				case G_UNICODE_PARAGRAPH_SEPARATOR:
+				case G_UNICODE_SPACE_SEPARATOR:
 				default:
 					break;
 				}
@@ -946,7 +974,7 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 	if (trie == EOSTrie) {
 		size_t word_len = strlen(matcher->word);
 		errs = matcher->num_errors;
-		if(word_len > matcher->word_pos) {
+		if((ssize_t)word_len > matcher->word_pos) {
 			matcher->num_errors = errs + word_len - matcher->word_pos;
 		}
 		if (matcher->num_errors <= matcher->max_errors) {

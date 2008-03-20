@@ -208,6 +208,25 @@ is_word_char (gunichar uc, size_t n)
 	case G_UNICODE_OTHER_NUMBER:
 	case G_UNICODE_CONNECT_PUNCTUATION:
                 return 1;     /* Enchant 1.3.0 defines word chars like this. */
+
+	case G_UNICODE_CONTROL:
+	case G_UNICODE_FORMAT:
+	case G_UNICODE_UNASSIGNED:
+	case G_UNICODE_PRIVATE_USE:
+	case G_UNICODE_SURROGATE:
+	case G_UNICODE_DASH_PUNCTUATION:
+	case G_UNICODE_CLOSE_PUNCTUATION:
+	case G_UNICODE_FINAL_PUNCTUATION:
+	case G_UNICODE_INITIAL_PUNCTUATION:
+	case G_UNICODE_OTHER_PUNCTUATION:
+	case G_UNICODE_OPEN_PUNCTUATION:
+	case G_UNICODE_CURRENCY_SYMBOL:
+	case G_UNICODE_MODIFIER_SYMBOL:
+	case G_UNICODE_MATH_SYMBOL:
+	case G_UNICODE_OTHER_SYMBOL:
+	case G_UNICODE_LINE_SEPARATOR:
+	case G_UNICODE_PARAGRAPH_SEPARATOR:
+	case G_UNICODE_SPACE_SEPARATOR:
 	default:
 		if ((n > 0) && (uc == g_utf8_get_char("'"))) {
 		        return 1;  /** Char ' is accepted only within a word. */

@@ -140,7 +140,6 @@ AC_SUBST(CC_WARN_CFLAGS)
 CXX_MAYBE_WARN="-Wall -Wextra \
 -Wsign-compare \
 -Wpointer-arith -Wwrite-strings \
--Wmissing-prototypes \
 -Wpacked -Wswitch-enum -Wmissing-format-attribute \
 -Wstrict-aliasing=2 -Winit-self -Wunsafe-loop-optimizations \
 -Wno-missing-field-initializers -Wno-unused-parameter \

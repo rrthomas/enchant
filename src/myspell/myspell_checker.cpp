@@ -240,22 +240,18 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 }
 
 static void
-s_buildHashNames (std::vector<std::string> & names, const char * dict)
+s_buildDictionaryDirs (std::vector<std::string> & dirs)
 {
-	char * tmp, * private_dir, * config_dir, * myspell_prefix, * dict_dic;
+	char * private_dir, * config_dir, * myspell_prefix;
 
-	names.clear ();
-
-	dict_dic = g_strconcat(dict, ".dic", NULL);
+	dirs.clear ();
 
 	config_dir = enchant_get_user_config_dir ();
 	if (config_dir) {
 		private_dir = g_build_filename (config_dir, 
 						"myspell", NULL);
 		
-		tmp = g_build_filename (private_dir, dict_dic, NULL);
-		names.push_back (tmp);
-		g_free (tmp);
+		dirs.push_back (private_dir);
 
 		g_free (private_dir);
 		g_free (config_dir);
@@ -263,9 +259,7 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 
 	myspell_prefix = myspell_checker_get_prefix ();
 	if (myspell_prefix) {
-		tmp = g_build_filename (myspell_prefix, dict_dic, NULL);
-		names.push_back (tmp);
-		g_free (tmp);
+		dirs.push_back (myspell_prefix);
 		g_free (myspell_prefix);
 	}
 
@@ -274,38 +268,71 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 	char* open_office_dicts_dir = myspell_checker_get_open_office_dicts_dir ();
 	if (open_office_dicts_dir) 
         {
-		    tmp = g_build_filename (open_office_dicts_dir, dict_dic, NULL);
-		    names.push_back (tmp);
-		    g_free (tmp);
-		    g_free (open_office_dicts_dir);
-	    }
+		dirs.push_back (open_office_dicts_dir);
+		g_free (open_office_dicts_dir);
+	}
     }
 #endif
+}
 
-    g_free(dict_dic);
+static void
+s_buildHashNames (std::vector<std::string> & names, const char * dict)
+{
+	names.clear ();
+
+	std::vector<std::string> dirs;
+	s_buildDictionaryDirs (dirs);
+
+	char *dict_dic = g_strconcat(dict, ".dic", NULL);
+	for (size_t i = 0; i < dirs.size(); i++)
+		{
+			char *tmp = g_build_filename (dirs[i].c_str(), dict_dic, NULL);
+			names.push_back (tmp);
+			g_free (tmp);
+		}
+
+	g_free(dict_dic);
 }
 
 static char *
 myspell_request_dictionary (const char * tag) 
 {
-	char * dic = NULL;
-
 	std::vector<std::string> names;
 
 	s_buildHashNames (names, tag);
 
-	for (size_t i = 0; i < names.size () && !dic; i++) {
+	for (size_t i = 0; i < names.size (); i++) {
 		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS))
-			dic = g_strdup (names[i].c_str());
+			return g_strdup (names[i].c_str());
 	}
 	
-	return dic;
+	std::vector<std::string> dirs;
+	s_buildDictionaryDirs (dirs);
+
+	for (size_t i = 0; i < dirs.size(); i++) {
+		GDir *dir = g_dir_open (dirs[i].c_str(), 0, NULL);
+		if (dir) {
+			const char *dir_entry;
+			while ((dir_entry = g_dir_read_name (dir)) != NULL) {
+				if (strncmp (dir_entry, tag, strlen(tag)) == 0 &&
+				    strstr (dir_entry, ".dic") != NULL) {
+					char *dict = g_build_filename (dirs[i].c_str(), 
+								       dir_entry, NULL);
+					g_dir_close (dir);
+					return dict;
+				}
+			}
+
+			g_dir_close (dir);
+		}
+	}
+
+	return NULL;
 }
 
 bool
 MySpellChecker::requestDictionary(const char *szLang)
 {
-	const char *dictBase = NULL;
 	char *dic = NULL, *aff = NULL;
 
 	dic = myspell_request_dictionary (szLang);

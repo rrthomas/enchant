@@ -104,6 +104,21 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 /********************************************************************************/
 
+static char *
+_enchant_get_user_home_dir (void)
+{
+	const char* home_dir;
+
+	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
+	if (home_dir)
+		return (char *)home_dir;
+
+	home_dir = g_get_home_dir ();
+	if (home_dir)
+		return g_strdup (home_dir);
+	return NULL;
+}
+
 static void
 _enchant_ensure_private_datadir (void)
 {
@@ -131,13 +146,13 @@ enchant_get_user_dir (void)
 #endif
 
 	if (!base_dir)
-		base_dir = enchant_get_user_home_dir ();
+		base_dir = _enchant_get_user_home_dir ();
 
 	if(base_dir)
 	{
-		user_dir = 	g_build_filename (base_dir,
-										  ENCHANT_USER_PATH_EXTENSION,
-										  NULL);
+		user_dir = g_build_filename (base_dir,
+					     ENCHANT_USER_PATH_EXTENSION,
+					     NULL);
 		g_free(base_dir);
 		return user_dir;
 	}
@@ -313,29 +328,6 @@ enchant_get_registry_value (const char * const prefix, const char * const key)
 			val = enchant_get_registry_value_ex (0, prefix, key);
 		}
 	return val;
-}
-
-/**
- * enchant_get_user_home_dir
- *
- * Returns: the user's home directory, or %null. Returned value
- * must be free'd.
- *
- * This API is private to the providers.
- */
-ENCHANT_MODULE_EXPORT (char *)
-enchant_get_user_home_dir (void)
-{
-	const char* home_dir;
-
-	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
-	if (home_dir)
-		return (char *)home_dir;
-
-	home_dir = g_get_home_dir ();
-	if (home_dir)
-		return g_strdup (home_dir);
-	return NULL;
 }
 
 /********************************************************************************/

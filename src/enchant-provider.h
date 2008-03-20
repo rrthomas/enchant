@@ -55,9 +55,6 @@ ENCHANT_MODULE_EXPORT(char *)
 typedef struct str_enchant_provider EnchantProvider;
 
 ENCHANT_MODULE_EXPORT (char *)
-	enchant_get_user_home_dir (void);
-
-ENCHANT_MODULE_EXPORT (char *)
 	enchant_get_user_config_dir (void);
 
 ENCHANT_MODULE_EXPORT (char *)
