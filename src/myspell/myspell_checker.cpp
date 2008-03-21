@@ -68,33 +68,6 @@ private:
 
 /***************************************************************************/
 
-static char *
-myspell_checker_get_prefix (void)
-{
-	char * data_dir = NULL;
-
-	/* Look for explicitly set registry values */
-	data_dir = enchant_get_registry_value ("Myspell", "Data_Dir");
-	if (data_dir)
-		return data_dir;
-
-	/* Dynamically locate library and search for modules relative to it. */
-	char * prefix = enchant_get_prefix_dir();
-	if(prefix)
-		{
-			data_dir = g_build_filename(prefix, "share", "enchant", "myspell", NULL);
-			g_free(prefix);
-			return data_dir;
-		}
-
-
-#ifdef ENCHANT_MYSPELL_DICT_DIR
-	return g_strdup (ENCHANT_MYSPELL_DICT_DIR);
-#else
-	return NULL;
-#endif
-}
-
 #if defined(_WIN32)
 static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR * uKey)
 {
@@ -239,40 +212,76 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 		return 0;
 }
 
-static void
-s_buildDictionaryDirs (std::vector<std::string> & dirs)
+static GSList *
+myspell_checker_get_dictionary_dirs (void)
 {
-	char * private_dir, * config_dir, * myspell_prefix;
+	GSList *dirs = NULL;
 
-	dirs.clear ();
+	{
+		GSList *config_dirs, *iter;
 
-	config_dir = enchant_get_user_config_dir ();
-	if (config_dir) {
-		private_dir = g_build_filename (config_dir, 
-						"myspell", NULL);
+		config_dirs = enchant_get_user_config_dirs ();
 		
-		dirs.push_back (private_dir);
+		for (iter = config_dirs; iter; iter = iter->next)
+			{
+				dirs = g_slist_append (dirs, g_build_filename ((const gchar *)iter->data, 
+									       "myspell", NULL));
+			}
 
-		g_free (private_dir);
-		g_free (config_dir);
+		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
+		g_slist_free (config_dirs);
 	}
 
-	myspell_prefix = myspell_checker_get_prefix ();
-	if (myspell_prefix) {
-		dirs.push_back (myspell_prefix);
-		g_free (myspell_prefix);
-	}
+	/* until I work out how to link the modules against enchant in MacOSX - fjf
+	 */
+#ifndef XP_TARGET_COCOA
+	char * myspell_prefix = NULL;
+
+	/* Look for explicitly set registry values */
+	myspell_prefix = enchant_get_registry_value ("Myspell", "Data_Dir");
+	if (myspell_prefix)
+		dirs = g_slist_append (dirs, myspell_prefix);
+
+	/* Dynamically locate library and search for modules relative to it. */
+	char * enchant_prefix = enchant_get_prefix_dir();
+	if(enchant_prefix)
+		{
+			myspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "myspell", NULL);
+			g_free(enchant_prefix);
+			dirs = g_slist_append (dirs, myspell_prefix);
+		}
+#endif
+
+#ifdef ENCHANT_MYSPELL_DICT_DIR
+	dirs = g_slist_append (dirs, g_strdup (ENCHANT_MYSPELL_DICT_DIR));
+#endif
 
 #if defined(_WIN32)
-    {
 	char* open_office_dicts_dir = myspell_checker_get_open_office_dicts_dir ();
 	if (open_office_dicts_dir) 
         {
-		dirs.push_back (open_office_dicts_dir);
-		g_free (open_office_dicts_dir);
+		dirs = g_slist_append (dirs, open_office_dicts_dir);
 	}
-    }
 #endif
+
+	return dirs;
+}
+
+static void
+s_buildDictionaryDirs (std::vector<std::string> & dirs)
+{
+	GSList *myspell_dirs, *iter;
+
+	dirs.clear ();
+
+	myspell_dirs = myspell_checker_get_dictionary_dirs ();
+	for (iter = myspell_dirs; iter; iter = iter->next)
+		{
+			dirs.push_back ((const char *)iter->data);
+		}
+
+	g_slist_foreach (myspell_dirs, (GFunc)g_free, NULL);
+	g_slist_free (myspell_dirs);
 }
 
 static void
@@ -427,33 +436,15 @@ static char **
 myspell_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
 {
+	std::vector<std::string> dict_dirs, dicts;
 	char ** dictionary_list = NULL;
-	std::vector<std::string> dicts;
-       	
-	char * config_dir = enchant_get_user_config_dir ();
-	if (config_dir) {
-		char * private_dir = g_build_filename (config_dir,
-						       "myspell", NULL);
-		
-		myspell_provider_enum_dicts (private_dir, dicts);
 
-		g_free (private_dir);
-		g_free (config_dir);
-	}
+	s_buildDictionaryDirs (dict_dirs);
 
-	char * myspell_prefix = myspell_checker_get_prefix ();
-	if (myspell_prefix) {
-		myspell_provider_enum_dicts (myspell_prefix, dicts);
-		g_free (myspell_prefix);
-	}
-
-#if defined(_WIN32)
-    char * open_office_dicts_dir = myspell_checker_get_open_office_dicts_dir ();
-	if (open_office_dicts_dir) {
-		myspell_provider_enum_dicts (open_office_dicts_dir, dicts);
-		g_free (open_office_dicts_dir);
-	}
-#endif
+	for (size_t i = 0; i < dict_dirs.size(); i++)
+		{
+			myspell_provider_enum_dicts (dict_dirs[i].c_str(), dicts);
+		}
 
 	if (dicts.size () > 0) {
 		dictionary_list = g_new0 (char *, dicts.size() + 1);

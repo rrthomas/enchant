@@ -50,29 +50,51 @@ ENCHANT_PLUGIN_DECLARE("Uspell")
 static const size_t MAXALTERNATIVE = 20; // we won't return more than this number of suggestions
 static const size_t MAXCHARS = 100; // maximum number of bytes of utf8 or chars of UCS4 in a word
 
-static char *
-uspell_checker_get_prefix (void)
+static GSList *
+uspell_checker_get_dictionary_dirs (void)
 {
-	char * data_dir = NULL;
+	GSList *dirs = NULL;
 
-	data_dir = enchant_get_registry_value ("Uspell", "Data_Dir");
-	if (data_dir)
-		return data_dir;
+	{
+		GSList *config_dirs, *iter;
+
+		config_dirs = enchant_get_user_config_dirs ();
+		
+		for (iter = config_dirs; iter; iter = iter->next)
+			{
+				dirs = g_slist_append (dirs, g_build_filename ((const gchar *)iter->data, 
+									       "uspell", NULL));
+			}
+
+		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
+		g_slist_free (config_dirs);
+	}
+
+	/* until I work out how to link the modules against enchant in MacOSX - fjf
+	 */
+#ifndef XP_TARGET_COCOA
+	char * uspell_prefix = NULL;
+
+	/* Look for explicitly set registry values */
+	uspell_prefix = enchant_get_registry_value ("Uspell", "Data_Dir");
+	if (uspell_prefix)
+		dirs = g_slist_append (dirs, uspell_prefix);
 
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			char * uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
+			uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
 			g_free(enchant_prefix);
-			return uspell_prefix;
+			dirs = g_slist_append (dirs, uspell_prefix);
 		}
+#endif
 
 #ifdef ENCHANT_USPELL_DICT_DIR
-	return g_strdup (ENCHANT_USPELL_DICT_DIR);
-#else
-	return NULL;
+	dirs = g_slist_append (dirs, g_strdup (ENCHANT_USPELL_DICT_DIR));
 #endif
+
+	return dirs;
 }
 
 static int
@@ -192,8 +214,8 @@ uspell_dict_add_to_session (EnchantDict * me, const char *const word,
 } // uspell_dict_add_to_session
 
 typedef struct {
-	char * language_tag;
-	char * corresponding_uspell_file_name;
+	const char * language_tag;
+	const char * corresponding_uspell_file_name;
 	int language_flags;
 } Mapping;
 
@@ -220,31 +242,23 @@ s_buildHashNames (std::vector<std::string> & names, const char * tag)
 
 	if (mapIndex < n_mappings) {
 
-		char * tmp, * private_dir, * config_dir, * uspell_prefix;
-		
-		char * dict = mapping[mapIndex].language_tag;
+		GSList *dirs, *iter;
+		char * dict = g_strdup_printf ("%s.uspell.dat",
+					       mapping[mapIndex].corresponding_uspell_file_name);
 
-		config_dir = enchant_get_user_config_dir ();
-		
-		if (config_dir) {
-			private_dir = g_build_filename (config_dir,
-							"uspell", NULL);
-			
-			tmp = g_build_filename (private_dir, dict, NULL);
-			names.push_back (tmp);
-			g_free (tmp);
-			
-			g_free (private_dir);
-			g_free (config_dir);
-		}
-		
-		uspell_prefix = uspell_checker_get_prefix ();
-		if (uspell_prefix) {
-			tmp = g_build_filename (uspell_prefix, dict, NULL);
-			names.push_back (tmp);
-			g_free (tmp);
-			g_free (uspell_prefix);
-		}
+		dirs = uspell_checker_get_dictionary_dirs ();
+
+		for (iter = dirs; iter; iter = iter->next)
+			{
+				char *tmp;
+
+				tmp = g_build_filename ((const char *)iter->data, dict, NULL);
+				names.push_back (tmp);
+				g_free (tmp);
+			}
+
+		g_slist_foreach (dirs, (GFunc)g_free, NULL);
+		g_slist_free (dirs);
 	}
 }
 
@@ -279,40 +293,28 @@ uspell_request_dict (const char * base, const char * mapping, const int flags)
 }
 
 static uSpell *
-uspell_request_manager (const char * private_dir, size_t mapIndex)
+uspell_request_manager (const char * dir, size_t mapIndex)
 {
-	char * uspell_prefix, * config_dir;
-
 	uSpell * manager = NULL;
 
-	manager = uspell_request_dict (private_dir,
+	manager = uspell_request_dict (dir,
 				       mapping[mapIndex].corresponding_uspell_file_name,
 				       mapping[mapIndex].language_flags);
 
-	if (!manager) {
-		uspell_prefix = uspell_checker_get_prefix ();
-
-		if (uspell_prefix) {
-			manager = uspell_request_dict (uspell_prefix,
-						       mapping[mapIndex].corresponding_uspell_file_name,
-						       mapping[mapIndex].language_flags);
-			g_free (uspell_prefix);
-		}
-	}
-
 	if (!manager) return NULL;
+
 	// look for a supplementary private dictionary
-	config_dir = enchant_get_user_config_dir ();
+	const char *config_dir = g_get_user_config_dir();
 	if (config_dir) {
 		gchar * auxFileName, * transPart;
 		transPart = g_strconcat (mapping[mapIndex].language_tag, ".dic", NULL);
 		auxFileName = g_build_filename (config_dir, transPart, NULL);
 		g_free (transPart);
-		g_free (config_dir);
 
 		(void) manager->assimilateFile (auxFileName);
 		g_free (auxFileName);
 	}
+
 	return manager;
 }
 
@@ -321,28 +323,28 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	EnchantDict *dict = NULL;
 	uSpell *manager = NULL;
-	int mapIndex;
+	size_t mapIndex;
+	bool found = false;
 
-	char * private_dir = NULL, * config_dir;
+	GSList *dirs, *iter;
 
-	config_dir = enchant_get_user_config_dir ();
-
-	if (config_dir) {
-		private_dir = g_build_filename (config_dir,
-						"uspell", NULL);
-		g_free (config_dir);
-	}
-
-	for (mapIndex = 0; mapIndex < n_mappings; mapIndex++) {
+	for (mapIndex = 0; mapIndex < n_mappings && !found; mapIndex++) {
 		if (!strcmp(tag, mapping[mapIndex].language_tag)) 
 			break;
 	}
 
-	if (mapIndex < n_mappings) {
-		manager = uspell_request_manager (private_dir, mapIndex);
-	}
+	if (!found)
+		return NULL;
 
-	g_free (private_dir);
+	dirs = uspell_checker_get_dictionary_dirs ();
+
+	for (iter = dirs; iter && !manager; iter = iter->next)
+		{
+			manager = uspell_request_manager ((const char *)iter->data, mapIndex);
+		}
+	
+	g_slist_foreach (dirs, (GFunc)g_free, NULL);
+	g_slist_free (dirs);
 
 	if (!manager) 
 		return NULL;

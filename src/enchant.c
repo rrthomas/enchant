@@ -104,77 +104,107 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 /********************************************************************************/
 
-static char *
-_enchant_get_user_home_dir (void)
+static GSList *
+_enchant_get_user_home_dirs (void)
 {
+	GSList *dirs = NULL;
 	const char* home_dir;
 
 	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
 	if (home_dir)
-		return (char *)home_dir;
+		dirs = g_slist_append (dirs, g_strdup (home_dir));
 
 	home_dir = g_get_home_dir ();
 	if (home_dir)
-		return g_strdup (home_dir);
-	return NULL;
+		dirs = g_slist_append (dirs, g_strdup (home_dir));
+
+	return dirs;
 }
 
 static void
 _enchant_ensure_private_datadir (void)
 {
-	/* test if ~/.enchant exists  */
-	char * config_dir;
+	const char * config_dir;
 
-	config_dir = enchant_get_user_config_dir ();
+	config_dir = g_get_user_config_dir();
 	if (config_dir && !g_file_test (config_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
 		{
 			(void)g_remove (config_dir);
 			g_mkdir_with_parents (config_dir, 0700);                        
 		}
-	
-	g_free (config_dir);
 }
 
-static char *
-enchant_get_user_dir (void)
+static GSList *
+enchant_get_user_dirs (void)
 {
-	char * base_dir = NULL;
-	char * user_dir;
+	GSList *user_dirs = NULL;
 
-#ifdef _WIN32
-	base_dir = g_strdup (g_get_user_config_dir());
-#endif
-
-	if (!base_dir)
-		base_dir = _enchant_get_user_home_dir ();
-
-	if(base_dir)
 	{
-		user_dir = g_build_filename (base_dir,
-					     ENCHANT_USER_PATH_EXTENSION,
-					     NULL);
-		g_free(base_dir);
-		return user_dir;
+		const char * user_config_dir;
+		
+		user_config_dir = g_get_user_config_dir();
+		
+		if (user_config_dir)
+			user_dirs = g_slist_append (user_dirs, g_build_filename (user_config_dir,
+										 "enchant",
+										 NULL));
 	}
-	else
-		return NULL;
+
+	{
+		GSList *home_dirs = NULL, *dir;
+		home_dirs = _enchant_get_user_home_dirs ();
+		
+		for (dir = home_dirs; dir; dir = dir->next)
+			{
+				user_dirs = g_slist_append (user_dirs,
+							    g_build_filename (dir->data,
+									      ENCHANT_USER_PATH_EXTENSION,
+									      NULL));
+			}
+
+		g_slist_foreach (home_dirs, (GFunc)g_free, NULL);
+		g_slist_free (home_dirs);
+	}
+
+	return user_dirs;
 }
 
 /* place to look for system level providers */
-static char *
-enchant_get_module_dir (void)
+static GSList *
+enchant_get_module_dirs (void)
 {
+	GSList *module_dirs = NULL;
+
 	char * module_dir = NULL;
 	char * prefix = NULL;
 
+	{
+		char* user_module_dir;
+		
+		user_module_dir = enchant_get_registry_value_ex (1, "Config", "Module_Dir");
+		if (user_module_dir)
+			module_dirs = g_slist_append (module_dirs, user_module_dir);
+	}
+
 #ifdef XP_TARGET_COCOA
-	return g_strdup ([[EnchantResourceProvider instance] moduleFolder]);
+	module_dirs = g_slist_append (module_dirs, g_strdup ([[EnchantResourceProvider instance] moduleFolder]));
 #endif
+
+	{
+		GSList *user_dirs, *iter;
+
+		user_dirs = enchant_get_user_dirs();
+
+		for (iter = user_dirs; iter; iter = iter->next)
+			module_dirs = g_slist_append (module_dirs, iter->data);
+		
+		g_slist_free (user_dirs);
+	}
 
 	/* Look for explicitly set registry values */
 	module_dir = enchant_get_registry_value_ex (0, "Config", "Module_Dir");
 	if (module_dir)
-				return module_dir;
+		module_dirs = g_slist_append (module_dirs, module_dir);
 
 	/* Dynamically locate library and search for modules relative to it. */
 	prefix = enchant_get_prefix_dir();
@@ -182,39 +212,30 @@ enchant_get_module_dir (void)
 		{
 			module_dir = g_build_filename(prefix,"lib","enchant",NULL);
 			g_free(prefix);
-			return module_dir;
+			module_dirs = g_slist_append (module_dirs, module_dir);
 		}
 
 #if defined(ENCHANT_GLOBAL_MODULE_DIR)
-	return g_strdup (ENCHANT_GLOBAL_MODULE_DIR);
-#else
-	return NULL;
+	module_dirs = g_slist_append (module_dirs, g_strdup (ENCHANT_GLOBAL_MODULE_DIR));
 #endif
+
+	return module_dirs;
 }
 
-static char *
-enchant_get_user_module_dir (void)
+static GSList *
+enchant_get_conf_dirs (void)
 {
-	char* user_module_dir;
-
-	user_module_dir = enchant_get_registry_value_ex (1, "Config", "Module_Dir");
-	if (user_module_dir)
-		return user_module_dir;
-	return enchant_get_user_dir();
-}
-
-static char *
-enchant_get_conf_dir (void)
-{
-#ifdef XP_TARGET_COCOA
-	return g_strdup ([[EnchantResourceProvider instance] configFolder]);
-#endif
+	GSList *conf_dirs = NULL;
 	char * ordering_dir = NULL, * prefix = NULL;;
+
+#ifdef XP_TARGET_COCOA
+	conf_dirs = g_slist_append (conf_dirs, g_strdup ([[EnchantResourceProvider instance] configFolder]));
+#endif
 
 	/* Look for explicitly set registry values */
 	ordering_dir = enchant_get_registry_value_ex (0, "Config", "Data_Dir");
 	if (ordering_dir)
-		return ordering_dir;
+		conf_dirs = g_slist_append (conf_dirs, ordering_dir);
 
 	/* Dynamically locate library and search for files relative to it. */
 	prefix = enchant_get_prefix_dir();
@@ -222,14 +243,14 @@ enchant_get_conf_dir (void)
 		{
 			ordering_dir = g_build_filename(prefix,"share","enchant",NULL);
 			g_free(prefix);
-			return ordering_dir;
+			conf_dirs = g_slist_append (conf_dirs, ordering_dir);
 		}
 
 #if defined(ENCHANT_GLOBAL_ORDERING)
-	return g_strdup (ENCHANT_GLOBAL_ORDERING);
-#else
-	return NULL;
+	conf_dirs = g_slist_append (conf_dirs, g_strdup (ENCHANT_GLOBAL_ORDERING));
 #endif
+
+	return conf_dirs;
 }
 
 /**
@@ -243,16 +264,19 @@ enchant_get_conf_dir (void)
  *
  * This API is private to the providers.
  */
-ENCHANT_MODULE_EXPORT (char *)
-enchant_get_user_config_dir (void)
+ENCHANT_MODULE_EXPORT (GSList *)
+enchant_get_user_config_dirs (void)
 {
+	GSList *dirs;
 	char* user_config;
+
+	dirs = enchant_get_user_dirs();
 
 	user_config = enchant_get_registry_value_ex (1, "Config", "Data_Dir");
 	if (user_config)
-		return user_config;
+		dirs = g_slist_prepend (dirs, user_config);
 
-	return enchant_get_user_dir();
+	return dirs;
 }
 
 /*
@@ -486,30 +510,51 @@ enchant_session_new_with_pwl (EnchantProvider * provider,
 }
 
 static EnchantSession *
+_enchant_session_new (EnchantProvider *provider, const char * const user_config_dir, 
+		      const char * const lang, gboolean fail_if_no_pwl)
+{
+	char *filename, *dic, *excl;
+	EnchantSession * session;
+
+	if (!user_config_dir || !lang)
+		return NULL;
+	
+	filename = g_strdup_printf ("%s.dic", lang);
+	dic = g_build_filename (user_config_dir, filename, NULL);
+	g_free (filename);
+	
+	filename = g_strdup_printf ("%s.exc", lang);
+	excl = g_build_filename (user_config_dir, filename,	NULL);
+	g_free (filename);
+	
+	session = enchant_session_new_with_pwl (provider, dic, excl, lang, fail_if_no_pwl);
+	
+	g_free (dic);
+
+	return session;
+}
+
+static EnchantSession *
 enchant_session_new (EnchantProvider *provider, const char * const lang)
 {
-	EnchantSession * session;
-	char * user_config_dir, * dic = NULL, *excl = NULL, * filename;
+	EnchantSession * session = NULL;
+	GSList *user_config_dirs, *iter;
 
-	user_config_dir = enchant_get_user_config_dir ();
-	if (user_config_dir) 
+	_enchant_ensure_private_datadir ();
+
+	user_config_dirs = enchant_get_user_config_dirs ();
+	for (iter = user_config_dirs; iter != NULL && session == NULL; iter = iter->next)
 		{
-			_enchant_ensure_private_datadir ();
-			filename = g_strdup_printf ("%s.dic", lang);
-			dic = g_build_filename (user_config_dir, filename, NULL);
-			g_free (filename);
-
-			filename = g_strdup_printf ("%s.exc", lang);
-			excl = g_build_filename (user_config_dir, filename,	NULL);
-			g_free (filename);
-
-			g_free (user_config_dir);
+			session =_enchant_session_new (provider, iter->data, lang, TRUE);
 		}
 
-	session = enchant_session_new_with_pwl (provider, dic, excl, lang, FALSE);	
-	
-	if (dic)
-		g_free (dic);
+	g_slist_foreach (user_config_dirs, (GFunc)g_free, NULL);
+	g_slist_free (user_config_dirs);
+
+	if (!session)
+		{
+			session =_enchant_session_new (provider, g_get_user_config_dir(), lang, FALSE);
+		}
 	
 	return session;
 }
@@ -1367,25 +1412,17 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	gchar *user_dir, *system_dir;
+	GSList *module_dirs, *iter;
+
+	module_dirs = enchant_get_module_dirs();
 	
-	/* load USER providers first. since the GSList is ordered,
-	   this intentionally gives preference to USER providers */
-
-	user_dir = enchant_get_user_module_dir ();
-
-	if (user_dir) 
+	for (iter = module_dirs; iter; iter = iter->next)
 		{
-			enchant_load_providers_in_dir (broker, user_dir);
-			g_free (user_dir);
+			enchant_load_providers_in_dir (broker, iter->data);
 		}
 
-	system_dir = enchant_get_module_dir ();
-	if (system_dir)
-		{
-			enchant_load_providers_in_dir (broker, system_dir);
-			g_free (system_dir);
-		}
+	g_slist_foreach (module_dirs, (GFunc)g_free, NULL);
+	g_slist_free (module_dirs);
 }
 
 static void
@@ -1424,28 +1461,22 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 static void
 enchant_load_provider_ordering (EnchantBroker * broker)
 {
-	char * ordering_file, * user_config_dir, * global_config_dir;
+	GSList *conf_dirs, *iter;
 
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	global_config_dir = enchant_get_conf_dir ();
-	if (global_config_dir) 
+	/* we want the user's dirs to show up last, so they override system dirs */
+	conf_dirs = g_slist_reverse (enchant_get_conf_dirs ());
+	for (iter = conf_dirs; iter; iter = iter->next)
 		{
-			ordering_file = g_build_filename (global_config_dir, "enchant.ordering", NULL);
+			char *ordering_file;
+			ordering_file = g_build_filename (iter->data, "enchant.ordering", NULL);
 			enchant_load_ordering_from_file (broker, ordering_file);
-			g_free (ordering_file);
-			g_free (global_config_dir);
+			g_free (ordering_file);	
 		}
-	
-	user_config_dir = enchant_get_user_config_dir ();
-	
-	if (user_config_dir) 
-		{
-			ordering_file = g_build_filename (user_config_dir, "enchant.ordering", NULL);
-			enchant_load_ordering_from_file (broker, ordering_file);
-			g_free (ordering_file);
-			g_free (user_config_dir);
-		}
+
+	g_slist_foreach (conf_dirs, (GFunc)g_free, NULL);
+	g_slist_free (conf_dirs);
 }
 
 static GSList *
@@ -2120,22 +2151,34 @@ enchant_get_prefix_dir(void)
 	char * prefix = NULL;
 
 #ifdef _WIN32
-	/* Dynamically locate library and return containing directory */
-	HINSTANCE hInstance = GetModuleHandle(L"libenchant");
-	if(hInstance != NULL)
-	{
-		WCHAR dll_path[MAX_PATH];
+	if (!prefix) {
+		/* Dynamically locate library and return containing directory */
+		HINSTANCE hInstance = GetModuleHandle(L"libenchant");
+		if(hInstance != NULL)
+			{
+				WCHAR dll_path[MAX_PATH];
 	  
-		if(GetModuleFileName(hInstance,dll_path,MAX_PATH))
-		{
-			gchar* utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
-			prefix = g_path_get_dirname(utf8_dll_path);
-			g_free(utf8_dll_path);
-		}
+				if(GetModuleFileName(hInstance,dll_path,MAX_PATH))
+					{
+						gchar* utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
+						prefix = g_path_get_dirname(utf8_dll_path);
+						g_free(utf8_dll_path);
+					}
+			}
 	}
-#elif defined(ENABLE_BINRELOC)
-	/* Use standard binreloc PREFIX macro */
-	prefix = gbr_find_prefix(NULL);
+#endif
+
+#if defined(ENABLE_BINRELOC)
+	if (!prefix) {
+		/* Use standard binreloc PREFIX macro */
+		prefix = gbr_find_prefix(NULL);
+	}
+#endif
+
+#if defined(ENCHANT_PREFIX_DIR)
+	if (!prefix) {
+		prefix = g_strdup (ENCHANT_PREFIX_DIR);
+	}
 #endif
 
 	return prefix;

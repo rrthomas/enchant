@@ -32,6 +32,7 @@
 #define ENCHANT_PROVIDER_H
 
 #include <enchant.h>
+#include <glib.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -54,8 +55,8 @@ ENCHANT_MODULE_EXPORT(char *)
 	
 typedef struct str_enchant_provider EnchantProvider;
 
-ENCHANT_MODULE_EXPORT (char *)
-	enchant_get_user_config_dir (void);
+ENCHANT_MODULE_EXPORT (GSList *)
+	enchant_get_user_config_dirs (void);
 
 ENCHANT_MODULE_EXPORT (char *)
 	enchant_get_registry_value (const char * const prefix, const char * const key);

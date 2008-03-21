@@ -175,6 +175,8 @@ AC_CACHE_CHECK([for supported C++ warning flags], enchant_cxx_cv_warn_cflags, [
 CXX_WARN_CFLAGS="$enchant_cxx_cv_warn_cflags"
 AC_SUBST(CXX_WARN_CFLAGS)
 
+ENCHANT_CFLAGS="$ENCHANT_CFLAGS -DENCHANT_PREFIX_DIR='\"$prefix\"'"
+
 AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
 
@@ -284,7 +286,7 @@ if test "x$have_cxx" = "xno"; then
 fi
 AM_CONDITIONAL(WITH_MYSPELL, test "x$build_myspell" = "xyes")
 
-myspell_dir=${datadir}/enchant/myspell
+myspell_dir=${datadir}/myspell/dicts
 AC_ARG_WITH(myspell-dir, [  --with-myspell-dir=PATH    path to installed myspell dicts ])
 
 if test "x$with_myspell_dir" != "x" ; then
@@ -414,14 +416,14 @@ if test "x$check_uspell" != "xno"; then
    PKG_CHECK_MODULES(USPELL, [libuspell >= 1.1.0], build_uspell=yes, build_uspell=no)
 fi
 
-uspell_dir=${datadir}/enchant/uspell
+uspell_dir=${datadir}/uspell
 AC_ARG_WITH(uspell-dir, [  --with-uspell-dir=PATH    path to installed uspell dicts ])
 
 if test "x$with_uspell_dir" != "x" ; then
    uspell_dir=$with_uspell_dir
 fi
 
-USPELL_CFLAGS="$USPELL_CFLAGS -DENCHANT_USPELL_DICT_DIR='\"$uspell_dict_dir\"'"
+USPELL_CFLAGS="$USPELL_CFLAGS -DENCHANT_USPELL_DICT_DIR='\"$uspell_dir\"'"
 AC_SUBST(USPELL_CFLAGS)
 AC_SUBST(USPELL_LIBS)
 

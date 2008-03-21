@@ -300,9 +300,26 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 	return sugg_arr;
 }
 
-static char *
-ispell_checker_get_prefix (void)
+static GSList *
+ispell_checker_get_dictionary_dirs (void)
 {
+	GSList *dirs = NULL;
+
+	{
+		GSList *config_dirs, *iter;
+
+		config_dirs = enchant_get_user_config_dirs ();
+		
+		for (iter = config_dirs; iter; iter = iter->next)
+			{
+				dirs = g_slist_append (dirs, g_build_filename ((const gchar *)iter->data, 
+									       ENCHANT_ISPELL_HOME_DIR, NULL));
+			}
+
+		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
+		g_slist_free (config_dirs);
+	}
+
 	/* until I work out how to link the modules against enchant in MacOSX - fjf
 	 */
 #ifndef XP_TARGET_COCOA
@@ -311,7 +328,7 @@ ispell_checker_get_prefix (void)
 	/* Look for explicitly set registry values */
 	ispell_prefix = enchant_get_registry_value ("Ispell", "Data_Dir");
 	if (ispell_prefix)
-		return ispell_prefix;
+		dirs = g_slist_append (dirs, ispell_prefix);
 
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
@@ -319,49 +336,36 @@ ispell_checker_get_prefix (void)
 		{
 			ispell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "ispell", NULL);
 			g_free(enchant_prefix);
-			return ispell_prefix;
+			dirs = g_slist_append (dirs, ispell_prefix);
 		}
 #endif
 
 #ifdef ENCHANT_ISPELL_DICT_DIR
-	return g_strdup (ENCHANT_ISPELL_DICT_DIR);
-#else
-	return NULL;
+	dirs = g_slist_append (dirs, g_strdup (ENCHANT_ISPELL_DICT_DIR));
 #endif
+
+	return dirs;
 }
 
 static void
 s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
-	char * tmp, * private_dir, * config_dir, * ispell_prefix;
-
 	names.clear ();
 
-	/* until I work out how to link the modules against enchant in MacOSX - fjf
-	 */
-#ifndef XP_TARGET_COCOA
-	config_dir = enchant_get_user_config_dir ();
-#else
-	config_dir = g_strdup (g_getenv ("HOME"));
-#endif
-	if (config_dir) {
-		private_dir = g_build_filename (config_dir, ENCHANT_ISPELL_HOME_DIR, NULL);
-		
-		tmp = g_build_filename (private_dir, dict, NULL);
-		names.push_back (tmp);
-		g_free (tmp);
+	GSList *dirs, *iter;
 
-		g_free (private_dir);
-		g_free (config_dir);
-	}
+	dirs = ispell_checker_get_dictionary_dirs();
+	for (iter = dirs; iter; iter = iter->next)
+		{
+			char *tmp;
 
-	ispell_prefix = ispell_checker_get_prefix ();
-	if (ispell_prefix) {
-		tmp = g_build_filename (ispell_prefix, dict, NULL);
-		names.push_back (tmp);
-		g_free (tmp);
-		g_free (ispell_prefix);
-	}
+			tmp = g_build_filename ((const gchar *)iter->data, dict, NULL);
+			names.push_back (tmp);
+			g_free (tmp);
+		}
+
+	g_slist_foreach (dirs, (GFunc)g_free, NULL);
+	g_slist_free (dirs);
 }
 
 char *
