@@ -51,7 +51,7 @@ public:
   ~SuggestMgr();
 
   int suggest(char*** slst, const char * word, int nsug, int * onlycmpdsug);
-  int ngsuggest(char ** wlst, char * word, int ns, HashMgr* pHMgr);
+  int ngsuggest(char ** wlst, char * word, int ns, HashMgr** pHMgr, int md);
   int suggest_auto(char*** slst, const char * word, int nsug);
   int suggest_stems(char*** slst, const char * word, int nsug);
   int suggest_pos_stems(char*** slst, const char * word, int nsug);

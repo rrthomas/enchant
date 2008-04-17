@@ -15,9 +15,10 @@
 
 #include "suggestmgr.hxx"
 #include "htypes.hxx"
+#include "csutil.hxx"
 
 #ifndef MOZILLA_CLIENT
-#ifndef W32
+#ifndef WIN32
 using namespace std;
 #endif
 #endif
@@ -1028,7 +1029,7 @@ int SuggestMgr::movechar_utf(char ** wlst, const w_char * word, int wl, int ns, 
 }
 
 // generate a set of suggestions for very poorly spelled words
-int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
+int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr** pHMgr, int md)
 {
 
   int i, j;
@@ -1036,8 +1037,6 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
   int sc, scphon;
   int lp, lpphon;
   int nonbmp = 0;
-
-  if (!pHMgr) return ns;
 
   // exhaustively search through all root words
   // keeping track of the MAX_ROOTS most similar root words
@@ -1088,8 +1087,9 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
     mkallcap(candidate, csconv);
     phonet(candidate, target, n, *ph);
   }
-  
-  while ((hp = pHMgr->walk_hashtable(col, hp))) {
+
+  for (i = 0; i < md; i++) {  
+  while ((hp = (pHMgr[i])->walk_hashtable(col, hp))) {
     if ((hp->astr) && (pAMgr) && 
        (TESTAFF(hp->astr, pAMgr->get_forbiddenword(), hp->alen) ||
           TESTAFF(hp->astr, ONLYUPCASEFLAG, hp->alen) ||
@@ -1135,7 +1135,7 @@ int SuggestMgr::ngsuggest(char** wlst, char * w, int ns, HashMgr* pHMgr)
           lval = scoresphon[j];
         }
     }
-  }
+  }}
 
   // find minimum threshhold for a passable suggestion
   // mangle original word three differnt ways
@@ -1557,7 +1557,7 @@ char * SuggestMgr::suggest_hentry_gen(hentry * rv, char * pattern)
     *result = '\0';
     int sfxcount = get_sfxcount(pattern);
 
-//    if (get_sfxcount(HENTRY_DATA(rv)) > sfxcount) return NULL;
+    if (get_sfxcount(HENTRY_DATA(rv)) > sfxcount) return NULL;
 
     if (HENTRY_DATA(rv)) {
         char * aff = pAMgr->morphgen(HENTRY_WORD(rv), rv->blen, rv->astr, rv->alen,

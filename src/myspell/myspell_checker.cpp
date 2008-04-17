@@ -38,8 +38,13 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
-/* built against hunspell 1.1.5 on 2007-03-19 */
+/* built against hunspell 1.2.2 on 2008-04-12 */
+
+#ifdef WITH_SYSTEM_MYSPELL
+#include <hunspell/hunspell.hxx>
+#else
 #include "hunspell.hxx"
+#endif
 
 ENCHANT_PLUGIN_DECLARE("Myspell")
 

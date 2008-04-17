@@ -7,9 +7,9 @@
 #include <cctype>
 #include <cstdio>
 #else
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
-#include <stdio.h> 
+#include <stdio.h>
 #include <ctype.h>
 #endif
 
@@ -17,7 +17,7 @@
 #include "csutil.hxx"
 
 #ifndef MOZILLA_CLIENT
-#ifndef W32
+#ifndef WIN32
 using namespace std;
 #endif
 #endif
@@ -29,8 +29,8 @@ PfxEntry::PfxEntry(AffixMgr* pmgr, affentry* dp)
   pmyMgr = pmgr;
 
   // set up its intial values
- 
-  aflag = dp->aflag;         // flag 
+
+  aflag = dp->aflag;         // flag
   strip = dp->strip;         // string to strip
   appnd = dp->appnd;         // string to append
   stripl = dp->stripl;       // length of strip string
@@ -70,7 +70,7 @@ char * PfxEntry::add(const char * word, int len)
     char tword[MAXWORDUTF8LEN + 4];
 
     if ((len > stripl) && (len >= numconds) && test_condition(word) &&
-       (!stripl || (strncmp(word, strip, stripl) == 0)) && 
+       (!stripl || (strncmp(word, strip, stripl) == 0)) &&
        ((MAXWORDUTF8LEN + 4) > (len + appndl - stripl))) {
     /* we have a match so add prefix */
               char * pp = tword;
@@ -81,7 +81,7 @@ char * PfxEntry::add(const char * word, int len)
                strcpy(pp, (word + stripl));
                return mystrdup(tword);
      }
-     return NULL;    
+     return NULL;
 }
 
 inline char * PfxEntry::nextchar(char * p) {
@@ -149,7 +149,7 @@ inline int PfxEntry::test_condition(const char * st)
     }
 }
 
-// check if this prefix entry matches 
+// check if this prefix entry matches
 struct hentry * PfxEntry::checkword(const char * word, int len, char in_compound, const FLAG needflag)
 {
     int                 tmpl;   // length of tmpword
@@ -171,7 +171,7 @@ struct hentry * PfxEntry::checkword(const char * word, int len, char in_compound
 
             if (stripl) strcpy (tmpword, strip);
             strcpy ((tmpword + stripl), (word + appndl));
-    
+
             // now make sure all of the conditions on characters
             // are met.  Please see the appendix at the end of
             // this file for more info on exactly what is being
@@ -194,14 +194,14 @@ struct hentry * PfxEntry::checkword(const char * word, int len, char in_compound
                       he = he->next_homonym; // check homonyms
                    } while (he);
                 }
-                
-                // prefix matched but no root word was found 
-                // if aeXPRODUCT is allowed, try again but now 
+
+                // prefix matched but no root word was found
+                // if aeXPRODUCT is allowed, try again but now
                 // ross checked combined with a suffix
 
                 //if ((opts & aeXPRODUCT) && in_compound) {
                 if ((opts & aeXPRODUCT)) {
-                   he = pmyMgr->suffix_check(tmpword, tmpl, aeXPRODUCT, (AffEntry *)this, NULL, 
+                   he = pmyMgr->suffix_check(tmpword, tmpl, aeXPRODUCT, (AffEntry *)this, NULL,
                         0, NULL, FLAG_NULL, needflag, in_compound);
                    if (he) return he;
                 }
@@ -210,7 +210,7 @@ struct hentry * PfxEntry::checkword(const char * word, int len, char in_compound
     return NULL;
 }
 
-// check if this prefix entry matches 
+// check if this prefix entry matches
 struct hentry * PfxEntry::check_twosfx(const char * word, int len,
     char in_compound, const FLAG needflag)
 {
@@ -245,8 +245,8 @@ struct hentry * PfxEntry::check_twosfx(const char * word, int len,
             if (test_condition(tmpword)) {
                 tmpl += stripl;
 
-                // prefix matched but no root word was found 
-                // if aeXPRODUCT is allowed, try again but now 
+                // prefix matched but no root word was found
+                // if aeXPRODUCT is allowed, try again but now
                 // cross checked combined with a suffix
 
                 if ((opts & aeXPRODUCT) && (in_compound != IN_CPD_BEGIN)) {
@@ -258,7 +258,7 @@ struct hentry * PfxEntry::check_twosfx(const char * word, int len,
     return NULL;
 }
 
-// check if this prefix entry matches 
+// check if this prefix entry matches
 char * PfxEntry::check_twosfx_morph(const char * word, int len,
          char in_compound, const FLAG needflag)
 {
@@ -292,8 +292,8 @@ char * PfxEntry::check_twosfx_morph(const char * word, int len,
             if (test_condition(tmpword)) {
                 tmpl += stripl;
 
-                // prefix matched but no root word was found 
-                // if aeXPRODUCT is allowed, try again but now 
+                // prefix matched but no root word was found
+                // if aeXPRODUCT is allowed, try again but now
                 // ross checked combined with a suffix
 
                 if ((opts & aeXPRODUCT) && (in_compound != IN_CPD_BEGIN)) {
@@ -305,7 +305,7 @@ char * PfxEntry::check_twosfx_morph(const char * word, int len,
     return NULL;
 }
 
-// check if this prefix entry matches 
+// check if this prefix entry matches
 char * PfxEntry::check_morph(const char * word, int len, char in_compound, const FLAG needflag)
 {
     int                 tmpl;   // length of tmpword
@@ -313,7 +313,7 @@ char * PfxEntry::check_morph(const char * word, int len, char in_compound, const
     char                tmpword[MAXWORDUTF8LEN + 4];
     char                result[MAXLNLEN];
     char * st;
-    
+
     *result = '\0';
 
     // on entry prefix is 0 length or already matches the beginning of the word.
@@ -349,7 +349,7 @@ char * PfxEntry::check_morph(const char * word, int len, char in_compound, const
                         ! TESTAFF(contclass, pmyMgr->get_needaffix(), contclasslen) &&
                         // needflag
                         ((!needflag) || TESTAFF(he->astr, needflag, he->alen) ||
-                         (contclass && TESTAFF(contclass, needflag, contclasslen)))) {                            
+                         (contclass && TESTAFF(contclass, needflag, contclasslen)))) {
                             if (morphcode) {
                                 strcat(result, " ");
                                 strcat(result, morphcode);
@@ -364,6 +364,13 @@ char * PfxEntry::check_morph(const char * word, int len, char in_compound, const
                             if (HENTRY_DATA(he)) {
                                 strcat(result, " ");
                                 strcat(result,HENTRY_DATA(he));
+                            } else {
+                                // return with debug information
+                                char * flag = pmyMgr->encode_flag(getFlag());
+                                strcat(result, " ");
+                                strcat(result, MORPH_FLAG);
+                                strcat(result, flag);
+                                free(flag);
                             }
                             strcat(result, "\n");
                       }
@@ -371,12 +378,12 @@ char * PfxEntry::check_morph(const char * word, int len, char in_compound, const
                     } while (he);
                 }
 
-                // prefix matched but no root word was found 
-                // if aeXPRODUCT is allowed, try again but now 
+                // prefix matched but no root word was found
+                // if aeXPRODUCT is allowed, try again but now
                 // ross checked combined with a suffix
 
                 if ((opts & aeXPRODUCT) && (in_compound != IN_CPD_BEGIN)) {
-                   st = pmyMgr->suffix_check_morph(tmpword, tmpl, aeXPRODUCT, (AffEntry *)this, 
+                   st = pmyMgr->suffix_check_morph(tmpword, tmpl, aeXPRODUCT, (AffEntry *)this,
                      FLAG_NULL, needflag);
                    if (st) {
                         strcat(result, st);
@@ -385,7 +392,7 @@ char * PfxEntry::check_morph(const char * word, int len, char in_compound, const
                 }
             }
      }
-     
+    
     if (*result) return mystrdup(result);
     return NULL;
 }
@@ -396,7 +403,7 @@ SfxEntry::SfxEntry(AffixMgr * pmgr, affentry* dp)
   pmyMgr = pmgr;
 
   // set up its intial values
-  aflag = dp->aflag;         // char flag 
+  aflag = dp->aflag;         // char flag
   strip = dp->strip;         // string to strip
   appnd = dp->appnd;         // string to append
   stripl = dp->stripl;       // length of strip string
@@ -425,7 +432,7 @@ SfxEntry::~SfxEntry()
     if (strip) free(strip);
     pmyMgr = NULL;
     appnd = NULL;
-    strip = NULL;    
+    strip = NULL;
     if (opts & aeLONGCOND) free(c.l.conds2);
     if (morphcode && !(opts & aeALIASM)) free(morphcode);
     if (contclass && !(opts & aeALIASF)) free(contclass);
@@ -470,14 +477,14 @@ inline int SfxEntry::test_condition(const char * st, const char * beg)
     if (numconds == 0) return 1;
     char * p = c.conds;
     st--;
-    int c = 1;
+    int i = 1;
     while (1) {
       switch (*p) {
         case '\0': return 1;
         case '[': { p = nextchar(p); pos = st; break; }
         case '^': { p = nextchar(p); neg = true; break; }
         case ']': { if (!neg && !ingroup) return 0;
-                c++;
+                i++;
                 pos = NULL;
                 neg = false;
                 ingroup = false;
@@ -515,17 +522,17 @@ inline int SfxEntry::test_condition(const char * st, const char * beg)
                         }
                         if (pos && st != pos) {
                             if (neg) return 0;
-                            else if (c == numconds) return 1;
+                            else if (i == numconds) return 1;
                             ingroup = true;
                         }
                         if (p && *p != '\0') p = nextchar(p);
                     } else if (pos) {
                         if (neg) return 0;
-                        else if (c == numconds) return 1;                        
+                        else if (i == numconds) return 1;
                         ingroup = true;
                     }
                     if (!pos) {
-                        c++;
+                        i++;
                         st--;
                         if (st < beg && p && *p != '\0') return 0; // word <= condition
                     }
@@ -538,12 +545,12 @@ inline int SfxEntry::test_condition(const char * st, const char * beg)
     }
 }
 
-// see if this suffix is present in the word 
+// see if this suffix is present in the word
 struct hentry * SfxEntry::checkword(const char * word, int len, int optflags,
     AffEntry* ppfx, char ** wlst, int maxSug, int * ns, const FLAG cclass, const FLAG needflag,
     const FLAG badflag)
 {
-    int                 tmpl;            // length of tmpword 
+    int                 tmpl;            // length of tmpword
     struct hentry *     he;              // hash entry pointer
     unsigned char *     cp;
     char                tmpword[MAXWORDUTF8LEN + 4];
@@ -563,7 +570,7 @@ struct hentry * SfxEntry::checkword(const char * word, int len, int optflags,
     tmpl = len - appndl;
     // the second condition is not enough for UTF-8 strings
     // it checked in test_condition()
-    
+
     if ((tmpl > 0) && (tmpl + stripl >= numconds)) {
 //    if (tmpl > 0) {
 
@@ -596,21 +603,21 @@ struct hentry * SfxEntry::checkword(const char * word, int len, int optflags,
                     do {
                         // check conditional suffix (enabled by prefix)
                         if ((TESTAFF(he->astr, aflag, he->alen) || (ep && ep->getCont() &&
-                                    TESTAFF(ep->getCont(), aflag, ep->getContLen()))) && 
-                            (((optflags & aeXPRODUCT) == 0) || 
+                                    TESTAFF(ep->getCont(), aflag, ep->getContLen()))) &&
+                            (((optflags & aeXPRODUCT) == 0) ||
                             TESTAFF(he->astr, ep->getFlag(), he->alen) ||
                              // enabled by prefix
                             ((contclass) && TESTAFF(contclass, ep->getFlag(), contclasslen))
                             ) &&
                             // handle cont. class
-                            ((!cclass) || 
+                            ((!cclass) ||
                                 ((contclass) && TESTAFF(contclass, cclass, contclasslen))
                             ) &&
                             // check only in compound homonyms (bad flags)
                             (!badflag || !TESTAFF(he->astr, badflag, he->alen)
-                            ) &&                            
+                            ) &&
                             // handle required flag
-                            ((!needflag) || 
+                            ((!needflag) ||
                               (TESTAFF(he->astr, needflag, he->alen) ||
                               ((contclass) && TESTAFF(contclass, needflag, contclasslen)))
                             )
@@ -618,12 +625,12 @@ struct hentry * SfxEntry::checkword(const char * word, int len, int optflags,
                         he = he->next_homonym; // check homonyms
                     } while (he);
 
-                // obsolote stemming code (used only by the 
+                // obsolote stemming code (used only by the
                 // experimental SuffixMgr:suggest_pos_stems)
                 // store resulting root in wlst
                 } else if (wlst && (*ns < maxSug)) {
                     int cwrd = 1;
-                    for (int k=0; k < *ns; k++) 
+                    for (int k=0; k < *ns; k++)
                         if (strcmp(tmpword, wlst[k]) == 0) cwrd = 0;
                     if (cwrd) {
                         wlst[*ns] = mystrdup(tmpword);
@@ -640,11 +647,11 @@ struct hentry * SfxEntry::checkword(const char * word, int len, int optflags,
     return NULL;
 }
 
-// see if two-level suffix is present in the word 
+// see if two-level suffix is present in the word
 struct hentry * SfxEntry::check_twosfx(const char * word, int len, int optflags,
     AffEntry* ppfx, const FLAG needflag)
 {
-    int                 tmpl;            // length of tmpword 
+    int                 tmpl;            // length of tmpword
     struct hentry *     he;              // hash entry pointer
     unsigned char *     cp;
     char                tmpword[MAXWORDUTF8LEN + 4];
@@ -689,7 +696,7 @@ struct hentry * SfxEntry::check_twosfx(const char * word, int len, int optflags,
             if (test_condition((char *) cp, (char *) tmpword)) {
                 if (ppfx) {
                     // handle conditional suffix
-                    if ((contclass) && TESTAFF(contclass, ep->getFlag(), contclasslen)) 
+                    if ((contclass) && TESTAFF(contclass, ep->getFlag(), contclasslen))
                         he = pmyMgr->suffix_check(tmpword, tmpl, 0, NULL, NULL, 0, NULL, (FLAG) aflag, needflag);
                     else
                         he = pmyMgr->suffix_check(tmpword, tmpl, optflags, ppfx, NULL, 0, NULL, (FLAG) aflag, needflag);
@@ -702,18 +709,18 @@ struct hentry * SfxEntry::check_twosfx(const char * word, int len, int optflags,
     return NULL;
 }
 
-// see if two-level suffix is present in the word 
+// see if two-level suffix is present in the word
 char * SfxEntry::check_twosfx_morph(const char * word, int len, int optflags,
     AffEntry* ppfx, const FLAG needflag)
 {
-    int                 tmpl;            // length of tmpword 
+    int                 tmpl;            // length of tmpword
     unsigned char *     cp;
     char                tmpword[MAXWORDUTF8LEN + 4];
     PfxEntry* ep = (PfxEntry *) ppfx;
     char * st;
 
     char result[MAXLNLEN];
-    
+
     *result = '\0';
 
     // if this suffix is being cross checked with a prefix
@@ -788,7 +795,7 @@ char * SfxEntry::check_twosfx_morph(const char * word, int len, int optflags,
 }
 
 // get next homonym with same affix
-struct hentry * SfxEntry::get_next_homonym(struct hentry * he, int optflags, AffEntry* ppfx, 
+struct hentry * SfxEntry::get_next_homonym(struct hentry * he, int optflags, AffEntry* ppfx,
     const FLAG cclass, const FLAG needflag)
 {
     PfxEntry* ep = (PfxEntry *) ppfx;
@@ -796,18 +803,18 @@ struct hentry * SfxEntry::get_next_homonym(struct hentry * he, int optflags, Aff
 
     while (he->next_homonym) {
         he = he->next_homonym;
-        if ((TESTAFF(he->astr, aflag, he->alen) || (ep && ep->getCont() && TESTAFF(ep->getCont(), aflag, ep->getContLen()))) && 
-                            ((optflags & aeXPRODUCT) == 0 || 
+        if ((TESTAFF(he->astr, aflag, he->alen) || (ep && ep->getCont() && TESTAFF(ep->getCont(), aflag, ep->getContLen()))) &&
+                            ((optflags & aeXPRODUCT) == 0 ||
                             TESTAFF(he->astr, eFlag, he->alen) ||
                              // handle conditional suffix
                             ((contclass) && TESTAFF(contclass, eFlag, contclasslen))
                             ) &&
                             // handle cont. class
-                            ((!cclass) || 
+                            ((!cclass) ||
                                 ((contclass) && TESTAFF(contclass, cclass, contclasslen))
                             ) &&
                             // handle required flag
-                            ((!needflag) || 
+                            ((!needflag) ||
                               (TESTAFF(he->astr, needflag, he->alen) ||
                               ((contclass) && TESTAFF(contclass, needflag, contclasslen)))
                             )

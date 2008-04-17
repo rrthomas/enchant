@@ -8,6 +8,7 @@
 #endif
 
 #include "htypes.hxx"
+#include "filemgr.hxx"
 
 enum flag { FLAG_CHAR, FLAG_LONG, FLAG_NUM, FLAG_UNI };
 
@@ -35,7 +36,7 @@ class HashMgr
 
 
 public:
-  HashMgr(const char * tpath, const char * apath);
+  HashMgr(const char * tpath, const char * apath, const char * key = NULL);
   ~HashMgr();
 
   struct hentry * lookup(const char *) const;
@@ -55,14 +56,15 @@ public:
   
 private:
   int get_clen_and_captype(const char * word, int wbl, int * captype);
-  int load_tables(const char * tpath);
+  int load_tables(const char * tpath, const char * key);
   int add_word(const char * word, int wbl, int wcl, unsigned short * ap,
     int al, const char * desc, bool onlyupcase);
-  int load_config(const char * affpath);
-  int parse_aliasf(char * line, FILE * af);
+  int load_config(const char * affpath, const char * key);
+  int parse_aliasf(char * line, FileMgr * af);
   int add_hidden_capitalized_word(char * word, int wbl, int wcl,
     unsigned short * flags, int al, char * dp, int captype);
-  int parse_aliasm(char * line, FILE * af);
+  int parse_aliasm(char * line, FileMgr * af);
+  int remove_forbidden_flag(const char * word);
 
 };
 

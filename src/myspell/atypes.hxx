@@ -13,8 +13,8 @@ static inline void HUNSPELL_WARNING(FILE *, const char *, ...) {}
 // HUNSTEM def.
 #define HUNSTEM
 
-#include "csutil.hxx"
 #include "hashmgr.hxx"
+#include "w_char.hxx"
 
 #define SETSIZE         256
 #define CONTSIZE        65536
@@ -70,6 +70,12 @@ struct affentry
    char *       morphcode;
 };
 
+struct guessword {
+  char * word;
+  bool allow;
+  char * orig;
+};
+
 struct mapentry {
   char * set;
   w_char * set_utf16;
@@ -79,12 +85,6 @@ struct mapentry {
 struct flagentry {
   FLAG * def;
   int len;
-};
-
-struct guessword {
-  char * word;
-  bool allow;
-  char * orig;
 };
 
 #endif

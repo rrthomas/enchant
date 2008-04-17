@@ -27,6 +27,8 @@ class AffixMgr
   AffEntry *          pFlag[CONTSIZE];
   AffEntry *          sFlag[CONTSIZE];
   HashMgr *           pHMgr;
+  HashMgr **          alldic;
+  int *               maxdic;
   char *              keystring;
   char *              trystring;
   char *              encoding;
@@ -96,8 +98,9 @@ class AffixMgr
   flag                flag_mode;
   
 public:
- 
-  AffixMgr(const char * affpath, HashMgr * ptr);
+
+  AffixMgr(const char * affpath, HashMgr** ptr, int * md,
+    const char * key = NULL);
   ~AffixMgr();
   struct hentry *     affix_check(const char * word, int len,
             const unsigned short needflag = (unsigned short) 0,
@@ -150,7 +153,7 @@ public:
             short numsyllable, short maxwordnum, short wnum, hentry ** words,
             char hu_mov_rule, char ** result, char * partresult);
 
-  struct hentry *     lookup(const char * word);
+  struct hentry * lookup(const char * word);
   int                 get_numrep();
   struct replentry *  get_reptable();
   struct phonetable * get_phonetable();
@@ -171,7 +174,6 @@ public:
   FLAG                get_compoundbegin();
   FLAG                get_forbiddenword();
   FLAG                get_nosuggest();
-//  FLAG                get_circumfix();
   FLAG                get_needaffix();
   FLAG                get_onlyincompound();
   FLAG                get_compoundroot();
@@ -191,21 +193,23 @@ public:
   int                 get_sugswithdots(void);
   FLAG                get_keepcase(void);
   int                 get_checksharps(void);
+  char *              encode_flag(unsigned short aflag);
 
 private:
-  int  parse_file(const char * affpath);
+  int  parse_file(const char * affpath, const char * key);
   int  parse_flag(char * line, unsigned short * out, const char * name);
   int  parse_num(char * line, int * out, const char * name);
   int  parse_cpdsyllable(char * line);
-  int  parse_reptable(char * line, FILE * af);
-  int  parse_phonetable(char * line, FILE * af);
-  int  parse_maptable(char * line, FILE * af);
-  int  parse_breaktable(char * line, FILE * af);
-  int  parse_checkcpdtable(char * line, FILE * af);
-  int  parse_defcpdtable(char * line, FILE * af);
-  int  parse_affix(char * line, const char at, FILE * af, char * dupflags);
+  int  parse_reptable(char * line, FileMgr * af);
+  int  parse_phonetable(char * line, FileMgr * af);
+  int  parse_maptable(char * line, FileMgr * af);
+  int  parse_breaktable(char * line, FileMgr * af);
+  int  parse_checkcpdtable(char * line, FileMgr * af);
+  int  parse_defcpdtable(char * line, FileMgr * af);
+  int  parse_affix(char * line, const char at, FileMgr * af, char * dupflags);
 
   void reverse_condition(char *);
+  void debugflag(char * result, unsigned short flag);
   int condlen(char *);
   int encodeit(struct affentry * ptr, char * cs);
   int build_pfxtree(AffEntry* pfxptr);

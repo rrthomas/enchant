@@ -3,6 +3,8 @@
 
 // First some base level utility routines
 
+#include "w_char.hxx"
+
 #define NOCAP   0
 #define INITCAP 1
 #define ALLCAP  2
@@ -23,6 +25,7 @@
 #define MORPH_PHON        "ph:"
 #define MORPH_HYPH        "hy:"
 #define MORPH_PART        "pa:"
+#define MORPH_FLAG        "fl:"
 #define MORPH_HENTRY      "_H:"
 #define MORPH_TAG_LEN     strlen(MORPH_STEM)
 
@@ -30,16 +33,15 @@
 #define MSEP_REC '\n'
 #define MSEP_ALT '\v'
 
-
 // default flags
 #define DEFAULTFLAGS   65510
 #define FORBIDDENWORD  65510
 #define ONLYUPCASEFLAG 65511
 
-typedef struct {
-    unsigned char l;
-    unsigned char h;
-} w_char;
+// hash entry macros
+#define HENTRY_DATA(h) (h->var ? ((h->var & H_OPT_ALIASM) ? \
+    get_stored_pointer(&(h->word) + h->blen + 1) : &(h->word) + h->blen + 1) : NULL)
+#define HENTRY_FIND(h,p) (HENTRY_DATA(h) ? strstr(HENTRY_DATA(h), p) : NULL)
 
 #define w_char_eq(a,b) (((a).l == (b).l) && ((a).h == (b).h))
 
@@ -102,12 +104,6 @@ struct cs_info {
   unsigned char ccase;
   unsigned char clower;
   unsigned char cupper;
-};
-
-// two character arrays
-struct replentry {
-  char * pattern;
-  char * pattern2;
 };
 
 // Unicode character encoding information
@@ -199,5 +195,11 @@ char * copy_field(char * dest, const char * morph, const char * var);
 int morphcmp(const char * s, const char * t);
 
 int get_sfxcount(const char * morph);
+
+// conversion function for protected memory
+void store_pointer(char * dest, char * source);
+
+// conversion function for protected memory
+char * get_stored_pointer(char * s);
 
 #endif

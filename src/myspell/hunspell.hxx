@@ -1,7 +1,6 @@
 #include "hashmgr.hxx"
 #include "affixmgr.hxx"
 #include "suggestmgr.hxx"
-#include "csutil.hxx"
 #include "langnum.hxx"
 
 #define  SPELL_COMPOUND  (1 << 0)
@@ -10,6 +9,7 @@
 #define  SPELL_NOCAP     (1 << 3)
 #define  SPELL_INITCAP   (1 << 4)
 
+#define MAXDIC 20
 #define MAXSUGGESTION 15
 #define MAXSHARPS 5
 
@@ -26,31 +26,36 @@
 	#endif
 #endif
 
-#ifdef W32
+#ifdef WIN32
 class DLLEXPORT Hunspell
 #else
 class Hunspell
 #endif
 {
   AffixMgr*       pAMgr;
-  HashMgr*        pHMgr;
+  HashMgr*        pHMgr[MAXDIC];
+  int             maxdic;
   SuggestMgr*     pSMgr;
+  char *          affixpath;
   char *          encoding;
   struct cs_info * csconv;
   int             langnum;
   int             utf8;
   int             complexprefixes;
   char**          wordbreak;
+  char *          key;
 
 public:
 
   /* Hunspell(aff, dic) - constructor of Hunspell class
    * input: path of affix file and dictionary file
    */
-  
-  Hunspell(const char * affpath, const char * dpath);
 
+  Hunspell(const char * affpath, const char * dpath, const char * key = NULL);
   ~Hunspell();
+
+  /* load extra dictionaries (only dic files) */
+  int add_dic(const char * dpath, const char * key = NULL);
 
   /* spell(word) - spellcheck word
    * output: 0 = bad word, not 0 = good word
@@ -123,7 +128,6 @@ public:
   int add_with_affix(const char * word, const char * example);
 
   /* remove word from the run-time dictionary */
-  /* NOTE: not implemented yet */
 
   int remove(const char * word);
 
@@ -164,7 +168,7 @@ private:
    hentry * spellsharps(char * base, char *, int, int, char * tmp, int * info, char **root);
    int    is_keepcase(const hentry * rv);
    int    insert_sug(char ***slst, char * word, int ns);
-   char * cat_result(char * result, char * st);
+   void   cat_result(char * result, char * st);
    char * stem_description(const char * desc);
 
 };
