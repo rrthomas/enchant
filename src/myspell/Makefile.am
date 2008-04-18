@@ -6,7 +6,7 @@ endif
 
 # copied from hunspell 1.2.2
 COPIED_MYSPELL_FILES=		\
-	affentry.cxx
+	affentry.cxx		\
 	affentry.hxx		\
 	affixmgr.cxx		\
 	affixmgr.hxx		\

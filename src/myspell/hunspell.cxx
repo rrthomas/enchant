@@ -13,7 +13,6 @@
 
 #include "hunspell.hxx"
 #include "hunspell.h"
-#include "config.h"
 #include "csutil.hxx"
 
 #ifndef MOZILLA_CLIENT
