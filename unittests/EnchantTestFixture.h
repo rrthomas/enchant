@@ -31,6 +31,7 @@
 #include <windows.h>
 #include <shlwapi.h>
 #endif
+#include <io.h>
 
 #include <glib.h>
 #include <string>
@@ -46,6 +47,9 @@ struct EnchantTestFixture
     //Setup
     EnchantTestFixture()
     {
+        CleanUpFiles(); //just in case we stopped the process in the middle.
+        MoveEnchantUserFilesOutOfTheWay();
+
 #ifdef _WIN32
         savedRegistryHomeDir = GetRegistryHomeDir();
         ClearRegistryHomeDir();
@@ -103,7 +107,130 @@ struct EnchantTestFixture
         else {
             SetMachineRegistryConfigDir(savedMachineRegistryConfigDir);
         }
+
 #endif
+        RestoreEnchantUserFiles();
+        CleanUpFiles();
+    }
+    void CleanUpFiles()
+    {
+        //clean up personal dictionaries from home dir
+        DeleteDirAndFiles(GetTempUserEnchantDir());
+        DeleteDirAndFiles(AddToPath(GetDirectoryOfThisModule(), "lib"));
+        DeleteDirAndFiles(AddToPath(GetDirectoryOfThisModule(), "share"));
+    }
+
+    std::string GetTempUserEnchantDir()
+    {
+        return GetEnchantHomeDirFromBase(GetDirectoryOfThisModule());
+    }
+
+    void MoveEnchantUserFilesOutOfTheWay()
+    {
+        GetFilesOutOfTheWay(GetEnchantHomeDirFromBase(g_get_user_config_dir()));
+        GetFilesOutOfTheWay(GetEnchantHomeDirFromBase(g_get_home_dir()));
+    }
+
+    void RestoreEnchantUserFiles()
+    {
+        RestoreFiles(GetEnchantHomeDirFromBase(g_get_user_config_dir()));
+        RestoreFiles(GetEnchantHomeDirFromBase(g_get_home_dir()));
+    }
+
+#define OUT_OF_THE_WAY ".real";
+
+    void GetFilesOutOfTheWay(const std::string& dir)
+    {
+        std::string toTheSideDir = dir + OUT_OF_THE_WAY;
+        
+        if(!DirExists(toTheSideDir))
+        {
+            MoveDir(dir, toTheSideDir);
+        }
+
+        DeleteDirAndFiles(dir);
+    }
+
+    void RestoreFiles(const std::string& dir)
+    {
+        std::string toTheSideDir = dir + OUT_OF_THE_WAY;
+        if(DirExists(toTheSideDir))
+        {
+            MoveDir(toTheSideDir, dir);
+        }
+    }
+
+    std::string GetEnchantConfigDir()
+    {
+        return AddToPath(AddToPath(GetDirectoryOfThisModule(), "share"), "enchant");
+    }
+
+    static bool DirExists(const std::string& dir)
+    {
+        return g_file_test(dir.c_str(), G_FILE_TEST_IS_DIR);
+    }
+
+    static void MoveDir(const std::string& from, const std::string& to)
+    {
+        int result = g_rename(from.c_str(), to.c_str());
+        if(result)
+        {
+           perror("failed");
+        }
+    }
+
+    static void DeleteDirAndFiles(const std::string& dir)
+    {
+        GDir* gdir = g_dir_open(dir.c_str(), 0, NULL);
+        if(gdir != NULL)
+        {
+            const gchar* filename;
+            for(;;){
+                filename = g_dir_read_name(gdir);
+                if(filename == NULL)
+                {
+                    break;
+                }
+                std::string filepath = AddToPath(dir, filename);
+				if(g_file_test(filepath.c_str(), G_FILE_TEST_IS_DIR)){
+                    DeleteDirAndFiles(filepath);
+                }
+                else {
+                    DeleteFile(filepath);
+                }
+            } 
+            g_dir_close(gdir);
+        }
+        g_rmdir(dir.c_str());
+    }
+
+    static std::string GetTemporaryFilename(const std::string & prefix){
+        char* tempFileName = tempnam(".", prefix.c_str());
+        std::string temp(tempFileName);
+        free(tempFileName);
+        return temp;
+    }
+
+    static void CreateDirectory(const std::string& filepath)
+    {
+        g_mkdir_with_parents(filepath.c_str(), S_IREAD | S_IWRITE | S_IEXEC);
+    }
+    static void CreateFile(const std::string& filepath)
+    {
+        int fh = g_creat(filepath.c_str(), _S_IREAD | _S_IWRITE);
+        if(fh != -1) {
+            close(fh);
+    }
+    }
+    static void DeleteFile(const std::string& filepath)
+    {
+        if(FileExists(filepath)){
+            g_remove(filepath.c_str());
+        }
+    }
+    static bool FileExists(const std::string& filepath)
+    {
+        return(g_access(filepath.c_str(), 0)==0);
     }
 
     std::string Convert(const std::wstring & ws)

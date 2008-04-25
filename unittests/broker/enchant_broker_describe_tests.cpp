@@ -71,12 +71,7 @@ struct EnchantBrokerNoProvidersTestFixture : EnchantTestFixture
     //Setup
     EnchantBrokerNoProvidersTestFixture()
     {
-#ifdef _WIN32
-        SetRegistryHomeDir("someplace_that_does_not_exist");
-        SetUserRegistryModuleDir("someplace_that_does_not_exist");
-        SetUserRegistryConfigDir("someplace_that_does_not_exist");
-#endif
-    _broker = enchant_broker_init ();
+        _broker = enchant_broker_init ();
     }
 
     //Teardown

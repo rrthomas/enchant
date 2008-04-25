@@ -197,11 +197,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\myspell\filemgr.cxx"
+				>
+			</File>
+			<File
 				RelativePath="..\src\myspell\hashmgr.cxx"
 				>
 			</File>
 			<File
 				RelativePath="..\src\myspell\hunspell.cxx"
+				>
+			</File>
+			<File
+				RelativePath="..\src\myspell\hunzip.cxx"
 				>
 			</File>
 			<File
@@ -259,6 +267,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\myspell\filemgr.hxx"
+				>
+			</File>
+			<File
 				RelativePath="..\src\myspell\hashmgr.hxx"
 				>
 			</File>
@@ -275,6 +287,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\myspell\hunzip.hxx"
+				>
+			</File>
+			<File
 				RelativePath="..\src\myspell\langnum.hxx"
 				>
 			</File>
@@ -284,6 +300,10 @@
 			</File>
 			<File
 				RelativePath="..\src\myspell\suggestmgr.hxx"
+				>
+			</File>
+			<File
+				RelativePath="..\src\myspell\w_char.hxx"
 				>
 			</File>
 		</Filter>

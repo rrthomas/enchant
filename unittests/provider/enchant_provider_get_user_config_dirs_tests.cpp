@@ -41,45 +41,82 @@
  */
 #ifdef _WIN32
 TEST_FIXTURE(EnchantTestFixture, 
-             GetUserConfigDir_FromRegistry)
+             GetUserConfigDir_FromRegistryConfigDataDir)
 {
   std::string configDir("here I am");
   SetUserRegistryConfigDir(configDir);
 
-  char * enchantUserConfigDir = enchant_get_user_config_dir();
+  GSList * enchantUserConfigDirs = enchant_get_user_config_dirs();
 
-  CHECK(enchantUserConfigDir);
-  CHECK_EQUAL(configDir, enchantUserConfigDir);
+  CHECK(enchantUserConfigDirs);
+  CHECK_EQUAL(configDir, (gchar*) enchantUserConfigDirs->data);
 
-  g_free(enchantUserConfigDir);
+  g_slist_free(enchantUserConfigDirs);
 }
 
 TEST_FIXTURE(EnchantTestFixture, 
-             GetUserConfigDir_BlankFromRegistry_RegistryEntryIgnored)
+             GetUserConfigDir_BlankFromRegistryConfigDataDir_RegistryEntryIgnored)
 {
   std::string configDir("");
   SetUserRegistryConfigDir(configDir);
 
-  char * enchantUserConfigDir = enchant_get_user_config_dir();
+  GSList * enchantUserConfigDirs = enchant_get_user_config_dirs();
 
-  CHECK(enchantUserConfigDir);
+  CHECK(enchantUserConfigDirs);
   
-  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), enchantUserConfigDir);
+  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), (gchar*) enchantUserConfigDirs->data);
 
-  g_free(enchantUserConfigDir);
+  g_slist_free(enchantUserConfigDirs);
 }
+
+TEST_FIXTURE(EnchantTestFixture, 
+             GetUserConfigDir_FromRegistryConfigHomeDir)
+{
+  std::string homeDir("here I am");
+  SetRegistryHomeDir(homeDir);
+
+  GSList * enchantUserConfigDirs = enchant_get_user_config_dirs();
+
+  CHECK(enchantUserConfigDirs);
+  GSList* iter = enchantUserConfigDirs->next;
+  CHECK(iter);
+
+  CHECK_EQUAL(GetEnchantHomeDirFromBase(homeDir), (gchar*) iter->data);
+
+  g_slist_free(enchantUserConfigDirs);
+}
+
+TEST_FIXTURE(EnchantTestFixture, 
+             GetUserConfigDir_BlankFromRegistryConfigHomeDir_RegistryEntryIgnored)
+{
+  std::string homeDir("");
+  SetRegistryHomeDir(homeDir);
+
+  GSList * enchantUserConfigDirs = enchant_get_user_config_dirs();
+
+  CHECK(enchantUserConfigDirs);
+  GSList* iter = enchantUserConfigDirs->next;
+  CHECK(iter);
+  
+  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_home_dir()), (gchar*) iter->data);
+
+  g_slist_free(enchantUserConfigDirs);
+}
+
 #endif
 
 TEST_FIXTURE(EnchantTestFixture,
              GetUserConfigDir)
 {
-  char * enchantUserConfigDir = enchant_get_user_config_dir();
+  GSList * enchantUserConfigDirs = enchant_get_user_config_dirs();
 
-  CHECK(enchantUserConfigDir);
+  CHECK(enchantUserConfigDirs);
+  GSList* iter = enchantUserConfigDirs;
 #ifdef _WIN32
-  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), enchantUserConfigDir);
-#else
-  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_home_dir()), enchantUserConfigDir);
+  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), (gchar*) iter->data);
+  iter = iter->next;
 #endif
-  g_free(enchantUserConfigDir);
+
+  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_home_dir()), (gchar*) iter->data);
+  g_slist_free(enchantUserConfigDirs);
 }

@@ -193,11 +193,11 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
     }
 
     std::string GetPersonalDictFileName(){
-        return AddToPath(GetEnchantPersonalDir(), "qaa.dic");
+        return AddToPath(GetTempUserEnchantDir(), "qaa.dic");
     }
 
 	std::string GetExcludeDictFileName(){
-        return AddToPath(GetEnchantPersonalDir(), "qaa.exc");
+        return AddToPath(GetTempUserEnchantDir(), "qaa.exc");
     }
 
     void SetErrorOnMockDictionary(const std::string& error)

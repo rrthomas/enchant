@@ -33,7 +33,6 @@
 #include "mock_provider/mock_provider.h"
 #include <stack>
 #include <stdio.h>
-#include <io.h>
 #include <direct.h>
 
 #if !defined(_WIN32)
@@ -128,8 +127,6 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
                              ConfigureHook user2Configuration=NULL,
                              bool includeNullProviders = false)
     {
-        CleanUpFiles(); //just in case we stopped the process in the middle.
-
         userMockProviderConfiguration = userConfiguration;
         userMockProvider2Configuration = user2Configuration;
 
@@ -161,7 +158,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
             CopyProvider("libenchant", "libenchant"); //not a provider
         }
 
-        SetUserRegistryConfigDir(GetEnchantPersonalDir());
+        SetUserRegistryConfigDir(GetTempUserEnchantDir());
         InitializeBroker();
     }
 
@@ -184,20 +181,11 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
             DeleteFile(pwlFilenames.top());
             pwlFilenames.pop();
         }
-        CleanUpFiles();
     }
 
     void InitializeBroker()
     {
         _broker = enchant_broker_init ();
-    }
-
-    void CleanUpFiles()
-    {
-        //clean up personal dictionaries from home dir
-        DeleteDirAndFiles(GetEnchantPersonalDir());
-        DeleteDirAndFiles(AddToPath(GetDirectoryOfThisModule(), "lib"));
-        DeleteDirAndFiles(AddToPath(GetDirectoryOfThisModule(), "share"));
     }
 
     void CopyProvider(const std::string& sourceProviderName, const std::string& destinationProviderName)
@@ -224,15 +212,6 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         }
     }
 
-    std::string GetEnchantPersonalDir()
-    {
-        return AddToPath(GetDirectoryOfThisModule(), ".enchant");
-    }
-
-    std::string GetEnchantConfigDir()
-    {
-        return AddToPath(AddToPath(GetDirectoryOfThisModule(), "share"), "enchant");
-    }
 
     EnchantProvider* GetMockProvider(){
         return mock_provider;
@@ -251,61 +230,8 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         return enchant_broker_request_dict(_broker, tag.c_str());
     }
 
-    static std::string GetTemporaryFilename(const std::string & extension){
-        char* tempFileName = tempnam(".", extension.c_str());
-        std::string temp(tempFileName);
-        free(tempFileName);
-        return temp;
-    }
-
-    static void CreateDirectory(const std::string& filepath)
-    {
-        g_mkdir_with_parents(filepath.c_str(), S_IREAD | S_IWRITE | S_IEXEC);
-    }
-    static void CreateFile(const std::string& filepath)
-    {
-        int fh = g_creat(filepath.c_str(), _S_IREAD | _S_IWRITE);
-        if(fh != -1) {
-            close(fh);
-        }
-    }
-    static void DeleteFile(const std::string& filepath)
-    {
-        if(FileExists(filepath)){
-            g_remove(filepath.c_str());
-        }
-    }
-    static bool FileExists(const std::string& filepath)
-    {
-        return(g_access(filepath.c_str(), 0)==0);
-    }
-    static void DeleteDirAndFiles(const std::string& dir)
-    {
-        GDir* gdir = g_dir_open(dir.c_str(), 0, NULL);
-        if(gdir != NULL)
-        {
-            const gchar* filename;
-            for(;;){
-                filename = g_dir_read_name(gdir);
-                if(filename == NULL)
-                {
-                    break;
-                }
-                std::string filepath = AddToPath(dir, filename);
-				if(g_file_test(filepath.c_str(), G_FILE_TEST_IS_DIR)){
-                    DeleteDirAndFiles(filepath);
-                }
-                else {
-                    DeleteFile(filepath);
-                }
-            } 
-            g_dir_close(gdir);
-        }
-        g_rmdir(dir.c_str());
-    }
-
     EnchantDict* RequestPersonalDictionary()
-	{
+    {
         std::string pwlFileName = GetTemporaryFilename("epwl");
         CreateFile(pwlFileName);
         pwlFilenames.push(pwlFileName);
