@@ -222,8 +222,17 @@ enchant_get_module_dirs (void)
 static GSList *
 enchant_get_conf_dirs (void)
 {
-	GSList *conf_dirs = NULL;
-	char * ordering_dir = NULL, * prefix = NULL;;
+	GSList *conf_dirs = NULL, *user_conf_dirs, *iter;
+	char * ordering_dir = NULL, * prefix = NULL;
+
+	user_conf_dirs = enchant_get_user_config_dirs();
+
+	for (iter = user_conf_dirs; iter != NULL; iter = iter->next)
+		{
+			conf_dirs = g_slist_append (conf_dirs, iter->data);
+		}
+
+	g_slist_free (user_conf_dirs);
 
 #ifdef XP_TARGET_COCOA
 	conf_dirs = g_slist_append (conf_dirs, g_strdup ([[EnchantResourceProvider instance] configFolder]));
