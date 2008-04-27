@@ -122,15 +122,12 @@ _enchant_get_user_home_dirs (void)
 }
 
 static void
-_enchant_ensure_private_datadir (void)
+_enchant_ensure_dir_exists (const char* dir)
 {
-	const char * config_dir;
-
-	config_dir = g_get_user_config_dir();
-	if (config_dir && !g_file_test (config_dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
+	if (dir && !g_file_test (dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) 
 		{
-			(void)g_remove (config_dir);
-			g_mkdir_with_parents (config_dir, 0700);                        
+			(void)g_remove (dir);
+			g_mkdir_with_parents (dir, 0700);                        
 		}
 }
 
@@ -540,21 +537,22 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 	EnchantSession * session = NULL;
 	GSList *user_config_dirs, *iter;
 
-	_enchant_ensure_private_datadir ();
-
 	user_config_dirs = enchant_get_user_config_dirs ();
 	for (iter = user_config_dirs; iter != NULL && session == NULL; iter = iter->next)
 		{
 			session =_enchant_session_new (provider, iter->data, lang, TRUE);
 		}
 
+	if (session == NULL && user_config_dirs != NULL)
+		{
+			_enchant_ensure_dir_exists (user_config_dirs->data);
+	
+			session =_enchant_session_new (provider, user_config_dirs->data, lang, FALSE);
+		}
+
 	g_slist_foreach (user_config_dirs, (GFunc)g_free, NULL);
 	g_slist_free (user_config_dirs);
 
-	if (!session)
-		{
-			session =_enchant_session_new (provider, g_get_user_config_dir(), lang, FALSE);
-		}
 	
 	return session;
 }
