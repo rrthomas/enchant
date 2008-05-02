@@ -308,6 +308,14 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 	g_free(dict_dic);
 }
 
+static bool
+s_hasCorrespondingAffFile(const std::string & dicFile)
+{
+    std::string aff = dicFile;
+    aff.replace(aff.end()-3,aff.end(), "aff");
+    return g_file_test(aff.c_str(), G_FILE_TEST_EXISTS) != 0;
+}
+
 static char *
 myspell_request_dictionary (const char * tag) 
 {
@@ -316,8 +324,11 @@ myspell_request_dictionary (const char * tag)
 	s_buildHashNames (names, tag);
 
 	for (size_t i = 0; i < names.size (); i++) {
-		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS))
-			return g_strdup (names[i].c_str());
+        if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS)) {
+            if(s_hasCorrespondingAffFile(names[i])){
+			    return g_strdup (names[i].c_str());
+            }
+        }
 	}
 	
 	std::vector<std::string> dirs;
@@ -333,7 +344,9 @@ myspell_request_dictionary (const char * tag)
 					char *dict = g_build_filename (dirs[i].c_str(), 
 								       dir_entry, NULL);
 					g_dir_close (dir);
-					return dict;
+                    if(s_hasCorrespondingAffFile(dict)){
+					    return dict;
+                    }
 				}
 			}
 
