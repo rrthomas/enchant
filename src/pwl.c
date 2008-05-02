@@ -388,8 +388,11 @@ void enchant_pwl_add(EnchantPWL *pwl,
 				if(g_stat(pwl->filename, &stats)==0)
 					pwl->file_changed = stats.st_mtime;
 
-				fwrite (word, sizeof(char), len, f);
+                /* we write the new line first since we can't guarantee
+                   that the file was terminated by a new line before
+                   and we are just appending to the end of the file */
 				fwrite ("\n", sizeof(char), 1, f);
+				fwrite (word, sizeof(char), len, f);
 				enchant_unlock_file (f);
 				fclose (f);
 			}	

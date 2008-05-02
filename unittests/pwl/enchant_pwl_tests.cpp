@@ -152,6 +152,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
   sNewWords.push_back("grow");
   sNewWords.push_back("another");
 
+  ExternalAddNewLineToDictionary();
   ExternalAddWordsToDictionary(sNewWords);
 
   for(std::vector<const std::string>::const_iterator itWord = sNewWords.begin(); itWord != sNewWords.end(); ++itWord){
@@ -190,10 +191,21 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 TEST_FIXTURE(EnchantPwl_TestFixture, 
              IsWordInDictionary_DictionaryBeginsWithBOM_Successful)
 {
-	std::string Utf8Bom ("\xef\xbb\xbf");
-	ExternalAddWordToDictionary(Utf8Bom + "cat");
+	char* Utf8Bom = "\xef\xbb\xbf";
 
-	ReloadTestDictionary();
+    Sleep(1000); // FAT systems have a 2 second resolution
+                 // NTFS is appreciably faster but no specs on what it is exactly
+                 // c runtime library's time_t has a 1 second resolution
+    FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+	if(f)
+	{
+		fputs(Utf8Bom, f);
+        fputs("cat", f);
+		fclose(f);
+	}
+
+
+  ReloadTestDictionary();
 
     CHECK( IsWordInDictionary("cat") );
 }
@@ -225,6 +237,41 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// Last word in Dictionary terminated By EOF instead of NL
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             IsWordInDictionary_LastWordNotTerminatedByNL_WordsAppendedOkay)
+{
+    std::vector<const std::string> sWords;
+    sWords.push_back("cat");
+    sWords.push_back("hat");
+    sWords.push_back("that");
+    sWords.push_back("bat");
+    sWords.push_back("tot");
+
+    Sleep(1000); // FAT systems have a 2 second resolution
+                 // NTFS is appreciably faster but no specs on what it is exactly
+                 // c runtime library's time_t has a 1 second resolution
+    FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+    if(f)
+    {
+	    fputs(sWords[0].c_str(), f);
+	    fclose(f);
+    }
+
+    for(std::vector<const std::string>::const_iterator itWord = sWords.begin() +1;
+        itWord != sWords.end();
+        ++itWord)
+    {
+        AddWordToDictionary(*itWord);
+    }
+
+    for(std::vector<const std::string>::const_iterator itWord = sWords.begin(); 
+        itWord != sWords.end(); 
+        ++itWord){
+        CHECK( IsWordInDictionary(*itWord) );
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // Pwl Bugs
@@ -441,7 +488,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
       CHECK_ARRAY_EQUAL(expected, suggestions, expected.size());
   }
 }
-
+  
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // Capitalization
 TEST_FIXTURE(EnchantPwl_TestFixture, 
@@ -1088,14 +1135,32 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 TEST_FIXTURE(EnchantPwl_TestFixture, 
              PwlRemove_ItemRemovedFromBeginningOfFileWithBOM)
 {
-  std::string Utf8Bom ("\xef\xbb\xbf");
+  char* Utf8Bom = "\xef\xbb\xbf";
 
   std::vector<const std::string> sWords;
-  sWords.push_back(Utf8Bom + "hello");
+  sWords.push_back("hello");
   sWords.push_back("cat");
   sWords.push_back("hat");
 
-  ExternalAddWordsToDictionary(sWords);
+  Sleep(1000); // FAT systems have a 2 second resolution
+               // NTFS is appreciably faster but no specs on what it is exactly
+               // c runtime library's time_t has a 1 second resolution
+  FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+  if(f)
+	{
+		fputs(Utf8Bom, f);
+		for(std::vector<const std::string>::const_iterator 
+			itWord = sWords.begin();
+            itWord != sWords.end();
+            ++itWord)
+        {
+            if(itWord != sWords.begin()){
+			    fputc('\n', f);
+            }
+			fputs(itWord->c_str(), f);
+		}
+		fclose(f);
+	}
 
   RemoveWordFromDictionary("hello");
 
@@ -1120,6 +1185,29 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 
   std::vector<const std::string>::const_iterator removed = sWords.insert(sWords.end(), "hello");
   AddWordsToDictionary(sWords);
+
+  RemoveWordFromDictionary("hello");
+
+  ReloadTestDictionary(); // to see what actually persisted
+
+  for(std::vector<const std::string>::const_iterator itWord = sWords.begin(); itWord != removed; ++itWord){
+    CHECK( IsWordInDictionary(*itWord) );
+  }
+  CHECK(!IsWordInDictionary(*removed) );
+}
+
+TEST_FIXTURE(EnchantPwl_TestFixture, 
+             PwlRemove_ItemRemovedFromEndOfFile_ExternalSetup)
+{
+  std::vector<const std::string> sWords;
+  sWords.push_back("cat");
+  sWords.push_back("hat");
+  sWords.push_back("that");
+  sWords.push_back("bat");
+  sWords.push_back("tot");
+
+  std::vector<const std::string>::const_iterator removed = sWords.insert(sWords.end(), "hello");
+  ExternalAddWordsToDictionary(sWords);
 
   RemoveWordFromDictionary("hello");
 

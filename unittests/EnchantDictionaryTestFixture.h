@@ -184,8 +184,16 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         }
 
         char c;
-        if(read(fd, &c, 1) == 1){
-            hasContents = true;
+        while(read(fd, &c, 1) == 1 && !hasContents){
+            switch(c)
+            {
+            case '\n':
+            case '\r':
+            case ' ':
+                break;
+            default:
+                hasContents = true;
+            }
         }
         close(fd);
 
@@ -258,8 +266,21 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         FILE * f = g_fopen(filename.c_str(), "at");
 		if(f)
 		{
-			fputs(word.c_str(), f);
 			fputc('\n', f);
+			fputs(word.c_str(), f);
+			fclose(f);
+		}
+    }
+
+    void ExternalAddNewLineToDictionary()
+    {
+        Sleep(1000); // FAT systems have a 2 second resolution
+                     // NTFS is appreciably faster but no specs on what it is exactly
+                     // c runtime library's time_t has a 1 second resolution
+        FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+		if(f) 
+		{
+		    fputc('\n', f);
 			fclose(f);
 		}
     }
@@ -273,9 +294,13 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 		if(f) 
 		{
 			for(std::vector<const std::string>::const_iterator 
-				itWord = sWords.begin(); itWord != sWords.end(); ++itWord) {
+				itWord = sWords.begin();
+                itWord != sWords.end(); ++itWord)
+            {
+                if(itWord != sWords.begin()){
+				    fputc('\n', f);
+                }
 				fputs(itWord->c_str(), f);
-				fputc('\n', f);
 			}
 			fclose(f);
 		}

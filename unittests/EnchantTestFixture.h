@@ -32,7 +32,7 @@
 #include <shlwapi.h>
 #endif
 #include <io.h>
-
+#include <assert.h>
 #include <glib.h>
 #include <string>
 
@@ -143,7 +143,7 @@ struct EnchantTestFixture
     {
         std::string toTheSideDir = dir + OUT_OF_THE_WAY;
         
-        if(!DirExists(toTheSideDir))
+        if(DirExists(dir) && !DirExists(toTheSideDir))
         {
             MoveDir(dir, toTheSideDir);
         }
@@ -156,6 +156,7 @@ struct EnchantTestFixture
         std::string toTheSideDir = dir + OUT_OF_THE_WAY;
         if(DirExists(toTheSideDir))
         {
+            DeleteDirAndFiles(dir);
             MoveDir(toTheSideDir, dir);
         }
     }
@@ -167,12 +168,13 @@ struct EnchantTestFixture
 
     static bool DirExists(const std::string& dir)
     {
-        return g_file_test(dir.c_str(), G_FILE_TEST_IS_DIR);
+        return g_file_test(dir.c_str(), G_FILE_TEST_IS_DIR) != 0;
     }
 
     static void MoveDir(const std::string& from, const std::string& to)
     {
         int result = g_rename(from.c_str(), to.c_str());
+        assert(result);
         if(result)
         {
            perror("failed");
