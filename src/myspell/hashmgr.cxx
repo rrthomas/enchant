@@ -284,6 +284,7 @@ int HashMgr::remove(const char * word)
         }
         dp = dp->next_homonym;
     }
+    return 0;
 }
 
 /* remove forbidden flag to add a personal word to the hash */
