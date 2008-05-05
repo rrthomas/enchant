@@ -12,7 +12,7 @@ ENCHANT_MINOR_VERSION=4
 dnl     3) Increment when interfaces not changed at all,
 dnl               only bug fixes or internal changes made.
 dnl     4b) Set to zero when adding, removing or changing interfaces.
-ENCHANT_MICRO_VERSION=1
+ENCHANT_MICRO_VERSION=2
 dnl
 dnl     Set this too
 MAJOR_VERSION_PLUS_MINOR_VERSION=`expr $ENCHANT_MAJOR_VERSION + $ENCHANT_MINOR_VERSION`
