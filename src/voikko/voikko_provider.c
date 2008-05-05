@@ -141,7 +141,7 @@ voikko_provider_list_dicts (EnchantProvider * me,
 		voikko_terminate(voikko_handle);
 		*out_n_dicts = 1;
 		out_list = g_new0 (char *, *out_n_dicts + 1);
-		out_list[1] = g_strdup("fi");
+		out_list[0] = g_strdup("fi");
 	}
 
 	return out_list;
