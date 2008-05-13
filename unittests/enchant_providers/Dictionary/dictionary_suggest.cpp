@@ -41,13 +41,13 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
         ReleaseDictionary(_dict);
     }
 
-    std::vector<const std::string> GetSuggestionsFromWord(const std::string& word)
+    std::vector<const std::string> GetSuggestionsFromWord(EnchantDict* dict, const std::string& word)
     {
         std::vector<const std::string> result;
-        if(_dict && _dict->suggest)
+        if(dict && dict->suggest)
         {
             size_t cSuggestions;
-            char** suggestions = (*_dict->suggest)(_dict, word.c_str(), word.size(), &cSuggestions);
+            char** suggestions = (*dict->suggest)(dict, word.c_str(), word.size(), &cSuggestions);
 
             if(suggestions != NULL){
                 result.insert(result.begin(), suggestions, suggestions+cSuggestions);
@@ -60,6 +60,12 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
         
         return result;
     }
+
+    std::vector<const std::string> GetSuggestionsFromWord(const std::string& word)
+    {
+        return GetSuggestionsFromWord(_dict, word);
+    }
+
     bool IsWordAllCaps(const std::string& word)
     {
 	    const char* it, *itEnd;
@@ -116,7 +122,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
     EnchantDict* dict = GetDictionary("fr_FR");
     if(dict && dict->suggest)
     {
-      std::vector<const std::string> suggestions = GetSuggestionsFromWord(Convert(L"fran\x00e7" L"ais")); //NFC latin small letter c with cedilla
+      std::vector<const std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"fran\x00e7" L"ais")); //NFC latin small letter c with cedilla
       CHECK(suggestions.size() != 0);
     }
     ReleaseDictionary(dict);
@@ -128,7 +134,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
     EnchantDict* dict = GetDictionary("fr_FR");
     if(dict && dict->suggest)
     {
-      std::vector<const std::string> suggestions = GetSuggestionsFromWord(Convert(L"franc\x0327" L"ais")); //NFD combining cedilla
+      std::vector<const std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"franc\x0327" L"ais")); //NFD combining cedilla
       CHECK(suggestions.size() != 0);
     }
     ReleaseDictionary(dict);
