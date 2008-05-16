@@ -174,10 +174,16 @@ struct EnchantTestFixture
     static void MoveDir(const std::string& from, const std::string& to)
     {
         int result = g_rename(from.c_str(), to.c_str());
-        assert(result);
-        if(result)
+        if(result!= 0)
         {
-           perror("failed");
+           perror("failed (will retry)");
+            // try once more.
+           result = g_rename(from.c_str(), to.c_str());
+        }
+        assert(result == 0);
+        if(result!= 0)
+        {
+           perror("failed (giving up)");
         }
     }
 
