@@ -31,8 +31,8 @@
 #ifndef ISPELL_CHECKER_H
 #define ISPELL_CHECKER_H
 
+#include <glib.h> // give glib a chance to override MAXPATHLEN first before it is set in ispell.h
 #include "ispell.h"
-#include <glib.h>
 
 class ISpellChecker
 {
