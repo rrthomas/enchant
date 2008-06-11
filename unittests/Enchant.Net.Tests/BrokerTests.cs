@@ -215,7 +215,7 @@ namespace Enchant.Tests
                 using (dictionaryFirstRequest = broker.RequestDictionary("en_US")) {}
                 Dictionary dictionarySecondRequest = broker.RequestDictionary("en_US");
 
-                Assert.AreNotSame(dictionaryFirstRequest, dictionarySecondRequest);
+                    Assert.AreNotSame(dictionaryFirstRequest, dictionarySecondRequest);
             }
         }
 
@@ -294,6 +294,24 @@ namespace Enchant.Tests
 		}
 
         [Test]
+        public void DictionaryKeepsBrokerAlive()
+        {
+            WeakReference brokerReference;
+            Dictionary dictionary = GetDictionaryAllowingBrokerToGoOutOfScope(out brokerReference);
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            Assert.IsTrue(brokerReference.IsAlive);
+            GC.KeepAlive(dictionary);
+        }
+
+	    private static Dictionary GetDictionaryAllowingBrokerToGoOutOfScope(out WeakReference brokerReference) 
+        {
+	        Broker broker = new Broker();
+            brokerReference = new WeakReference(broker);
+	        return broker.RequestDictionary("en_US");
+	    }
+
+	    [Test]
         public void Finalize_DictionaryGoesOutOfScope_Finalized()
         {
             using (Broker broker = new Broker())
@@ -302,7 +320,6 @@ namespace Enchant.Tests
                 WeakReference dictionaryReference = GetDictionaryReference(broker);
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
-                GC.Collect();
                 Assert.IsFalse(dictionaryReference.IsAlive);
             }
         }
@@ -313,5 +330,34 @@ namespace Enchant.Tests
             Dictionary dictionary = broker.RequestDictionary("en_US");
             return new WeakReference(dictionary);
         }
+
+        [Test]
+        public void Default_ReturnsNonNull()
+        {
+            Assert.IsNotNull(Broker.Default);
+        }
+
+        [Test]
+        public void Default_CalledTwice_ReturnsSame()
+        {
+            Assert.AreSame(Broker.Default, Broker.Default);
+        }
+
+        [Test]
+        public void Default_Disposed_ReturnsNonNull()
+        {
+            Broker.Default.Dispose();
+            Assert.IsNotNull(Broker.Default);
+        }
+
+        [Test]
+        public void Default_Disposed_ReturnsNewObject()
+        {
+            Broker originalBroker = Broker.Default;
+            originalBroker.Dispose();
+
+            Assert.AreNotSame(originalBroker, Broker.Default);
+        }
+
 	}
 }

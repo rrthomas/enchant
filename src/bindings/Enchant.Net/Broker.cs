@@ -34,6 +34,22 @@ namespace Enchant
 	    private readonly Dictionary<string, WeakReference> _pwlDictionaryCache;
 	    private bool _cacheDictionaries = true;
 
+	    private static Broker _defaultBroker;
+        /// <summary>
+        ///  Singleton for apps that want to use that pattern
+        /// </summary>
+        public static Broker Default
+	    {
+	        get
+	        {
+	            if(_defaultBroker == null || _defaultBroker._disposed)
+	            {
+	                _defaultBroker = new Broker();
+	            }
+	            return _defaultBroker;
+	        }
+	    }
+
 		public Broker()
 		{
 			_handle = Bindings.enchant_broker_init();
