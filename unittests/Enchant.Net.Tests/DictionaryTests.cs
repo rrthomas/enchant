@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Microsoft.Win32;
 using NUnit.Framework;
 
@@ -78,7 +79,7 @@ namespace Enchant.Tests
 		public void FixtureSetup()
 		{
 			string providerDir = Path.Combine(Path.Combine(
-																					Directory.GetCurrentDirectory(), "lib"), "enchant");
+								 Directory.GetCurrentDirectory(), "lib"), "enchant");
 			if (!Directory.Exists(providerDir))
 			{
 				Directory.CreateDirectory(providerDir);
@@ -87,29 +88,34 @@ namespace Enchant.Tests
 								Path.Combine(providerDir, "libenchant_ispell.dll"), true);
 			File.Copy("libenchant_myspell.dll",
 								Path.Combine(providerDir, "libenchant_myspell.dll"), true);
-
-			string dictionarySourceDir =
-				Path.Combine(Path.Combine(Path.Combine(Path.Combine(Path.Combine(Path.Combine(
-																																					 Directory.GetCurrentDirectory(), ".."), ".."),
-																														"lib"), "share"),
-																	"enchant"), "myspell");
-
-			string dictionaryDestDir = Path.Combine(Path.Combine(Path.Combine(
-																														 Directory.GetCurrentDirectory(), "share"), "enchant"),
-																							"myspell");
-
-			if (!Directory.Exists(dictionaryDestDir))
-			{
-				Directory.CreateDirectory(dictionaryDestDir);
-			}
-
-			File.Copy(Path.Combine(dictionarySourceDir, "en_US.aff"),
-								Path.Combine(dictionaryDestDir, "en_US.aff"), true);
-
-			File.Copy(Path.Combine(dictionarySourceDir, "en_US.dic"),
-								Path.Combine(dictionaryDestDir, "en_US.dic"), true);
+            InstallDictionary("myspell", new string[]{"en_US.aff", "en_US.dic"});
 		}
 
+        static private void InstallDictionary(string provider, IEnumerable<string> files)
+        {
+            string dictionarySourceDir =
+                    Path.Combine(Path.Combine(Path.Combine(Path.Combine(Path.Combine(Path.Combine(
+                                             Directory.GetCurrentDirectory(), ".."), ".."),
+                                             "lib"), "share"),
+                                              "enchant"), provider);
+
+            string dictionaryDestDir = Path.Combine(Path.Combine(Path.Combine(
+                                                    Directory.GetCurrentDirectory(), "share"), "enchant"),
+                                                    provider);
+
+            if (!Directory.Exists(dictionaryDestDir))
+            {
+                Directory.CreateDirectory(dictionaryDestDir);
+            }
+
+            foreach (string file in files)
+            {
+                File.Copy(Path.Combine(dictionarySourceDir, file),
+                          Path.Combine(dictionaryDestDir, file), true);
+
+            }
+        }
+        
 		[TestFixtureTearDown]
 		public void FixtureTearDown()
 		{
@@ -199,5 +205,15 @@ namespace Enchant.Tests
 			List<string> suggestions = new List<string>(dictionary.Suggest("helo"));
 			Assert.Contains("hello", suggestions);
 		}
+
+        [Test]
+        public void Dispose_Called_SendsDisposedEvent()
+        {
+            bool disposedEventCalled = false;
+            dictionary.Disposed += delegate
+                                   { disposedEventCalled = true; };
+            dictionary.Dispose();
+            Assert.IsTrue(disposedEventCalled);
+        }
 	}
 }

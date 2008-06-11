@@ -81,28 +81,33 @@ namespace Enchant.Tests
 								Path.Combine(providerDir, "libenchant_ispell.dll"), true);
 			File.Copy("libenchant_myspell.dll",
 								Path.Combine(providerDir, "libenchant_myspell.dll"), true);
-
-			string dictionarySourceDir =
-				Path.Combine(Path.Combine(Path.Combine(Path.Combine(Path.Combine(Path.Combine(
-																																					 Directory.GetCurrentDirectory(), ".."), ".."),
-																														"lib"), "share"),
-																	"enchant"), "myspell");
-
-			string dictionaryDestDir = Path.Combine(Path.Combine(Path.Combine(
-																														 Directory.GetCurrentDirectory(), "share"), "enchant"),
-																							"myspell");
-
-			if (!Directory.Exists(dictionaryDestDir))
-			{
-				Directory.CreateDirectory(dictionaryDestDir);
-			}
-
-			File.Copy(Path.Combine(dictionarySourceDir, "en_US.aff"),
-								Path.Combine(dictionaryDestDir, "en_US.aff"), true);
-
-			File.Copy(Path.Combine(dictionarySourceDir, "en_US.dic"),
-								Path.Combine(dictionaryDestDir, "en_US.dic"), true);
+            InstallDictionary("myspell", new string[] { "en_US.aff", "en_US.dic" });
 		}
+
+        static private void InstallDictionary(string provider, IEnumerable<string> files)
+        {
+            string dictionarySourceDir =
+                    Path.Combine(Path.Combine(Path.Combine(Path.Combine(Path.Combine(Path.Combine(
+                                             Directory.GetCurrentDirectory(), ".."), ".."),
+                                             "lib"), "share"),
+                                              "enchant"), provider);
+
+            string dictionaryDestDir = Path.Combine(Path.Combine(Path.Combine(
+                                                    Directory.GetCurrentDirectory(), "share"), "enchant"),
+                                                    provider);
+
+            if (!Directory.Exists(dictionaryDestDir))
+            {
+                Directory.CreateDirectory(dictionaryDestDir);
+            }
+
+            foreach (string file in files)
+            {
+                File.Copy(Path.Combine(dictionarySourceDir, file),
+                          Path.Combine(dictionaryDestDir, file), true);
+
+            }
+        }
 
 		[TestFixtureTearDown]
 		public void FixtureTearDown()
@@ -187,7 +192,75 @@ namespace Enchant.Tests
 			}
 		}
 
-		[Test]
+        [Test]
+        public void RequestDictionary_CachingEnabled_DictionaryReRequested_SameReference()
+        {
+            using (Broker broker = new Broker())
+            {
+                broker.CacheDictionaries = true;
+                Dictionary dictionaryFirstRequest = broker.RequestDictionary("en_US");
+                Dictionary dictionarySecondRequest = broker.RequestDictionary("en_US");
+
+                Assert.AreSame(dictionaryFirstRequest, dictionarySecondRequest);
+            }
+        }
+
+        [Test]
+        public void RequestDictionary_CachingEnabled_DictionaryDisposedThenReRequested_DifferentReference()
+        {
+            using (Broker broker = new Broker())
+            {
+                broker.CacheDictionaries = true;
+                Dictionary dictionaryFirstRequest;
+                using (dictionaryFirstRequest = broker.RequestDictionary("en_US")) {}
+                Dictionary dictionarySecondRequest = broker.RequestDictionary("en_US");
+
+                Assert.AreNotSame(dictionaryFirstRequest, dictionarySecondRequest);
+            }
+        }
+
+        [Test]
+        public void RequestDictionary_CachingDisabled_DictionaryReRequested_DifferentReference()
+        {
+            using (Broker broker = new Broker())
+            {
+                broker.CacheDictionaries = false;
+                Dictionary dictionaryFirstRequest = broker.RequestDictionary("en_US");
+                Dictionary dictionarySecondRequest = broker.RequestDictionary("en_US");
+
+                Assert.AreNotSame(dictionaryFirstRequest, dictionarySecondRequest);
+            }
+        }
+
+        [Test]
+        public void RequestDictionary_CachingDisabled_DictionaryDisposedThenReRequested_DifferentReference()
+        {
+            using (Broker broker = new Broker())
+            {
+                broker.CacheDictionaries = false;
+                Dictionary dictionaryFirstRequest;
+                using (dictionaryFirstRequest = broker.RequestDictionary("en_US"))
+                {
+                }
+                Dictionary dictionarySecondRequest = broker.RequestDictionary("en_US");
+
+                Assert.AreNotSame(dictionaryFirstRequest, dictionarySecondRequest);
+            }
+        }
+
+        [Test]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void Dispose_UseDictionaryAfterBrokerDisposed_Throws()
+        {
+            Dictionary dictionary;
+            using (Broker broker = new Broker())
+            {
+                dictionary = broker.RequestDictionary("en_US");
+            }
+            DictionaryInfo info = dictionary.Information;
+        }
+
+        [Test]
 		[ExpectedException(typeof (ApplicationException))]
 		public void RequestDictionary_DictionaryDoesNotExist_Throws()
 		{
@@ -219,5 +292,26 @@ namespace Enchant.Tests
 				broker.SetOrdering("en_US", "aspell, myspell, ispell");
 			}
 		}
+
+        [Test]
+        public void Finalize_DictionaryGoesOutOfScope_Finalized()
+        {
+            using (Broker broker = new Broker())
+            {
+                broker.CacheDictionaries = true;
+                WeakReference dictionaryReference = GetDictionaryReference(broker);
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                Assert.IsFalse(dictionaryReference.IsAlive);
+            }
+        }
+
+        //this will allow the dictionary object to go out of scope
+	    private static WeakReference GetDictionaryReference(Broker broker) 
+        {
+            Dictionary dictionary = broker.RequestDictionary("en_US");
+            return new WeakReference(dictionary);
+        }
 	}
 }

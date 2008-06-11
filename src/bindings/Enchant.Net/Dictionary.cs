@@ -87,6 +87,11 @@ namespace Enchant
 
         // shared (dispose and finalizable) cleanup logic
         _disposed = true;
+        if (disposing)
+        {
+            OnDisposed(); // call it here so will throw if someone uses
+            // it because _disposed has been set to true;
+        }
       }
     }
 
@@ -198,5 +203,15 @@ namespace Enchant
 			}
 			Bindings.enchant_dict_store_replacement(_handle, misspelling, correction);
 		}
+
+        /// <summary>
+        /// Occurs when a dictionary is disposed by a call to the Dispose method
+        /// </summary>
+        public event EventHandler Disposed = delegate { };
+
+        private void OnDisposed()
+        {
+            Disposed.Invoke(this, new EventArgs());
+        }
 	}
 }
