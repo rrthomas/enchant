@@ -338,14 +338,14 @@ init_enchant_provider (void)
 
 #if defined(_WIN32)
 
-static WCHAR* GetDirectoryOfThisLibrary()
+static WCHAR* GetDirectoryOfThisLibrary(void)
 {
 	WCHAR dll_path[MAX_PATH];
     gchar* utf8_dll_path;
     gchar* utf8_prefix;
     gunichar2* utf16_prefix;
 
-    if(!GetModuleFileName(s_hModule,dll_path,MAX_PATH))
+    if(!GetModuleFileNameW(s_hModule,dll_path,MAX_PATH))
         { /* unable to determine filename of this library */
             return NULL;
         }
@@ -372,7 +372,7 @@ static HMODULE LoadLibraryFromPath(const WCHAR* path, const WCHAR* libraryName)
     wcscat(wszFullLibraryPath, L"\\");
     wcscat(wszFullLibraryPath, libraryName);
 
-    h = LoadLibrary(wszFullLibraryPath);
+    h = LoadLibraryW(wszFullLibraryPath);
 
     g_free(wszFullLibraryPath);
     return h;
@@ -385,13 +385,13 @@ static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR
 	DWORD dwSize;
 	WCHAR* wszValue = NULL;
 
-	if(RegOpenKeyEx(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+	if(RegOpenKeyExW(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 		{
 			/* Determine size of string */
-			if(RegQueryValueEx( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
+			if(RegQueryValueExW( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
 				{
 					wszValue = g_new0(WCHAR, dwSize + 1);
-					RegQueryValueEx(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
+					RegQueryValueExW(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
 				}
 		}
 
@@ -399,10 +399,9 @@ static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR
 }
 #endif
 
-void configure_enchant_provider(EnchantProvider * me, const char *dir_name)
-{
 #if defined(_WIN32)
-    const WCHAR* aspell_module_name = L"aspell-15.dll";
+gboolean try(EnchantProvider * me, const char *dir_name, const WCHAR *aspell_module_name)
+{
     HMODULE aspell_module = NULL;
     char* szModule;
 
@@ -413,7 +412,7 @@ void configure_enchant_provider(EnchantProvider * me, const char *dir_name)
         WCHAR* wszModule;
 
 	    wszModule = g_utf8_to_utf16 (szModule, -1, NULL, NULL, NULL);
-        aspell_module = LoadLibrary(wszModule);
+        aspell_module = LoadLibraryW(wszModule);
         g_free(wszModule);
     }
 
@@ -442,7 +441,7 @@ void configure_enchant_provider(EnchantProvider * me, const char *dir_name)
     if (aspell_module == NULL) 
         {
             /* then try default lookup */
-            aspell_module = LoadLibrary(aspell_module_name);
+            aspell_module = LoadLibraryW(aspell_module_name);
         }
 
     if (aspell_module == NULL) 
@@ -452,9 +451,18 @@ void configure_enchant_provider(EnchantProvider * me, const char *dir_name)
             me->request_dict = NULL;
             me->dispose_dict = NULL;
             me->list_dicts = NULL;
+	    return FALSE;
         }
+    return TRUE;
+}
 #endif
 
+void configure_provider(EnchantProvider * me, const char *dir_name)
+{
+#if defined(_WIN32)
+	try(me, dir_name, L"aspell-15.dll") ||
+	try(me, dir_name, L"libaspell-15.dll");
+#endif
 }
 
 

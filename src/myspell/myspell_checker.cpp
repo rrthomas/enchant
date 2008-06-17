@@ -81,13 +81,13 @@ static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR
 	DWORD dwSize;
 	WCHAR* wszValue = NULL;
 
-	if(RegOpenKeyEx(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+	if(RegOpenKeyExW(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 		{
 			/* Determine size of string */
-			if(RegQueryValueEx( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
+			if(RegQueryValueExW( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
 				{
 					wszValue = g_new0(WCHAR, dwSize + 1);
-					RegQueryValueEx(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
+					RegQueryValueExW(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
 				}
 		}
 

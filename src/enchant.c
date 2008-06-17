@@ -314,13 +314,13 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 	uKeyName = g_utf8_to_utf16 (keyName, -1, NULL, NULL, NULL);
 	uKey = g_utf8_to_utf16 (key, -1, NULL, NULL, NULL);
 
-	if(RegOpenKeyEx(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+	if(RegOpenKeyExW(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 		{
 			/* Determine size of string */
-			if(RegQueryValueEx( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
+			if(RegQueryValueExW( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
 				{
 					wszValue = g_new0(WCHAR, dwSize + 1);
-					RegQueryValueEx(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
+					RegQueryValueExW(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
 				}
 		}
 
@@ -2160,17 +2160,18 @@ enchant_get_prefix_dir(void)
 #ifdef _WIN32
 	if (!prefix) {
 		/* Dynamically locate library and return containing directory */
-		HINSTANCE hInstance = GetModuleHandle(L"libenchant");
-		if(hInstance != NULL)
+		WCHAR dll_path[MAX_PATH];
+
+		if(GetModuleFileNameW(s_hModule,dll_path,MAX_PATH))
 			{
-				WCHAR dll_path[MAX_PATH];
-	  
-				if(GetModuleFileName(hInstance,dll_path,MAX_PATH))
-					{
-						gchar* utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
-						prefix = g_path_get_dirname(utf8_dll_path);
-						g_free(utf8_dll_path);
-					}
+				gchar* utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
+				prefix = g_path_get_dirname(utf8_dll_path);
+				g_free(utf8_dll_path);
+				/* Strip off "bin" subfolder if present */
+				if (strlen(prefix) >=6 &&
+				    G_IS_DIR_SEPARATOR(prefix[strlen(prefix)-4]) &&
+				    g_ascii_strcasecmp(prefix+strlen(prefix)-3, "bin") == 0)
+					prefix[strlen(prefix)-4] = '\0';
 			}
 	}
 #endif

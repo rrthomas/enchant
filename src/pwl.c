@@ -60,7 +60,8 @@
 #include <fcntl.h>
 
 #ifdef _WIN32
-#include <io.h>
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #endif
 
 #include <glib.h>
@@ -197,7 +198,13 @@ enchant_lock_file (FILE * f)
 #elif defined(HAVE_LOCKF)
 	lockf (fileno (f), F_LOCK, 0);
 #elif defined(_WIN32)
-	_lock_file(f);
+	OVERLAPPED overlapped;
+
+	overlapped.Offset = 0;
+	overlapped.OffsetHigh = 0;
+	overlapped.hEvent = NULL;
+	if (!LockFileEx ((HANDLE) _get_osfhandle (fileno (f)), LOCKFILE_EXCLUSIVE_LOCK, 0, 0, 0x80000000, &overlapped))
+		g_warning ("Could not lock file\n");
 #else
 	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
@@ -211,7 +218,13 @@ enchant_unlock_file (FILE * f)
 #elif defined(HAVE_LOCKF)
 	lockf (fileno (f), F_ULOCK, 0);
 #elif defined(_WIN32)
-	_unlock_file(f);
+	OVERLAPPED overlapped;
+
+	overlapped.Offset = 0;
+	overlapped.OffsetHigh = 0;
+	overlapped.hEvent = NULL;
+	if (!UnlockFileEx ((HANDLE) _get_osfhandle (fileno (f)), 0, 0, 0x80000000, &overlapped))
+		g_warning ("Could not unlock file\n");
 #else
 	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
 #endif /* HAVE_FLOCK */
