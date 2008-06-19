@@ -40,10 +40,10 @@
 
 /* built against hunspell 1.2.2 on 2008-04-12 */
 
-#ifdef WITH_SYSTEM_MYSPELL
-#include <hunspell/hunspell.hxx>
-#else
+#ifdef HUNSPELL_STATIC
 #include "hunspell.hxx"
+#else
+#include <hunspell/hunspell.hxx>
 #endif
 
 ENCHANT_PLUGIN_DECLARE("Myspell")
