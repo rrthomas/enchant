@@ -33,6 +33,7 @@ namespace Enchant
 	    private readonly Dictionary<string, WeakReference> _dictionaryCache;
 	    private readonly Dictionary<string, WeakReference> _pwlDictionaryCache;
 	    private bool _cacheDictionaries = true;
+	    private static Nullable<bool> _isLibEnchantAvailable;
 
 	    private static Broker _defaultBroker;
         /// <summary>
@@ -50,19 +51,46 @@ namespace Enchant
 	        }
 	    }
 
+        public static bool IsLibEnchantAvailable
+        {
+            get
+            {
+                if (_isLibEnchantAvailable == null)
+                {
+                    // force a broker to be created and thus trying to
+                    // us libenchant and setting our status
+                    Broker broker = Default;
+                }
+                return _isLibEnchantAvailable??false;
+            }
+        }
+
+
 		public Broker()
 		{
-			_handle = Bindings.enchant_broker_init();
-			VerifyNoErrors();
-			if (_handle.IsInvalid)
-			{
-				throw new ApplicationException("Unable to initialize broker");
-			}
-            _dictionaryCache = new Dictionary<string, WeakReference>();
+            try
+            {
+                _handle = Bindings.enchant_broker_init();
+                _isLibEnchantAvailable = true;
+            }
+            catch (DllNotFoundException)
+            {
+                _isLibEnchantAvailable = false;
+            }
+            if (_isLibEnchantAvailable == true)
+            {
+                VerifyNoErrors();
+                if (_handle.IsInvalid)
+                {
+                    throw new ApplicationException("Unable to initialize broker");
+                }
+            }
+		    _dictionaryCache = new Dictionary<string, WeakReference>();
             _pwlDictionaryCache = new Dictionary<string, WeakReference>();
 		}
 
-		public IEnumerable<ProviderInfo> Providers
+
+	    public IEnumerable<ProviderInfo> Providers
 		{
 			get
 			{
@@ -78,12 +106,13 @@ namespace Enchant
         private void InitializeProviderList()
         {
           _providers = new List<ProviderInfo>();
-          Bindings.enchant_broker_describe(_handle,
-                                           delegate(ProviderInfo provider)
-                                           {
-                                             _providers.Add(provider);
-                                           });
-          VerifyNoErrors();
+          if (_isLibEnchantAvailable == true)
+          {
+              Bindings.enchant_broker_describe(_handle,
+                                               delegate(ProviderInfo provider)
+                                               { _providers.Add(provider); });
+              VerifyNoErrors();
+          }
         }
 
         public IEnumerable<DictionaryInfo> Dictionaries
@@ -108,12 +137,13 @@ namespace Enchant
 	    private void InitializeDictionaryList()
         {
           _dictionaries = new List<DictionaryInfo>();
-          Bindings.enchant_broker_list_dicts(_handle,
-                                             delegate(DictionaryInfo dictionary)
-                                             {
-                                               _dictionaries.Add(dictionary);
-                                             });
-          VerifyNoErrors();
+          if (_isLibEnchantAvailable == true)
+          {
+              Bindings.enchant_broker_list_dicts(_handle,
+                                                 delegate(DictionaryInfo dictionary)
+                                                 { _dictionaries.Add(dictionary); });
+              VerifyNoErrors();
+          }
         }
 
 	    #region IDisposable Members
@@ -133,7 +163,10 @@ namespace Enchant
             if (disposing)
             {
                 // dispose-only, i.e. non-finalizable logic
-                _handle.Dispose();
+                if(_handle != null)
+                {
+                    _handle.Dispose();
+                }
                 DisposeAllDictionariesFromCache(_dictionaryCache);
                 DisposeAllDictionariesFromCache(_pwlDictionaryCache);
             }
@@ -174,6 +207,11 @@ namespace Enchant
 		    {
 			    throw new ArgumentNullException("language_tag");
 		    }
+            if(_isLibEnchantAvailable != true)
+            {
+                throw new InvalidOperationException("LibEnchant is not available");
+            }
+
             Dictionary dictionary = GetDictionaryFromCache(this._dictionaryCache, language_tag);
             if(dictionary != null)
             {
@@ -253,6 +291,11 @@ namespace Enchant
           {
             throw new ArgumentNullException("language_tag");
           }
+          if (_isLibEnchantAvailable != true)
+          {
+              return false;
+          }
+
           int result = Bindings.enchant_broker_dict_exists(_handle, language_tag);
           VerifyNoErrors();
           if (result != 0 && result != 1)
@@ -270,7 +313,10 @@ namespace Enchant
 			{
 				throw new ArgumentNullException("pwlFile");
 			}
-
+            if (_isLibEnchantAvailable != true)
+            {
+                throw new InvalidOperationException("LibEnchant is not available");
+            }
             Dictionary dictionary = GetDictionaryFromCache(this._pwlDictionaryCache, pwlFile);
             if (dictionary != null)
             {
@@ -293,17 +339,23 @@ namespace Enchant
 	    public void SetOrdering(string language_tag, string ordering)
 		{
 			VerifyNotDisposed();
-			Bindings.enchant_broker_set_ordering(_handle, language_tag, ordering);
-			VerifyNoErrors();
+            if (_isLibEnchantAvailable == true)
+            {
+                Bindings.enchant_broker_set_ordering(_handle, language_tag, ordering);
+            }
+	        VerifyNoErrors();
 		}
 
 		private void VerifyNoErrors()
 		{
-			string message = Bindings.enchant_broker_get_error(_handle);
-			if (!string.IsNullOrEmpty(message))
-			{
-				throw new ApplicationException(message);
-			}
+            if (_isLibEnchantAvailable == true)
+            {
+                string message = Bindings.enchant_broker_get_error(_handle);
+                if (!string.IsNullOrEmpty(message))
+                {
+                    throw new ApplicationException(message);
+                }
+            }
 		}
 	}
 }
