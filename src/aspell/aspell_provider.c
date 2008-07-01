@@ -400,7 +400,7 @@ static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR
 #endif
 
 #if defined(_WIN32)
-gboolean try(EnchantProvider * me, const char *dir_name, const WCHAR *aspell_module_name)
+gboolean load_library(EnchantProvider * me, const char *dir_name, const WCHAR *aspell_module_name)
 {
     HMODULE aspell_module = NULL;
     char* szModule;
@@ -446,22 +446,24 @@ gboolean try(EnchantProvider * me, const char *dir_name, const WCHAR *aspell_mod
 
     if (aspell_module == NULL) 
         {
-            /* we can't seem to load aspell. Avoid late binding problems later */
-            g_warning("Unable to load library aspell-15.dll.");
-            me->request_dict = NULL;
-            me->dispose_dict = NULL;
-            me->list_dicts = NULL;
-	    return FALSE;
+	        return FALSE;
         }
     return TRUE;
 }
 #endif
 
-void configure_provider(EnchantProvider * me, const char *dir_name)
+void configure_enchant_provider(EnchantProvider * me, const char *dir_name)
 {
 #if defined(_WIN32)
-	try(me, dir_name, L"aspell-15.dll") ||
-	try(me, dir_name, L"libaspell-15.dll");
+	if(!load_library(me, dir_name, L"aspell-15.dll") &&
+       !load_library(me, dir_name, L"libaspell-15.dll"))
+    {
+            /* we can't seem to load aspell. Avoid late binding problems later */
+            g_warning("Unable to load library aspell-15.dll.");
+            me->request_dict = NULL;
+            me->dispose_dict = NULL;
+            me->list_dicts = NULL;
+    }
 #endif
 }
 
