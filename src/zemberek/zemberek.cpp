@@ -19,23 +19,54 @@
 
 #include "zemberek.h"
 
-Zemberek::Zemberek()
+bool zemberek_service_is_running ()
 {
+  DBusGConnection *connection;
+  DBusGProxy *proxy;
 
-  GError *Error;
+  GError *Error = NULL;
   g_type_init ();
 
-  Error = NULL;
   connection = dbus_g_bus_get (DBUS_BUS_SYSTEM,
                                &Error);
   if (connection == NULL) {
-      //g_stpcpy(error,Error->message);
       g_error_free (Error);
+      return false;
   }
   proxy = dbus_g_proxy_new_for_name (connection,
                                      "net.zemberekserver.server.dbus",
                                      "/net/zemberekserver/server/dbus/ZemberekDbus",
                                      "net.zemberekserver.server.dbus.ZemberekDbusInterface");
+
+  dbus_g_connection_unref (connection);
+  if (proxy == NULL) {
+    return false;
+  }
+
+   g_object_unref (proxy);
+   return true;
+}
+
+Zemberek::Zemberek()
+  : connection(NULL), proxy(NULL)
+{
+  GError *Error = NULL;
+  g_type_init ();
+
+  connection = dbus_g_bus_get (DBUS_BUS_SYSTEM,
+                               &Error);
+  if (connection == NULL) {
+      g_error_free (Error);
+      throw "couldn't connect to the system bus";
+  }
+  proxy = dbus_g_proxy_new_for_name (connection,
+                                     "net.zemberekserver.server.dbus",
+                                     "/net/zemberekserver/server/dbus/ZemberekDbus",
+                                     "net.zemberekserver.server.dbus.ZemberekDbusInterface");
+
+  if (proxy == NULL) {
+    throw "couldn't connect to the Zemberek service";
+  }
 }
 
 
@@ -43,18 +74,18 @@ Zemberek::~Zemberek()
 {
     if(proxy)
 	    g_object_unref (proxy);
+    if(connection)
+	    dbus_g_connection_unref (connection);
 }
 
 
-int Zemberek::checkWord(const char* word ) const
+int Zemberek::checkWord(const char* word) const
 {
     gboolean result;
-    GError *Error;
-    Error=NULL;
+    GError *Error = NULL;
     if (!dbus_g_proxy_call (proxy, "kelimeDenetle", &Error,
     	G_TYPE_STRING,word,G_TYPE_INVALID,
     	G_TYPE_BOOLEAN, &result, G_TYPE_INVALID)) {
-    	//g_stpcpy(error,Error->message);
     	g_error_free (Error);
     	return -1;
     }
@@ -70,12 +101,10 @@ int Zemberek::checkWord(const char* word ) const
 char** Zemberek::suggestWord(const char* word, size_t *out_n_suggs)
 {
     char** suggs;
-    GError *Error;
-    Error=NULL;
+    GError *Error = NULL;
     if (!dbus_g_proxy_call (proxy, "oner", &Error,
     	G_TYPE_STRING,word,G_TYPE_INVALID,
     	G_TYPE_STRV, &suggs,G_TYPE_INVALID)) {
-    	//g_stpcpy(error,Error->message);
     	g_error_free (Error);
     	return NULL;
     }

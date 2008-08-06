@@ -23,8 +23,6 @@
 #include <dbus/dbus-glib.h>
 #include <glib.h>
 
-using namespace std;
-
 class Zemberek
 {
 public:
@@ -33,9 +31,11 @@ public:
     
     int checkWord(const char* word) const;
     char** suggestWord(const char* word, size_t *out_n_suggs);
-    //char *error;
+
 private:
     DBusGConnection *connection;
     DBusGProxy *proxy;
 };
+
+bool zemberek_service_is_running ();
 #endif
