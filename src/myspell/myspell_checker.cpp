@@ -343,8 +343,8 @@ myspell_request_dictionary (const char * tag)
 				    strstr (dir_entry, ".dic") != NULL) {
 					char *dict = g_build_filename (dirs[i].c_str(), 
 								       dir_entry, NULL);
-					g_dir_close (dir);
                     if(s_hasCorrespondingAffFile(dict)){
+			                    g_dir_close (dir);
 					    return dict;
                     }
 				}
