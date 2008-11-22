@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <locale.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 
@@ -465,6 +466,8 @@ int main (int argc, char ** argv)
 	int countLines = 0;
 	gchar *dictionary = 0;  /* -d dictionary */
 
+	/* Initialize system locale */
+	setlocale(LC_ALL, "");
 
 	for (i = 1; i < argc; i++) {
 		char * arg = argv[i];
