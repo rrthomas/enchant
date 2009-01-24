@@ -237,6 +237,16 @@ myspell_checker_get_dictionary_dirs (void)
 		g_slist_free (config_dirs);
 	}
 
+	{
+		const gchar* const * system_data_dirs = g_get_system_data_dirs ();
+		const gchar* const * iter;
+
+		for (iter = system_data_dirs; *iter; iter++)
+			{
+				dirs = g_slist_append (dirs, g_build_filename (*iter, "myspell", "dicts", NULL));
+			}
+	}
+
 	/* until I work out how to link the modules against enchant in MacOSX - fjf
 	 */
 #ifndef XP_TARGET_COCOA
