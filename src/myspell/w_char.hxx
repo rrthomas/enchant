@@ -4,7 +4,7 @@
 #ifdef WIN32
 typedef struct {
 #else
-typedef struct __attribute__ ((packed)) {
+typedef struct {
 #endif
     unsigned char l;
     unsigned char h;

@@ -1,6 +1,8 @@
 #ifndef _ATYPES_HXX_
 #define _ATYPES_HXX_
 
+#include <stdio.h>
+
 #ifndef HUNSPELL_WARNING
 #ifdef HUNSPELL_WARNING_ON
 #define HUNSPELL_WARNING fprintf

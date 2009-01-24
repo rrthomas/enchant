@@ -28,6 +28,9 @@
 */
 
 #ifndef MOZILLA_CLIENT
+#ifdef __SUNPRO_CC
+using namespace std;
+#endif
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>

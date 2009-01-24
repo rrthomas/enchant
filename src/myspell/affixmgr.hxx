@@ -2,11 +2,11 @@
 #define _AFFIXMGR_HXX_
 
 #ifdef MOZILLA_CLIENT
+#include <stdio.h>
+#else
 #ifdef __SUNPRO_CC // for SunONE Studio compiler
 using namespace std;
 #endif
-#include <stdio.h>
-#else
 #include <cstdio>
 #endif
 

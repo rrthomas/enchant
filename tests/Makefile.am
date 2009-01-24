@@ -1,4 +1,4 @@
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(CXX_WARN_CFLAGS)
+INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 EXTRA_DIST=test.pwl ispell.in
 
