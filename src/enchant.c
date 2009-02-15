@@ -563,6 +563,7 @@ _enchant_session_new (EnchantProvider *provider, const char * const user_config_
 	session = enchant_session_new_with_pwl (provider, dic, excl, lang, fail_if_no_pwl);
 	
 	g_free (dic);
+	g_free (excl);
 
 	return session;
 }
