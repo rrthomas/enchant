@@ -1729,6 +1729,7 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 {
 	EnchantDict * dict;
 	GSList * list;
+	GSList * listIter;
 
 	dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
 	if (dict) {
@@ -1736,11 +1737,12 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 		return dict;
 	}
 
-	for (list = enchant_get_ordered_providers (broker, tag); list != NULL; list = g_slist_next (list))
+	list = enchant_get_ordered_providers (broker, tag);
+	for (listIter = list; listIter != NULL; listIter = g_slist_next (listIter))
 		{
 			EnchantProvider * provider;
 
-			provider = (EnchantProvider *) list->data;
+			provider = (EnchantProvider *) listIter->data;
 			
 			if (provider->request_dict)
 				{
