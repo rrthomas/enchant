@@ -286,6 +286,43 @@ enchant_get_conf_dirs (void)
 	return conf_dirs;
 }
 
+ENCHANT_MODULE_EXPORT(FILE *)
+enchant_fopen (const gchar *filename, const gchar *mode)
+{
+#ifdef G_OS_WIN32
+  wchar_t *wfilename = g_utf8_to_utf16 (filename, -1, NULL, NULL, NULL);
+  wchar_t *wmode;
+  FILE *retval;
+  int save_errno;
+
+  if (wfilename == NULL)
+    {
+      errno = EINVAL;
+      return NULL;
+    }
+
+  wmode = g_utf8_to_utf16 (mode, -1, NULL, NULL, NULL);
+
+  if (wmode == NULL)
+    {
+      g_free (wfilename);
+      errno = EINVAL;
+      return NULL;
+    }
+
+  retval = _wfopen (wfilename, wmode);
+  save_errno = errno;
+
+  g_free (wfilename);
+  g_free (wmode);
+
+  errno = save_errno;
+  return retval;
+#else
+  return fopen (filename, mode);
+#endif
+}
+
 /**
  * enchant_get_user_config_dir
  *
@@ -1470,7 +1507,7 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 
 	FILE * f;
 
-	f = g_fopen (file, "r");
+	f = enchant_fopen (file, "r");
 	if (!f)
 		return;
 

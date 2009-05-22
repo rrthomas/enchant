@@ -44,7 +44,6 @@
 #include <string.h>
 #include <locale.h>
 #include <glib.h>
-#include <glib/gstdio.h>
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -138,7 +137,7 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, siz
 
 	if (word->len <= MIN_WORD_LENGTH || enchant_dict_check (dict, word->str, word->len) == 0) {
 		if (lineCount)
-			fprintf (out, "* %ld\n", lineCount);
+			fprintf (out, "* %u\n", (unsigned int)lineCount);
 		else
 			fwrite ("*\n", 1, 2, out);
 	}
@@ -148,18 +147,18 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, siz
 		if (!n_suggs || !suggs) {
 			fwrite ("# ", 1, 2, out);
 			if (lineCount)
-				fprintf (out, "%ld ", lineCount);
+				fprintf (out, "%u ", (unsigned int)lineCount);
 			print_utf (out, word->str);
-			fprintf (out, " %ld\n", start_pos);
+			fprintf (out, " %u\n", (unsigned int)start_pos);
 		}
 		else {
 			size_t i = 0;
 			
 			fwrite ("& ", 1, 2, out);
 			if (lineCount)
-				fprintf (out, "%ld ", lineCount);
+				fprintf (out, "%u ", (unsigned int)lineCount);
 			print_utf (out, word->str);
-			fprintf (out, " %ld %ld:", n_suggs, start_pos);
+			fprintf (out, " %u %u:", (unsigned int)n_suggs, (unsigned int)start_pos);
 			
 			for (i = 0; i < n_suggs; i++) {
 				fprintf (out, " ");
@@ -181,7 +180,7 @@ do_mode_l (FILE * out, EnchantDict * dict, GString * word, size_t lineCount)
 {
 	if (enchant_dict_check (dict, word->str, word->len) != 0) {
 		if (lineCount)
-			fprintf (out, "%ld ", lineCount);
+			fprintf (out, "%u ", (unsigned int)lineCount);
 		print_utf (out, word->str);
 		fwrite ("\n", 1, 1, out);
 	}
@@ -514,7 +513,7 @@ int main (int argc, char ** argv)
 	}
 	else {
 		if (file) {
-			fp = g_fopen (file, "rb");
+			fp = enchant_fopen (file, "rb");
 			if (!fp) {
 				fprintf (stderr, "Error: Could not open the file \"%s\" for reading.\n", file);
 				exit (1);

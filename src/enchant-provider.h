@@ -33,6 +33,7 @@
 
 #include <enchant.h>
 #include <glib.h>
+#include <stdio.h>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -69,6 +70,9 @@ ENCHANT_MODULE_EXPORT(void)
 
 ENCHANT_MODULE_EXPORT(void)
 	enchant_provider_set_error (EnchantProvider * provider, const char * const err);
+
+ENCHANT_MODULE_EXPORT(FILE *)
+	enchant_fopen (const gchar *filename, const gchar *mode);
 
 struct str_enchant_dict
 {

@@ -67,6 +67,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include "enchant-provider.h"
 
 #include "pwl.h"
 
@@ -258,17 +259,17 @@ EnchantPWL* enchant_pwl_init(void)
  */ 
 EnchantPWL* enchant_pwl_init_with_file(const char * file)
 {
-	int fd;
+	FILE* fd;
 	EnchantPWL *pwl;
 
 	g_return_val_if_fail (file != NULL, NULL);
 
-	fd = g_open(file, O_CREAT | O_RDONLY, S_IREAD | S_IWRITE);
-	if(fd == -1)
+	fd = enchant_fopen(file, "wb");
+	if(fd == NULL)
 		{
 			return NULL;
 		}
-	close(fd);
+	fclose(fd);
 	pwl = enchant_pwl_init();
 	pwl->filename = g_strdup(file);
 	pwl->file_changed = 0;
@@ -299,7 +300,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	g_hash_table_destroy (pwl->words_in_trie);
 	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	f = g_fopen(pwl->filename, "r");
+	f = enchant_fopen(pwl->filename, "r");
 	if (!f) 
 		return;
 
@@ -393,7 +394,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 	{
 		FILE *f;
 		
-		f = g_fopen(pwl->filename, "a");
+		f = enchant_fopen(pwl->filename, "a");
 		if (f)
 			{
 				struct stat stats;
@@ -433,7 +434,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 			if(!g_file_get_contents(pwl->filename, &contents, &length, NULL))
 				return;
 
-			f = g_fopen(pwl->filename, "wb"); /*binary because g_file_get_contents reads binary*/
+			f = enchant_fopen(pwl->filename, "wb"); /*binary because g_file_get_contents reads binary*/
 			if (f)
 				{
 					const gunichar BOM = 0xfeff;
