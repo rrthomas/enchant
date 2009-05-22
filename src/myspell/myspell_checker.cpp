@@ -475,6 +475,11 @@ myspell_provider_enum_dicts (const char * const directory,
 	}
 }
 
+extern "C" {
+
+ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+	     init_enchant_provider (void);
+
 static char ** 
 myspell_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
@@ -579,11 +584,6 @@ myspell_provider_describe (EnchantProvider * me)
 {
 	return "Myspell Provider";
 }
-
-extern "C" {
-
-ENCHANT_MODULE_EXPORT (EnchantProvider *) 
-	     init_enchant_provider (void);
 
 EnchantProvider *
 init_enchant_provider (void)

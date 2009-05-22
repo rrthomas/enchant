@@ -328,6 +328,11 @@ uspell_request_manager (const char * dir, size_t mapIndex)
 	return manager;
 }
 
+extern "C" {
+
+ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+	     init_enchant_provider (void);
+
 static EnchantDict *
 uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
@@ -439,11 +444,6 @@ uspell_provider_describe (EnchantProvider * me)
 {
 	return "Uspell Provider";
 }
-
-extern "C" {
-
-ENCHANT_MODULE_EXPORT (EnchantProvider *) 
-	     init_enchant_provider (void);
 
 EnchantProvider *
 init_enchant_provider (void)

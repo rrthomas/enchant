@@ -623,6 +623,11 @@ _ispell_provider_dictionary_exists (EnchantBroker * broker, const char *const sz
 	return 0;
 }
 
+extern "C" {
+
+ENCHANT_MODULE_EXPORT (EnchantProvider *) 
+	     init_enchant_provider (void);
+
 static char **
 ispell_provider_list_dictionaries (EnchantProvider * me,
 				   size_t * out_n_dicts)
@@ -688,11 +693,6 @@ ispell_provider_describe (EnchantProvider * me)
 {
 	return "Ispell Provider";
 }
-
-extern "C" {
-
-ENCHANT_MODULE_EXPORT (EnchantProvider *) 
-	     init_enchant_provider (void);
 
 EnchantProvider *
 init_enchant_provider (void)

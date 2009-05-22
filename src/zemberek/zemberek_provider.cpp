@@ -37,6 +37,11 @@
 
 ENCHANT_PLUGIN_DECLARE("Zemberek")
 
+extern "C" {
+
+ENCHANT_MODULE_EXPORT(EnchantProvider *)
+  init_enchant_provider(void);
+
 static int
 zemberek_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
@@ -130,11 +135,6 @@ zemberek_provider_list_dicts (EnchantProvider * me,
 	return out_list;
     }
 }
-
-extern "C" {
-
-ENCHANT_MODULE_EXPORT(EnchantProvider *)
-  init_enchant_provider(void);
 
 EnchantProvider *
 init_enchant_provider(void)
