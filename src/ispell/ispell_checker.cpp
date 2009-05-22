@@ -115,8 +115,9 @@ ISpellChecker::try_autodetect_charset(const char * const inEncoding)
 /***************************************************************************/
 /***************************************************************************/
 
-ISpellChecker::ISpellChecker()
-	: deftflag(-1),
+ISpellChecker::ISpellChecker(EnchantBroker * broker)
+: m_broker(broker),
+	deftflag(-1),
      prefstringchar(-1),
      m_bSuccessfulInit(false),
      m_BC(NULL),
@@ -301,7 +302,7 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 }
 
 static GSList *
-ispell_checker_get_dictionary_dirs (void)
+ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
 {
 	GSList *dirs = NULL;
 
@@ -360,13 +361,13 @@ ispell_checker_get_dictionary_dirs (void)
 }
 
 static void
-s_buildHashNames (std::vector<std::string> & names, const char * dict)
+s_buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, const char * dict)
 {
 	names.clear ();
 
 	GSList *dirs, *iter;
 
-	dirs = ispell_checker_get_dictionary_dirs();
+	dirs = ispell_checker_get_dictionary_dirs(broker);
 	for (iter = dirs; iter; iter = iter->next)
 		{
 			char *tmp;
@@ -385,7 +386,7 @@ ISpellChecker::loadDictionary (const char * szdict)
 {
 	std::vector<std::string> dict_names;
 
-	s_buildHashNames (dict_names, szdict);
+	s_buildHashNames (dict_names, m_broker, szdict);
 
 	for (size_t i = 0; i < dict_names.size(); i++)
 		{
@@ -562,7 +563,7 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	EnchantDict *dict;
 	ISpellChecker * checker;
 	
-	checker = new ISpellChecker ();
+	checker = new ISpellChecker (me->owner);
 	
 	if (!checker)
 		{
@@ -595,11 +596,11 @@ ispell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 }
 
 static int
-_ispell_provider_dictionary_exists (const char *const szFile)
+_ispell_provider_dictionary_exists (EnchantBroker * broker, const char *const szFile)
 {
 	std::vector <std::string> names;
 
-	s_buildHashNames (names, szFile);
+	s_buildHashNames (names, broker, szFile);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
 			return 1;
@@ -619,7 +620,7 @@ ispell_provider_list_dictionaries (EnchantProvider * me,
 
 	nb = 0;
 	for (i = 0; i < size_ispell_map; i++)
-		if (_ispell_provider_dictionary_exists (ispell_map[i].dict))
+		if (_ispell_provider_dictionary_exists (me->owner, ispell_map[i].dict))
 			out_dicts[nb++] = g_strdup (ispell_map[i].lang);
 
 	*out_n_dicts = nb;
@@ -644,7 +645,7 @@ ispell_provider_dictionary_exists (struct str_enchant_provider * me,
 		{
 			const IspellMap * mapping = (const IspellMap *)(&(ispell_map[i]));
 			if (!strcmp (tag, mapping->lang) || !strcmp (shortened_dict.c_str(), mapping->lang)) 
-				return _ispell_provider_dictionary_exists(mapping->dict);
+				return _ispell_provider_dictionary_exists(me->owner, mapping->dict);
 		}
 	
 	return 0;

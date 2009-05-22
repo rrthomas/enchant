@@ -57,7 +57,7 @@ ENCHANT_PLUGIN_DECLARE("Myspell")
 class MySpellChecker
 {
 public:
-	MySpellChecker();
+	MySpellChecker(EnchantBroker * broker);
 	~MySpellChecker();
 
 	bool checkWord (const char *word, size_t len);
@@ -69,6 +69,7 @@ private:
 	GIConv  m_translate_in; /* Selected translation from/to Unicode */
 	GIConv  m_translate_out;
 	Hunspell *myspell;
+	EnchantBroker *m_broker;
 };
 
 /***************************************************************************/
@@ -129,8 +130,8 @@ g_iconv_is_valid(GIConv i)
 	return (i != G_ICONV_INVALID);
 }
 
-MySpellChecker::MySpellChecker()
-	: m_translate_in(G_ICONV_INVALID), m_translate_out(G_ICONV_INVALID), myspell(0)
+MySpellChecker::MySpellChecker(EnchantBroker * broker)
+: m_translate_in(G_ICONV_INVALID), m_translate_out(G_ICONV_INVALID), myspell(0), m_broker(broker)
 {
 }
 
@@ -218,7 +219,7 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 }
 
 static GSList *
-myspell_checker_get_dictionary_dirs (void)
+myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 {
 	GSList *dirs = NULL;
 
@@ -283,13 +284,13 @@ myspell_checker_get_dictionary_dirs (void)
 }
 
 static void
-s_buildDictionaryDirs (std::vector<std::string> & dirs)
+s_buildDictionaryDirs (std::vector<std::string> & dirs, EnchantBroker * broker)
 {
 	GSList *myspell_dirs, *iter;
 
 	dirs.clear ();
 
-	myspell_dirs = myspell_checker_get_dictionary_dirs ();
+	myspell_dirs = myspell_checker_get_dictionary_dirs (broker);
 	for (iter = myspell_dirs; iter; iter = iter->next)
 		{
 			dirs.push_back ((const char *)iter->data);
@@ -300,12 +301,12 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs)
 }
 
 static void
-s_buildHashNames (std::vector<std::string> & names, const char * dict)
+s_buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, const char * dict)
 {
 	names.clear ();
 
 	std::vector<std::string> dirs;
-	s_buildDictionaryDirs (dirs);
+	s_buildDictionaryDirs (dirs, broker);
 
 	char *dict_dic = g_strconcat(dict, ".dic", NULL);
 	for (size_t i = 0; i < dirs.size(); i++)
@@ -327,22 +328,22 @@ s_hasCorrespondingAffFile(const std::string & dicFile)
 }
 
 static char *
-myspell_request_dictionary (const char * tag) 
+myspell_request_dictionary (EnchantBroker * broker, const char * tag) 
 {
 	std::vector<std::string> names;
 
-	s_buildHashNames (names, tag);
+	s_buildHashNames (names, broker, tag);
 
 	for (size_t i = 0; i < names.size (); i++) {
-        if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS)) {
-            if(s_hasCorrespondingAffFile(names[i])){
-			    return g_strdup (names[i].c_str());
-            }
-        }
+		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS)) {
+			if(s_hasCorrespondingAffFile(names[i])){
+				return g_strdup (names[i].c_str());
+			}
+		}
 	}
 	
 	std::vector<std::string> dirs;
-	s_buildDictionaryDirs (dirs);
+	s_buildDictionaryDirs (dirs, broker);
 
 	for (size_t i = 0; i < dirs.size(); i++) {
 		GDir *dir = g_dir_open (dirs[i].c_str(), 0, NULL);
@@ -372,7 +373,7 @@ MySpellChecker::requestDictionary(const char *szLang)
 {
 	char *dic = NULL, *aff = NULL;
 
-	dic = myspell_request_dictionary (szLang);
+	dic = myspell_request_dictionary (m_broker, szLang);
 	if (!dic)
 		return false;
 
@@ -467,7 +468,7 @@ myspell_provider_list_dicts (EnchantProvider * me,
 	std::vector<std::string> dict_dirs, dicts;
 	char ** dictionary_list = NULL;
 
-	s_buildDictionaryDirs (dict_dirs);
+	s_buildDictionaryDirs (dict_dirs, me->owner);
 
 	for (size_t i = 0; i < dict_dirs.size(); i++)
 		{
@@ -497,7 +498,7 @@ myspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 	EnchantDict *dict;
 	MySpellChecker * checker;
 	
-	checker = new MySpellChecker();
+	checker = new MySpellChecker(me->owner);
 	
 	if (!checker)
 		return NULL;
@@ -533,7 +534,7 @@ myspell_provider_dictionary_exists (struct str_enchant_provider * me,
 {
 	std::vector <std::string> names;
 
-	s_buildHashNames (names, tag);
+	s_buildHashNames (names, me->owner, tag);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
 		{

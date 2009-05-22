@@ -33,11 +33,12 @@
 
 #include <glib.h> // give glib a chance to override MAXPATHLEN first before it is set in ispell.h
 #include "ispell.h"
+#include "enchant.h"
 
 class ISpellChecker
 {
 public:
-	ISpellChecker();
+	ISpellChecker(EnchantBroker * broker);
 	~ISpellChecker();
 
 	bool checkWord(const char * const word, size_t len);
@@ -46,6 +47,9 @@ public:
 	bool requestDictionary (const char * szLang);
 
 private:
+	EnchantBroker* m_broker;
+
+	ISpellChecker();
 	ISpellChecker(const ISpellChecker&);	// no impl
 	void operator=(const ISpellChecker&);	// no impl
 
