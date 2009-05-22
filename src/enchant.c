@@ -2282,3 +2282,9 @@ enchant_broker_set_param (EnchantBroker * broker, const char * const param_name,
 	else
 		g_hash_table_insert (broker->params, g_strdup (param_name), g_strdup (param_value));
 }
+
+ENCHANT_MODULE_EXPORT (GSList *)
+enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_name)
+{
+	return NULL;
+}

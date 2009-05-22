@@ -74,6 +74,9 @@ ENCHANT_MODULE_EXPORT(void)
 ENCHANT_MODULE_EXPORT(FILE *)
 	enchant_fopen (const gchar *filename, const gchar *mode);
 
+ENCHANT_MODULE_EXPORT (GSList *)
+	enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_name);
+
 struct str_enchant_dict
 {
 	void *user_data;
