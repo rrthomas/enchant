@@ -2286,5 +2286,29 @@ enchant_broker_set_param (EnchantBroker * broker, const char * const param_name,
 ENCHANT_MODULE_EXPORT (GSList *)
 enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_name)
 {
-	return NULL;
+	const char *param_value;
+	char **tokens;
+	GSList *dirs = NULL;
+
+	param_value = enchant_broker_get_param (broker, param_name);
+	if (param_value == NULL)
+		return NULL;
+
+#ifdef _WIN32
+	tokens = g_strsplit (param_value, ";", 0);
+#else
+	tokens = g_strsplit (param_value, ":", 0);
+#endif
+	if (tokens != NULL) {
+		int i;
+		for (i = 0; tokens[i]; i++) 
+			{
+				char *token = g_strstrip(tokens[i]);
+				dirs = g_slist_append (dirs, g_strdup (token));
+			}
+		
+		g_strfreev (tokens);		
+	}
+
+	return dirs;
 }
