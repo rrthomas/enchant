@@ -51,7 +51,7 @@ static const size_t MAXALTERNATIVE = 20; // we won't return more than this numbe
 static const size_t MAXCHARS = 100; // maximum number of bytes of utf8 or chars of UCS4 in a word
 
 static GSList *
-uspell_checker_get_dictionary_dirs (void)
+uspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 {
 	GSList *dirs = NULL;
 
@@ -103,6 +103,20 @@ uspell_checker_get_dictionary_dirs (void)
 #ifdef ENCHANT_USPELL_DICT_DIR
 	dirs = g_slist_append (dirs, g_strdup (ENCHANT_USPELL_DICT_DIR));
 #endif
+
+	{
+		GSList *config_dirs, *iter;
+
+		config_dirs = enchant_get_dirs_from_param (broker, "enchant.uspell.dictionary.path");
+		
+		for (iter = config_dirs; iter; iter = iter->next)
+			{
+				dirs = g_slist_append (dirs, g_strdup ((const gchar *)iter->data));
+			}
+
+		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
+		g_slist_free (config_dirs);
+	}
 
 	return dirs;
 }
@@ -239,7 +253,7 @@ static const Mapping mapping [] = {
 static const size_t n_mappings = (sizeof(mapping)/sizeof(mapping[0]));
 
 static void
-s_buildHashNames (std::vector<std::string> & names, const char * tag)
+s_buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, const char * tag)
 {
 	names.clear ();
 
@@ -256,7 +270,7 @@ s_buildHashNames (std::vector<std::string> & names, const char * tag)
 		char * dict = g_strdup_printf ("%s.uspell.dat",
 					       mapping[mapIndex].corresponding_uspell_file_name);
 
-		dirs = uspell_checker_get_dictionary_dirs ();
+		dirs = uspell_checker_get_dictionary_dirs (broker);
 
 		for (iter = dirs; iter; iter = iter->next)
 			{
@@ -351,7 +365,7 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	if (!found)
 		return NULL;
 
-	dirs = uspell_checker_get_dictionary_dirs ();
+	dirs = uspell_checker_get_dictionary_dirs (me->owner);
 
 	for (iter = dirs; iter && !manager; iter = iter->next)
 		{
@@ -380,7 +394,7 @@ uspell_provider_dictionary_exists (struct str_enchant_provider * me,
 {
 	std::vector <std::string> names;
 
-	s_buildHashNames (names, tag);
+	s_buildHashNames (names, me->owner, tag);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
 			return 1;
