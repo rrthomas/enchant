@@ -10,6 +10,7 @@ EXTRA_DIST =		\
 	enchant.spec.in	\
 	enchant.spec	\
 	lt-compile-resource \
+	compile-resource \
 	README 		\
 	TODO 		\
 	HACKING 	\
