@@ -295,9 +295,15 @@ if test "x$with_myspell_dir" != "x" ; then
 fi
 
 MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dir\"'"
-PKG_CHECK_MODULES(MYSPELL, [hunspell], have_system_myspell=true, have_system_myspell=false)
-AC_SUBST(MYSPELL_CFLAGS)
-AC_SUBST(MYSPELL_LIBS)
+
+AC_ARG_WITH(system-myspell, AS_HELP_STRING([--with-system-myspell=yes/no],[use the system myspell/hunspell @<:@default=auto@:>@]))
+if test "x$with_system_myspell" != "xno"; then
+	PKG_CHECK_MODULES(MYSPELL, [hunspell], have_system_myspell=true, have_system_myspell=false)
+	AC_SUBST(MYSPELL_CFLAGS)
+	AC_SUBST(MYSPELL_LIBS)
+else
+	have_system_myspell=false;
+fi
 AM_CONDITIONAL(WITH_SYSTEM_MYSPELL, test "x$have_system_myspell" = "xtrue")
 
 check_aspell=yes
@@ -522,6 +528,6 @@ $PACKAGE-$VERSION
 	Build Hspell backend:           ${build_hspell}
 	Build Myspell/Hunspell backend: ${build_myspell}
 	Build Voikko backend:           ${build_voikko}
-	Build Zemberek backend:		${build_zemberek}
+	Build Zemberek backend:         ${build_zemberek}
 	Build a relocatable library:	${relocatable_library}
 "
