@@ -345,6 +345,27 @@ s_hasCorrespondingAffFile(const std::string & dicFile)
     return g_file_test(aff.c_str(), G_FILE_TEST_EXISTS) != 0;
 }
 
+static bool is_plausible_dict_for_tag(const char *dir_entry, const char *tag)
+{
+    const char *dic_suffix = ".dic";
+    size_t dic_suffix_len = strlen(dic_suffix);
+    size_t dir_entry_len = strlen(dir_entry);
+    size_t tag_len = strlen(tag);
+
+    if (dir_entry_len - dic_suffix_len < tag_len)
+        return false;
+    if (strcmp(dir_entry+dir_entry_len-dic_suffix_len, dic_suffix) != 0)
+        return false;
+    if (strncmp (dir_entry, tag, tag_len) != 0)
+        return false;
+    //e.g. requested dict for "fi",
+    //reject "fil_PH.dic"
+    //allow "fi-FOO.dic", "fi_FOO.dic", "fi.dic", etc.
+    if (!ispunct(dir_entry[tag_len]))
+        return false;
+    return true;
+}
+
 static char *
 myspell_request_dictionary (EnchantBroker * broker, const char * tag) 
 {
@@ -368,8 +389,7 @@ myspell_request_dictionary (EnchantBroker * broker, const char * tag)
 		if (dir) {
 			const char *dir_entry;
 			while ((dir_entry = g_dir_read_name (dir)) != NULL) {
-				if (strncmp (dir_entry, tag, strlen(tag)) == 0 &&
-				    strstr (dir_entry, ".dic") != NULL) {
+				if (is_plausible_dict_for_tag(dir_entry, tag)) {
 					char *dict = g_build_filename (dirs[i].c_str(), 
 								       dir_entry, NULL);
                     if(s_hasCorrespondingAffFile(dict)){
