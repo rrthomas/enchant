@@ -431,6 +431,8 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 					do_mode_a (out, dict, word, pos, lineCount);
 				else if (mode == MODE_L)
 					do_mode_l (out, dict, word, lineCount);
+
+				g_string_free(word, TRUE);
 			}
 			if (token_ptr)
 				g_slist_free (token_ptr);
@@ -446,8 +448,6 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 	enchant_broker_free_dict (broker, dict);
 	enchant_broker_free (broker);
 
-	if (word)
-		g_string_free (word, TRUE);
 	g_string_free (str, TRUE);
 
 	return 0;

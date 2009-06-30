@@ -606,6 +606,7 @@ _enchant_session_new (EnchantProvider *provider, const char * const user_config_
 	
 	session = enchant_session_new_with_pwl (provider, dic, excl, lang, fail_if_no_pwl);
 	
+	g_free (excl);
 	g_free (dic);
 	g_free (excl);
 
@@ -1615,17 +1616,21 @@ enchant_dict_destroyed (gpointer data)
 	EnchantDict *dict;
 	EnchantProvider *owner;
 	EnchantSession *session;
+	EnchantDictPrivateData *enchant_dict_private_data;
 	
 	g_return_if_fail (data);
 	
 	dict = (EnchantDict *) data;
-	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
+	enchant_dict_private_data = (EnchantDictPrivateData*)dict->enchant_private_data;
+	session = enchant_dict_private_data->session;
 	owner = session->provider;
 	
 	if (owner && owner->dispose_dict) 
 		(*owner->dispose_dict) (owner, dict);
 	else if(session->is_pwl)
 		g_free (dict);
+
+	g_free(enchant_dict_private_data);
 
 	enchant_session_destroy (session);
 }
