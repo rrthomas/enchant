@@ -264,7 +264,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 
 	g_return_val_if_fail (file != NULL, NULL);
 
-	fd = enchant_fopen(file, "wb");
+	fd = enchant_fopen(file, "ab+");
 	if(fd == NULL)
 		{
 			return NULL;
