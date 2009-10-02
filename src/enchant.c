@@ -1275,7 +1275,6 @@ enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 	EnchantSession * session;
 
 	g_return_if_fail (dict);
-	g_return_if_fail (string_list);
 	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 	g_strfreev(string_list);
