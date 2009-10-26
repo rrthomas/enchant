@@ -143,10 +143,11 @@ _enchant_get_user_home_dirs (void)
 {
 	GSList *dirs = NULL;
 	const char* home_dir;
+	char *tmp;
 
-	home_dir = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
-	if (home_dir)
-		dirs = enchant_slist_append_unique_path (dirs, g_strdup (home_dir));
+	tmp = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
+	if (tmp)
+		dirs = enchant_slist_append_unique_path (dirs, tmp);
 
 	home_dir = g_get_home_dir ();
 	if (home_dir)
