@@ -43,10 +43,11 @@ bool zemberek_service_is_running ()
       g_error_free (Error);
       return false;
   }
-  proxy = dbus_g_proxy_new_for_name (connection,
+  proxy = dbus_g_proxy_new_for_name_owner (connection,
                                      "net.zemberekserver.server.dbus",
                                      "/net/zemberekserver/server/dbus/ZemberekDbus",
-                                     "net.zemberekserver.server.dbus.ZemberekDbusInterface");
+                                     "net.zemberekserver.server.dbus.ZemberekDbusInterface",
+                                     &Error);
 
   dbus_g_connection_unref (connection);
   if (proxy == NULL) {
