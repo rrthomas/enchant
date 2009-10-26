@@ -394,6 +394,7 @@ enchant_get_registry_value_ex (int current_user, const char * const prefix, cons
 					wszValue = g_new0(WCHAR, dwSize + 1);
 					RegQueryValueExW(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
 				}
+			RegCloseKey(hKey);
 		}
 
 	if(wszValue && *wszValue)
