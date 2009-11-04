@@ -465,11 +465,11 @@ ISpellChecker::setDictionaryEncoding( const char * hashname, const char * encodi
 			
 			if (prefstringchar < 0)
 				{
-					std::string teststring;
+					char teststring[64];
 					for(int n1 = 1; n1 <= 15; n1++)
 						{
-							teststring = "latin" + n1;
-							prefstringchar = findfiletype(teststring.c_str(), 1,				      
+							sprintf(teststring, "latin%d", n1);
+							prefstringchar = findfiletype(teststring, 1,				      
 										      deftflag < 0 ? &deftflag : static_cast<int *>(NULL));
 							if (prefstringchar >= 0) 
 								break;
