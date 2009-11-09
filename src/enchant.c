@@ -1423,6 +1423,10 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 			if ((entry_len > g_module_suffix_len) && 
 				!strcmp(dir_entry+(entry_len-g_module_suffix_len), G_MODULE_SUFFIX))
 				{
+#ifdef _WIN32
+					/* Suppress error popups for failing to load plugins */
+					UINT old_error_mode = SetErrorMode(SEM_FAILCRITICALERRORS);
+#endif
 					filename = g_build_filename (dir_name, dir_entry, NULL);
 					
 					module = g_module_open (filename, (GModuleFlags) 0);
@@ -1457,6 +1461,10 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 						}
 					
 					g_free (filename);
+#ifdef _WIN32
+					/* Restore the original error mode */
+					SetErrorMode(old_error_mode);
+#endif
 				}
 			if (provider)
 				{
