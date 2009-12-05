@@ -463,9 +463,9 @@ fi
 
 AM_CONDITIONAL(WITH_HSPELL, test "$build_hspell" = yes)
 
-build_zemberek=yes
+build_zemberek=no
 
-AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--disable-zemberek],[enable the zemberek backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=yes)
+AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--disable-zemberek],[enable the experimental zemberek (turkish) backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=no)
 
 if test "x$have_cxx" = "xno"; then
    build_zemberek=no
@@ -529,5 +529,10 @@ $PACKAGE-$VERSION
 	Build Myspell/Hunspell backend: ${build_myspell}
 	Build Voikko backend:           ${build_voikko}
 	Build Zemberek backend:         ${build_zemberek}
-	Build a relocatable library:	${relocatable_library}
-"
+	Build a relocatable library:	${relocatable_library}"
+
+if test "x$build_zemberek" = "xyes"; then
+   echo "
+The Zemberek Turkish spell-checking plugin is enabled. It is known 
+to cause crashes with WebKit. Use at your own discretion."
+fi
