@@ -1737,7 +1737,7 @@ enchant_broker_free (EnchantBroker * broker)
  * @pwl: A non-null pathname in the GLib file name encoding (UTF-8 on Windows)
  *       to the personal wordlist file
  *
- * Returns: 
+ * Returns: An EnchantDict. This dictionary is reference counted.
  */
 ENCHANT_MODULE_EXPORT (EnchantDict *)
 enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
@@ -1832,7 +1832,7 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
  * @broker: A non-null #EnchantBroker
  * @tag: The non-null language tag you wish to request a dictionary for ("en_US", "de_DE", ...)
  *
- * Returns: An #EnchantDict, or %null if no suitable dictionary could be found.
+ * Returns: An #EnchantDict, or %null if no suitable dictionary could be found. This dictionary is reference counted.
  */
 ENCHANT_MODULE_EXPORT (EnchantDict *)
 enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
