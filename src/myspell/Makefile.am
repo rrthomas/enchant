@@ -4,7 +4,7 @@ else
 target_lib =
 endif
 
-# copied from hunspell 1.2.2
+# copied from hunspell 1.2.15
 COPIED_MYSPELL_FILES=		\
 	affentry.cxx		\
 	affentry.hxx		\
@@ -24,11 +24,14 @@ COPIED_MYSPELL_FILES=		\
 	hunspell.cxx		\
 	hunspell.h		\
 	hunspell.hxx		\
+	hunvisapi.h		\
 	hunzip.cxx		\
 	hunzip.hxx		\
 	langnum.hxx		\
 	phonet.cxx		\
 	phonet.hxx		\
+	replist.cxx		\
+	replist.hxx		\
 	suggestmgr.cxx		\
 	suggestmgr.hxx		\
 	utf_info.cxx		\
@@ -62,5 +65,6 @@ EXTRA_DIST=			\
 	license.hunspell	\
 	license.myspell		\
 	license.readme		\
+	libenchant_myspell.rc		\
 	hunspell.dsp
 
