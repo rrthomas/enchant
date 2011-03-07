@@ -4,6 +4,10 @@
 #ifndef _HUNZIP_HXX_
 #define _HUNZIP_HXX_
 
+#include "hunvisapi.h"
+
+#include <stdio.h>
+
 #define BUFSIZE  65536
 #define HZIP_EXTENSION ".hz"
 
@@ -12,14 +16,12 @@
 #define MSG_MEMORY "error: %s: missing memory\n"
 #define MSG_KEY    "error: %s: missing or bad password\n"
 
-#include <stdio.h>
-
 struct bit {
     unsigned char c[2];
     int v[2];
 };
 
-class Hunzip
+class LIBHUNSPELL_DLL_EXPORTED Hunzip
 {
 
 protected:

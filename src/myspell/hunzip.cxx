@@ -1,17 +1,10 @@
-#ifndef MOZILLA_CLIENT
-#ifdef __SUNPRO_CC
-using namespace std;
-#endif
-#include <cstdlib>
-#include <cstring>
-#include <cstdio>
-#else
 #include <stdlib.h> 
 #include <string.h>
 #include <stdio.h> 
-#endif
 
 #include "hunzip.hxx"
+
+#include "enchant-provider.h"
 
 #define CODELEN  65536
 #define BASEBITREC 5000
@@ -32,6 +25,7 @@ Hunzip::Hunzip(const char * file, const char * key) {
     inc = 0;
     outc = 0;
     dec = NULL;
+    fin = NULL;
     filename = (char *) malloc(strlen(file) + 1);
     if (filename) strcpy(filename, file);
     if (getcode(key) == -1) bufsiz = -1;
@@ -44,7 +38,9 @@ int Hunzip::getcode(const char * key) {
     int allocatedbit = BASEBITREC;
     const char * enc = key;
 
-    fin = fopen(filename, "rb");
+    if (!filename) return -1;
+
+    fin = enchant_fopen(filename, "rb");
     if (!fin) return -1;
 
     // read magic number
