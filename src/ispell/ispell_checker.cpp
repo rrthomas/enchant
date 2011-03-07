@@ -179,8 +179,8 @@ ISpellChecker::checkWord(const char * const utf8Word, size_t length)
 	
 	if (!strtoichar(iWord, szWord, sizeof(iWord), 0))
 		{
-			if (good(iWord, 0, 0, 1, 0) == 1 ||
-			    compoundgood(iWord, 1) == 1)
+			if (good(iWord, 0, 0, 1, 0) >= 1 ||
+			    compoundgood(iWord, 1))
 				{
 					retVal = true;
 				}
