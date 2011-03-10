@@ -892,6 +892,8 @@ enchant_dict_get_good_suggestions(EnchantDict * dict,
 		{
 			size_t sugg_len = strlen(suggs[i]);
 
+			if (sugg_len == 0) continue;
+
 			if(g_utf8_validate(suggs[i], sugg_len, NULL) && 
 			   !enchant_session_exclude(session, suggs[i], sugg_len) )
 				{
