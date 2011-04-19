@@ -331,7 +331,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 					continue;
 				}
 						
-			if( line[0] != '#')
+			if( line[0] && line[0] != '#')
 				{
 					if(g_utf8_validate(line, -1, NULL))
 						enchant_pwl_add_to_trie(pwl, line, strlen(line));
@@ -676,7 +676,7 @@ static void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl,
 
 			suggestion = g_hash_table_lookup (pwl->words_in_trie, suggs_list->suggs[i]);
 			suggestion_len = strlen(suggestion);
-			
+
 			if(utf8_case_convert_function &&
 					!enchant_is_all_caps(suggestion, suggestion_len))
 				{
