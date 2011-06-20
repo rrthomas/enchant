@@ -28,7 +28,16 @@ if test ! -d `aclocal --print-ac-dir 2>> autogen.err`; then
   exit 1
 fi
 
-libtoolize --force --copy || {
+libtoolize=""
+for found_lib in libtoolize glibtoolize ; do
+    $found_lib --version > /dev/null 2>&1
+    if [ $? = 0 ]; then
+        libtoolize=$found_lib
+        break
+    fi
+done
+
+$libtoolize --force --copy || {
     echo "error: libtoolize failed"
     exit 1
 }
