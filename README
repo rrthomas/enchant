@@ -9,10 +9,11 @@ dealing with different spell checking libraries.
 
    Enchant is meant to provide a generic interface into various existing
 spell checking libaries. These include, but are not limited to:
-	* Aspell/Pspell
-	* Ispell
-	* Hspell
-	* Uspell
+    * Apple Spell
+    * Aspell/Pspell
+    * Ispell
+    * Hspell
+    * Uspell
 
    Enchant is also meant to be used in a cross-platform (XP) environment. Part
 of this means that Enchant wants to limit its number of external dependencies
