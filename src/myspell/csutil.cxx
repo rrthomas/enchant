@@ -10,13 +10,6 @@
 #include "atypes.hxx"
 #include "langnum.hxx"
 
-// Unicode character encoding information
-struct unicode_info {
-  unsigned short c;
-  unsigned short cupper;
-  unsigned short clower;
-};
-
 #ifdef OPENOFFICEORG
 #  include <unicode/uchar.h>
 #else
