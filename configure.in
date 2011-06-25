@@ -554,18 +554,18 @@ fi
 echo "
 $PACKAGE-$VERSION
 
-	prefix:                         ${prefix}
-	compiler:                       ${CC}
-	
-	Build Aspell backend:           ${build_aspell}
-	Build Ispell backend:           ${build_ispell}
-	Build Uspell backend:           ${build_uspell}
-	Build Hspell backend:           ${build_hspell}
-	Build Myspell/Hunspell backend: ${build_myspell}
-	Build Voikko backend:           ${build_voikko}
-	Build Zemberek backend:         ${build_zemberek}
-	Build Apple Spell backend:      ${build_applespell}
-	Build a relocatable library:	${relocatable_library}"
+    prefix:                                 ${prefix}
+    compiler:                               ${CC}
+
+    Build Aspell backend:                   ${build_aspell}
+    Build Ispell backend:                   ${build_ispell}
+    Build Uspell backend:                   ${build_uspell}
+    Build Hspell backend:                   ${build_hspell}
+    Build Myspell/Hunspell backend:         ${build_myspell}
+    Build Voikko backend (Linux only):      ${build_voikko}
+    Build Zemberek backend:                 ${build_zemberek}
+    Build Apple Spell backend (OS X only):  ${build_applespell}
+    Build a relocatable library:            ${relocatable_library}"
 
 if test "x$build_zemberek" = "xyes"; then
    echo "
