@@ -209,7 +209,6 @@ case ${host_os} in
     ;;
 esac
 AC_MSG_RESULT([$check_applespell])
-AM_CONDITIONAL(WITH_APPLESPELL, test "x$check_applespell" = "xyes")
 
 AC_SUBST(SOCKET_LIBS)
 
@@ -498,26 +497,28 @@ AM_CONDITIONAL(WITH_ZEMBEREK, test "x$build_zemberek" = "xyes")
 
 zemberek_dir=${datadir}/enchant/zemberek
 
-build_applespell=no
-
 APPLESPELL_CFLAGS=""
 APPLESPELL_LIBS=""
 APPLESPELL_LDFLAGS=""
 
-AC_ARG_ENABLE(applespell, AS_HELP_STRING([--disable-applespell],[enable the applespell backend @<:@default=auto@:>@]), check_applespell="$enableval", check_applespell=yes)
+build_applespell=no
+if test "x$check_applespell" = "xyes"; then
 
-if test "x$check_applespell" != "xno"; then
-   APPLESPELL_CFLAGS+=" -DXP_TARGET_COCOA -xobjective-c"
-   APPLESPELL_LIBS+=" -lobjc"
-   APPLESPELL_LDFLAGS+=" -framework Cocoa"
-   build_applespell=yes
+    AC_ARG_ENABLE(applespell, AS_HELP_STRING([--disable-applespell],[enable the applespell backend @<:@default=no@:>@]), build_applespell="$enableval", build_applespell=no)
+
+    if test "x$build_applespell" != "xno"; then
+        APPLESPELL_CFLAGS+=" -DXP_TARGET_COCOA -xobjective-c"
+        APPLESPELL_LIBS+=" -lobjc"
+        APPLESPELL_LDFLAGS+=" -framework Cocoa"
+    fi
+
 fi
 
 AC_SUBST(APPLESPELL_CFLAGS)
 AC_SUBST(APPLESPELL_LIBS)
 AC_SUBST(APPLESPELL_LDFLAGS)
 
-AM_CONDITIONAL(WITH_APPLESPELL, test "$build_applespell" = yes)
+AM_CONDITIONAL(WITH_APPLESPELL, test "x$build_applespell" = "xyes")
 
 dnl =======================================================================================
 
