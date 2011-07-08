@@ -5,7 +5,11 @@
 
 #include <string>
 #include <vector>
+<<<<<<< .mine
 #include <libhyphenate\Hyphenator.h>
+=======
+#include "Hyphenator.h"
+>>>>>>> .theirs
 
 #include "enchant-provider.h"
 #include "sp_spell.h"
@@ -44,6 +48,43 @@ static const IspellMap ispell_map [] = {
 	{"es"    ,"espanol.hash"        ,"iso-8859-1" },
 	{"fi"    ,"finnish.hash"        ,"iso-8859-1" },
 	{"fr"    ,"francais.hash"       ,"iso-8859-1" },
+	{"hu"    ,"hungarian.hash"      ,"iso-8859-2" },
+	{"ga"    ,"irish.hash"          ,"iso-8859-1" },
+	{"gl"    ,"galician.hash"       ,"iso-8859-1" },
+	{"ia"    ,"interlingua.hash"    ,"iso-8859-1" },
+	{"it"    ,"italian.hash"        ,"iso-8859-1" },
+	{"la"    ,"mlatin.hash"         ,"iso-8859-1" },
+	{"lt"    ,"lietuviu.hash"       ,"iso-8859-13" },
+	{"nl"    ,"nederlands.hash"     ,"iso-8859-1" },
+	{"nb"    ,"norsk.hash"          ,"iso-8859-1" },
+	{"nn"    ,"nynorsk.hash"        ,"iso-8859-1" },
+	{"no"    ,"norsk.hash"          ,"iso-8859-1" },
+	{"pl"    ,"polish.hash"         ,"iso-8859-2" },
+	{"pt"    ,"brazilian.hash"      ,"iso-8859-1" },
+	{"pt_PT" ,"portugues.hash"      ,"iso-8859-1" },
+	{"ru"    ,"russian.hash"        ,"koi8-r" },
+	{"sc"    ,"sardinian.hash"      ,"iso-8859-1" },
+	{"sk"    ,"slovak.hash"         ,"iso-8859-2" },
+	{"sl"    ,"slovensko.hash"      ,"iso-8859-2" },
+	{"sv"    ,"svenska.hash"        ,"iso-8859-1" },
+	{"uk"    ,"ukrainian.hash"      ,"koi8-u" },
+	{"yi"    ,"yiddish-yivo.hash"   ,"utf-8" }
+};
+
+static const IspellMap ispell_hyphenation_map [] = {
+	{"ca"    ,"en"         ,"iso-8859-1" },
+	{"cs"    ,"czech.hash"          ,"iso-8859-2" },
+	{"da"    ,"dansk.hash"          ,"iso-8859-1" },
+	{"de"    ,"de"        ,"iso-8859-1" },
+	{"de_CH" ,"swiss.hash"          ,"iso-8859-1" },
+	{"el"    ,"ellhnika.hash"       ,"iso-8859-7" },
+	{"en"    ,"en"        ,"iso-8859-1" },
+	{"en_PH" ,"american.hash"       ,"iso-8859-1" },
+	{"en_US" ,"american.hash"       ,"iso-8859-1" },
+	{"eo"    ,"esperanto.hash"      ,"iso-8859-3" },
+	{"es"    ,"es"        ,"iso-8859-1" },
+	{"fi"    ,"finnish.hash"        ,"iso-8859-1" },
+	{"fr"    ,"fr"       ,"iso-8859-1" },
 	{"hu"    ,"hungarian.hash"      ,"iso-8859-2" },
 	{"ga"    ,"irish.hash"          ,"iso-8859-1" },
 	{"gl"    ,"galician.hash"       ,"iso-8859-1" },
@@ -195,6 +236,7 @@ char **
 ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 			   size_t * out_n_suggestions)
 {
+	char* test[]={"chen","xia","jian"};
 	ichar_t  iWord[INPUTWORDLEN + MAXAFFIXLEN];
 	char word8[INPUTWORDLEN + MAXAFFIXLEN];
 	int  c;
@@ -266,12 +308,28 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 						}
 						*(Out) = 0;
 					}
+<<<<<<< .mine
 				//test 
 				sugg_arr[c] = "chenxiajian ispell";
+=======
+				sugg_arr[c] = utf8Sugg;
+
+>>>>>>> .theirs
 			}
 	}
 	
 	return sugg_arr;
+}
+#include <fstream>
+using namespace std;
+char *
+ISpellChecker::hyphenate(const char * const utf8Word, const char *const tag)
+{  //we must choose the right language tag
+	string result=Hyphenator(RFC_3066::Language(tag)).hyphenate(utf8Word).c_str();
+	
+	char* temp=new char[result.length()];
+	strcpy(temp,result.c_str());
+	return temp;	
 }
 
 <<<<<<< .mine
@@ -683,6 +741,7 @@ ispell_dict_suggest (EnchantDict * me, const char *const word,
 <<<<<<< .mine
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 static char **
 ispell_dict_hyphenate (EnchantDict * me, const char *const word,
 					 size_t len, size_t * out_n_suggs)
@@ -789,6 +848,117 @@ ispell_dict_hyphenate (EnchantDict * me, const char *const word)
 
 
 >>>>>>> .theirs
+=======
+static char *
+ispell_dict_hyphenate (EnchantDict * me, const char *const word)
+{
+	ISpellChecker * checker;
+
+	checker = (ISpellChecker *) me->user_data;
+	return checker->hyphenate (word,me->tag);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 static int
 ispell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
@@ -821,7 +991,10 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	}
 	
 	dict = g_new0 (EnchantDict, 1);
+	char* tagTmp=new char(strlen(tag));
+	strcpy(tagTmp,tag);
 	dict->user_data = (void *) checker;
+	dict->tag = tagTmp;
 	dict->check = ispell_dict_check;
 	dict->suggest = ispell_dict_suggest;
 	dict->hyphenate = ispell_dict_hyphenate;

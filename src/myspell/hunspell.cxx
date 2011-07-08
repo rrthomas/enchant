@@ -10,6 +10,10 @@
 
 #include "csutil.hxx"
 
+#include <ctype.h>
+
+#include "hyphen.h"
+
 Hunspell::Hunspell(const char * affpath, const char * dpath, const char * key)
 {
     encoding = NULL;
@@ -670,12 +674,45 @@ struct hentry * Hunspell::checkword(const char * w, int * info, char ** root)
 
   return he;
 }
+#include <string>
+using namespace std;
+void Hunspell::hyphenate( const char* const word, char* result, char* tag )
+{
+	HyphenDict *dict;	
+	char buf[BUFSIZE + 1];	
+	char *hyphens=new char[BUFSIZE + 1];	
+	char ** rep;
+	int * pos;
+	int * cut;
+	/* load the hyphenation dictionary */  
+	string filePath="hyph_";
+	filePath+=tag;
+	filePath+=".dic";
+	if ((dict = hnj_hyphen_load(filePath.c_str())) == NULL) {
+		fprintf(stderr, "Couldn't find file %s\n",tag);
+		fflush(stderr);
+		exit(1);
+	}
+     int len=strlen(word);
+     if (hnj_hyphen_hyphenate2(dict, word, len-1, hyphens, NULL, &rep, &pos, &cut)) {
+				free(hyphens);
+				fprintf(stderr, "hyphenation error\n");
+				exit(1);
+		}
 
+<<<<<<< .mine
 void Hunspell::hyphenate( const char* const word, char* result )
 {
 	//not implement yet chenxiajian
 }
 
+=======
+	hnj_hyphen_free(dict);
+	result=hyphens;	
+}
+
+
+>>>>>>> .theirs
 int Hunspell::suggest(char*** slst, const char * word)
 {
   int onlycmpdsug = 0;

@@ -81,6 +81,7 @@ struct str_enchant_dict
 {
 	void *user_data;
 	void *enchant_private_data;
+	char* tag; //for hyphenation to find dic
 
 	int (*check) (struct str_enchant_dict * me, const char *const word,
 			  size_t len);
@@ -102,59 +103,9 @@ struct str_enchant_dict
 	
 	void (*add_to_exclude) (struct str_enchant_dict * me,
 				 const char *const word, size_t len);
-<<<<<<< .mine
-<<<<<<< .mine
-<<<<<<< .mine
-
-	char **(*hyphenate) (struct str_enchant_dict * me,
-		const char *const word, size_t len,
-		size_t * out_n_suggs);
-=======
 
 	char *(*hyphenate) (struct str_enchant_dict * me,
 		const char *const word);
-
->>>>>>> .theirs
-=======
-
-	char *(*hyphenate) (struct str_enchant_dict * me,
-		const char *const word);
-
-
-
-
-
-
-
-
->>>>>>> .theirs
-=======
-
-	char *(*hyphenate) (struct str_enchant_dict * me,
-		const char *const word);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
 	
 	void * _reserved[5];
 };

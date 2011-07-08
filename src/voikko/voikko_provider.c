@@ -81,6 +81,7 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 <<<<<<< .mine
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 static char **
 voikko_dict_hyphenate (EnchantDict * me, const char *const word,
 					 size_t len, size_t * out_n_suggs)
@@ -143,6 +144,117 @@ voikko_dict_hyphenate (EnchantDict * me, const char *const word)
 	result=voikko_hyphenate_cstr(voikko_handle,word);
 	return result;	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+=======
+static char *
+voikko_dict_hyphenate (EnchantDict * me, const char *const word)
+{
+	char*result=0;
+	int voikko_handle;
+    voikko_handle = (long) me->user_data;
+
+	result=voikko_hyphenate_cstr(voikko_handle,word);
+	return result;	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

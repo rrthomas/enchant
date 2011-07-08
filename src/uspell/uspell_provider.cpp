@@ -215,6 +215,7 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 <<<<<<< .mine
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 static char **
 uspell_dict_hyphenate (EnchantDict * me, const char *const word,
 					 size_t len, size_t * out_n_suggs)
@@ -341,6 +342,221 @@ uspell_dict_hyphenate (EnchantDict * me, const char *const word)
 	char*result=0;
 	return result;	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+=======
+static char *
+uspell_dict_hyphenate (EnchantDict * me, const char *const word)
+{
+	uSpell *manager;
+	utf8_t myWord[MAXCHARS];
+
+	char **sugg_arr = NULL;
+	const utf8_t *sugg;
+	wide_t buf[MAXCHARS];
+	int length;
+	unsigned int i;
+	utf8_t **list;
+
+	if (len >= MAXCHARS) // no suggestions; the word is outlandish
+		return NULL;
+
+	///not implement yet! chenxiajian///
+
+ 	free(list);
+	char*result=0;
+	return result;	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

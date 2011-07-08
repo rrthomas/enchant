@@ -17,6 +17,7 @@ public:
 <<<<<<< .mine
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 	char ** hyphenate(const char * const word, size_t len, size_t * out_n_suggs);
     
 =======
@@ -27,6 +28,21 @@ public:
 	char * hyphenate(const char * const word);
     
 
+=======
+	char * hyphenate(const char * const word, const char *const tag);
+    
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 =======
 	char * hyphenate(const char * const word);
     

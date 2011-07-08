@@ -12,6 +12,13 @@
 
 // Unicode character encoding information
 struct unicode_info {
+public:
+  unicode_info(int a,int b,int g)
+  {
+	 c=a;
+	 cupper=b;
+	 clower=g;
+  }
   unsigned short c;
   unsigned short cupper;
   unsigned short clower;
