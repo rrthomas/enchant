@@ -104,6 +104,7 @@ struct str_enchant_dict
 				 const char *const word, size_t len);
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 
 	char **(*hyphenate) (struct str_enchant_dict * me,
 		const char *const word, size_t len,
@@ -118,6 +119,33 @@ struct str_enchant_dict
 
 	char *(*hyphenate) (struct str_enchant_dict * me,
 		const char *const word);
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+=======
+
+	char *(*hyphenate) (struct str_enchant_dict * me,
+		const char *const word);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

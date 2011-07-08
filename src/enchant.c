@@ -1014,6 +1014,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 
 ENCHANT_MODULE_EXPORT (char **)
 enchant_dict_hyphenate (EnchantDict * dict, const char *const word,
@@ -1132,6 +1133,193 @@ enchant_dict_hyphenate (EnchantDict * dict, const char *const word)
 
 	return result;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+=======
+
+ENCHANT_MODULE_EXPORT (char *)
+enchant_dict_hyphenate (EnchantDict * dict, const char *const word)
+{
+	EnchantSession * session;
+	size_t n_suggs = 0, n_dict_suggs = 0, n_pwl_suggs = 0, n_suggsT = 0;
+	char **suggs, **dict_suggs = NULL, **pwl_suggs = NULL, **suggsT;
+
+
+	char*result=0;
+
+	g_return_val_if_fail (dict, NULL);
+	g_return_val_if_fail (word, NULL);
+
+	
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
+	enchant_session_clear_error (session);
+	/* Check for suggestions from provider dictionary */
+	if (dict->hyphenate) 
+	{
+		dict_suggs = (*dict->hyphenate) (dict, word);
+		
+	}
+
+
+	return result;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

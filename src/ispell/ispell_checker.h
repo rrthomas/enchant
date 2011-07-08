@@ -16,6 +16,7 @@ public:
 	char ** suggestWord(const char * const word, size_t len, size_t * out_n_suggs);
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 	char ** hyphenate(const char * const word, size_t len, size_t * out_n_suggs);
     
 =======
@@ -26,6 +27,20 @@ public:
 	char * hyphenate(const char * const word);
     
 
+=======
+	char * hyphenate(const char * const word);
+    
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 
 
 

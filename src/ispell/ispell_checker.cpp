@@ -5,11 +5,13 @@
 
 #include <string>
 #include <vector>
+#include <libhyphenate\Hyphenator.h>
 
 #include "enchant-provider.h"
 #include "sp_spell.h"
 #include "ispell_checker.h"
 #include "enchant.h"
+using namespace Hyphenate;
 
 #ifndef ENCHANT_ISPELL_HOME_DIR
 #define ENCHANT_ISPELL_HOME_DIR "ispell"
@@ -145,7 +147,7 @@ ISpellChecker::~ISpellChecker()
 
 bool
 ISpellChecker::checkWord(const char * const utf8Word, size_t length)
-{	
+{
 	ichar_t iWord[INPUTWORDLEN + MAXAFFIXLEN];
 	char szWord[INPUTWORDLEN + MAXAFFIXLEN];
 	
@@ -264,14 +266,15 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 						}
 						*(Out) = 0;
 					}
-				
-				sugg_arr[c] = utf8Sugg;
+				//test 
+				sugg_arr[c] = "chenxiajian ispell";
 			}
 	}
 	
 	return sugg_arr;
 }
 
+<<<<<<< .mine
 <<<<<<< .mine
 <<<<<<< .mine
 
@@ -323,6 +326,81 @@ ISpellChecker::hyphenate(const char * const utf8Word)
 	char*result=0;
 	return result;	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+=======
+
+char *
+ISpellChecker::hyphenate(const char * const utf8Word)
+{  //we must choose the right language tag
+	const char* result=Hyphenator(RFC_3066::Language("en")).hyphenate(utf8Word).c_str();	
+	char* temp=new char[strlen(result)];
+	strcpy(temp,result);
+	return temp;	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -604,6 +682,7 @@ ispell_dict_suggest (EnchantDict * me, const char *const word,
 
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 static char **
 ispell_dict_hyphenate (EnchantDict * me, const char *const word,
 					 size_t len, size_t * out_n_suggs)
@@ -637,6 +716,61 @@ ispell_dict_hyphenate (EnchantDict * me, const char *const word)
 	checker = (ISpellChecker *) me->user_data;
 	return checker->hyphenate (word);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+=======
+static char *
+ispell_dict_hyphenate (EnchantDict * me, const char *const word)
+{
+	ISpellChecker * checker;
+
+	checker = (ISpellChecker *) me->user_data;
+	return checker->hyphenate (word);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

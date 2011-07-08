@@ -114,6 +114,7 @@ ENCHANT_MODULE_EXPORT (char **)
 			   ssize_t len, size_t * out_n_suggs);
 <<<<<<< .mine
 <<<<<<< .mine
+<<<<<<< .mine
 
 ENCHANT_MODULE_EXPORT (char **)
 enchant_dict_hyphenate (EnchantDict * dict, const char *const word,
@@ -132,6 +133,41 @@ enchant_dict_hyphenate (EnchantDict * dict, const char *const word);
 
 ENCHANT_MODULE_EXPORT (char *)
 enchant_dict_hyphenate (EnchantDict * dict, const char *const word);
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+=======
+
+ENCHANT_MODULE_EXPORT (char *)
+enchant_dict_hyphenate (EnchantDict * dict, const char *const word);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
