@@ -28,6 +28,11 @@
  * do so, delete this exception statement from your version.
  */
 
+#ifndef __ENCHANT_VERSION_STRING
+#define __ENCHANT_VERSION_STRING
+#define ENCHANT_VERSION_STRING "1.6.0"
+#endif
+
 #ifndef ENCHANT_H
 #define ENCHANT_H
 
@@ -107,6 +112,12 @@ ENCHANT_MODULE_EXPORT (int)
 ENCHANT_MODULE_EXPORT (char **)
      enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			   ssize_t len, size_t * out_n_suggs);
+
+ENCHANT_MODULE_EXPORT (char **)
+enchant_dict_hyphenate (EnchantDict * dict, const char *const word,
+					  ssize_t len, size_t * out_n_suggs);
+
+
 ENCHANT_MODULE_EXPORT (void)
      enchant_dict_add (EnchantDict * dict, const char *const word,
 			      ssize_t len);

@@ -212,6 +212,30 @@ uspell_dict_suggest (EnchantDict * me, const char *const word,
 	return sugg_arr;
 } // uspell_dict_suggest
 
+static char **
+uspell_dict_hyphenate (EnchantDict * me, const char *const word,
+					 size_t len, size_t * out_n_suggs)
+{
+	uSpell *manager;
+	utf8_t myWord[MAXCHARS];
+
+	char **sugg_arr = NULL;
+	const utf8_t *sugg;
+	wide_t buf[MAXCHARS];
+	int length;
+	unsigned int i;
+	utf8_t **list;
+
+	if (len >= MAXCHARS) // no suggestions; the word is outlandish
+		return NULL;
+
+	///not implement yet! chenxiajian///
+
+ 	free(list);
+	return sugg_arr;
+}
+
+
 static void
 uspell_dict_add_to_session (EnchantDict * me, const char *const word,
 		     size_t len)
@@ -383,6 +407,7 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->check = uspell_dict_check;
 	dict->suggest = uspell_dict_suggest;
 	dict->add_to_session = uspell_dict_add_to_session;
+	dict->hyphenate = uspell_dict_hyphenate;
 	// don't use personal, session - let higher level implement that
 	
 	return dict;
@@ -478,4 +503,5 @@ init_enchant_provider (void)
 }
 
 }
+
 

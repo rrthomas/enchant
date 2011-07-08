@@ -78,6 +78,16 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 	return sugg_arr;
 }
 
+static char **
+voikko_dict_hyphenate (EnchantDict * me, const char *const word,
+					 size_t len, size_t * out_n_suggs)
+{
+	char **sugg_arr;
+	int voikko_handle;
+///not implement yet! chenxiajian///
+	return sugg_arr;
+}
+
 static EnchantDict *
 voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
@@ -99,6 +109,7 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *)(long) voikko_handle;
 	dict->check = voikko_dict_check;
 	dict->suggest = voikko_dict_suggest;
+	dict->hyphenate = voikko_dict_hyphenate;
 
 	return dict;
 }

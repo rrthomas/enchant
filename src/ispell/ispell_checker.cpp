@@ -272,6 +272,22 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 	return sugg_arr;
 }
 
+
+char **
+ISpellChecker::hyphenate(const char * const utf8Word, size_t length,
+						   size_t * out_n_suggestions)
+{
+	ichar_t  iWord[INPUTWORDLEN + MAXAFFIXLEN];
+	char word8[INPUTWORDLEN + MAXAFFIXLEN];
+	int  c;
+
+	*out_n_suggestions = 0;
+	char **sugg_arr = NULL;
+    ///not implement yet! chenxiajian///
+
+	return sugg_arr;
+}
+
 static GSList *
 ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
 {
@@ -529,6 +545,17 @@ ispell_dict_suggest (EnchantDict * me, const char *const word,
 	return checker->suggestWord (word, len, out_n_suggs);
 }
 
+static char **
+ispell_dict_hyphenate (EnchantDict * me, const char *const word,
+					 size_t len, size_t * out_n_suggs)
+{
+	ISpellChecker * checker;
+
+	checker = (ISpellChecker *) me->user_data;
+	return checker->hyphenate (word, len, out_n_suggs);
+}
+
+
 static int
 ispell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
@@ -564,6 +591,7 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *) checker;
 	dict->check = ispell_dict_check;
 	dict->suggest = ispell_dict_suggest;
+	dict->hyphenate = ispell_dict_hyphenate;
 	// don't implement session or personal
 	
 	return dict;

@@ -824,6 +824,18 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	return -1;
 }
 
+ENCHANT_MODULE_EXPORT (int)
+enchant_dict_hyphenation (EnchantDict * dict, const char *const word, ssize_t len)
+{
+	return 0;
+}
+ENCHANT_MODULE_EXPORT (char **)
+enchant_dict_hyphenationSuggest (EnchantDict * dict, const char *const word,
+								 ssize_t len, size_t * out_n_suggs)
+{
+	return 0;
+}
+
 /* @suggs must have at least n_suggs + n_new_suggs space allocated
  * @n_suggs is the number if items currently appearing in @suggs
  *
@@ -991,6 +1003,50 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			suggs = NULL;
 		}
 	
+	g_strfreev(dict_suggs);
+	g_strfreev(pwl_suggs);
+
+	if (out_n_suggs)
+		*out_n_suggs = n_suggs;
+
+	return suggs;
+}
+
+
+ENCHANT_MODULE_EXPORT (char **)
+enchant_dict_hyphenate (EnchantDict * dict, const char *const word,
+					  ssize_t len, size_t * out_n_suggs)
+{
+	EnchantSession * session;
+	size_t n_suggs = 0, n_dict_suggs = 0, n_pwl_suggs = 0, n_suggsT = 0;
+	char **suggs, **dict_suggs = NULL, **pwl_suggs = NULL, **suggsT;
+
+	g_return_val_if_fail (dict, NULL);
+	g_return_val_if_fail (word, NULL);
+
+	if (len < 0)
+		len = strlen (word);
+
+	g_return_val_if_fail (len, NULL);
+	g_return_val_if_fail (g_utf8_validate(word, len, NULL), NULL);
+
+	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
+	enchant_session_clear_error (session);
+	/* Check for suggestions from provider dictionary */
+	if (dict->hyphenate) 
+	{
+		dict_suggs = (*dict->hyphenate) (dict, word, len,	
+			&n_dict_suggs);
+		if(dict_suggs)
+		{
+			//suggsT = enchant_dict_get_good_suggestions(dict, dict_suggs, n_dict_suggs, &n_suggsT);
+            suggsT= dict_suggs;
+			enchant_provider_free_string_list (session->provider, dict_suggs);
+			dict_suggs = suggsT;
+			n_dict_suggs = n_suggsT;
+		}
+	}
+
 	g_strfreev(dict_suggs);
 	g_strfreev(pwl_suggs);
 

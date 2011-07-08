@@ -14,7 +14,8 @@ public:
 
 	bool checkWord(const char * const word, size_t len);
 	char ** suggestWord(const char * const word, size_t len, size_t * out_n_suggs);
-
+	char ** hyphenate(const char * const word, size_t len, size_t * out_n_suggs);
+    
 	bool requestDictionary (const char * szLang);
 
 private:

@@ -122,3 +122,12 @@ char** Zemberek::suggestWord(const char* word, size_t *out_n_suggs)
     *out_n_suggs = g_strv_length(suggs);
     return suggs;
 }
+
+char** Zemberek::hyphenate(const char* word, size_t *out_n_suggs)
+{
+	char** suggs;
+	GError *Error = NULL;
+	///not implement yet! chenxiajian///
+
+	return suggs;
+}

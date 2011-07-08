@@ -181,6 +181,28 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	return sugg_arr;	
 }
 
+static char **
+hspell_dict_hyphenate (EnchantDict * me, const char *const word,
+					 size_t len, size_t * out_n_suggs)
+{
+
+	int res;
+	gsize length;
+	char *iso_word;
+	char **sugg_arr = NULL;
+	struct corlist cl;
+	struct dict_radix *hspell_dict;
+
+	hspell_dict = (struct dict_radix *)me->user_data;
+///not implement yet! chenxiajian///
+
+
+	/* free the word */
+	g_free (iso_word);
+
+	return sugg_arr;	
+}
+
 static EnchantDict *
 hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
@@ -204,6 +226,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *) hspell_dict;
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
+	dict->hyphenate = hspell_dict_hyphenate;
 	
 	return dict;
 }

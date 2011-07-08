@@ -59,6 +59,17 @@ zemberek_dict_suggest (EnchantDict * me, const char *const word,
     return checker->suggestWord (word, out_n_suggs);
 }
 
+static char**
+zemberek_dict_hyphenate (EnchantDict * me, const char *const word,
+					   size_t len, size_t * out_n_suggs)
+{
+	Zemberek *checker;
+	checker = (Zemberek *) me->user_data;
+	return checker->hyphenate (word, out_n_suggs);
+}
+
+
+
 static void
 zemberek_provider_dispose(EnchantProvider *me)
 {
@@ -79,6 +90,7 @@ zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
 	dict->user_data = (void *) checker;
 	dict->check = zemberek_dict_check;
 	dict->suggest = zemberek_dict_suggest;
+    dict->hyphenate = zemberek_dict_hyphenate;
 
 	return dict;
       }

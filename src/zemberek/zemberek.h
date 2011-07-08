@@ -41,6 +41,7 @@ public:
     
     int checkWord(const char* word) const;
     char** suggestWord(const char* word, size_t *out_n_suggs);
+	char** hyphenate(const char* word, size_t *out_n_suggs);
 
 private:
     DBusGConnection *connection;
