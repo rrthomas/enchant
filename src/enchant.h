@@ -112,12 +112,21 @@ ENCHANT_MODULE_EXPORT (int)
 ENCHANT_MODULE_EXPORT (char **)
      enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			   ssize_t len, size_t * out_n_suggs);
+<<<<<<< .mine
 
 ENCHANT_MODULE_EXPORT (char **)
 enchant_dict_hyphenate (EnchantDict * dict, const char *const word,
 					  ssize_t len, size_t * out_n_suggs);
 
 
+=======
+
+ENCHANT_MODULE_EXPORT (char *)
+enchant_dict_hyphenate (EnchantDict * dict, const char *const word);
+
+
+
+>>>>>>> .theirs
 ENCHANT_MODULE_EXPORT (void)
      enchant_dict_add (EnchantDict * dict, const char *const word,
 			      ssize_t len);

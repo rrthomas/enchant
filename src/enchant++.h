@@ -112,6 +112,7 @@ namespace enchant
 				suggest (utf8word, result);
 				return result;
 			}
+<<<<<<< .mine
 
 			void hyphenate (const std::string & utf8word, 
 				std::vector<std::string> & out_suggestions) {
@@ -137,6 +138,33 @@ namespace enchant
 				hyphenate (utf8word, result);
 				return result;
 			}
+=======
+
+			void hyphenate (const std::string & utf8word, 
+				std::string & out_suggestions) {
+					//not implement yet chenxiajian
+			}
+
+			std::string hyphenate (const std::string & utf8word) {
+				std::string result;
+				hyphenate (utf8word, result);
+				return result;
+			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 			
 			void add (const std::string & utf8word) {
 				enchant_dict_add (m_dict, utf8word.c_str(), 

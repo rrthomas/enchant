@@ -59,13 +59,12 @@ zemberek_dict_suggest (EnchantDict * me, const char *const word,
     return checker->suggestWord (word, out_n_suggs);
 }
 
-static char**
-zemberek_dict_hyphenate (EnchantDict * me, const char *const word,
-					   size_t len, size_t * out_n_suggs)
+static char*
+zemberek_dict_hyphenate (EnchantDict * me, const char *const word)
 {
 	Zemberek *checker;
 	checker = (Zemberek *) me->user_data;
-	return checker->hyphenate (word, out_n_suggs);
+	return checker->hyphenate (word);
 }
 
 

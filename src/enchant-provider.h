@@ -102,10 +102,17 @@ struct str_enchant_dict
 	
 	void (*add_to_exclude) (struct str_enchant_dict * me,
 				 const char *const word, size_t len);
+<<<<<<< .mine
 
 	char **(*hyphenate) (struct str_enchant_dict * me,
 		const char *const word, size_t len,
 		size_t * out_n_suggs);
+=======
+
+	char *(*hyphenate) (struct str_enchant_dict * me,
+		const char *const word);
+
+>>>>>>> .theirs
 	
 	void * _reserved[5];
 };
