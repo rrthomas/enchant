@@ -64,6 +64,7 @@ public:
    */
 
   int suggest(char*** slst, const char * word);
+  void hyphenate( const char* const word, char* result );
 
   /* deallocate suggestion lists */
 
@@ -166,7 +167,6 @@ private:
    const char * get_xml_pos(const char * s, const char * attr);
    int    get_xml_list(char ***slst, char * list, const char * tag);
    int    check_xml_par(const char * q, const char * attr, const char * value);
-
 };
 
 #endif

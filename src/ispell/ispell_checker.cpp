@@ -273,6 +273,7 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 }
 
 <<<<<<< .mine
+<<<<<<< .mine
 
 char **
 ISpellChecker::hyphenate(const char * const utf8Word, size_t length,
@@ -304,6 +305,43 @@ ISpellChecker::hyphenate(const char * const utf8Word)
 	char*result=0;
 	return result;	
 }
+
+
+>>>>>>> .theirs
+=======
+
+char *
+ISpellChecker::hyphenate(const char * const utf8Word)
+{
+	ichar_t  iWord[INPUTWORDLEN + MAXAFFIXLEN];
+	char word8[INPUTWORDLEN + MAXAFFIXLEN];
+	int  c;
+
+	char **sugg_arr = NULL;
+    ///not implement yet! chenxiajian///
+
+	char*result=0;
+	return result;	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 >>>>>>> .theirs
@@ -565,6 +603,7 @@ ispell_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 <<<<<<< .mine
+<<<<<<< .mine
 static char **
 ispell_dict_hyphenate (EnchantDict * me, const char *const word,
 					 size_t len, size_t * out_n_suggs)
@@ -585,6 +624,33 @@ ispell_dict_hyphenate (EnchantDict * me, const char *const word)
 	checker = (ISpellChecker *) me->user_data;
 	return checker->hyphenate (word);
 }
+
+
+
+>>>>>>> .theirs
+=======
+static char *
+ispell_dict_hyphenate (EnchantDict * me, const char *const word)
+{
+	ISpellChecker * checker;
+
+	checker = (ISpellChecker *) me->user_data;
+	return checker->hyphenate (word);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

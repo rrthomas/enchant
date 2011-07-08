@@ -113,6 +113,7 @@ namespace enchant
 				return result;
 			}
 <<<<<<< .mine
+<<<<<<< .mine
 
 			void hyphenate (const std::string & utf8word, 
 				std::vector<std::string> & out_suggestions) {
@@ -150,6 +151,61 @@ namespace enchant
 				hyphenate (utf8word, result);
 				return result;
 			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
+=======
+
+			void hyphenate (const std::string & utf8word, 
+				std::string & out_suggestions) {
+					//not implement yet chenxiajian
+			}
+
+			std::string hyphenate (const std::string & utf8word) {
+				std::string result;
+				hyphenate (utf8word, result);
+				return result;
+			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

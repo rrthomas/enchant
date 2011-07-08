@@ -182,6 +182,7 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 <<<<<<< .mine
+<<<<<<< .mine
 static char **
 hspell_dict_hyphenate (EnchantDict * me, const char *const word,
 					 size_t len, size_t * out_n_suggs)
@@ -228,6 +229,55 @@ hspell_dict_hyphenate (EnchantDict * me, const char *const word)
 }
 
 >>>>>>> .theirs
+=======
+//Hebrew donot need hyphenation
+//static char *
+//hspell_dict_hyphenate (EnchantDict * me, const char *const word)
+//{
+//
+//	int res;
+//	gsize length;
+//	char *iso_word;
+//	char **sugg_arr = NULL;
+//	struct corlist cl;
+//	struct dict_radix *hspell_dict;
+//
+//	hspell_dict = (struct dict_radix *)me->user_data;
+//
+//	/* free the word */
+//	g_free (iso_word);
+//
+//	char*result=0;
+//	return result;	
+//}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 static EnchantDict *
 hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
@@ -251,7 +301,11 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *) hspell_dict;
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
+<<<<<<< .mine
 	dict->hyphenate = hspell_dict_hyphenate;
+=======
+	//dict->hyphenate = hspell_dict_hyphenate;
+>>>>>>> .theirs
 	
 	return dict;
 }

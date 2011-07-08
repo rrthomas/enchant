@@ -42,9 +42,17 @@ public:
     int checkWord(const char* word) const;
     char** suggestWord(const char* word, size_t *out_n_suggs);
 <<<<<<< .mine
+<<<<<<< .mine
 	char** hyphenate(const char* word, size_t *out_n_suggs);
 =======
 	char* hyphenate(const char* word);
+>>>>>>> .theirs
+=======
+	char* hyphenate(const char* word);
+
+
+
+
 >>>>>>> .theirs
 
 private:

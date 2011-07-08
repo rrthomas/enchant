@@ -1,0 +1,45 @@
+--- hyphen.tex	2002-12-19 00:00:00.000000000 +0100
++++ hyphen.us	2007-11-22 14:06:43.000000000 +0100
+@@ -2,7 +2,6 @@
+ % Unlimited copying and redistribution of this file are permitted as long
+ % as this file is not modified. Modifications are permitted, but only if
+ % the resulting file is not named hyphen.tex.
+-\patterns{ % just type <return> if you're not using INITEX
+ .ach4
+ .ad4der
+ .af1t
+@@ -4450,20 +4449,17 @@
+ zte4
+ 4z1z2
+ z4zy
+-}
+-\hyphenation{ % Do NOT make any alterations to this list! --- DEK
+-as-so-ciate
+-as-so-ciates
+-dec-li-na-tion
+-oblig-a-tory
+-phil-an-thropic
+-present
+-presents
+-project
+-projects
+-reci-procity
+-re-cog-ni-zance
+-ref-or-ma-tion
+-ret-ri-bu-tion
+-ta-ble
+-}
++.as9s8o9c8i8a8te.
++.as9s8o9c8i8a8t8es.
++.de8c9l8i9n8a9t8i8on.
++.ob8l8i8g9a9t8o8ry.
++.ph8i8l9a8n9t8h8r8o8p8ic.
++.pr8e8s8e8nt.
++.pr8e8s8e8n8ts.
++.pr8o8j8e8ct.
++.pr8o8j8e8c8ts.
++.re8c8i9p8r8o8c8i8ty.
++.re9c8o8g9n8i9z8a8n8ce.
++.re8f9o8r9m8a9t8i8on.
++.re8t9r8i9b8u9t8i8on.
++.ta9b8le.

@@ -15,11 +15,21 @@ public:
 	bool checkWord(const char * const word, size_t len);
 	char ** suggestWord(const char * const word, size_t len, size_t * out_n_suggs);
 <<<<<<< .mine
+<<<<<<< .mine
 	char ** hyphenate(const char * const word, size_t len, size_t * out_n_suggs);
     
 =======
 	char * hyphenate(const char * const word);
     
+>>>>>>> .theirs
+=======
+	char * hyphenate(const char * const word);
+    
+
+
+
+
+
 >>>>>>> .theirs
 	bool requestDictionary (const char * szLang);
 

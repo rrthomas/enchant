@@ -671,6 +671,11 @@ struct hentry * Hunspell::checkword(const char * w, int * info, char ** root)
   return he;
 }
 
+void Hunspell::hyphenate( const char* const word, char* result )
+{
+	//not implement yet chenxiajian
+}
+
 int Hunspell::suggest(char*** slst, const char * word)
 {
   int onlycmpdsug = 0;
@@ -1914,7 +1919,6 @@ char * Hunspell::morph_with_correction(const char * word)
   if (*result) return mystrdup(result);
   return NULL;
 }
-
 #endif // END OF HUNSPELL_EXPERIMENTAL CODE
 
 Hunhandle *Hunspell_create(const char * affpath, const char * dpath)
