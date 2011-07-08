@@ -14,54 +14,8 @@ public:
 
 	bool checkWord(const char * const word, size_t len);
 	char ** suggestWord(const char * const word, size_t len, size_t * out_n_suggs);
-<<<<<<< .mine
-<<<<<<< .mine
-<<<<<<< .mine
-<<<<<<< .mine
-	char ** hyphenate(const char * const word, size_t len, size_t * out_n_suggs);
-    
-=======
-	char * hyphenate(const char * const word);
-    
->>>>>>> .theirs
-=======
-	char * hyphenate(const char * const word);
-    
-
-=======
 	char * hyphenate(const char * const word, const char *const tag);
     
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
-=======
-	char * hyphenate(const char * const word);
-    
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
-
-
-
-
->>>>>>> .theirs
 	bool requestDictionary (const char * szLang);
 
 private:

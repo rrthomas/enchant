@@ -700,19 +700,10 @@ void Hunspell::hyphenate( const char* const word, char* result, char* tag )
 				exit(1);
 		}
 
-<<<<<<< .mine
-void Hunspell::hyphenate( const char* const word, char* result )
-{
-	//not implement yet chenxiajian
-}
-
-=======
 	hnj_hyphen_free(dict);
 	result=hyphens;	
 }
 
-
->>>>>>> .theirs
 int Hunspell::suggest(char*** slst, const char * word)
 {
   int onlycmpdsug = 0;

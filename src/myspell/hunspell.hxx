@@ -64,11 +64,7 @@ public:
    */
 
   int suggest(char*** slst, const char * word);
-<<<<<<< .mine
-  void hyphenate( const char* const word, char* result );
-=======
   void hyphenate( const char* const word, char* result, char* tag );
->>>>>>> .theirs
 
   /* deallocate suggestion lists */
 

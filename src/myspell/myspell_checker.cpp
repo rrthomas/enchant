@@ -67,11 +67,7 @@ public:
 
 	bool checkWord (const char *word, size_t len);
 	char **suggestWord (const char* const word, size_t len, size_t *out_n_suggs);
-<<<<<<< .mine
-	char *hyphenate (const char* const word, size_t len);
-=======
 	char *hyphenate (const char* const word, size_t len,char*);
->>>>>>> .theirs
 
 	bool requestDictionary (const char * szLang);
 
@@ -228,21 +224,6 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 		return 0;
 }
 
-<<<<<<< .mine
-char*
-MySpellChecker::hyphenate (const char* const word, size_t len)
-{
-	if (len > MAXWORDLEN 
-		|| !g_iconv_is_valid(m_translate_in)
-		|| !g_iconv_is_valid(m_translate_out))
-		return 0;
-	//not implemant yet chenxiajian
-	char* result=0;
-	myspell->hyphenate(word,result);
-	return result;
-}
-
-=======
 char*
 MySpellChecker::hyphenate (const char* const word, size_t len,char* tag)
 {
@@ -256,7 +237,6 @@ MySpellChecker::hyphenate (const char* const word, size_t len,char* tag)
 	return result;
 }
 
->>>>>>> .theirs
 static GSList *
 myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 {
@@ -484,19 +464,6 @@ myspell_dict_suggest (EnchantDict * me, const char *const word,
 	return checker->suggestWord (word, len, out_n_suggs);
 }
 
-<<<<<<< .mine
-static char *
-myspell_dict_hyphenate (EnchantDict * me, const char *const word)
-{
-	MySpellChecker * checker;
-
-	checker = (MySpellChecker *) me->user_data;
-	char*result=0;
-	result=checker->hyphenate(word,-1);
-	return result;	
-}
-
-=======
 static char *
 myspell_dict_hyphenate (EnchantDict * me, const char *const word)
 {
@@ -508,7 +475,6 @@ myspell_dict_hyphenate (EnchantDict * me, const char *const word)
 	return result;	
 }
 
->>>>>>> .theirs
 static int
 myspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
