@@ -51,6 +51,12 @@
 /* word has to be bigger than this to be checked */
 #define MIN_WORD_LENGTH 1
 
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+static char charset[15] = "CP437";
+#endif
 
 typedef enum 
 	{
@@ -100,7 +106,11 @@ consume_line (FILE * in, GString * str)
 	}
 
 	if (str->len) {
+#ifdef WIN32
+		utf = g_convert(str->str, str->len, "UTF-8", charset, &bytes_read, &bytes_written, NULL);
+#else
 		utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
+#endif
 
 		if (utf) {
 			g_string_assign (str, utf);
@@ -467,6 +477,15 @@ int main (int argc, char ** argv)
 
 	/* Initialize system locale */
 	setlocale(LC_ALL, "");
+
+#ifdef WIN32
+	/* Workaround about glib's "locale" not being the set C locale */
+	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) != FILE_TYPE_CHAR) {
+		sprintf_s(charset,15,"CP%u",GetACP());
+	} else {
+		sprintf_s(charset,15,"CP%u",GetConsoleCP());
+	}
+#endif
 
 	for (i = 1; i < argc; i++) {
 		char * arg = argv[i];
