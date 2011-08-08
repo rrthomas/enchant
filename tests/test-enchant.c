@@ -118,6 +118,7 @@ main (int argc, char **argv)
 	broker = enchant_broker_init ();
 	
 	dict = enchant_broker_request_dict (broker, "en_US");
+	//dict = enchant_broker_request_dict (broker, "en");
 	
 	if (!dict) 
 		{
