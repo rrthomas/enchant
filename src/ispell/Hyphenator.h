@@ -28,7 +28,7 @@
 #include <vector>
 
 #include <iconv.h>
-
+using namespace std;
 namespace Hyphenate {
    class HyphenationTree;
    class HyphenationRule;
@@ -52,10 +52,10 @@ namespace Hyphenate {
           *
           * \param lang The language for which hyphenation patterns will be
           *             loaded. */
-	 Hyphenator(const RFC_3066::Language& lang); 
+	 Hyphenator(const RFC_3066::Language& lang,string dicPath=""); 
 
          /** Build a hyphenator from the patterns in the file provided. */
-	 Hyphenator(const char *filename); 
+	 Hyphenator(const char *filename,string dicPath=""); 
 
          /** Destructor. */
 	 ~Hyphenator();

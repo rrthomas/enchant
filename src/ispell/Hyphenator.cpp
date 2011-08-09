@@ -62,11 +62,12 @@ static auto_ptr<HyphenationTree> read_hyphenation_table(const char *filename) {
    *             loaded. */
 #include <fstream>
 using namespace std;
-Hyphenate::Hyphenator::Hyphenator(const RFC_3066::Language& lang) {
+Hyphenate::Hyphenator::Hyphenator(const RFC_3066::Language& lang,string dicPath) {
    setlocale(LC_CTYPE, "");
    string path = "";
 
-   if (getenv("LIBHYPHENATE_PATH")) {
+   if(dicPath==""&&getenv("LIBHYPHENATE_PATH"))
+   {
       path = getenv("LIBHYPHENATE_PATH");
    }
    path += "./language/";
@@ -75,7 +76,7 @@ Hyphenate::Hyphenator::Hyphenator(const RFC_3066::Language& lang) {
 }
 
 /** Build a hyphenator from the patterns in the file provided. */
-Hyphenate::Hyphenator::Hyphenator(const char *filename) {
+Hyphenate::Hyphenator::Hyphenator(const char *filename,string dicPath) {
    dictionary = read_hyphenation_table(filename);
 }
 
