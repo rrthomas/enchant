@@ -315,7 +315,8 @@ using namespace std;
 char *
 ISpellChecker::hyphenate(const char * const utf8Word, const char *const tag)
 {  //we must choose the right language tag
-	string result=Hyphenator(RFC_3066::Language(tag)).hyphenate(utf8Word).c_str();
+    char* param_value = enchant_broker_get_param (m_broker, "enchant.ispell.hyphenation.dictionary.path");
+	string result=Hyphenator(RFC_3066::Language(tag),param_value).hyphenate(utf8Word).c_str();
 	
 	char* temp=new char[result.length()];
 	strcpy(temp,result.c_str());
