@@ -130,6 +130,16 @@ namespace Enchant
 			return Bindings.enchant_dict_suggest(_handle, word);
 		}
 
+        public string Hyphenate(string word)
+        {
+            VerifyNotDisposed();
+            if (word == null)
+            {
+                throw new ArgumentNullException("word");
+            }
+            return Bindings.enchant_dict_hyphenate(_handle, word);
+        }
+
 		public void Add(string word)
 		{
 			VerifyNotDisposed();

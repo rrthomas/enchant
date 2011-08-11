@@ -227,6 +227,22 @@ namespace Enchant
 			return result;
 		}
 
+        [DllImport(ENCHANT_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+		private static extern IntPtr enchant_dict_hyphenate(SafeDictionaryHandle dict,
+																											IntPtr word,
+																											int len);
+
+		public static string enchant_dict_hyphenate(SafeDictionaryHandle dict, string word,int len)
+		{
+            string result;
+			using (Utf8Marshaller utf8Word = new Utf8Marshaller(word))
+			{
+				result =
+					enchant_dict_suggest(dict,word,len);
+			}
+			return result;
+		}
+
 		[DllImport(ENCHANT_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
 		private static extern void enchant_dict_free_string_list(SafeDictionaryHandle dict,
 																														 IntPtr string_list);
