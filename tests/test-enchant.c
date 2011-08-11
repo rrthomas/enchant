@@ -65,7 +65,9 @@ run_dict_tests (EnchantDict * dict)
 	char **suggs;
 	size_t n_suggs;
 	size_t i, j;
-	
+
+	char* result=NULL;
+
 	const char *check_checks[] = { "hello", "helllo" };
 	const char *sugg_checks[] = { "helllo", "taag" };
 	
@@ -74,6 +76,21 @@ run_dict_tests (EnchantDict * dict)
 			printf ("enchant_dict_check (%s): %s\n", check_checks[i],
 				print_found(dict, check_checks[i]));
 		}
+
+	for (i = 0; i < (sizeof (check_checks) / sizeof (check_checks[0])); i++)
+	{
+		result=enchant_dict_hyphenate(dict,check_checks[i],strlen(check_checks[i]));
+		if(result!=NULL)
+		{
+			printf ("enchant_dict_hyphenate (%s): %s\n", check_checks[i],
+				result);
+		}
+		else
+		{
+			printf ("enchant_dict_hyphenate (%s): %s\n", check_checks[i],
+				"result not find!");
+		}
+	}
 	
 	for (i = 0; i < (sizeof (sugg_checks) / sizeof (sugg_checks[0])); i++)
 		{
