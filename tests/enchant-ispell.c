@@ -57,7 +57,8 @@ typedef enum
 		MODE_NONE,
 		MODE_VERSION,
 		MODE_A,
-		MODE_L
+		MODE_L,
+		MODE_H
 	} IspellMode_t;
 
 static void 
@@ -75,6 +76,7 @@ print_help (FILE * to, const char * prog)
 	fprintf (to, "\t-d dict uses dictionary <dict>.\n");
 	fprintf (to, "\t-l lists misspellings.\n");
 	fprintf (to, "\t-m is ignored.\n");
+	fprintf (to, "\t-h list hyphenation result.\n");
 	fprintf (to, "\t-L displays line numbers.\n");
 	fprintf (to, "\t-v displays program version.\n");
 }
@@ -182,6 +184,21 @@ do_mode_l (FILE * out, EnchantDict * dict, GString * word, size_t lineCount)
 		if (lineCount)
 			fprintf (out, "%u ", (unsigned int)lineCount);
 		print_utf (out, word->str);
+		fwrite ("\n", 1, 1, out);
+	}
+}
+
+static void
+do_mode_h (FILE * out, EnchantDict * dict, GString * word, size_t lineCount)
+{
+	char* result=enchant_dict_hyphenate(dict,word->str,word->len);
+	if (result != NULL) {
+		print_utf (out, result);
+		fwrite ("\n", 1, 1, out);
+	}
+	else
+	{
+		print_utf (out, "not find!");
 		fwrite ("\n", 1, 1, out);
 	}
 }
@@ -431,6 +448,8 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 					do_mode_a (out, dict, word, pos, lineCount);
 				else if (mode == MODE_L)
 					do_mode_l (out, dict, word, lineCount);
+				else if (mode == MODE_H)
+					do_mode_h (out, dict, word, lineCount);
 
 				g_string_free(word, TRUE);
 			}
@@ -477,6 +496,8 @@ int main (int argc, char ** argv)
 					mode = MODE_A;
 				else if (arg[1] == 'l' && MODE_NONE == mode)
 					mode = MODE_L;
+				else if (arg[1] == 'h' && MODE_NONE == mode)
+					mode = MODE_H;
 				else if (arg[1] == 'v' && MODE_NONE == mode)
 					mode = MODE_VERSION;
 				else if (arg[1] == 'L' && MODE_NONE == mode)
