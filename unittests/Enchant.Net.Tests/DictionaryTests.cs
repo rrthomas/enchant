@@ -199,6 +199,12 @@ namespace Enchant.Tests
 			dictionary.StoreReplacement("theirs", "their's");
 		}
 
+        [Test]
+        public void Hyphenate()
+        {
+            dictionary.Hyphenate("theirs");
+        }
+
 		[Test]
 		public void Suggest()
 		{
