@@ -24,7 +24,9 @@
 #include <list>
 #include <string>
 #include <stdexcept>
-
+#include <map>
+#include <string>
+using namespace std;
 namespace RFC_3066 {
    /** This class implements a parser for RFC 3066-compliant language codes. */
    class Language {
@@ -53,6 +55,7 @@ namespace RFC_3066 {
 	  *  first, then de-AT, then de. The directory should be /-postfixed. */
 	 std::string find_suitable_file(const std::string &dir) const
 	    throw(std::domain_error);
+	 std::map<string,string> languageMap;  //to match with name of abiword and name of Libhyphenation
    };
 }
 

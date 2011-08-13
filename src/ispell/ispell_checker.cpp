@@ -67,42 +67,6 @@ static const IspellMap ispell_map [] = {
 	{"yi"    ,"yiddish-yivo.hash"   ,"utf-8" }
 };
 
-static const IspellMap ispell_hyphenation_map [] = {
-	{"ca"    ,"en"         ,"iso-8859-1" },
-	{"cs"    ,"czech.hash"          ,"iso-8859-2" },
-	{"da"    ,"dansk.hash"          ,"iso-8859-1" },
-	{"de"    ,"de"        ,"iso-8859-1" },
-	{"de_CH" ,"swiss.hash"          ,"iso-8859-1" },
-	{"el"    ,"ellhnika.hash"       ,"iso-8859-7" },
-	{"en"    ,"en"        ,"iso-8859-1" },
-	{"en_PH" ,"american.hash"       ,"iso-8859-1" },
-	{"en_US" ,"american.hash"       ,"iso-8859-1" },
-	{"eo"    ,"esperanto.hash"      ,"iso-8859-3" },
-	{"es"    ,"es"        ,"iso-8859-1" },
-	{"fi"    ,"finnish.hash"        ,"iso-8859-1" },
-	{"fr"    ,"fr"       ,"iso-8859-1" },
-	{"hu"    ,"hungarian.hash"      ,"iso-8859-2" },
-	{"ga"    ,"irish.hash"          ,"iso-8859-1" },
-	{"gl"    ,"galician.hash"       ,"iso-8859-1" },
-	{"ia"    ,"interlingua.hash"    ,"iso-8859-1" },
-	{"it"    ,"italian.hash"        ,"iso-8859-1" },
-	{"la"    ,"mlatin.hash"         ,"iso-8859-1" },
-	{"lt"    ,"lietuviu.hash"       ,"iso-8859-13" },
-	{"nl"    ,"nederlands.hash"     ,"iso-8859-1" },
-	{"nb"    ,"norsk.hash"          ,"iso-8859-1" },
-	{"nn"    ,"nynorsk.hash"        ,"iso-8859-1" },
-	{"no"    ,"norsk.hash"          ,"iso-8859-1" },
-	{"pl"    ,"polish.hash"         ,"iso-8859-2" },
-	{"pt"    ,"brazilian.hash"      ,"iso-8859-1" },
-	{"pt_PT" ,"portugues.hash"      ,"iso-8859-1" },
-	{"ru"    ,"russian.hash"        ,"koi8-r" },
-	{"sc"    ,"sardinian.hash"      ,"iso-8859-1" },
-	{"sk"    ,"slovak.hash"         ,"iso-8859-2" },
-	{"sl"    ,"slovensko.hash"      ,"iso-8859-2" },
-	{"sv"    ,"svenska.hash"        ,"iso-8859-1" },
-	{"uk"    ,"ukrainian.hash"      ,"koi8-u" },
-	{"yi"    ,"yiddish-yivo.hash"   ,"utf-8" }
-};
 
 static const size_t size_ispell_map = G_N_ELEMENTS(ispell_map);
 
@@ -154,11 +118,21 @@ ISpellChecker::ISpellChecker(EnchantBroker * broker)
 {
 	memset(m_sflagindex,0,sizeof(m_sflagindex));
 	memset(m_pflagindex,0,sizeof(m_pflagindex));
+	initlanguageMap();//to match with name of abiword and name of Libhyphenation
 }
 
 #ifndef FREEP
 #define FREEP(p)        do { if (p) free(p); } while (0)
 #endif
+
+void ISpellChecker::initlanguageMap()
+{
+	languageMap.insert(make_pair("en_US","en"));
+	languageMap.insert(make_pair("en","en"));
+	languageMap.insert(make_pair("de","de"));
+	languageMap.insert(make_pair("fr","fr"));
+	languageMap.insert(make_pair("es","es"));
+}
 
 ISpellChecker::~ISpellChecker()
 {
@@ -315,12 +289,16 @@ using namespace std;
 char *
 ISpellChecker::hyphenate(const char * const utf8Word, const char *const tag)
 {  //we must choose the right language tag
-    char* param_value = enchant_broker_get_param (m_broker, "enchant.ispell.hyphenation.dictionary.path");
-	string result=Hyphenator(RFC_3066::Language(tag),param_value).hyphenate(utf8Word).c_str();
-	
-	char* temp=new char[result.length()];
-	strcpy(temp,result.c_str());
-	return temp;	
+	char* param_value = enchant_broker_get_param (m_broker, "enchant.ispell.hyphenation.dictionary.path");
+	if(languageMap[tag]!="")
+	{
+		string result=Hyphenator(RFC_3066::Language(languageMap[tag]),param_value).hyphenate(utf8Word).c_str();
+
+		char* temp=new char[result.length()];
+		strcpy(temp,result.c_str());
+		return temp;
+	}
+	return NULL;
 }
 
 static GSList *
@@ -416,7 +394,6 @@ s_buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, cons
 	g_slist_foreach (dirs, (GFunc)g_free, NULL);
 	g_slist_free (dirs);
 }
-
 char *
 ISpellChecker::loadDictionary (const char * szdict)
 {

@@ -45,7 +45,6 @@ Language::Language(string rfc_3066) throw(domain_error) {
 	 throw *new domain_error("RFC 3066 tags must contain only letters, spaces "
 	    + string() + "and dashes.");
    } while (*++c);
-
 }
 
 bool Language::operator==(const Language &o) const throw() {

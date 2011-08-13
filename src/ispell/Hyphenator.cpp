@@ -70,7 +70,9 @@ Hyphenate::Hyphenator::Hyphenator(const RFC_3066::Language& lang,string dicPath)
    {
       path = getenv("LIBHYPHENATE_PATH");
    }
-   path += "./language/";
+   else
+       path=dicPath;
+   path += "\\language\\";
    string filename = lang.find_suitable_file(path);
    dictionary = read_hyphenation_table(filename.c_str());
 }

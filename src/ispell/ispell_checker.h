@@ -5,7 +5,9 @@
 #include <glib.h> // give glib a chance to override MAXPATHLEN first before it is set in ispell.h
 #include "ispell.h"
 #include "enchant.h"
-
+#include <map>
+#include <String>
+using namespace std;
 class ISpellChecker
 {
 public:
@@ -239,6 +241,9 @@ private:
 
 	GIConv  m_translate_in; /* Selected translation from/to Unicode */
 	GIConv  m_translate_out;
+
+	std::map<string,string> languageMap; //to match with name of abiword and name of Libhyphenation
+	void initlanguageMap();
 };
 
 #endif /* ISPELL_CHECKER_H */
