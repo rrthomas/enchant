@@ -563,7 +563,9 @@ ispell_dict_hyphenate (EnchantDict * me, const char *const word)
 	ISpellChecker * checker;
 
 	checker = (ISpellChecker *) me->user_data;
-	return checker->hyphenate (word,me->tag);
+	if(me->tag!="")
+	  return checker->hyphenate (word,me->tag);
+    return checker->hyphenate (word,"en_us");
 }
 
 
