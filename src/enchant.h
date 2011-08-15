@@ -25,7 +25,7 @@
  * respects for all of the code used other than said providers.  If you modify
  * this file, you may extend this exception to your version of the
  * file, but you are not obligated to do so.  If you do not wish to
- * do so, delete this exception statement from your version.
+ * do so, delete this exception statement from your version. 
  */
 
 #ifndef __ENCHANT_VERSION_STRING
@@ -116,6 +116,8 @@ ENCHANT_MODULE_EXPORT (char **)
 ENCHANT_MODULE_EXPORT (char *)
 enchant_dict_hyphenate (EnchantDict * dict, const char *const word, ssize_t len);
 
+ENCHANT_MODULE_EXPORT (char*)
+enchant_dict_hyphenateWithoutDic (EnchantDict * dict,const char *const word, ssize_t len);
 
 ENCHANT_MODULE_EXPORT (void)
      enchant_dict_add (EnchantDict * dict, const char *const word,
