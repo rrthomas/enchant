@@ -25,7 +25,7 @@
  * respects for all of the code used other than said providers.  If you modify
  * this file, you may extend this exception to your version of the
  * file, but you are not obligated to do so.  If you do not wish to
- * do so, delete this exception statement from your version.
+ * do so, delete this exception statement from your version.  
  */
 
 #include <stdio.h>
@@ -41,6 +41,7 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 #include "pwl.h"
+
 
 #ifdef XP_TARGET_COCOA
 #import "enchant_cocoa.h"
@@ -111,6 +112,7 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 #else
 #define path_cmp strcmp
 #endif
+
 
 static GSList* enchant_slist_prepend_unique_path (GSList *slist, gchar* data)
 {
@@ -1020,14 +1022,35 @@ enchant_dict_hyphenate (EnchantDict * dict, const char *const word, ssize_t len)
 	/* Check for suggestions from provider dictionary */
 	if (dict->hyphenate) 
 	{
-		dict_suggs = (*dict->hyphenate) (dict, word);
+		dict_suggs = (*dict->hyphenate) (dict, word); 
 		
 	}
 
 
 	return dict_suggs;
 }
+ENCHANT_MODULE_EXPORT (char*)
+enchant_dict_hyphenateWithoutDic (EnchantDict * dict, const char *const word, ssize_t len)
+{
+	EnchantSession * session;
+	size_t n_suggs = 0, n_dict_suggs = 0, n_pwl_suggs = 0, n_suggsT = 0;
+	char **suggs, *dict_suggs = NULL, **pwl_suggs = NULL, **suggsT;
 
+
+	char*result=0;
+	g_return_val_if_fail (word, NULL);
+	g_return_val_if_fail (dict, NULL);
+
+	//without dic we can also m_dict
+	// but only in ispell now
+	if (dict->hyphenate) 
+	{
+		dict_suggs = (*dict->hyphenate) (dict, word); 
+
+	}
+
+	return dict_suggs;
+}
 /**
  * enchant_dict_add
  * @dict: A non-null #EnchantDict
