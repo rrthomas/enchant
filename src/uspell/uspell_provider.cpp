@@ -407,7 +407,8 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->check = uspell_dict_check;
 	dict->suggest = uspell_dict_suggest;
 	dict->add_to_session = uspell_dict_add_to_session;
-	dict->hyphenate = uspell_dict_hyphenate;
+    //USpell : Yiddish dont need hyphenation
+	//dict->hyphenate = uspell_dict_hyphenate;
 	// don't use personal, session - let higher level implement that
 	
 	return dict;
