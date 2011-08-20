@@ -115,14 +115,13 @@ namespace enchant
 
 			//void hyphenate (const std::string & utf8word, 
 			//	std::string & out_suggestions) {
-			//		//not implement yet chenxiajian
 			//	    // we only need to return one result
 			//		// so delete it
 			//}
 
 			std::string hyphenate (const std::string & utf8word) {
 				std::string result;
-				//hyphenate (utf8word, result);
+				hyphenate (utf8word, result);
 				return result;
 			}
 			
