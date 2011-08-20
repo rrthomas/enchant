@@ -81,11 +81,11 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 static char *
 voikko_dict_hyphenate (EnchantDict * me, const char *const word)
 {
-	char*result=0;
-	int voikko_handle;
+	char*result=NULL;
+	int voikko_handle=0;
     voikko_handle = (long) me->user_data;
-
-	result=voikko_hyphenate_cstr(voikko_handle,word);
+	if(voikko_handle!=-1) 
+	   result=voikko_hyphenate_cstr(voikko_handle,word);
 	return result;	
 }
 
