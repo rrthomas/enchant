@@ -40,34 +40,40 @@
 #include "enchant-provider.h"
 
 /**
- * Chinese is a Chinese spell checker. More information will be add later
+ * ChineseLib is a Chinese spell checker. More information will be add later
  *
  * http://chenxiajian1985.blogspot.com
  */
+// to deal with Chinese-Class Language (Chinse, Janpansee, Korean...)
 ENCHANT_PLUGIN_DECLARE("Chinese")
 
 static int
 chinese_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
-	int result;
+	int result=-1;
 	int chinese_handle;
-
-	chinese_handle = (long) me->user_data;
-	return -1;
+    chinese_handle = (long) me->user_data;
+	//call for library
+	return result;
 }
 
 static char **
 chinese_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
-	char **sugg_arr;
-	int chinese_handle;
+	char **sugg_arr,**result;
+	int chinese_handle,index=0;
 
 	chinese_handle = (long) me->user_data;
-	if (sugg_arr == NULL)
-		return NULL;
-	for (*out_n_suggs = 0; sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
-	return sugg_arr;
+	//call for library
+	for (*out_n_suggs = 0; (*out_n_suggs)<strlen(sugg_arr); (*out_n_suggs)++)
+	{
+        if(sugg_arr[*out_n_suggs]!= NULL)
+		{
+			result[index++]=sugg_arr[*out_n_suggs];
+		}    
+	}
+	return result;
 }
 
 static char *
@@ -76,7 +82,7 @@ chinese_dict_hyphenate (EnchantDict * me, const char *const word)
 	char*result=0;
 	int chinese_handle;
     chinese_handle = (long) me->user_data;
-
+    //call for library
 	return result;	
 }
 
@@ -87,9 +93,8 @@ chinese_provider_request_dict (EnchantProvider * me, const char *const tag)
 	const char * chinese_error;
 	int chinese_handle;
 
-	
 	if (chinese_error) {
-		enchant_provider_set_error(me, chinese_error);
+		//enchant_provider_set_error(me, chinese_error);
 		return NULL;
 	}
 
@@ -97,7 +102,8 @@ chinese_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *)(long) chinese_handle;
 	dict->check = chinese_dict_check;
 	dict->suggest = chinese_dict_suggest;
-	dict->hyphenate = chinese_dict_hyphenate;
+	// Chinese don't need hyphenate
+	//dict->hyphenate = chinese_dict_hyphenate;
 
 	return dict;
 }
@@ -125,8 +131,6 @@ chinese_provider_list_dicts (EnchantProvider * me,
 	int chinese_handle;
 	*out_n_dicts = 0;
 
-
-
 	return out_list;
 }
 
@@ -145,13 +149,13 @@ chinese_provider_dispose (EnchantProvider * me)
 static const char *
 chinese_provider_identify (EnchantProvider * me)
 {
-	return "chinese";
+	return "Chinese";
 }
 
 static const char *
 chinese_provider_describe (EnchantProvider * me)
 {
-	return "chinese Provider";
+	return "Chinese Provider";
 }
 
 #ifdef __cplusplus
