@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	Name="libenchant_ispell"
 	ProjectGUID="{5DC9EE15-B080-4964-96CC-1BDC90BB873A}"
 	RootNamespace="ispell_provider"
 	Keyword="Win32Proj"
+	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
 		<Platform
@@ -66,6 +67,8 @@
 				AdditionalLibraryDirectories="&quot;$(SolutionDir)..\lib\glib\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -85,9 +88,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -144,6 +144,8 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -163,9 +165,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -193,7 +192,47 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\ispell\hyphenate.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\hyphenate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\HyphenationRule.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\HyphenationRule.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\HyphenationTree.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\HyphenationTree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\Hyphenator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\Hyphenator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\src\ispell\ispell_checker.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\Language.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\ispell\Language.h"
 				>
 			</File>
 			<File

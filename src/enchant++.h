@@ -122,7 +122,7 @@ namespace enchant
 
 			std::string hyphenate (const std::string & utf8word) {
 				std::string result;
-				hyphenate (utf8word, result);
+				//hyphenate (utf8word, result);
 				return result;
 			}
 			
