@@ -14,14 +14,14 @@ protected:
     int pos;
 
 public:
-    RepList(int n);
-    ~RepList();
+    RepList(int n=0);
+    virtual ~RepList();
 
     int get_pos();
-    int add(char * pat1, char * pat2);
+    virtual int add(char * pat1, char * pat2);
     replentry * item(int n);
-    int near(const char * word);
-    int match(const char * word, int n);
-    int conv(const char * word, char * dest);
+    virtual int near(const char * word);
+    virtual int match(const char * word, int n);
+    virtual int conv(const char * word, char * dest);
 };
 #endif
