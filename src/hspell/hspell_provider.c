@@ -227,6 +227,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->user_data = (void *) hspell_dict;
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
+	//Hspell : Hebrew dont need hyphenation
 	//dict->hyphenate = hspell_dict_hyphenate;
 	
 	return dict;
