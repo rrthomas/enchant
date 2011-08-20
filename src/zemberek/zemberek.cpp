@@ -125,7 +125,7 @@ char** Zemberek::suggestWord(const char* word, size_t *out_n_suggs)
 
 char* Zemberek::hyphenate(const char* word)
 {
-	char* result;
+	char* result= NULL;
 	GError *Error = NULL;
 	if (!dbus_g_proxy_call (proxy, "hecele", &Error,
 		G_TYPE_STRING,word,G_TYPE_INVALID,
@@ -134,6 +134,5 @@ char* Zemberek::hyphenate(const char* word)
 			return NULL;
 	}
 
-	char*result=0;
 	return result;	
 }

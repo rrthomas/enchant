@@ -64,7 +64,9 @@ zemberek_dict_hyphenate (EnchantDict * me, const char *const word)
 {
 	Zemberek *checker;
 	checker = (Zemberek *) me->user_data;
-	return checker->hyphenate (word);
+	if(checker!=NULL)
+	    return checker->hyphenate (word);
+	return NULL;
 }
 
 
