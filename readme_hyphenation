@@ -1,0 +1,44 @@
+=================================1. welcome=================================
+Welcome to gsoc2011enchant branch.
+there are two part of my GSoc2011 branches: 
+checkout my gsoc2011hyphenation SVN here: http://svn.abisource.com/svnroot/abiword/branches/gsoc2011hyphenation
+checkout my gsoc2011enchant SVN here: http://svn.abisource.com/svnroot/enchant/branches/gsoc2011hyphenation
+
+
+For more meterial, you can refer to: http://www.abisource.com/wiki/GSoC_2011_-_Hyphenation
+or my blog: chenxiajian.blogspot.com
+
+=================================2. How to use?=================================
+You can just apply the diff files in SVN.
+How to Support more languages
+
+As mentioned before, we use Enchant to support more languages. So we have five backend to support more language. Take ISpell and mySpell for example.
+In the folder ¡°abiword\msvc2008\Debug\¡± there are the folder for hyphenation: Spell and mySpell. And there is two folder for their dictionary. [[1]]
+
+=================================3. How to support more languages in ISpell=================================
+Go into the ISpell, you will see the folder language; you can just copy your languages¡¯ hyphenation dictionary into it. So that our abiword will support your language¡¯s hyphenation.
+Now we support de, en, es, and fr.
+
+=================================4. How to support more languages in mySepll=================================
+The same as ISpell, to support more languages in mySpell, we can refer to the myspell folder.
+How to extend the enchant function
+
+=================================5. How to extend the enchant function=================================
+I have read much codes in enchant. So I think enchant is a very useful framework for you to support dictionary-need function, such as spell-check, hyphenation. To extend the function in Enchant, we need to do the following things:
+1 In order to achieve this, we need to add concreate function in EnchantDict firstly. Something like:
+           char **(*hyphenate) (struct str_enchant_dict * me,
+                         const char *const word, size_t len,
+                         size_t * out_n_suggs);
+2 the function is implement by the backend.
+           static char **
+           ispell_dict_hyphenate (EnchantDict * me, const char *const word,
+                   size_t len, size_t * out_n_suggs)
+           {
+                  ISpellChecker * checker;
+                  checker = (ISpellChecker *) me->user_data;
+                 return checker->hyphenate (word, len, out_n_suggs);
+           }
+3 we set the connetion with dic
+           dict->hyphenate = ispell_dict_hyphenate;
+           dict->suggest = hspell_dict_hyphenate;
+           dict->suggest = zemberek_dict_hyphenate;
