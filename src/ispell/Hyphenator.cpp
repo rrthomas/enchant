@@ -62,6 +62,9 @@ static auto_ptr<HyphenationTree> read_hyphenation_table(const char *filename) {
    *             loaded. */
 #include <fstream>
 using namespace std;
+
+// From here, we arrange the dic file in the folder "language"
+// you can just copy your languages hyphenation dictionary into it. So that our abiword will support your language s hyphenation.
 Hyphenate::Hyphenator::Hyphenator(const RFC_3066::Language& lang,string dicPath) {
    setlocale(LC_CTYPE, "");
    string path = "";

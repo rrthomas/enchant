@@ -605,6 +605,7 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	strcpy(tagTmp,tag);
 	dict->user_data = (void *) checker;
 	dict->tag = tagTmp;
+	// we set the connetion with backend
 	dict->check = ispell_dict_check;
 	dict->suggest = ispell_dict_suggest;
 	dict->hyphenate = ispell_dict_hyphenate;
