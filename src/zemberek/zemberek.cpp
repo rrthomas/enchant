@@ -27,6 +27,8 @@
  * do so, delete this exception statement from your version.
  */
 
+
+// for more about D-Bus: http://dbus.freedesktop.org/doc/dbus-tutorial.html
 #include "zemberek.h"
 
 bool zemberek_service_is_running ()

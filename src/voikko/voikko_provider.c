@@ -44,6 +44,7 @@
  * Voikko is a Finnish spell checker. More information is available from:
  *
  * http://voikko.sourceforge.net/
+ * www.puimula.org/htp/ooo/voikko-win/
  */
 ENCHANT_PLUGIN_DECLARE("Voikko")
 
