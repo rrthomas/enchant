@@ -1,0 +1,157 @@
+======================About Five backends to support hyphenation======================
+including ispell, myspell, zemberek, voikko, uspell
+     Hunspell: using seperated dictionary: such as hyph_en_us.dic.  we can download dic from internet
+     Libhyphenaiton: the dictionary is provided by author, sometimes limited
+     Zemberek: for Turkis
+     Voikko: for Finnish
+the changes:
+1 deleted the unneed connection, such as HSpell
+2 add hunspell(myspell) hyphenation code
+3 implement hyphenation using hunspell
+4 implement hyphenation using Zemberek
+
+1 deleted the unneed connection, such as HSpell
+Hebrew don¡¯t need any hyphenation
+Yiddish don¡¯t need any hyphenation
+
+2 Implement hyphenation using hunspell
+In order to use libhyphenation. We need to add files:
+   hyphen/hnjalloc.h
+   hyphen/hnjalloc.c
+   hyphen/hyph_en_US.dic
+   hyphen/hyphen.c
+   hyphen/hyphen.gyp
+   hyphen/hyphen.h
+   hyphen/hyphen.patch
+   hyphen/hyphen.tex
+==============================================   
+3 Implement hyphenation using Zemberek
+just using dbus_g_proxy_call the same as Spell-Check in Zemberek:
+the hyphenation is as following
+   char* Zemberek::hyphenate(const char* word)
+   {
+          char* result;
+          GError *Error = NULL;
+          if (!dbus_g_proxy_call (proxy, "hecele", &Error,
+                  G_TYPE_STRING,word,G_TYPE_INVALID,
+                  G_TYPE_STRV, &result,G_TYPE_INVALID)) {
+                          g_error_free (Error);
+                          return NULL;
+          }
+          char*result=0;
+          return result;
+   }
+==============================================  
+ISpell
+I used Libhyphenation in ISpell. The simple code is just like this:
+    static char *
+    ispell_dict_hyphenate (EnchantDict * me, const char *const word)
+    {
+        ISpellChecker * checker;
+        checker = (ISpellChecker *) me->user_data;
+        if(me->tag!="")
+        return checker->hyphenate (word,me->tag);
+        return checker->hyphenate (word,"en_us");
+    }
+The concrete code in ISpellChecker is :
+    char *
+    ISpellChecker::hyphenate(const char * const utf8Word, const char *const tag)
+    {  //we must choose the right language tag
+      char* param_value = enchant_broker_get_param (m_broker, "enchant.ispell.hyphenation.dictionary.path");
+      if(languageMap[tag]!="")
+      {
+      string result=Hyphenator(RFC_3066::Language(languageMap[tag]),param_value).hyphenate(utf8Word).c_str();
+      char* temp=new char[result.length()];
+      strcpy(temp,result.c_str());
+      return temp;
+      }
+      return NULL;
+    }
+==============================================  
+MySpell
+I used Libhyphenate in ISpell. The simple code is just like this:
+   char*
+   MySpellChecker::hyphenate (const char* const word, size_t len,char* tag)
+   {    
+   	if(len==-1) len=strlen(word);
+   	if (len > MAXWORDLEN 
+   		|| !g_iconv_is_valid(m_translate_in)
+   		|| !g_iconv_is_valid(m_translate_out))
+   		return 0;
+   	char* result=0;
+   	myspell->hyphenate(word,result,tag);
+   	return result;
+   }
+The concrete code in MySpellChecker is :
+   void Hunspell::hyphenate( const char* const word, char* result, char* tag )
+   {
+   HyphenDict *dict;	
+   char buf[BUFSIZE + 1];	
+   char *hyphens=new char[BUFSIZE + 1];	
+   char ** rep;
+   int * pos;
+   int * cut;
+   /* load the hyphenation dictionary */  
+   string filePath="hyph_";
+   filePath+=tag;
+   filePath+=".dic";
+   if ((dict = hnj_hyphen_load(filePath.c_str())) == NULL) {
+   fprintf(stderr, "Couldn't find file %s\n",tag);
+   fflush(stderr);
+   exit(1);
+   }
+   int len=strlen(word);
+    if (hnj_hyphen_hyphenate2(dict, word, len-1, hyphens, NULL, &rep, &pos, &cut)) {
+   free(hyphens);
+   fprintf(stderr, "hyphenation error\n");
+   exit(1);
+   }
+   hnj_hyphen_free(dict);
+   result=hyphens;	
+   }
+==============================================  
+zemberek
+The way in Zemberek is same with the two above:
+   static char*
+   zemberek_dict_hyphenate (EnchantDict * me, const char *const word)
+   {
+   	Zemberek *checker;
+   	checker = (Zemberek *) me->user_data;
+   	return checker->hyphenate (word);
+   }
+But the way for the concrete implementation is different from the two. We use zemberek_service
+   char* Zemberek::hyphenate(const char* word)
+   {
+   	char* result;
+   	GError *Error = NULL;
+   	if (!dbus_g_proxy_call (proxy, "hecele", &Error,
+   		G_TYPE_STRING,word,G_TYPE_INVALID,
+   		G_TYPE_STRV, &result,G_TYPE_INVALID)) {
+   			g_error_free (Error);
+   			return NULL;
+   	} 
+   	char*result=0;
+   	return result;	
+   }
+==============================================  
+voikko
+The hyphenation implementation in Voikko is easy since Voikko has hyphenaiton¡¯s API.
+   static char **
+   voikko_dict_suggest (EnchantDict * me, const char *const word,
+   size_t len, size_t * out_n_suggs)
+   {
+   	char **sugg_arr;
+   	int voikko_handle;
+   	voikko_handle = (long) me->user_data;
+   	sugg_arr = voikko_suggest_cstr(voikko_handle, word);
+   	if (sugg_arr == NULL)
+   		return NULL;
+   	for (*out_n_suggs = 0; sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
+   	return sugg_arr;
+   }
+==============================================  
+Deploy of enchant in Abiword
+I just copy the buliding result of enchant to the right place in Abiword:
+enchant\bin\Debug\libenchant_myspell.dll ---->abiword\msvc2008\Debug\lib\enchant\libenchant_myspell.dll
+enchant\bin\Debug\libenchant_ispell.dll ---->abiword\msvc2008\Debug\lib\enchant\libenchant_ispell.dll
+enchant\bin\Debug\libenchant.dll---->abiword\msvc2008\Debug\bin\ibenchant.dll
