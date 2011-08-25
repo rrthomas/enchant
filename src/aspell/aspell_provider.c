@@ -262,6 +262,8 @@ aspell_provider_list_dicts (EnchantProvider * me,
 	while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0)
 		(*out_n_dicts)++;
 
+	delete_aspell_dict_info_enumeration (dels);
+
 	if (*out_n_dicts) {
 		size_t i;		
 
