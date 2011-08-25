@@ -284,7 +284,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	char* line;
 	size_t line_number = 1;
 	FILE *f;
-	struct stat stats;
+	struct _stat32 stats;
 
 	if(!pwl->filename)
 		return;
@@ -397,7 +397,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 		f = enchant_fopen(pwl->filename, "a");
 		if (f)
 			{
-				struct stat stats;
+				struct _stat32 stats;
 
 				enchant_lock_file (f);
 				if(g_stat(pwl->filename, &stats)==0)
@@ -440,7 +440,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 					const gunichar BOM = 0xfeff;
 					char * filestart, *searchstart, *needle;
 					char * key;
-					struct stat stats;
+					struct _stat32 stats;
 
 					enchant_lock_file (f);
 					key = g_strndup(word, len);
