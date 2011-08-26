@@ -72,58 +72,14 @@ namespace enchant
 				enchant_broker_free_dict (m_broker, m_dict);
 			}
 					
-			bool check (const std::string & utf8word) {
-				int val;
-
-				val = enchant_dict_check (m_dict, utf8word.c_str(), 
-							  utf8word.size());
-				if (val == 0)
-					return true;
-				else if (val > 0)
-					return false;
-				else {
-					throw enchant::Exception (enchant_dict_get_error (m_dict));
-				}
-
-				return false; // never reached
-			}
+			bool check (const std::string & utf8word);
 
 			void suggest (const std::string & utf8word, 
-				      std::vector<std::string> & out_suggestions) {
-				size_t n_suggs;
-				char ** suggs;
-				
-				out_suggestions.clear ();
-				
-				suggs = enchant_dict_suggest (m_dict, utf8word.c_str(), 
-							      utf8word.size(), &n_suggs);
-				
-				if (suggs && n_suggs) {
-					for (size_t i = 0; i < n_suggs; i++) {
-						out_suggestions.push_back (suggs[i]);
-					}
-					
-					enchant_dict_free_string_list (m_dict, suggs);
-				}
-			}
+				      std::vector<std::string> & out_suggestions) ;
 						
-			std::vector<std::string> suggest (const std::string & utf8word) {
-				std::vector<std::string> result;
-				suggest (utf8word, result);
-				return result;
-			}
+			std::vector<std::string> suggest (const std::string & utf8word) ;
 
-			//void hyphenate (const std::string & utf8word, 
-			//	std::string & out_suggestions) {
-			//	    // we only need to return one result
-			//		// so delete it
-			//}
-
-			std::string hyphenate (const std::string & utf8word) {
-				std::string result;
-				hyphenate (utf8word, result);
-				return result;
-			}
+			std::string hyphenate (const std::string & utf8word) ;
 			
 			void add (const std::string & utf8word) {
 				enchant_dict_add (m_dict, utf8word.c_str(), 
@@ -233,27 +189,9 @@ namespace enchant
 				return &m_instance;
 			}
 						
-			Dict * request_dict (const std::string & lang) {
-				EnchantDict * dict = enchant_broker_request_dict (m_broker, lang.c_str());
-				
-				if (!dict) {
-					throw enchant::Exception (enchant_broker_get_error (m_broker));
-					return 0; // never reached
-				}
-				
-				return new Dict (dict, m_broker);
-			}
+			Dict * request_dict (const std::string & lang) ;
 
-			Dict * request_pwl_dict (const std::string & pwl) {
-				EnchantDict * dict = enchant_broker_request_pwl_dict (m_broker, pwl.c_str());
-				
-				if (!dict) {
-					throw enchant::Exception (enchant_broker_get_error (m_broker));
-					return 0; // never reached
-				}
-				
-				return new Dict (dict, m_broker);
-			}
+			Dict * request_pwl_dict (const std::string & pwl) ;
 			
 			bool dict_exists (const std::string & lang) {
 				if (enchant_broker_dict_exists (m_broker, lang.c_str()))
