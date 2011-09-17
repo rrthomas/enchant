@@ -298,6 +298,26 @@ myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 		g_slist_free (config_dirs);
 	}
 
+	{
+		char* hun_dir;
+#if defined(_WIN32)
+		WCHAR wsz[MAX_PATH];
+		DWORD rv = GetEnvironmentVariableW(L"DICPATH", wsz, MAX_PATH);
+		if (rv >0 && rv <= MAX_PATH) {
+			hun_dir = g_utf16_to_utf8((gunichar2*)wsz,-1,NULL,NULL,NULL);
+		} else hun_dir = NULL;
+#else
+		hun_dir = getenv("DICPATH");
+#endif
+		if (hun_dir)
+		{
+			dirs = g_slist_append(dirs, g_strdup(hun_dir));
+#if defined(_WIN32)
+			g_free(hun_dir);
+#endif
+		}
+	}
+
 	return dirs;
 }
 
