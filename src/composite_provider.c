@@ -72,9 +72,34 @@ composite_dict_store_replacement (EnchantDict * me,
 {
 }
 
+/**
+ * composite_provider_create_dict
+ * @list_of_dicts: A non-null list of #EnchantDicts
+ *
+ * Remarks: creates a composite dictionary that composes of EnchantDicts in @list_of_dicts
+ *          and maps all methods to composite provider methods for dictionary operations.
+ */
 EnchantDict *
 composite_provider_create_dict (GSList* list_of_dicts)
 {
+	EnchantDict *dict;
+	CompositeDict *comp_dict;
+
+	g_return_if_fail (list_of_dicts);
+
+	comp_dict = g_new0 (CompositeDict, 1);
+	comp_dict->dict_list = list_of_dicts;
+
+	dict = g_new0 (EnchantDict, 1);
+	dict->user_data = (void *) comp_dict;
+
+	dict->check = composite_dict_check;
+	dict->suggest = composite_dict_suggest;
+	dict->add_to_personal = composite_dict_add_to_personal;
+	dict->add_to_session = composite_dict_add_to_session;
+	dict->store_replacement = composite_dict_store_replacement;
+
+	return dict;
 }
 
 #ifdef __cplusplus
