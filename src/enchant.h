@@ -50,6 +50,7 @@ extern "C" {
 
 typedef struct str_enchant_broker EnchantBroker;
 typedef struct str_enchant_dict   EnchantDict;
+typedef struct str_composite_dict CompositeDict;
 
 /* const */
 ENCHANT_MODULE_EXPORT (char *)

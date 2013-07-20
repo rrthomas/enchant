@@ -138,6 +138,10 @@ struct str_enchant_provider
 	void * _reserved[5];
 };
 
+struct str_composite_dict
+{
+	GSList *dict_list;
+};
 #ifdef __cplusplus
 }
 #endif
