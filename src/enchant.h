@@ -74,6 +74,10 @@ ENCHANT_MODULE_EXPORT (void)
      enchant_broker_set_ordering (EnchantBroker * broker,
 				  const char * const tag,
 				  const char * const ordering);
+
+ENCHANT_MODULE_EXPORT (EnchantDict *)
+enchant_broker_request_composite_dict (EnchantBroker * broker, const char *const tag_string);
+
 /* const */
 ENCHANT_MODULE_EXPORT(char *)
      enchant_broker_get_error (EnchantBroker * broker);

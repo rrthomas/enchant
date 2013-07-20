@@ -41,6 +41,7 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 #include "pwl.h"
+#include "composite_provider.h"
 
 #ifdef XP_TARGET_COCOA
 #import "enchant_cocoa.h"
@@ -1866,6 +1867,50 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	g_free (normalized_tag);
 	
 	return dict;
+}
+
+/**
+ * enchant_broker_request_composite_dict
+ * @broker: A non-null #EnchantBroker
+ * @tags: The non-null language tags you wish to request a 'composite' dictionary for ("en_US", "de_DE", ...)
+ *
+ * Returns: A 'composite' #EnchantDict, or %null if no suitable dictionary could be found. This dictionary is reference counted.
+ */
+ENCHANT_MODULE_EXPORT (EnchantDict *)
+enchant_broker_request_composite_dict (EnchantBroker * broker, const char *const tag_string)
+{
+	EnchantDict *composite_dict = NULL,*dict=NULL;
+	char *normalized_tag,*lang_tag;
+	char delimiter[] = ":"; // the tag_string will have several language tags seperated by ":" used as delimiter
+	GSList *dict_list = NULL;
+
+	g_return_val_if_fail (broker, NULL);
+	g_return_val_if_fail (tag_string && strlen(tag_string), NULL);
+
+	enchant_broker_clear_error (broker);
+	
+	lang_tag = strtok(tag_string, delimiter);
+	while(lang_tag != NULL)
+	{
+		normalized_tag = enchant_normalize_dictionary_tag (lang_tag);
+		if(!enchant_is_valid_dictionary_tag(normalized_tag))
+		{
+			enchant_broker_set_error (broker, "invalid tag character found");
+			break;
+		}
+		else if ((dict = _enchant_broker_request_dict (broker, normalized_tag)) == NULL)
+		{
+			char * iso_639_only_tag;
+			iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
+			dict = _enchant_broker_request_dict (broker, iso_639_only_tag);		
+			dict_list = g_slist_append(dict_list,dict);
+			g_free (iso_639_only_tag);
+		}
+	}
+	
+	g_free (normalized_tag);
+	composite_dict = composite_provider_create_dict(dict_list);
+	return composite_dict;
 }
 
 /**
