@@ -206,6 +206,10 @@ struct _EnchantProvider {
 			       size_t * out_n_dicts);
 };
 
+struct str_composite_dict
+{
+	GSList *dict_list;
+};
 #ifdef __cplusplus
 }
 #endif
