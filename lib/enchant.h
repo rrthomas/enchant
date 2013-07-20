@@ -40,6 +40,7 @@ extern "C" {
 
 typedef struct _EnchantBroker EnchantBroker;
 typedef struct _EnchantDict   EnchantDict;
+typedef struct _EnchantCompositeDict CompositeDict;
 
 const char *enchant_get_version (void);
 
