@@ -89,7 +89,7 @@ libenchant_null_describe_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_describe_la_LIBADD = $(LIBENCHANT_COPY)
 libenchant_null_describe_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
-check_PROGRAMS = main.test providers.test
+check_PROGRAMS = main.test providers.test enchant-composite.test
 LOG_COMPILER = $(srcdir)/run-test
 # Make the tests run serially.
 providers.log: main.log
@@ -134,6 +134,11 @@ main_test_SOURCES = main.test.cpp \
 main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
 main_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
 main_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
+
+enchant_composite_test_SOURCES = enchant-composite.test.c
+enchant_composite_test_DEPENDENCIES = $(LIBENCHANT_COPY)
+enchant_composite_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
+enchant_composite_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
 APPLESPELL_CONFIG = config/AppleSpell.config
 $(APPLESPELL_CONFIG): $(top_srcdir)/providers/AppleSpell.config
