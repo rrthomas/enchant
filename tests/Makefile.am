@@ -11,13 +11,18 @@ else
 cxx_progs =
 endif
 
-noinst_PROGRAMS = test-enchant $(cxx_progs)
+noinst_PROGRAMS = test-enchant test-enchant-composite $(cxx_progs)
 bin_PROGRAMS= enchant-lsmod enchant
 
 test_enchant_SOURCES = test-enchant.c
 test_enchant_LDFLAGS =
 test_enchant_DEPENDENCIES = $(DEPS)
 test_enchant_LDADD = $(ldadd)
+
+test_enchant_composite_SOURCES = test-enchant-composite.c
+test_enchant_composite_LDFLAGS =
+test_enchant_composite_DEPENDENCIES = $(DEPS)
+test_enchant_composite_LDADD = $(ldadd)
 
 enchant_SOURCES = enchant-ispell.c
 enchant_LDFLAGS =
