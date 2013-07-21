@@ -1883,13 +1883,14 @@ enchant_broker_request_composite_dict (EnchantBroker * broker, const char *const
 	char *normalized_tag,*lang_tag;
 	char delimiter[] = ":"; // the tag_string will have several language tags seperated by ":" used as delimiter
 	GSList *dict_list = NULL;
+	char tags[strlen(tag_string)];
 
 	g_return_val_if_fail (broker, NULL);
 	g_return_val_if_fail (tag_string && strlen(tag_string), NULL);
 
 	enchant_broker_clear_error (broker);
-	
-	lang_tag = strtok(tag_string, delimiter);
+	strcpy(tags,tag_string);
+	lang_tag = strtok(tags, delimiter);
 	while(lang_tag != NULL)
 	{
 		normalized_tag = enchant_normalize_dictionary_tag (lang_tag);
@@ -1902,10 +1903,11 @@ enchant_broker_request_composite_dict (EnchantBroker * broker, const char *const
 		{
 			char * iso_639_only_tag;
 			iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
-			dict = _enchant_broker_request_dict (broker, iso_639_only_tag);		
+			dict = _enchant_broker_request_dict (broker, iso_639_only_tag);	
 			dict_list = g_slist_append(dict_list,dict);
 			g_free (iso_639_only_tag);
 		}
+	lang_tag = strtok(NULL, delimiter);
 	}
 	
 	g_free (normalized_tag);
