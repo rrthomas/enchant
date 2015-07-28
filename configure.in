@@ -49,7 +49,7 @@ have_cxx=yes
 AC_PROG_CXX(,have_cxx=no)
 AM_CONDITIONAL(WITH_CXX, test "x$have_cxx" = "xyes")
 
-AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+PKG_PROG_PKG_CONFIG
 
 PKG_CHECK_MODULES(ENCHANT, [glib-2.0 >= 2.6 gmodule-2.0])
 
@@ -482,13 +482,7 @@ AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--disable-zemberek],[enable the experime
 if test "x$have_cxx" = "xno"; then
    build_zemberek=no
 fi
-AC_MSG_CHECKING([For DBus-Glib >= 0.62])
-if pkg-config --atleast-version=0.62 dbus-glib-1; then
-	ZEMBEREK_CFLAGS=`pkg-config --cflags dbus-glib-1`
-	ZEMBEREK_LIBS=`pkg-config --libs dbus-glib-1`
-else
-	build_zemberek=no
-fi
+PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib >= 0.62], build_zemberek=yes, build_zemberek=no)
 
 AC_SUBST(ZEMBEREK_CFLAGS)
 AC_SUBST(ZEMBEREK_LIBS)
