@@ -240,7 +240,7 @@ enchant_get_module_dirs (void)
 
 #if defined(ENCHANT_GLOBAL_MODULE_DIR)
 	module_dirs = enchant_slist_append_unique_path (module_dirs, g_strdup (ENCHANT_GLOBAL_MODULE_DIR));
-#else
+#endif
 	/* Dynamically locate library and search for modules relative to it. */
 	prefix = enchant_get_prefix_dir();
 	if(prefix)
@@ -249,7 +249,6 @@ enchant_get_module_dirs (void)
 			g_free(prefix);
 			module_dirs = enchant_slist_append_unique_path (module_dirs, module_dir);
 		}
-#endif
 
 	return module_dirs;
 }
