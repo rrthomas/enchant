@@ -2265,12 +2265,10 @@ enchant_get_prefix_dir(void)
 	}
 #endif
 
-#if defined(ENABLE_BINRELOC)
 	if (!prefix) {
-		/* Use standard binreloc PREFIX macro */
-		prefix = gbr_find_prefix(NULL);
+		/* Use ENCHANT_PREFIX_DIR env var */
+		prefix = g_strdup (g_getenv("ENCHANT_PREFIX_DIR"));
 	}
-#endif
 
 #if defined(ENCHANT_PREFIX_DIR)
 	if (!prefix) {
