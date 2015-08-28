@@ -2267,7 +2267,7 @@ enchant_get_prefix_dir(void)
 
 	if (!prefix) {
 		/* Use ENCHANT_PREFIX_DIR env var */
-		gchar* env = g_getenv("ENCHANT_PREFIX_DIR");
+		const gchar* env = g_getenv("ENCHANT_PREFIX_DIR");
 		if (env) {
 			prefix = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
 		}
