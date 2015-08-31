@@ -240,7 +240,7 @@ enchant_get_module_dirs (void)
 
 #if defined(ENCHANT_GLOBAL_MODULE_DIR)
 	module_dirs = enchant_slist_append_unique_path (module_dirs, g_strdup (ENCHANT_GLOBAL_MODULE_DIR));
-#else
+#endif
 	/* Dynamically locate library and search for modules relative to it. */
 	prefix = enchant_get_prefix_dir();
 	if(prefix)
@@ -249,7 +249,6 @@ enchant_get_module_dirs (void)
 			g_free(prefix);
 			module_dirs = enchant_slist_append_unique_path (module_dirs, module_dir);
 		}
-#endif
 
 	return module_dirs;
 }
@@ -2266,12 +2265,13 @@ enchant_get_prefix_dir(void)
 	}
 #endif
 
-#if defined(ENABLE_BINRELOC)
 	if (!prefix) {
-		/* Use standard binreloc PREFIX macro */
-		prefix = gbr_find_prefix(NULL);
+		/* Use ENCHANT_PREFIX_DIR env var */
+		const gchar* env = g_getenv("ENCHANT_PREFIX_DIR");
+		if (env) {
+			prefix = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
+		}
 	}
-#endif
 
 #if defined(ENCHANT_PREFIX_DIR)
 	if (!prefix) {
