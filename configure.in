@@ -306,8 +306,6 @@ if test "x$with_myspell_dir" != "x" ; then
    myspell_dir=$with_myspell_dir
 fi
 
-MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dir\"'"
-
 AC_ARG_WITH(system-myspell, AS_HELP_STRING([--with-system-myspell=yes/no],[use the system myspell/hunspell @<:@default=auto@:>@]))
 if test "x$with_system_myspell" != "xno"; then
 	PKG_CHECK_MODULES(MYSPELL, [hunspell], have_system_myspell=true, have_system_myspell=false)
@@ -316,6 +314,7 @@ if test "x$with_system_myspell" != "xno"; then
 else
 	have_system_myspell=false;
 fi
+MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dir\"'"
 AM_CONDITIONAL(WITH_SYSTEM_MYSPELL, test "x$have_system_myspell" = "xtrue")
 
 check_aspell=yes
