@@ -2333,7 +2333,7 @@ enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_na
 	return dirs;
 }
 
-ENCHANT_MODULE_EXPORT(char *)
+ENCHANT_MODULE_EXPORT(const char *)
 enchant_get_version (void) {
 	return ENCHANT_VERSION_STRING;
 }

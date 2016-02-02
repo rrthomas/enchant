@@ -52,7 +52,7 @@ typedef struct str_enchant_broker EnchantBroker;
 typedef struct str_enchant_dict   EnchantDict;
 
 /* const */
-ENCHANT_MODULE_EXPORT (char *)
+ENCHANT_MODULE_EXPORT (const char *)
      enchant_get_version (void);
 
 ENCHANT_MODULE_EXPORT (EnchantBroker *) 

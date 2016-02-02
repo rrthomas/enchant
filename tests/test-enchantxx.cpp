@@ -69,7 +69,7 @@ run_dict_tests (enchant::Dict * dict)
 		{
 			dict->suggest (sugg_checks[i], suggs);
 			
-			printf ("enchant_dict_suggest(%s): %d\n", sugg_checks[i], suggs.size());
+			printf ("enchant_dict_suggest(%s): %lu\n", sugg_checks[i], suggs.size());
 			for (j = 0; j < suggs.size(); j++)
 				{
 					printf ("\t=>%s\n", suggs[j].c_str());

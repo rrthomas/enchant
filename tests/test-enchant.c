@@ -81,7 +81,7 @@ run_dict_tests (EnchantDict * dict)
 				enchant_dict_suggest (dict, sugg_checks[i], strlen (sugg_checks[i]),
 						      &n_suggs);
 			
-			printf ("enchant_dict_suggest(%s): %d\n", sugg_checks[i], n_suggs);
+			printf ("enchant_dict_suggest(%s): %lu\n", sugg_checks[i], n_suggs);
 			for (j = 0; j < n_suggs; j++)
 				{
 					printf ("\t=>%s\n", suggs[j]);

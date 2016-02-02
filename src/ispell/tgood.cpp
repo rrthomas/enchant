@@ -266,7 +266,6 @@ void ISpellChecker::pfx_list_chk (ichar_t *word, ichar_t *ucword, int len, int o
     int			entcount;	/* Number of entries to process */
     register struct flagent *
 			flent;		/* Current table entry */
-    int			preadd;		/* Length added to tword2 as prefix */
     register int	tlen;		/* Length of tword */
     ichar_t		tword[INPUTWORDLEN + 4 * MAXAFFIXLEN + 4]; /* Tmp cpy */
     ichar_t		tword2[sizeof tword]; /* 2nd copy for ins_root_cap */
@@ -324,7 +323,6 @@ void ISpellChecker::pfx_list_chk (ichar_t *word, ichar_t *ucword, int len, int o
 							cp += flent->affl;
 							*cp++ = '+';
 						}
-						preadd = cp - tword2;
 						icharcpy (cp, tword);
 						cp += tlen;
 						if (flent->stripl)
@@ -432,7 +430,6 @@ void ISpellChecker::suf_list_chk (ichar_t *word, ichar_t *ucword,
     int			entcount;	/* Number of entries to process */
     register struct flagent *
 			flent;		/* Current table entry */
-    int			preadd;		/* Length added to tword2 as prefix */
     register int	tlen;		/* Length of tword */
     ichar_t		tword[INPUTWORDLEN + 4 * MAXAFFIXLEN + 4]; /* Tmp cpy */
     ichar_t		tword2[sizeof tword]; /* 2nd copy for ins_root_cap */
@@ -499,7 +496,6 @@ void ISpellChecker::suf_list_chk (ichar_t *word, ichar_t *ucword,
 							cp += pfxent->affl;
 							*cp++ = '+';
 						}
-						preadd = cp - tword2;
 						icharcpy (cp, tword);
 						cp += tlen;
 						if ((optflags & FF_CROSSPRODUCT)
