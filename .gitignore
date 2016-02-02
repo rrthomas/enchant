@@ -6,6 +6,7 @@ compile
 configure
 config.*
 depcomp
+doxygen
 enchant-uninstalled.pc
 enchant.pc
 enchant.ps
@@ -16,15 +17,15 @@ ltmain.sh
 missing
 Makefile
 Makefile.in
-src/**/*.o
-src/**/*.lo
 src/**/*.la
+src/**/*.lo
+src/**/*.o
 src/**/.libs
 src/**/.deps
 src/libenchant.rc
-tests/**/*.o
-tests/**/*.lo
 tests/**/*.la
+tests/**/*.lo
+tests/**/*.o
 tests/**/.libs
 tests/**/.deps
 tests/enchant
