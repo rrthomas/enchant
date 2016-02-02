@@ -62,3 +62,10 @@ And in the body of the message write "subscribe"
 An archive of the mailing lists is available in:
 	http://www.abisource.com/mailinglists/abiword-dev/
 
+API documentation
+-----------------
+
+   To generate API documentation, simply run
+
+	doxygen doxygen.conf
+And doxygen/index.html provides starting point.
