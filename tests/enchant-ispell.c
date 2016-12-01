@@ -327,7 +327,7 @@ convert_language_code (gchar *code)
 }
 
 
-/* Splits a line into a set of (word,word_position) touples. */
+/* Splits a line into a set of (word,word_position) tuples. */
 static GSList *
 tokenize_line (GString * line)
 {
@@ -368,7 +368,7 @@ tokenize_line (GString * line)
 			i--;
 		}
 
-		/* Save (word, position) touple. */
+		/* Save (word, position) tuple. */
                 if (word->len) {
 		        tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
 			tokens = g_slist_append (tokens, GINT_TO_POINTER(start_pos));
