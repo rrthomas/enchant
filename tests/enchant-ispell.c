@@ -474,7 +474,19 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 				case '`': /* Enter verbose-correction mode */
 					break;
 
-				/* FIXME: Implement aspell's $$ra <MISSPELLED>,<REPLACEMENT> using enchant_dict_store_replacement */
+				case '$': /* Save correction for rest of session [aspell extension] */
+					{ /* Syntax: $$ra <MISSPELLED>,<REPLACEMENT> */
+						gchar *prefix = "$$ra ";
+						if (g_str_has_prefix(str->str, prefix)) {
+							gchar *comma = g_utf8_strchr(str->str, -1, (gunichar)',');
+							char *mis = str->str + strlen(prefix);
+							char *cor = comma + 1;
+							ssize_t mis_len = comma - mis;
+							ssize_t cor_len = strlen(str->str) - (cor - str->str);
+							enchant_dict_store_replacement(dict, mis, mis_len, cor, cor_len);
+						}
+					}
+					break;
 
 				case '^': /* ^ is used as prefix to prevent interpretation of original
 					     first character as a command */
