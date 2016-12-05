@@ -495,6 +495,8 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 
 			if (mode != MODE_A || mode_A_no_command) {
 				token_ptr = tokens = tokenize_line (str);
+				if (tokens == NULL)
+					putc('\n', out);
 				while (tokens != NULL) {
 					corrected_something = TRUE;
 
