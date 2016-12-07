@@ -438,7 +438,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 			corrected_something = FALSE;
 
 			if (mode == MODE_A) {
-				switch ((int)*str->str) {
+				switch (*str->str) {
 				case '&': /* Insert uncapitalised in personal word list */
 					if (str->len > 1) {
 						gunichar c = g_utf8_get_char_validated(str->str + 1, str->len);
