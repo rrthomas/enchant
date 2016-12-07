@@ -348,7 +348,8 @@ tokenize_line (GString * line)
 	word = g_string_new (NULL);
 
 	while (cur_pos < line->len && *utf) {
-    int i;
+		int i;
+
 	        /* Skip non-word characters. */
 		cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		uc = g_utf8_get_char (utf);
