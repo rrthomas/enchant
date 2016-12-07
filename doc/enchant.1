@@ -33,14 +33,15 @@ located in \fI~/.enchant\fR.
 The per-user file takes precedence, if found.
 .PP
 The ordering file takes the form language_tag:<comma-separated list of spelling
-backends>. I am currently aware of the following backends: aspell, myspell, ispell, uspell, hspell, voikko, and zemberek. '*' is
+backends>. I am currently aware of the following backends: aspell/pspell,
+myspell/hunspell, ispell, uspell, hspell, voikko, zemberek, and Apple Spell (macOS only). '*' is
 used to mean "use this ordering for all languages, unless instructed otherwise." For example:
 .PP
 *:aspell,myspell,ispell
 .br
 en:aspell,myspell,ispell
 .br
-en_UK:myspell,aspell,ispell
+en_GB:myspell,aspell,ispell
 .br
 fr:myspell,ispell:aspell
 .SH DIRECTORIES IMPORTANT TO ENCHANT
