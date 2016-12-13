@@ -9,6 +9,8 @@ dealing with different spell checking libraries.
 
    Enchant is meant to provide a generic interface into various existing
 spell checking libaries. These include, but are not limited to:
+
+    * Hunspell (formerly Myspell)
     * Apple Spell (OS X only)
     * Aspell/Pspell
     * Ispell
@@ -29,7 +31,8 @@ provider DLLs and for dictionaries themselves, when possible. Enchant's DLL
 location algorithm takes this into account, and gives preference to the $USER
 DLLs, when found.
 
-To report libenchant bugs, please visit bugzilla.abisource.com.
+To report libenchant bugs, please visit https://github.com/AbiWord/enchant
+
     This library is free software; you can redistribute it and/or modify
     it under the terms of version 2.1 of the GNU Lesser General Public License
     as published by the Free Software Foundation.
@@ -61,4 +64,3 @@ And in the body of the message write "subscribe"
 
 An archive of the mailing lists is available in:
 	http://www.abisource.com/mailinglists/abiword-dev/
-
