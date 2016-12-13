@@ -209,6 +209,10 @@ is_word_char (gunichar uc, size_t n)
 {
 	GUnicodeType type;
 
+	if (uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’")) {
+		return 1;
+	}
+
 	type = g_unichar_type(uc);
 
 	switch (type) {
@@ -217,7 +221,7 @@ is_word_char (gunichar uc, size_t n)
 	case G_UNICODE_TITLECASE_LETTER:
 	case G_UNICODE_UPPERCASE_LETTER:
 	case G_UNICODE_OTHER_LETTER:
-	case G_UNICODE_COMBINING_MARK:
+	case G_UNICODE_COMBINING_MARK: /* Older name for G_UNICODE_SPACING_MARK; deprecated since glib 2.30 */
 	case G_UNICODE_ENCLOSING_MARK:
 	case G_UNICODE_NON_SPACING_MARK:
 	case G_UNICODE_DECIMAL_NUMBER:
@@ -226,12 +230,17 @@ is_word_char (gunichar uc, size_t n)
 	case G_UNICODE_CONNECT_PUNCTUATION:
                 return 1;     /* Enchant 1.3.0 defines word chars like this. */
 
+	case G_UNICODE_DASH_PUNCTUATION:
+		if ((n > 0) && (type == G_UNICODE_DASH_PUNCTUATION)) {
+			return 1; /* hyphens only accepted within a word. */
+		}
+		/* Fallthrough */
+
 	case G_UNICODE_CONTROL:
 	case G_UNICODE_FORMAT:
 	case G_UNICODE_UNASSIGNED:
 	case G_UNICODE_PRIVATE_USE:
 	case G_UNICODE_SURROGATE:
-	case G_UNICODE_DASH_PUNCTUATION:
 	case G_UNICODE_CLOSE_PUNCTUATION:
 	case G_UNICODE_FINAL_PUNCTUATION:
 	case G_UNICODE_INITIAL_PUNCTUATION:
@@ -245,13 +254,6 @@ is_word_char (gunichar uc, size_t n)
 	case G_UNICODE_PARAGRAPH_SEPARATOR:
 	case G_UNICODE_SPACE_SEPARATOR:
 	default:
-		if ((n > 0) && (uc == g_utf8_get_char("'"))) {
-		        return 1;  /** Char ' is accepted only within a word. */
-		}
-		else if ((n > 0) && (type == G_UNICODE_DASH_PUNCTUATION)) {
-			return 1; /* hyphens only accepted within a word. */
-		}
-
 		return 0;
 	}
 }
