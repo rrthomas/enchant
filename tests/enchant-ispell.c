@@ -77,8 +77,9 @@ static void
 print_help (FILE * to, const char * prog)
 {
 	fprintf (to, "Usage: %s [options] -a|-d dict|-l|-L|-m|-v[v]|<file>\n", prog);
-	fprintf (to, "\t-a lists alternatives.\n");
+	fprintf (to, "\t-a lists suggestions in ispell pipe mode format.\n");
 	fprintf (to, "\t-d dict uses dictionary <dict>.\n");
+	fprintf (to, "\t-h Show this help message.\n");
 	fprintf (to, "\t-l lists misspellings.\n");
 	fprintf (to, "\t-m is ignored.\n");
 	fprintf (to, "\t-L displays line numbers.\n");
