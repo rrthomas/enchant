@@ -51,7 +51,7 @@ ENCHANT_PLUGIN_DECLARE ("Hspell")
  */
 static int is_hebrew (const char *const iso_word, gsize len)
 {
-	int i;
+	gsize i;
 	
 	for ( i = 0; (i < len) && (iso_word[i]); i++ )
 		{
@@ -73,7 +73,7 @@ static int is_hebrew (const char *const iso_word, gsize len)
 static gchar **
 corlist2strv (struct corlist *cl, size_t nb_sugg)
 {
-	int i;
+	size_t i;
 	gsize len;
 	char **sugg_arr = NULL;
 	const char *sugg;
@@ -141,8 +141,6 @@ static char **
 hspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
-	
-	int res;
 	gsize length;
 	char *iso_word;
 	char **sugg_arr = NULL;
