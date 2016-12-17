@@ -297,7 +297,7 @@ extern int		gnMaskBits;
 ** character counts as two!
 */
 #ifndef MAXSTRINGCHARS
-#define MAXSTRINGCHARS 128
+#define MAXSTRINGCHARS 512
 #endif /* MAXSTRINGCHARS */
 
 /*
