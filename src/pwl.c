@@ -322,7 +322,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 				line[l] = '\0';
 			else if(!feof(f)) /* ignore lines longer than BUFSIZ. */ 
 				{
-					g_warning ("Line too long (ignored) in %s at line:%u\n", pwl->filename, line_number);
+					g_warning ("Line too long (ignored) in %s at line:%zu\n", pwl->filename, line_number);
 					while (NULL != (fgets (buffer, sizeof (buffer), f)))
 						{
 							if (line[strlen(buffer)-1]=='\n') 
@@ -336,7 +336,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 					if(g_utf8_validate(line, -1, NULL))
 						enchant_pwl_add_to_trie(pwl, line, strlen(line));
 					else
-						g_warning ("Bad UTF-8 sequence in %s at line:%u\n", pwl->filename, line_number);
+						g_warning ("Bad UTF-8 sequence in %s at line:%zu\n", pwl->filename, line_number);
 				}
 		}
 	

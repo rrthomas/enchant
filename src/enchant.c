@@ -835,10 +835,7 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 								const char * const* const new_suggs,
 								size_t n_new_suggs)
 {
-	EnchantSession * session;
 	size_t i, j;
-
-	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 
 	for(i = 0; i < n_new_suggs; i++)
 		{
