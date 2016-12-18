@@ -97,7 +97,7 @@ main (int argc, char **argv)
 				g_free (lang_tag);
 			return 0;
 		} else if (!strcmp (argv[i], "-v") || !strcmp (argv[i], "-version")) {
-			printf ("%s %s\n", argv[0], VERSION);
+			printf ("%s %s\n", argv[0], PACKAGE_VERSION);
 			if (lang_tag)
 				g_free (lang_tag);
 			return 0;

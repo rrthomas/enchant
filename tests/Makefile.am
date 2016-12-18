@@ -1,4 +1,4 @@
-INCLUDES=-I$(top_srcdir)/src $(ENCHANT_CFLAGS)
+AM_CPPFLAGS=-I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 EXTRA_DIST=test.pwl ispell.in
 

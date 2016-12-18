@@ -69,7 +69,7 @@ typedef enum
 static void 
 print_version (FILE * to)
 {
-	fprintf (to, "@(#) International Ispell Version 3.1.20 (but really Enchant %s)\n", VERSION);
+	fprintf (to, "@(#) International Ispell Version 3.1.20 (but really Enchant %s)\n", PACKAGE_VERSION);
 	fflush (to);
 }
 

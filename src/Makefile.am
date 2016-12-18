@@ -1,6 +1,6 @@
 SUBDIRS=. aspell ispell uspell myspell hspell applespell voikko zemberek
 
-INCLUDES=-I$(top_srcdir) $(ENCHANT_CFLAGS) $(CC_WARN_CFLAGS) -DENCHANT_GLOBAL_MODULE_DIR=\"$(libdir)/enchant\" -DENCHANT_GLOBAL_ORDERING=\"$(datadir)/enchant\" -D_ENCHANT_BUILD=1 -DENCHANT_VERSION_STRING=\"@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.@ENCHANT_MICRO_VERSION@\"
+AM_CPPFLAGS=-I$(top_srcdir) $(ENCHANT_CFLAGS) $(CC_WARN_CFLAGS) -DENCHANT_GLOBAL_MODULE_DIR=\"$(libdir)/enchant\" -DENCHANT_GLOBAL_ORDERING=\"$(datadir)/enchant\" -D_ENCHANT_BUILD=1 -DENCHANT_VERSION_STRING=\"@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.@ENCHANT_MICRO_VERSION@\"
 
 lib_LTLIBRARIES = libenchant.la
 
@@ -20,7 +20,7 @@ libenchant_includedir = $(includedir)/enchant
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
 
 if WITH_APPLESPELL
-INCLUDES += @APPLESPELL_CFLAGS@
+AM_CPPFLAGS += @APPLESPELL_CFLAGS@
 libenchant_la_LIBADD += @APPLESPELL_LIBS@
 libenchant_la_LDFLAGS += @APPLESPELL_LDFLAGS@
 libenchant_la_SOURCES += enchant_cocoa.m enchant_cocoa.h

@@ -1,8 +1,16 @@
-* Don't commit directly, instead send your diff to the authors (use
-  'cvs diff -Nu').
+* Don't commit directly, instead make a pull request on GitHub.
+
+
+Building from git
+-----------------
+
+Before running ./configure in a fresh git checkout, run:
+
+./autogen.sh
+
 
 Working in libenchant
--------------------
+---------------------
 
    When writing libenchant our priorities are
 
@@ -20,6 +28,7 @@ loop 3% faster is not.  Specifically, this means:
 	- Clarity of design and function are paramount
 	- Make sure your code does not generate warnings at all.
 	- Please follow the formatting style
+
 
 Formatting style
 ----------------
@@ -55,7 +64,7 @@ modular chunks (as detailed by Linus).
 	  g_return_if_fail and g_return_val_if_fail macros to verify
 	  that the parameters passed are valid.
 
-	- Under no circunstances use magic variables.  Use typedef
+	- Under no circumstances use magic variables.  Use typedef
 	  enum { ... } type; to create enumerations.  Do not use
 	  integers to hold references to enumerations, the compiler
 	  can help catch various errors.
@@ -82,7 +91,7 @@ modular chunks (as detailed by Linus).
 	  that there is a clean and maintainable way to do it:  
 
         - Fast code that is difficult to maintain has no place in
-	  Gnumeric and will be dropped.
+	  Enchant and will be dropped.
 
 	- Follow the libenchant commenting style, which is not the Gtk
 	  style;
@@ -99,4 +108,4 @@ might become a burden to the program maintainers.
 projects.
 
    Cleaning code in libenchant is more important than trying not to break
-existing code.  By all means, code clean ups are always welcome. 
+existing code.  Code clean ups are always welcome.
