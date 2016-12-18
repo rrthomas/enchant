@@ -692,10 +692,10 @@ static void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl,
 		}
 }
 
-static int best_distance(const char*const*const suggs, const char *const word, size_t len)
+static int best_distance(char** suggs, const char *const word, size_t len)
 {
 	int best_dist;
-	const char*const* sugg_it;
+	char** sugg_it;
 	char* normalized_word;
 
 	normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
