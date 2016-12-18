@@ -19,5 +19,6 @@
 /libtool
 /ltmain.sh
 /missing
+/INSTALL
 Makefile
 Makefile.in

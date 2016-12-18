@@ -1,44 +1,45 @@
-AC_INIT(src/enchant.h)
+AC_INIT([enchant],[1.6.1])
+AC_PACKAGE_VERSION
+AC_CONFIG_SRCDIR(src/enchant.h)
+AM_INIT_AUTOMAKE([no-define])
 AC_CANONICAL_HOST
+AM_MAINTAINER_MODE
+AC_CONFIG_MACRO_DIR([m4])
 
-dnl Set release number
+dnl Release number rules:
 dnl This is derived from "Versioning" chapter of info libtool documentation.
-PACKAGE=enchant
-dnl     4a) Increment when removing or changing interfaces.
-ENCHANT_MAJOR_VERSION=1
-dnl     4a) 5) Increment when adding interfaces.
-dnl     6) Set to zero when removing or changing interfaces.
-ENCHANT_MINOR_VERSION=6
-dnl     3) Increment when interfaces not changed at all,
+dnl Format is MAJOR:MIINOR:MICRO
+dnl     4a) Increment major when removing or changing interfaces.
+dnl     4a) 5) Increment minor when adding interfaces.
+dnl     6) Set minor to zero when removing or changing interfaces.
+dnl     3) Increment micro when interfaces not changed at all,
 dnl               only bug fixes or internal changes made.
-dnl     4b) Set to zero when adding, removing or changing interfaces.
-ENCHANT_MICRO_VERSION=1
-dnl
-dnl     Set this too
-MAJOR_VERSION_PLUS_MINOR_VERSION=`expr $ENCHANT_MAJOR_VERSION + $ENCHANT_MINOR_VERSION`
-dnl
-VERSION=$ENCHANT_MAJOR_VERSION.$ENCHANT_MINOR_VERSION.$ENCHANT_MICRO_VERSION
+dnl     4b) Set micro to zero when adding, removing or changing interfaces.
+
+dnl First extract pieces from the version number string
+ENCHANT_MAJOR_VERSION=`echo $VERSION | awk -F. '{print $1}'`
+ENCHANT_MINOR_VERSION=`echo $VERSION | awk -F. '{print $2}'`
+ENCHANT_MICRO_VERSION=`echo $VERSION | awk -F. '{print $3}'`
+
 dnl Version info for libraries = CURRENT:REVISION:AGE
+MAJOR_VERSION_PLUS_MINOR_VERSION=`expr $ENCHANT_MAJOR_VERSION + $ENCHANT_MINOR_VERSION`
 VERSION_INFO=$MAJOR_VERSION_PLUS_MINOR_VERSION:$ENCHANT_MICRO_VERSION:$ENCHANT_MINOR_VERSION
+
 AC_SUBST(VERSION_INFO)
 AC_SUBST(ENCHANT_MAJOR_VERSION)
 AC_SUBST(ENCHANT_MINOR_VERSION)
 AC_SUBST(ENCHANT_MICRO_VERSION)
 
-AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
-AM_MAINTAINER_MODE
-
 dnl Checks for programs.
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_OBJC
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_STDC_HEADERS
-AC_LIBTOOL_WIN32_DLL
-AM_PROG_LIBTOOL
+AC_HEADER_STDC
+LT_INIT([win32-dll])
 gt_TYPE_SSIZE_T
 
 AC_C_CONST
@@ -61,7 +62,7 @@ AC_DEFUN([ENCHANT_CC_TRY_FLAG], [
   enchant_save_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS $1"
 
-  AC_COMPILE_IFELSE([ ], [enchant_cc_flag=yes], [enchant_cc_flag=no])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])], [enchant_cc_flag=yes], [enchant_cc_flag=no])
   CFLAGS="$enchant_save_CFLAGS"
 
   if test "x$enchant_cc_flag" = "xyes"; then
@@ -80,7 +81,7 @@ AC_DEFUN([ENCHANT_CXX_TRY_FLAG], [
   enchant_save_CXXFLAGS="$CXXFLAGS"
   CXXFLAGS="$CXXFLAGS $1"
 
-  AC_COMPILE_IFELSE([ ], [enchant_cxx_flag=yes], [enchant_cxx_flag=no])
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])], [enchant_cxx_flag=yes], [enchant_cxx_flag=no])
   CXXFLAGS="$enchant_save_CXXFLAGS"
 
   if test "x$enchant_cxx_flag" = "xyes"; then
@@ -255,8 +256,7 @@ glib_DEFUN([GLIB_LC_MESSAGES],
   [AC_CHECK_HEADERS([locale.h])
     if test $ac_cv_header_locale_h = yes; then
     AC_CACHE_CHECK([for LC_MESSAGES], am_cv_val_LC_MESSAGES,
-      [AC_TRY_LINK([#include <locale.h>], [return LC_MESSAGES],
-       am_cv_val_LC_MESSAGES=yes, am_cv_val_LC_MESSAGES=no)])
+      [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <locale.h>]], [[return LC_MESSAGES]])],[am_cv_val_LC_MESSAGES=yes],[am_cv_val_LC_MESSAGES=no])])
     if test $am_cv_val_LC_MESSAGES = yes; then
       AC_DEFINE(HAVE_LC_MESSAGES, 1,
         [Define if your <locale.h> file defines LC_MESSAGES.])
@@ -509,7 +509,7 @@ AM_CONDITIONAL(WITH_APPLESPELL, test "x$build_applespell" = "xyes")
 
 dnl =======================================================================================
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
 Makefile
 enchant.pc
 enchant-uninstalled.pc
@@ -530,6 +530,7 @@ doc/Makefile
 data/Makefile
 autopackage/default.apspec
 ])
+AC_OUTPUT
 
 dnl ===========================================================================================
 

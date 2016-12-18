@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS=src tests doc data
 
 pkgconfigdir = $(libdir)/pkgconfig
