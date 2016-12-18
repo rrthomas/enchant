@@ -707,7 +707,7 @@ enchant_session_contains (EnchantSession * session, const char * const word, siz
 	
 	if (g_hash_table_lookup (session->session_include, utf) ||
 		(enchant_pwl_check (session->personal, word, len) == 0 &&
-		 !enchant_pwl_check (session->exclude, word, len) == 0))
+		 (!enchant_pwl_check (session->exclude, word, len)) == 0))
 		result = TRUE;
 	
 	g_free (utf);
