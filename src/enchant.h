@@ -132,20 +132,6 @@ ENCHANT_MODULE_EXPORT (void)
 ENCHANT_MODULE_EXPORT (void)
 	     enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
 
-#ifndef ENCHANT_DISABLE_DEPRECATED
-ENCHANT_MODULE_EXPORT (void)
-     enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions);
-ENCHANT_MODULE_EXPORT (void)
-     enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
-				   ssize_t len);
-ENCHANT_MODULE_EXPORT (void)
-     enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
-			      ssize_t len);
-ENCHANT_MODULE_EXPORT (int)
-     enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
-				 ssize_t len);
-#endif /* ENCHANT_DISABLE_DEPRECATED */
-
 /* const */
 ENCHANT_MODULE_EXPORT(char *)
      enchant_dict_get_error (EnchantDict * dict);

@@ -1066,36 +1066,6 @@ enchant_dict_add (EnchantDict * dict, const char *const word,
 }
 
 /**
- * enchant_dict_add_to_pwl
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- *
- * DEPRECATED. Please use enchant_dict_add() instead.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
-			 ssize_t len)
-{
-	enchant_dict_add(dict,word,len);
-}
-
-/**
- * enchant_dict_add_to_personal
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- *
- * DEPRECATED. Please use enchant_dict_add() instead.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
-				  ssize_t len)
-{
-	enchant_dict_add(dict, word, len);
-}
-
-/**
  * enchant_dict_add_to_session
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to add to this spell-checking session, in UTF-8 encoding
@@ -1150,21 +1120,6 @@ enchant_dict_is_added (EnchantDict * dict, const char *const word,
 	enchant_session_clear_error (session);
 
 	return enchant_session_contains (session, word, len);
-}
-
-/**
- * enchant_dict_is_in_session
- * @dict: A non-null #EnchantDict
- * @word: The word you wish to see if it's in your session in UTF8 encoding
- * @len: the byte length of @word, or -1 for strlen (@word)
- *
- * DEPRECATED. Please use enchant_dict_is_added() instead.
-*/
-ENCHANT_MODULE_EXPORT (int)
-enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
-				ssize_t len)
-{
-	return enchant_dict_is_added(dict, word, len);
 }
 
 /**
@@ -1314,21 +1269,6 @@ enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 	g_strfreev(string_list);
-}
-
-/**
- * enchant_dict_free_suggestions
- * @dict: A non-null #EnchantDict
- * @suggestions: The non-null suggestion list returned by
- *               'enchant_dict_suggest'
- *
- * Releases the suggestions
- * This function is DEPRECATED. Please use enchant_dict_free_string_list() instead.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions)
-{
-	enchant_dict_free_string_list (dict, suggestions);
 }
 
 /**

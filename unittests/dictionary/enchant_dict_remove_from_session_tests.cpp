@@ -110,9 +110,9 @@ TEST_FIXTURE(EnchantDictionaryRemoveFromSession_TestFixture,
              EnchantDictionaryRemoveFromSession_InBrokerSession_WordExcludedFromBrokerSession)
 {
     enchant_dict_add_to_session(_pwl, "hello", -1);
-    CHECK(enchant_dict_is_in_session(_pwl, "hello", -1));
+    CHECK(enchant_dict_is_added(_pwl, "hello", -1));
     enchant_dict_remove_from_session(_pwl, "hello", -1);
-    CHECK(!enchant_dict_is_in_session(_pwl, "hello", -1));
+    CHECK(!enchant_dict_is_added(_pwl, "hello", -1));
 }
 
 TEST_FIXTURE(EnchantDictionaryRemoveFromSession_TestFixture,

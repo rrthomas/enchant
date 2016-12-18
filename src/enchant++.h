@@ -166,15 +166,6 @@ namespace enchant
 				return m_provider_file;
 			}
 
-			/* deprecated */
-			void add_to_personal (const std::string & utf8word) {
-				return add (utf8word);
-			}
-
-			/* deprecated */
-			void add_to_pwl (const std::string & utf8word) {
-				return add (utf8word);
-			}
 		private:
 
 			// space reserved for API/ABI expansion

@@ -224,7 +224,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
     }
 
     bool IsWordInSession(const std::string& word){
-        return enchant_dict_is_in_session(_dict, word.c_str(), word.size())!=0;
+        return enchant_dict_is_added(_dict, word.c_str(), word.size())!=0;
     }
 
     bool IsWordInDictionary(const std::string& word){
