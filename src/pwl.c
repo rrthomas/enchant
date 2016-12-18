@@ -729,8 +729,8 @@ static int best_distance(char** suggs, const char *const word, size_t len)
 
 /* gives the best set of suggestions from pwl that are at least as good as the 
  * given suggs (if suggs == NULL just best from pwl) */
-char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
-			   size_t len, const char*const*const suggs, size_t* out_n_suggs)
+char** enchant_pwl_suggest(EnchantPWL *pwl, const char *const word,
+			   size_t len, char** suggs, size_t* out_n_suggs)
 {
 	EnchantTrieMatcher* matcher;
 	EnchantSuggList sugg_list;
