@@ -830,9 +830,9 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
  */
 static int
 enchant_dict_merge_suggestions(EnchantDict * dict, 
-								const char ** suggs, 
+								char ** suggs,
 								size_t n_suggs,
-								const char * const* const new_suggs,
+								char ** new_suggs,
 								size_t n_new_suggs)
 {
 	size_t i, j;
@@ -871,7 +871,7 @@ enchant_dict_merge_suggestions(EnchantDict * dict,
 
 static char **
 enchant_dict_get_good_suggestions(EnchantDict * dict, 
-								const char * const* const suggs, 
+								char ** suggs,
 								size_t n_suggs,
 								size_t* out_n_filtered_suggs)
 {
