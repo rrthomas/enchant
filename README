@@ -8,7 +8,7 @@ file COPYING.LIB.
 dealing with different spell checking libraries.
 
    Enchant is meant to provide a generic interface into various existing
-spell checking libaries. These include, but are not limited to:
+spell checking libraries. These include, but are not limited to:
 
     * Hunspell (formerly Myspell)
     * Apple Spell (OS X only)
@@ -18,7 +18,7 @@ spell checking libaries. These include, but are not limited to:
     * Uspell
     * Voikko (Linux only)
 
-   Enchant is also meant to be used in a cross-platform (XP) environment. Part
+   Enchant is also meant to be used in a cross-platform environment. Part
 of this means that Enchant wants to limit its number of external dependencies
 to 0, or as close is as humanly possible. Also, any enchant consumer (i.e. a
 Word Processor) should not need to know about what backend providers Enchant
@@ -56,11 +56,11 @@ Aspell/Pspell:
 Mailing lists
 -------------
 
-   There is NO mailing list used to discuss libenchant specificly as yet.  For now
-please use the AbiWord-devel list. To subscribe send a mail to:
+   There is NO mailing list used to discuss libenchant specifically as yet.
+For now please use the AbiWord-devel list. To subscribe send a mail to:
 
 	abiword-dev-request@abisource.com
 And in the body of the message write "subscribe"
 
-An archive of the mailing lists is available in:
+An archive of the mailing lists is available at:
 	http://www.abisource.com/mailinglists/abiword-dev/
