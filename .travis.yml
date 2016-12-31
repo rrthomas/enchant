@@ -59,3 +59,4 @@ script:
   - ./autogen.sh
   - make
   - make check
+  - make distcheck
