@@ -475,7 +475,7 @@ AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--disable-zemberek],[enable the experime
 if test "x$have_cxx" = "xno"; then
    build_zemberek=no
 fi
-PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib >= 0.62], build_zemberek=yes, build_zemberek=no)
+PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib-1 >= 0.62], build_zemberek=yes, build_zemberek=no)
 
 AC_SUBST(ZEMBEREK_CFLAGS)
 AC_SUBST(ZEMBEREK_LIBS)
