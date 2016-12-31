@@ -1,6 +1,7 @@
 *.o
 *.lo
 *.la
+enchant-*.tar.gz
 .libs
 .deps
 /aclocal.m4
