@@ -2,6 +2,7 @@
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
  *               2007 Hannu Väisänen
+ *               2016 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,6 +38,8 @@
  * calls a spelling program (e.g. enchant) like this
  *
  * enchant -a -m -d dictionary
+ *
+ * Modified in 2016 to implement most ispell prefix commands.
  */
 
 #include <stdio.h>
@@ -100,9 +103,10 @@ consume_line (FILE * in, GString * str)
 		if (ch == '\r')
 			continue;
 		else {
-			g_string_append_c (str, ch);
 			if (ch == '\n')
 				ret = FALSE;
+			else
+				g_string_append_c (str, ch);
 		}
 	}
 
@@ -141,16 +145,18 @@ print_utf (FILE * out, const char * str)
 }
 
 static void
-do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, size_t lineCount)
+do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, size_t lineCount, gboolean terse_mode)
 {
 	size_t n_suggs;
 	char ** suggs;	
 
 	if (word->len <= MIN_WORD_LENGTH || enchant_dict_check (dict, word->str, word->len) == 0) {
-		if (lineCount)
-			fprintf (out, "* %u\n", (unsigned int)lineCount);
-		else
-			fwrite ("*\n", 1, 2, out);
+		if (!terse_mode) {
+			if (lineCount)
+				fprintf (out, "* %u\n", (unsigned int)lineCount);
+			else
+				fwrite ("*\n", 1, 2, out);
+		}
 	}
 	else {
 		suggs = enchant_dict_suggest (dict, word->str, 
@@ -203,6 +209,10 @@ is_word_char (gunichar uc, size_t n)
 {
 	GUnicodeType type;
 
+	if (uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’")) {
+		return 1;
+	}
+
 	type = g_unichar_type(uc);
 
 	switch (type) {
@@ -211,7 +221,7 @@ is_word_char (gunichar uc, size_t n)
 	case G_UNICODE_TITLECASE_LETTER:
 	case G_UNICODE_UPPERCASE_LETTER:
 	case G_UNICODE_OTHER_LETTER:
-	case G_UNICODE_COMBINING_MARK:
+	case G_UNICODE_COMBINING_MARK: /* Older name for G_UNICODE_SPACING_MARK; deprecated since glib 2.30 */
 	case G_UNICODE_ENCLOSING_MARK:
 	case G_UNICODE_NON_SPACING_MARK:
 	case G_UNICODE_DECIMAL_NUMBER:
@@ -220,12 +230,17 @@ is_word_char (gunichar uc, size_t n)
 	case G_UNICODE_CONNECT_PUNCTUATION:
                 return 1;     /* Enchant 1.3.0 defines word chars like this. */
 
+	case G_UNICODE_DASH_PUNCTUATION:
+		if ((n > 0) && (type == G_UNICODE_DASH_PUNCTUATION)) {
+			return 1; /* hyphens only accepted within a word. */
+		}
+		/* Fallthrough */
+
 	case G_UNICODE_CONTROL:
 	case G_UNICODE_FORMAT:
 	case G_UNICODE_UNASSIGNED:
 	case G_UNICODE_PRIVATE_USE:
 	case G_UNICODE_SURROGATE:
-	case G_UNICODE_DASH_PUNCTUATION:
 	case G_UNICODE_CLOSE_PUNCTUATION:
 	case G_UNICODE_FINAL_PUNCTUATION:
 	case G_UNICODE_INITIAL_PUNCTUATION:
@@ -239,13 +254,6 @@ is_word_char (gunichar uc, size_t n)
 	case G_UNICODE_PARAGRAPH_SEPARATOR:
 	case G_UNICODE_SPACE_SEPARATOR:
 	default:
-		if ((n > 0) && (uc == g_utf8_get_char("'"))) {
-		        return 1;  /** Char ' is accepted only within a word. */
-		}
-		else if ((n > 0) && (type == G_UNICODE_DASH_PUNCTUATION)) {
-			return 1; /* hyphens only accepted within a word. */
-		}
-
 		return 0;
 	}
 }
@@ -327,7 +335,7 @@ convert_language_code (gchar *code)
 }
 
 
-/* Splits a line into a set of (word,word_position) touples. */
+/* Splits a line into a set of (word,word_position) tuples. */
 static GSList *
 tokenize_line (GString * line)
 {
@@ -342,7 +350,8 @@ tokenize_line (GString * line)
 	word = g_string_new (NULL);
 
 	while (cur_pos < line->len && *utf) {
-    int i;
+		int i;
+
 	        /* Skip non-word characters. */
 		cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		uc = g_utf8_get_char (utf);
@@ -368,7 +377,7 @@ tokenize_line (GString * line)
 			i--;
 		}
 
-		/* Save (word, position) touple. */
+		/* Save (word, position) tuple. */
                 if (word->len) {
 		        tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
 			tokens = g_slist_append (tokens, GINT_TO_POINTER(start_pos));
@@ -391,7 +400,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 	gchar * lang;
 	size_t pos, lineCount = 0;
 
-	gboolean was_last_line = FALSE, corrected_something = FALSE;
+	gboolean was_last_line = FALSE, corrected_something = FALSE, terse_mode = FALSE;
 
 	if (mode == MODE_A)
 		print_version (out);
@@ -422,6 +431,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 	str = g_string_new (NULL);
 	
 	while (!was_last_line) {
+		gboolean mode_A_no_command = FALSE;
 		was_last_line = consume_line (in, str);
 
 		if (countLines)
@@ -429,24 +439,92 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 
 		if (str->len) {
 			corrected_something = FALSE;
-			token_ptr = tokens = tokenize_line (str);
-			while (tokens != NULL) {
-				corrected_something = TRUE;
 
-				word = (GString *)tokens->data;
-				tokens = tokens->next;
-				pos = GPOINTER_TO_INT(tokens->data);
-				tokens = tokens->next;
+			if (mode == MODE_A) {
+				switch (*str->str) {
+				case '&': /* Insert uncapitalised in personal word list */
+					if (str->len > 1) {
+						gunichar c = g_utf8_get_char_validated(str->str + 1, str->len);
+						if (c > 0) {
+							str = g_string_erase(str, 1, g_utf8_next_char(str->str + 1) - (str->str + 1));
+							g_string_insert_unichar(str, 1, g_unichar_tolower(c));
+						}
+					}
+					/* FALLTHROUGH */
+				case '*': /* Insert in personal word list */
+					if (str->len == 1)
+						goto empty_word;
+					enchant_dict_add(dict, str->str + 1, -1);
+					break;
+				case '@': /* Accept for this session */
+					if (str->len == 1)
+						goto empty_word;
+					enchant_dict_add_to_session(dict, str->str + 1, -1);
+					break;
 
-				if (mode == MODE_A)
-					do_mode_a (out, dict, word, pos, lineCount);
-				else if (mode == MODE_L)
-					do_mode_l (out, dict, word, lineCount);
+				case '%': /* Exit terse mode */
+					terse_mode = FALSE;
+					break;
+				case '!': /* Enter terse mode */
+					terse_mode = TRUE;
+					break;
 
-				g_string_free(word, TRUE);
+				/* Ignore these commands */
+				case '#': /* Save personal word list (enchant does this automatically) */
+				case '+': /* LaTeX mode */
+				case '-': /* nroff mode [default] */
+				case '~': /* change string character type (enchant is fixed to UTF-8) */
+				case '`': /* Enter verbose-correction mode */
+					break;
+
+				case '$': /* Save correction for rest of session [aspell extension] */
+					{ /* Syntax: $$ra <MISSPELLED>,<REPLACEMENT> */
+						gchar *prefix = "$$ra ";
+						if (g_str_has_prefix(str->str, prefix)) {
+							gchar *comma = g_utf8_strchr(str->str, -1, (gunichar)',');
+							char *mis = str->str + strlen(prefix);
+							char *cor = comma + 1;
+							ssize_t mis_len = comma - mis;
+							ssize_t cor_len = strlen(str->str) - (cor - str->str);
+							enchant_dict_store_replacement(dict, mis, mis_len, cor, cor_len);
+						}
+					}
+					break;
+
+				case '^': /* ^ is used as prefix to prevent interpretation of original
+					     first character as a command */
+					/* FALLTHROUGH */
+				default: /* A word or words to check */
+					mode_A_no_command = TRUE;
+					break;
+
+				empty_word:
+					fprintf (out, "Error: The word \"\" is invalid. Empty string.\n");
+				}
 			}
-			if (token_ptr)
-				g_slist_free (token_ptr);
+
+			if (mode != MODE_A || mode_A_no_command) {
+				token_ptr = tokens = tokenize_line (str);
+				if (tokens == NULL)
+					putc('\n', out);
+				while (tokens != NULL) {
+					corrected_something = TRUE;
+
+					word = (GString *)tokens->data;
+					tokens = tokens->next;
+					pos = GPOINTER_TO_INT(tokens->data);
+					tokens = tokens->next;
+
+					if (mode == MODE_A)
+						do_mode_a (out, dict, word, pos, lineCount, terse_mode);
+					else if (mode == MODE_L)
+						do_mode_l (out, dict, word, lineCount);
+
+					g_string_free(word, TRUE);
+				}
+				if (token_ptr)
+					g_slist_free (token_ptr);
+			}
 		} 
 		
 		if (mode == MODE_A && corrected_something) {
