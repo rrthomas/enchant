@@ -4,10 +4,26 @@ os:
   - linux
   - osx
 
+dist: trusty
+sudo: required
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages: &default_deps
+      - libglib2.0-dev
+      - libdbus-glib-1-dev
+      - ispell
+      - hspell
+      - libhunspell-dev
+      - libvoikko-dev
+      - aspell
+      # - zemberek-server: installs with error in Travis’s trusty environment
+
 matrix:
   include:
     - os: linux
-      dist: trusty
     - os: osx
       osx_image: xcode7.2
     - os: osx
@@ -15,45 +31,27 @@ matrix:
     - compiler: gcc
       env: COMPILER=g++
     - compiler: gcc
-      addons:
-          apt:
-            sources:
-              - ubuntu-toolchain-r-test
-            packages:
-              - libglib2.0-dev
-              - libdbus-glib-1-dev
-              - hspell
-              - libhunspell-dev
-              - libvoikko-dev
-              - aspell
-              - g++-5
       env: COMPILER=g++-5
-    - compiler: gcc
       addons:
-          apt:
-            sources:
-              - ubuntu-toolchain-r-test
-            packages:
-              - libglib2.0-dev
-              - libdbus-glib-1-dev
-              - hspell
-              - libhunspell-dev
-              - libvoikko-dev
-              - aspell
-              - g++-6
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_deps
+            - [g++-5]
+    - compiler: gcc
       env: COMPILER=g++-6
-addons:
-  apt:
-    packages:
-      - libglib2.0-dev
-      - libdbus-glib-1-dev
-      - hspell
-      - libhunspell-dev
-      - libvoikko-dev
-      - aspell
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_deps
+            - [g++-6]
+
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib aspell hspell hunspell libvoikko ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib aspell hspell hunspell libvoikko ispell ; fi
 
 script:
   - ./autogen.sh
