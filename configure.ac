@@ -528,7 +528,6 @@ tests/Makefile
 tests/ispell
 doc/Makefile
 data/Makefile
-autopackage/default.apspec
 ])
 AC_OUTPUT
 
