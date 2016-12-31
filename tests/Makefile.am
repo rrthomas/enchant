@@ -1,35 +1,45 @@
 AM_CPPFLAGS=-I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
-EXTRA_DIST=test.pwl ispell.in
+# Note: each directory is given with and without $(ENCHANT_LT_OBJDIR) to
+# work with static builds and on systems that do not have static compilation
+# and hence don't use LT_OBJDIR.
+# FIXME: Following line is ugly (but inserting backslashes stops it
+# working), and not portable to Windows (need semicolons instead of colons)
+AM_TESTS_ENVIRONMENT=\
+	ENCHANT_MODULE_PATH=$(top_builddir)/src/applespell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/applespell:$(top_builddir)/src/aspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/aspell:$(top_builddir)/src/hspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/hspell:$(top_builddir)/src/ispell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/ispell:$(top_builddir)/src/myspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/myspell:$(top_builddir)/src/uspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/uspell:$(top_builddir)/src/voikko/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/voikko:$(top_builddir)/src/zemberek/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/zemberek; \
+	export ENCHANT_MODULE_PATH; \
+	rm -f test.pwl; \
+	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
+	chmod +w $(builddir)/test.pwl;
 
-DEPS= $(top_builddir)/src/libenchant.la
-ldadd= $(top_builddir)/src/libenchant.la  $(ENCHANT_LIBS)
+DISTCLEANFILES = test.pwl
+
+EXTRA_DIST=test.pwl.orig ispell.in
+
+ldadd= $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
 
 if WITH_CXX
-cxx_progs = test-enchantxx
+cxx_progs = enchantxx.test
 else
 cxx_progs =
 endif
 
-noinst_PROGRAMS = test-enchant $(cxx_progs)
+noinst_PROGRAMS = enchant.test $(cxx_progs)
 bin_PROGRAMS= enchant-lsmod enchant
 
-test_enchant_SOURCES = test-enchant.c
-test_enchant_LDFLAGS =
-test_enchant_DEPENDENCIES = $(DEPS)
-test_enchant_LDADD = $(ldadd)
+enchant_test_SOURCES = enchant.test.c
+enchant_test_LDADD = $(ldadd)
 
 enchant_SOURCES = enchant-ispell.c
-enchant_LDFLAGS =
-enchant_DEPENDENCIES = $(DEPS)
 enchant_LDADD = $(ldadd)
 
-test_enchantxx_SOURCES = test-enchantxx.cpp
-test_enchantxx_LDFLAGS =
-test_enchantxx_DEPENDENCIES = $(DEPS)
-test_enchantxx_LDADD = $(ldadd)
+enchantxx_test_SOURCES = enchantxx.test.cpp
+enchantxx_test_LDADD = $(ldadd)
 
 enchant_lsmod_SOURCES = enchant-lsmod.c
-enchant_lsmod_LDFLAGS =
-enchant_lsmod_DEPENDENCIES = $(DEPS)
 enchant_lsmod_LDADD = $(ldadd)
+
+TESTS = $(noinst_PROGRAMS)
+
+# Enforce serial running of tests, so they don't contend for test.pwl
+enchantxx.log: enchant.log

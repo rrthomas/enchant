@@ -1,5 +1,8 @@
+/*.trs
+/*.log
 /enchant
 /enchant-lsmod
 /ispell
-/test-enchant
-/test-enchantxx
+/enchant.test
+/enchantxx.test
+/test.pwl
