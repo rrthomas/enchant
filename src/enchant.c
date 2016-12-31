@@ -1918,6 +1918,8 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 {
 	GSList *list;
 	GHashTable *tags;
+	GHashTableIter iter;
+	gpointer key, value;
 	
 	g_return_if_fail (broker);
 	g_return_if_fail (fn);
@@ -1929,35 +1931,59 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
 			EnchantProvider *provider;
-			GModule *module;
 
 			provider = (EnchantProvider *) list->data;
-			module = (GModule *) provider->enchant_private_data;
 
 			if (provider->list_dicts)
 				{
-					const char * tag, * name, * desc, * file;
 					size_t n_dicts, i;
-					char ** dicts;				       
+					char ** dicts;
 
 					dicts = (*provider->list_dicts) (provider, &n_dicts);
-					name = (*provider->identify) (provider);
-					desc = (*provider->describe) (provider);
-					file = g_module_name (module);
 
 					for (i = 0; i < n_dicts; i++)
 						{
+							const char * tag;
+
 							tag = dicts[i];
-							if(enchant_is_valid_dictionary_tag(tag) &&
-							   !g_hash_table_lookup (tags, tag))
-								{
-									g_hash_table_insert (tags, g_strdup (tag), GINT_TO_POINTER(TRUE));
-									(*fn) (tag, name, desc, file, user_data);
+							if (enchant_is_valid_dictionary_tag (tag)) {
+								gpointer ptr;
+								GSList *providers;
+								gint this_priority;
+
+								providers = enchant_get_ordered_providers (broker, tag);
+								this_priority = g_slist_index (providers, provider);
+								if (this_priority != -1) {
+									gint min_priority;
+
+									min_priority = this_priority + 1;
+									ptr = g_hash_table_lookup (tags, tag);
+									if (ptr != NULL)
+										min_priority = g_slist_index (providers, ptr);
+									if (this_priority < min_priority)
+										g_hash_table_insert (tags, g_strdup (tag), provider);
 								}
+							}
 						}
 
 					enchant_provider_free_string_list (provider, dicts);
 				}	
+		}
+
+	g_hash_table_iter_init (&iter, tags);
+	while (g_hash_table_iter_next (&iter, &key, &value))
+		{
+			const char * tag, * name, * desc, * file;
+			EnchantProvider * provider;
+			GModule *module;
+
+			tag = (const char *) key;
+			provider = (EnchantProvider *) value;
+			module = (GModule *) provider->enchant_private_data;
+			name = (*provider->identify) (provider);
+			desc = (*provider->describe) (provider);
+			file = g_module_name (module);
+			(*fn) (tag, name, desc, file, user_data);
 		}
 
 	g_hash_table_destroy (tags);
