@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantDictionaryTestFixture.h"
+#include "EnchantDictionaryTestFixture.h"
 
 static bool callbackCalled;
 
@@ -109,8 +109,8 @@ TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
 TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
              EnchantDictionaryDescribe_NonNullUserdata_PassedToCallback)
 {
-    void* userData = "some user data";
-    enchant_dict_describe(_dict, EnchantSingleDictionaryDescribeAssignUserDataToStaticCallback, userData);
+    const char* userData = "some user data";
+    enchant_dict_describe(_dict, EnchantSingleDictionaryDescribeAssignUserDataToStaticCallback, (void*)userData);
     CHECK(callbackCalled);
     CHECK_EQUAL(userData, global_user_data);
 }

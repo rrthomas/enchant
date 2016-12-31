@@ -41,9 +41,9 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
         ReleaseDictionary(_dict);
     }
 
-    std::vector<const std::string> GetSuggestionsFromWord(EnchantDict* dict, const std::string& word)
+    std::vector<std::string> GetSuggestionsFromWord(EnchantDict* dict, const std::string& word)
     {
-        std::vector<const std::string> result;
+        std::vector<std::string> result;
         if(dict && dict->suggest)
         {
             size_t cSuggestions;
@@ -61,7 +61,7 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
         return result;
     }
 
-    std::vector<const std::string> GetSuggestionsFromWord(const std::string& word)
+    std::vector<std::string> GetSuggestionsFromWord(const std::string& word)
     {
         return GetSuggestionsFromWord(_dict, word);
     }
@@ -71,7 +71,7 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
 	    const char* it, *itEnd;
 	    bool hasCap = false;
 
-        for(it = word.c_str(), itEnd = it+word.length();
+            for(it = word.c_str(), itEnd = it+word.length();
             it < itEnd; it = g_utf8_next_char(it))
 		    {
 			    GUnicodeType type = g_unichar_type(g_utf8_get_char(it));
@@ -94,7 +94,7 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
 	    gunichar ch;
 	    GUnicodeType type;
 
-        ch = g_utf8_get_char(word.c_str());
+            ch = g_utf8_get_char(word.c_str());
     	
 	    type = g_unichar_type(ch);
 	    if(type == G_UNICODE_UPPERCASE_LETTER || type == G_UNICODE_TITLECASE_LETTER)
@@ -111,7 +111,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
 {
     if(_dict && _dict->suggest)
     {
-      std::vector<const std::string> suggestions = GetSuggestionsFromWord("fiance");
+      std::vector<std::string> suggestions = GetSuggestionsFromWord("fiance");
       CHECK(suggestions.size() != 0);
     }
 }
@@ -122,7 +122,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
     EnchantDict* dict = GetDictionary("fr_FR");
     if(dict && dict->suggest)
     {
-      std::vector<const std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"fran\x00e7" L"ais")); //NFC latin small letter c with cedilla
+      std::vector<std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"fran\x00e7" L"ais")); //NFC latin small letter c with cedilla
       CHECK(suggestions.size() != 0);
     }
     ReleaseDictionary(dict);
@@ -134,7 +134,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
     EnchantDict* dict = GetDictionary("fr_FR");
     if(dict && dict->suggest)
     {
-      std::vector<const std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"franc\x0327" L"ais")); //NFD combining cedilla
+      std::vector<std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"franc\x0327" L"ais")); //NFD combining cedilla
       CHECK(suggestions.size() != 0);
     }
     ReleaseDictionary(dict);
@@ -147,8 +147,8 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
 {
     if(_dict && _dict->suggest)
     {
-      std::vector<const std::string> suggestions = GetSuggestionsFromWord("AAA");
-      for(std::vector<const std::string>::const_iterator i = suggestions.begin();
+      std::vector<std::string> suggestions = GetSuggestionsFromWord("AAA");
+      for(std::vector<std::string>::const_iterator i = suggestions.begin();
           i != suggestions.end();
           ++i)
       {
@@ -162,8 +162,8 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
 {
     if(_dict && _dict->suggest)
     {
-      std::vector<const std::string> suggestions = GetSuggestionsFromWord("Aaa");
-      for(std::vector<const std::string>::const_iterator i = suggestions.begin();
+      std::vector<std::string> suggestions = GetSuggestionsFromWord("Aaa");
+      for(std::vector<std::string>::const_iterator i = suggestions.begin();
           i != suggestions.end();
           ++i)
       {

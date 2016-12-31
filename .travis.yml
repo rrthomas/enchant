@@ -1,9 +1,5 @@
 language: cpp
 
-os:
-  - linux
-  - osx
-
 dist: trusty
 sudo: required
 
@@ -20,31 +16,25 @@ addons:
       - libhunspell-dev
       - libvoikko-dev
       - aspell-en
+      - libunittest++-dev
+      - g++-5
       # - zemberek-server: installs with error in Travis’s trusty environment
 
-env: &default_env
-  - VERBOSE=1 # Get test logs in Travis logs
+env:
+  global:
+    - VERBOSE=1 # Get test logs in Travis logs
 
 matrix:
   include:
+    - os: linux
+      env:
+        - COMPILER=g++-5
     - os: osx
       osx_image: xcode7.2
     - os: osx
       osx_image: xcode8.2
     - compiler: gcc
       env:
-        - *default_env
-        - COMPILER=g++-5
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_deps
-            - [g++-5]
-    - compiler: gcc
-      env:
-        - *default_env
         - COMPILER=g++-6
       addons:
         apt:
@@ -56,9 +46,9 @@ matrix:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib aspell hspell hunspell libvoikko ispell ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib aspell hspell hunspell libvoikko ispell unittest-cpp ; fi
 
 script:
-  - ./autogen.sh
+  - ./autogen.sh CXX=$COMPILER
   - make
   - make distcheck

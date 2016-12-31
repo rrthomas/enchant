@@ -276,7 +276,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 
 static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 {
-	char buffer[BUFSIZ];
+	char buffer[BUFSIZ + 1];
 	char* line;
 	size_t line_number = 1;
 	FILE *f;

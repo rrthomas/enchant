@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 
 /**
  * enchant_broker_get_error

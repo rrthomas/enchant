@@ -1,7 +1,7 @@
 AC_INIT([enchant],[1.6.1])
 AC_PACKAGE_VERSION
 AC_CONFIG_SRCDIR(src/enchant.h)
-AM_INIT_AUTOMAKE([no-define])
+AM_INIT_AUTOMAKE([no-define subdir-objects])
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
@@ -50,6 +50,7 @@ AC_CHECK_FUNCS(flock lockf)
 
 have_cxx=yes
 AC_PROG_CXX(,have_cxx=no)
+AX_CXX_COMPILE_STDCXX(11)
 AM_CONDITIONAL(WITH_CXX, test "x$have_cxx" = "xyes")
 
 PKG_PROG_PKG_CONFIG
@@ -269,7 +270,41 @@ glib_DEFUN([GLIB_LC_MESSAGES],
 
 GLIB_LC_MESSAGES
 
+
 dnl ===========================================================================
+dnl Travis run Ubuntu 14.04 LTS which doesn't include that macro
+dnl added to pkg-config in January 2013.
+dnl ===========================================================================
+m4_ifndef([PKG_CHECK_VAR], [
+AC_DEFUN([PKG_CHECK_VAR],
+  [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
+     AC_ARG_VAR([$1], [value of $3 for $2, overriding pkg-config])dnl
+     _PKG_CONFIG([$1], [variable="][$3]["], [$2])
+     AS_VAR_COPY([$1], [pkg_cv_][$1])
+     AS_VAR_IF([$1], [""], [$5], [$4])dnl
+  ])# PKG_CHECK_VAR
+])
+
+dnl ===========================================================================
+dnl very hackish.
+dnl Unbuntu / Debian ship older version of unittest++ with their own pkg-config
+dnl and include
+dnl ===========================================================================
+PKG_CHECK_EXISTS([UnitTest++],
+    [PKG_CHECK_MODULES(UNITTESTPP, [UnitTest++])
+dnl and because of the above, we need to tweak the include until we stop
+dnl supporting this old version.
+        PKG_CHECK_VAR(UNITTESTPP_INCLUDE, [UnitTest++], [includedir])
+        if test "x$UNITTESTPP_INCLUDE" != "x"; then
+            UNITTESTPP_CFLAGS="$UNITTESTPP_CFLAGS -I$UNITTESTPP_INCLUDE/UnitTest++"
+        fi
+    ],
+    [PKG_CHECK_EXISTS([unittest++],
+        [PKG_CHECK_MODULES(UNITTESTPP, [unittest++])]
+    )]
+)
+AC_SUBST(UNITTESTPP_CFLAGS)
+AC_SUBST(UNITTESTPP_LIBS)
 
 dnl binreloc
 dnl AM_BINRELOC
@@ -530,6 +565,9 @@ src/voikko/Makefile
 src/zemberek/Makefile
 tests/Makefile
 tests/ispell
+unittests/Makefile
+unittests/enchant_providers/Makefile
+unittests/mock_provider/Makefile
 doc/Makefile
 data/Makefile
 ])

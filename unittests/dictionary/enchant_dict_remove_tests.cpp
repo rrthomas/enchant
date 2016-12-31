@@ -23,7 +23,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantDictionaryTestFixture.h"
+#include "EnchantDictionaryTestFixture.h"
 
 static bool addToExcludeCalled;
 static std::string wordToAdd;
@@ -200,9 +200,11 @@ TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
 {
     enchant_dict_remove(_dict, "aelo", -1);
 
-    std::vector<const std::string> suggestions = GetSuggestions("helo");
+    std::vector<std::string> suggestions = GetSuggestions("helo");
     CHECK_EQUAL(3, suggestions.size());
-    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo",1), suggestions, std::min(3u,suggestions.size()));
+    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo",1), suggestions,
+                      std::min(static_cast<std::vector<std::string>::size_type>(3),
+                               suggestions.size()));
 }
 
 TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
@@ -211,7 +213,7 @@ TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
     enchant_dict_remove(_dict, "aelo", -1);
     enchant_dict_add_to_session(_dict, "aelo", -1);
 
-    std::vector<const std::string> suggestions = GetSuggestions("helo");
+    std::vector<std::string> suggestions = GetSuggestions("helo");
     CHECK_EQUAL(4, suggestions.size());
     CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo"), suggestions, suggestions.size());
 }
@@ -224,9 +226,11 @@ TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
 
     ReloadTestDictionary(); // to see what actually persisted
 
-    std::vector<const std::string> suggestions = GetSuggestions("helo");
+    std::vector<std::string> suggestions = GetSuggestions("helo");
     CHECK_EQUAL(3, suggestions.size());
-    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo",1), suggestions, std::min(3u,suggestions.size()));
+    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo",1), suggestions,
+                      std::min(static_cast<std::vector<std::string>::size_type>(3),
+                               suggestions.size()));
 }
 
 /* since the broker pwl file is a read/write file (there is no readonly dictionary in addition)

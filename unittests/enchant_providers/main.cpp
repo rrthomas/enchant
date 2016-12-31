@@ -25,6 +25,7 @@
 #include <glib.h>
 #include <gmodule.h>
 #include <assert.h>
+#include <string.h>
 #include "unittest_enchant_providers.h"
 
 int Test(char* path);
