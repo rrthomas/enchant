@@ -17,12 +17,5 @@ libenchant_myspell_la_SOURCES =	\
 	myspell_checker.cpp
 
 EXTRA_DIST=			\
-	$(COPIED_MYSPELL_FILES)	\
-	license.readme		\
-	utf_info.cxx		\
-	license.hunspell	\
-	license.myspell		\
-	license.readme		\
-	libenchant_myspell.rc		\
-	hunspell.dsp
+	libenchant_myspell.rc
 
