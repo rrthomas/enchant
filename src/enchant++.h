@@ -49,16 +49,26 @@ namespace enchant
 					m_ex = ex;
 			}
 
-			virtual ~Exception () throw() {
+			virtual ~Exception ()
+#if __cplusplus >= 201103L
+				noexcept
+#else
+				throw()
+#endif
+			{
 			}
-			
-			virtual const char * what () throw() {
+
+			virtual const char * what () const
+#if __cplusplus >= 201103L
+				noexcept
+#else
+				throw()
+#endif
+			{
 				return m_ex.c_str();
 			}
 
 		private:
-			Exception ();
-
 			std::string m_ex;
 		};
 
