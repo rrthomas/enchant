@@ -44,10 +44,12 @@
 
 /* built against hunspell 1.2.2 on 2008-04-12 */
 
-#ifdef HUNSPELL_STATIC
-#include "hunspell.hxx"
-#else
 #include <hunspell/hunspell.hxx>
+
+/* Some versions of hunspell (1.4.x) don't have this defined. */
+/* This is the defined value at that point */
+#ifndef MAXWORDLEN
+#define MAXWORDLEN 176
 #endif
 
 ENCHANT_PLUGIN_DECLARE("Myspell")
