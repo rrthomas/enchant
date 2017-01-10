@@ -8,7 +8,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 dnl Release number rules:
 dnl This is derived from "Versioning" chapter of info libtool documentation.
-dnl Format is MAJOR:MIINOR:MICRO
+dnl Format is MAJOR:MINOR:MICRO
 dnl     4a) Increment major when removing or changing interfaces.
 dnl     4a) 5) Increment minor when adding interfaces.
 dnl     6) Set minor to zero when removing or changing interfaces.
