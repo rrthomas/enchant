@@ -167,6 +167,31 @@ _enchant_ensure_dir_exists (const char* dir)
 }
 
 static GSList *
+_enchant_get_dirs_from_string (const char * string)
+{
+	char **tokens;
+	GSList *dirs = NULL;
+
+#ifdef _WIN32
+	tokens = g_strsplit (string, ";", 0);
+#else
+	tokens = g_strsplit (string, ":", 0);
+#endif
+	if (tokens != NULL) {
+		int i;
+		for (i = 0; tokens[i]; i++)
+			{
+				char *token = g_strstrip(tokens[i]);
+				dirs = g_slist_append (dirs, g_strdup (token));
+			}
+
+		g_strfreev (tokens);
+	}
+
+	return dirs;
+}
+
+static GSList *
 enchant_get_user_dirs (void)
 {
 	GSList *user_dirs = NULL;
@@ -249,6 +274,22 @@ enchant_get_module_dirs (void)
 			g_free(prefix);
 			module_dirs = enchant_slist_append_unique_path (module_dirs, module_dir);
 		}
+
+	/* Use ENCHANT_MODULE_PATH env var */
+	{
+		const gchar* env = g_getenv("ENCHANT_MODULE_PATH");
+		if (env) {
+			const gchar * path = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
+			if (path)
+				{
+					GSList *dir;
+					for (dir = _enchant_get_dirs_from_string (path); dir; dir = dir->next)
+						{
+							module_dirs = enchant_slist_append_unique_path (module_dirs, dir->data);
+						}
+				}
+		}
+	}
 
 	return module_dirs;
 }
@@ -2330,30 +2371,12 @@ ENCHANT_MODULE_EXPORT (GSList *)
 enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_name)
 {
 	const char *param_value;
-	char **tokens;
-	GSList *dirs = NULL;
 
 	param_value = enchant_broker_get_param (broker, param_name);
 	if (param_value == NULL)
 		return NULL;
 
-#ifdef _WIN32
-	tokens = g_strsplit (param_value, ";", 0);
-#else
-	tokens = g_strsplit (param_value, ":", 0);
-#endif
-	if (tokens != NULL) {
-		int i;
-		for (i = 0; tokens[i]; i++) 
-			{
-				char *token = g_strstrip(tokens[i]);
-				dirs = g_slist_append (dirs, g_strdup (token));
-			}
-		
-		g_strfreev (tokens);		
-	}
-
-	return dirs;
+	return _enchant_get_dirs_from_string (param_value);
 }
 
 ENCHANT_MODULE_EXPORT(char *)
