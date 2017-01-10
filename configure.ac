@@ -180,7 +180,9 @@ AC_CACHE_CHECK([for supported C++ warning flags], enchant_cxx_cv_warn_cflags, [
 CXX_WARN_CFLAGS="$enchant_cxx_cv_warn_cflags"
 AC_SUBST(CXX_WARN_CFLAGS)
 
-ENCHANT_CFLAGS="$ENCHANT_CFLAGS -DENCHANT_PREFIX_DIR='\"$prefix\"'"
+if test "x$prefix" != "xNONE"; then
+	ENCHANT_CFLAGS="$ENCHANT_CFLAGS -DENCHANT_PREFIX_DIR='\"$prefix\"'"
+fi
 
 AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
