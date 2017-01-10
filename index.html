@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>Enchant</title>
+</head>
+<body>
+<div class="content">
+<h2>Enchant</h2>
+<p>by Dom Lachowicz</p>
+<p>Current maintainer: Reuben Thomas</p>
+
+<hr />
+
+<h3>News</h3>
+
+<p>Enchant is now <a href="https://github.com/AbiWord/enchant">hosted on Github</a></p>
+
+<p>April 1, 2010: Enchant 1.6.0 released. See <a href="#download">below</a> for download information.
+<ul>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12567">12567</a>: the ispell sources aren't licensed under the LGPL</li>
+<li>Add a function to get enchant's version (enchant_get_version)</li>
+<li>Disable zemberek plugin by default, as it's known to cause issues/crashes with WebKit</li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12472">12472</a>: Win32 DLL dependency not found popup occurs when module has unmet dependencies</li>
+<li>Possibly fix Ubuntu bug <a href="https://bugs.launchpad.net/ubuntu/+source/enchant/+bug/474062">474062</a></li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12409">12409</a>: Registry handle not closed in enchant_get_registry_value_ex</li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12406">12406</a>: Leak in _enchant_get_user_home_dirs() on Windows</li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12007">12007</a>: Update FSF address</li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12305">12305</a>: Zemberek module lists a Turkish dictionary even without Zemberek installed</li>
+<li>Don't assert if passed a null string list</li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12350">12350</a>: enchant_pwl_init_with_file truncates pwl file</li>
+<li>Fix a double-free memory corruption bug</li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12173">12173</a>: fix some small memory leaks</li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12174">12174</a>: mis-acceptence of dictionaries which start with a partial match of the lang id</li>
+<li>Fix bug <a href="http://bugzilla.abisource.com/show_bug.cgi?id=12160">12160</a>: enchant 1.5.0 always looks in "lib" dir for plugins</li>
+<li>Fix the build with the MSVC compiler</li>
+<li>Add a --with-system-myspell option</li>
+<li>Package missing compile-resource file</li>
+<li>Compare paths ignoring case sensitivity on windows</li>
+</ul>
+</p>
+
+<p>May 23, 2009: Enchant 1.5.0 released. See <a href="#download">below</a> for download information.</p>
+
+<p>May 5, 2008: Enchant 1.4.2 released. See <a href="#download">below</a> for download information.</p>
+
+<h3>What is Enchant?</h3>
+
+<p>On the surface, Enchant appears to be a generic spell checking
+library. You can request dictionaries from it, ask if a word is
+correctly spelled, get corrections for a misspelled word, etc...</p>
+
+<p>Beneath the surface, Enchant is a whole lot more - and less - than
+that. You'll see that Enchant isn't really a spell checking library at
+all.</p>
+
+<p>"What's that?" you ask. Well, Enchant doesn't try to do any of the
+work itself. It's lazy, and requires backends to do most of its dirty
+work. Looking closer, you'll see the Enchant is more-or-less a fancy
+wrapper around the <tt>dlopen()</tt> system call. Enchant steps in to
+provide uniformity and conformity on top of these libraries, and
+implement certain features that may be lacking in any individual
+provider library. Everything should "just work" for any and every
+definition of "just working."</p>
+
+<h3>Enchant, Pipes, API, and ABI</h3>
+
+<p>Enchant does not use pipes to talk with command line
+programs. Enchant is a full-fledged library, with a C and C++ API. Its
+communication with its various backends happens via "virtual function
+calls", or at least the C equivalent thereof. The backends are small
+C/C++ plugins. The backends themselves do not use the <tt>popen()</tt>
+call, but instead link to various libraries (eg: <a
+href="http://aspell.sf.net/">aspell</a>) and interface with said
+library's API to "get the job done."</p>
+
+<p>Further, enchant has a standard C API/ABI that will in due course
+be frozen for all of eternity, barring any gross oversights or
+shortcomings introduced by the author. I believe the current API to be
+rather sufficient for my various projects' needs. It may not, however,
+be sufficient for yours. If not, please read on to the "Enchant and
+Collaboration" section below.</p>
+
+<h3>No pipes? But I thought you support Ispell!</h3>
+
+<p>Enchant does support most Ispell dictionaries. Back in the day, I
+and some other folks from the AbiWord team forked Ispell in order to
+turn it into a C library. Unfortunately, it had a lot of Ispell
+"global state" cruft in it. Since then, we have turned this library
+into a stateful C++ library, complete with 1st-class classes and
+objects. In the process, we also believe that we've made Ispell more
+flexible, and that there is room for further flexibility
+still. Enchant's Ispell backend is based on this work done by myself
+and others inside of AbiWord.</p>
+
+<h3>Command Lines</h3>
+
+<p>Enchant is <strong>not</strong> another "ispell compatible" command
+line program. However, it does currently ship with one, as a
+"technology demo." The program currently isn't particularly good,
+especially when compared to 'aspell'. Contributions improving the
+command line program are generously welcomed.</p>
+
+<h3>Enchant and Wheels</h3>
+
+<p>As far as I know, Enchant re-invents no wheels here. This wheel is
+entirely new. Enchant doesn't implement its own correction code. It
+doesn't "duplicate" functionality already found in other projects, as
+frankly, it doesn't have much functionality of its own. Enchant wraps
+a common set of functionality present in a variety of existing
+products/libraries, and exposes a stable API/ABI for doing so. Where a
+library doesn't implement some specific functionality, Enchant will
+emulate it.</p>
+
+<h3>Backends</h3>
+
+<p>Enchant is capable of having multiple backends loaded at once. Currently, Enchant has 8 backends:</p>
+
+<ul>
+<li>Aspell/Pspell (intends to replace Ispell)</li>
+<li>Ispell (old as sin, could be interpreted as a defacto standard)</li>
+<li>MySpell/Hunspell (an OOo project, also used by Mozilla)</li>
+<li>Uspell (primarily Yiddish, Hebrew, and Eastern European languages - <a href="https://github.com/AbiWord/uspell">hosted on AbiWord github</a>)</li>
+<li>Hspell (Hebrew)</li>
+<li>Zemberek (Turkish)</li>
+<li>Voikko (Finnish)</li>
+<li>AppleSpell (Mac OSX)</li>
+</ul>
+
+<p>More/other backends are welcomed.</p>
+
+<h3>Enchant and multiple backends</h3>
+
+<p>Why would Enchant want to support multiple backends? There are
+several reasons for this.</p>
+
+<ul>
+
+<li>Not all spell checking libraries are created equal. Their language
+coverage and various algorithms aren't all of equal
+quality. Spell-checking some languages is fundamentally different than
+spell-checking others. For instance, one might want to write a word
+processing document with both Yiddish and English words in it. If you
+just have Aspell or Ispell installed, you can't currently spell-check
+both languages. Enchant presents a consistent interface so that you
+can have Uspell spell-checking the Yiddish bits and Aspell correcting
+the English ones. Your Word Processor needn't know the fact that 2
+different spell-checkers are needed for this task. It all "just works"
+(tm). Also consider the fact that (perhaps) Aspell does a better job
+at handling English than Ispell, but Ispell does a better job at
+French. You as a user don't want to use a sub-standard spell
+checker. Enchant provides a few different solutions to this problem 1)
+Define an ordering of providers based on language tags 2) Install an
+English Aspell dictionary and a French Ispell one. Don't install a
+French Aspell one or an English Ispell one. Either way, the intended
+result will happen like magic, because Enchant allows you to have 0 or
+more backends active at the same time.</li>
+
+<li>We want to provide a consistent API to all of these
+backends. Fundamentally, they all do a similar job and expose similar
+functionality to the outside world. But they don't present a
+consistent API, and many don't or won't have a stable API and/or
+ABI. Some of them didn't even have an API/ABI until Enchant came along
+&lt;cough&gt;Ispell&lt;/cough&gt;. This is a problem for consumer
+programs, such as Office applications. Enchant will shield you from
+these problems via its plugin architecture, and stable API/ABI.</li>
+
+<li>We want to integrate well with native solutions. This means that
+we want to have a "MacOS X" backend that uses the builtin
+spell-checker. We want a "MS Office" backend that uses their
+plugins. We want to be viral, invasive, seamless, and
+all-encompassing. And we want to do it well.</li>
+
+<li>We want to integrate with whatever solution the user already has
+installed, be it Ispell, Pspell, MySpell, ... and not force some
+alternative down their throats, or force them to install a different
+dictionary to work with OpenOffice than they need to work inside of
+GEdit.</li> </ul>
+
+
+<h3>Enchant and API Inspiration</h3>
+
+<p>Enchant's API was inspired by the Aspell/Pspell API, and aims to be
+both a superset and a "ease of code" simplification of said API.</p>
+<p>All inputs and outputs are in UTF-8 encoding. All language tags are
+based on ISO standards, and take the form of "xx_YY"
+(language_LOCALE), where the locale ("_YY") portion is optional, but
+encouraged. We may consider extending the language tag mechanism to
+accomodate future needs, such as medical dictionaries.</p>
+
+<h3>Enchant and Multi-User systems</h3>
+
+<p>Enchant strives to support multi-user systems as well as is humanly
+possible. This in part means that users can have locally defined
+plugin backends for enchant (for example, in <tt>~/.enchant/</tt>)
+that work with the spell checker of their choice. This is in addition
+to any globally installed plugin providers. The user-defined plugins
+are guaranteed to always take precedence.</p>
+
+<p>Similarly, several of Enchant's backends support user + global
+dictionaries. This includes the Ispell, Uspell, and Myspell
+backends. Users may have locally installed dictionaries (for example,
+in <tt>~/.enchant/ispell</tt> or <tt>~/.enchant/uspell</tt>) in
+addition to any globally installed ones. As with plugins, the
+user-defined dictionaries will always take precedence over the
+globally installed ones.</p>
+
+<p> Also, both user-local and global Provider Ordering files can
+coexist, with the values in the user-local one guaranteed
+precedence. Further, an API exists so that one can modify said
+orderings at runtime, if necessary.</p>
+
+<p>Why is this done?</p>
+
+<ul>
+<li>User might not have a multi-user license to use a particular spell checker</li>
+<li>User might not have a multi-user license for a particular dictionary</li>
+<li>User might've modified a plugin or dictionary and not want/have administrator priveleges to update a global dictionary or plugin, or add a new plugin/dictionary</li>
+<li>User might have a different idea of which spell checker provides the best result for various languages than the administrator does.</li>
+</ul>
+
+
+<h3>Building Enchant</h3>
+
+<p>Enchant strives to be buildable with <strong>any</strong>
+toolchain, not just the GNU ones. Currently, the only ones that have
+been tested are the GNU one (or any toolchain capable of being driven
+by auto* and libtool) and MSVC. This, however, does not mean that we
+want to stop here. We want Enchant to build with the compiler and
+linker of your choice. For example, the fact that I don't own a copy
+of MSVC shouldn't stop you from sending me a DSW project file that is
+capable of building Enchant. I will add it gratefully.</p>
+
+<p>Enchant is vanilla C and C++ code, and as such should be buildable
+with just about any C/C++ compiler known to man. Some of it is based
+on AbiWord code, which compiles on [Unix, MacOS, BeOS, QNX,
+Win32]. Some of it uses Glib2 code, which compiles on [Unix, MacOS,
+Win32, BeOS, QNX, ...]. In short, enchant's code should be
+<strong>highly</strong> portable. If something doesn't work for your
+$COMPILER on $PLATFORM, please send problem reports or patches that
+fix the problem. Other than that, the only "obstacle" should be
+getting a build system set up for Enchant for your particular
+$COMPILER and $PLATFORM, which shouldn't be too daunting of a
+task.</p>
+
+<p>Enchant exposes 0 outside dependencies, save LibC. Internally,
+Enchant only requires Glib2 version 2.6 or later. This was done for
+pragmatic reasons - it's simply easier to use a portability library
+that handles modules, lists, etc... than writing one's own copy. That
+said, patches to remove the Glib2 dependency are welcomed. As I said,
+the decision to include it in the first place was extremely
+pragmatic. I didn't want to put it in, but I didn't want to rewrite a
+portability library, so I chose one I'm familiar with, is well tested,
+and works well. It saved me time getting the project off the
+ground. Now that it works and there is some outside interest, I'd
+wouldn't be saddened to see it go, provided that a viable alternative
+was implemented.</p>
+
+
+<a name="download" />
+<h3>Getting Enchant</h3>
+
+<p>You can get Enchant from Github. <a
+href="https://github.com/AbiWord/enchant">https://github.com/AbiWord/enchant</a></p>
+
+<p>Alternately, you can download <a
+href="http://www.abisource.com/downloads/enchant/1.6.0/enchant-1.6.0.tar.gz">Enchant
+1.6.0</a> (April 1, 2010). Older versions are still available <a
+href="http://www.abisource.com/downloads/enchant/">here</a>.</p>
+
+<p>You can browse the Enchant source online from: <a href="https://github.com/AbiWord/enchant">https://github.com/AbiWord/enchant</a>. Enchant's
+public API can be found <a
+href="https://github.com/AbiWord/enchant/blob/master/src/enchant.h">here.</a>
+Enchant's provider plugin API can be found <a
+href="https://github.com/AbiWord/enchant/blob/master/src/enchant-provider.h">here.</a>
+Enchant's C++ API can be found <a
+href="https://github.com/AbiWord/enchant/blob/master/src/enchant%2B%2B.h">here.</a></p>
+
+<h3>Enchant and AbiWord [i.e. Collaboration]</h3>
+<p>Enchant was written by AbiWord's maintainer and lead developer. He also develops and maintains a lot of other software too. Enchant was inspired by a host of bugs in the <a href="http://bugzilla.abisource.com/">AbiWord bugzilla</a>. Please don't let the "AbiWord" part throw you for a loop.</p>
+
+<p>
+The developer's intentions are for Enchant to be as widely adopted and successful as possible. 
+He wants this to be used by (<a href="http://koffice.kde.org/">KOffice</a>, 
+<a href="http://www.openoffice.org/">OpenOffice</a>, 
+<a href="http://www.kde.org/">KDE</a>, <a href="http://www.gnome.org/">Gnome</a>, ...). Patches and contributions from non-AbiWord developers are not only gladly welcomed, but strongly encouraged. Don't settle for mediocrity - stand up and be counted.
+</p>
+
+<p> As with many proposed standards, the initial work on Enchant was
+done to address a real need in a real product by a real developer. It
+was not designed by committee. It addresses the author's needs
+remarkably well. Also like many standards, the author proposes his
+current body of work for discussion, collaboration, improvement, and
+ultimately standardization. It is often useful to have a working
+reference base in order to stimulate and direct discussion. The
+Enchant codebase is meant to do exactly that.  </p>
+
+<p> For the record, Enchant is already in use by <a
+href="http://www.abisource.com/">AbiWord</a>, while <a
+href="http://www.lyx.org">Lyx</a> and <a
+href="http://www.conglomerate.org/">Conglomerate</a> are presently
+considering using it. Gnome-Spell and GtkSpell are currently in the
+works of transitioning between Pspell and Enchant. We hope to achieve
+broader use at an exponential level.  </p>
+
+<p> The current list for Enchant discussion is the AbiWord-devel
+list. Please see <a
+href="http://www.abisource.com/developers/">http://www.abisource.com/developers/</a>
+for more information on how to join, and for archives. If there is
+sufficient interest, I can look into moving this onto a separate, more
+"neutral" list, such as a <a
+href="http://www.freedesktop.org/">Freedesktop.org</a> one.  </p>
+
+<h2>Issues with Enchant</h2>
+<hr />
+<p>Obviously, there are going to be issues, bugs, patches, RFEs, etc... for Enchant. These are gladly welcomed. You may do one of a few things (in my order of preference):</p>
+
+<ul>
+
+<li>File your issue in <a
+href="https://github.com/AbiWord/enchant/issues/new">Github issue
+tracker</a></li>
+
+<li>Send a message to the abiword-devel mailing list</li>
+
+</ul>
+
+<h3>Enchant's Future</h3>
+<p>Some stuff that we're thinking about or are already in the process of adding:</p>
+<ul>
+<li>Standardization!</li>
+</ul>
+
+<h3>Enchant's License</h3>
+
+<p>Enchant is currently licensed under the LGPL license, with an
+Exception so that non-free (as in speech and/or cost) plugin backends
+could be loaded and used by Enchant. This is mainly so that we can use
+the native spell checkers on various platforms (MacOS X, MS Office,
+...), or that our users could "plug in" their favorite commercial
+product to do the job.</p>
+
+<p>The author would consider re-licensing it as necessary to help
+foster broader adoption. This may include MPL or JCA/SISSL license,
+but the author would also consider alternate licenses as well.</p>
+
+<h3>What's in a Name?</h3>
+
+<p>"Enchant"'s English definition is roughly "to cast a spell" - whose
+meaning seemed to fit in well with a spelling-oriented framework. Add
+to that the fact that I wrote most of this this on a lonely Sunday
+morning while my gf was engrossed with "Harry Potter and the Order of
+the Phoenix", and you can see where I got its name ;-)</p>
+
+</div>
+<table style="text-align: left; background-color: rgb(244, 244, 244); width: 100%;" width="100%" border="0" cellspacing="2" cellpadding="2"><tbody><tr><td style="font-size: 8pt; align: center;"><div class="copyright">Copyright (C) 1998-2017, the AbiSource community.  All rights reserved.<br />
+AbiSource, AbiSuite, and AbiWord are <a href="/information/license/tm_guide.phtml">trademarks</a> of Dom Lachowicz.  All other product names, company names, or logos cited herein are property of their respective owners.</div></td></tr></tbody></table>
+</body>
+</html>
