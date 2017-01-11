@@ -21,5 +21,6 @@ enchant-*.tar.gz
 /ltmain.sh
 /missing
 /INSTALL
+/test-driver
 Makefile
 Makefile.in

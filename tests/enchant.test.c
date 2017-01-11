@@ -126,6 +126,7 @@ main (int argc, char **argv)
 				fprintf (stderr, "Couldn't create dictionary for en_US: %s\n", err);
 			else
 				fprintf (stderr, "Couldn't create dictionary for en_US\n");
+			return 1;
 		} 
 	else 
 		{
@@ -142,6 +143,7 @@ main (int argc, char **argv)
 				fprintf (stderr, "Couldn't create personal wordlist dictionary: %s\n", err);
 			else
 				fprintf (stderr, "Couldn't create personal wordlist dictionary\n");
+			return 1;
 		} 
 	else 
 		{

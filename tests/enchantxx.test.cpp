@@ -108,14 +108,19 @@ main (int argc, char **argv)
 		describe_dict (dict);
 		run_dict_tests (dict);		
 		delete dict;
+	} catch (enchant::Exception & ex) {
+		fprintf (stderr, "Couldn't create dictionary for en_US: %s\n", ex.what());
+		return 1;
+	}
 
+	try {
 		// test personal wordlist dictionaries
 		dict = broker->request_pwl_dict ("test.pwl");
 		describe_dict (dict);
 		run_dict_tests (dict);
 		delete dict;
 	} catch (enchant::Exception & ex) {
-		fprintf (stderr, "Couldn't create dictionary for en_US: %s\n", ex.what());
+		fprintf (stderr, "Couldn't create PWL for en_US: %s\n", ex.what());
 		return 1;
 	}
 

@@ -14,12 +14,16 @@ addons:
     packages: &default_deps
       - libglib2.0-dev
       - libdbus-glib-1-dev
+      - libaspell-dev
       - ispell
       - hspell
       - libhunspell-dev
       - libvoikko-dev
-      - aspell
+      - aspell-en
       # - zemberek-server: installs with error in Travis’s trusty environment
+
+env: &default_env
+  - VERBOSE=1 # Get test logs in Travis logs
 
 matrix:
   include:
@@ -29,9 +33,13 @@ matrix:
     - os: osx
       osx_image: xcode8.1
     - compiler: gcc
-      env: COMPILER=g++
+      env:
+        - *default_env
+        - COMPILER=g++
     - compiler: gcc
-      env: COMPILER=g++-5
+      env:
+        - *default_env
+        - COMPILER=g++-5
       addons:
         apt:
           sources:
@@ -40,7 +48,9 @@ matrix:
             - *default_deps
             - [g++-5]
     - compiler: gcc
-      env: COMPILER=g++-6
+      env:
+        - *default_env
+        - COMPILER=g++-6
       addons:
         apt:
           sources:
