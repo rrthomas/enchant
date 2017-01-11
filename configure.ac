@@ -8,7 +8,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 dnl Release number rules:
 dnl This is derived from "Versioning" chapter of info libtool documentation.
-dnl Format is MAJOR:MIINOR:MICRO
+dnl Format is MAJOR:MINOR:MICRO
 dnl     4a) Increment major when removing or changing interfaces.
 dnl     4a) 5) Increment minor when adding interfaces.
 dnl     6) Set minor to zero when removing or changing interfaces.
@@ -180,7 +180,9 @@ AC_CACHE_CHECK([for supported C++ warning flags], enchant_cxx_cv_warn_cflags, [
 CXX_WARN_CFLAGS="$enchant_cxx_cv_warn_cflags"
 AC_SUBST(CXX_WARN_CFLAGS)
 
-ENCHANT_CFLAGS="$ENCHANT_CFLAGS -DENCHANT_PREFIX_DIR='\"$prefix\"'"
+if test "x$prefix" != "xNONE"; then
+	ENCHANT_CFLAGS="$ENCHANT_CFLAGS -DENCHANT_PREFIX_DIR='\"$prefix\"'"
+fi
 
 AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
