@@ -24,7 +24,7 @@ else
 cxx_progs =
 endif
 
-noinst_PROGRAMS = enchant.test $(cxx_progs)
+check_PROGRAMS = enchant.test $(cxx_progs)
 bin_PROGRAMS= enchant-lsmod enchant
 
 enchant_test_SOURCES = enchant.test.c
