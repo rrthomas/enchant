@@ -35,12 +35,6 @@
 #include <stdio.h>
 #include <direct.h>
 
-#if !defined(_WIN32)
-#if !defined(O_BINARY)
-#define O_BINARY 0 // Posix systems don'd distinguish between text and binary so define O_BINARY for compatibility
-#endif
-#endif
-
 //////////////////////////////////////
 // Mock provider functions
 static void
