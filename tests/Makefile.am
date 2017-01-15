@@ -39,7 +39,7 @@ enchantxx_test_LDADD = $(ldadd)
 enchant_lsmod_SOURCES = enchant-lsmod.c
 enchant_lsmod_LDADD = $(ldadd)
 
-TESTS = $(noinst_PROGRAMS)
+TESTS = $(check_PROGRAMS)
 
 # Enforce serial running of tests, so they don't contend for test.pwl
 enchantxx.log: enchant.log
