@@ -214,6 +214,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <glib/gstdio.h>
 
 #include "enchant-provider.h"
 #include "ispell_checker.h"
@@ -249,7 +250,7 @@ int ISpellChecker::linit (char *hashname)
     int			viazero;
     ichar_t *		cp;
 
-    if ((fpHash = enchant_fopen (hashname, "rb")) == NULL)
+    if ((fpHash = g_fopen (hashname, "rb")) == NULL)
 	{
 		return (-1);
 	}

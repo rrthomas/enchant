@@ -47,6 +47,7 @@
 #include <string.h>
 #include <locale.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -611,7 +612,7 @@ int main (int argc, char ** argv)
 	}
 	else {
 		if (file) {
-			fp = enchant_fopen (file, "rb");
+			fp = g_fopen (file, "rb");
 			if (!fp) {
 				fprintf (stderr, "Error: Could not open the file \"%s\" for reading.\n", file);
 				exit (1);

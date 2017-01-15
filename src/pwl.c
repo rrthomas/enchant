@@ -260,7 +260,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 
 	g_return_val_if_fail (file != NULL, NULL);
 
-	fd = enchant_fopen(file, "ab+");
+	fd = g_fopen(file, "ab+");
 	if(fd == NULL)
 		{
 			return NULL;
@@ -296,7 +296,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	g_hash_table_destroy (pwl->words_in_trie);
 	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	f = enchant_fopen(pwl->filename, "r");
+	f = g_fopen(pwl->filename, "r");
 	if (!f) 
 		return;
 
@@ -390,7 +390,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 	{
 		FILE *f;
 		
-		f = enchant_fopen(pwl->filename, "a+");
+		f = g_fopen(pwl->filename, "a+");
 		if (f)
 			{
 				struct stat stats;
@@ -440,7 +440,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 			if(!g_file_get_contents(pwl->filename, &contents, &length, NULL))
 				return;
 
-			f = enchant_fopen(pwl->filename, "wb"); /*binary because g_file_get_contents reads binary*/
+			f = g_fopen(pwl->filename, "wb"); /*binary because g_file_get_contents reads binary*/
 			if (f)
 				{
 					const gunichar BOM = 0xfeff;
