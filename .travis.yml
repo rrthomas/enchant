@@ -27,15 +27,10 @@ env: &default_env
 
 matrix:
   include:
-    - os: linux
     - os: osx
       osx_image: xcode7.2
     - os: osx
       osx_image: xcode8.2
-    - compiler: gcc
-      env:
-        - *default_env
-        - COMPILER=g++
     - compiler: gcc
       env:
         - *default_env
