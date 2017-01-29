@@ -6,7 +6,7 @@ lib_LTLIBRARIES = libenchant.la
 
 libenchant_la_LIBADD= $(ENCHANT_LIBS) @ENCHANT_WIN32_RESOURCE@
 
-libenchant_la_LDFLAGS = -no-undefined -export-dynamic
+libenchant_la_LDFLAGS = -no-undefined -export-symbols-regex '^enchant_.*'
 if OS_WIN32
 libenchant_la_LDFLAGS += -avoid-version
 else
