@@ -247,10 +247,6 @@ EnchantPWL* enchant_pwl_init(void)
 	return pwl;
 }
 
-#ifndef BUFSIZ
-#define BUFSIZ 1024
-#endif
-
 /**
  * enchant_pwl_init_with_file
  *
