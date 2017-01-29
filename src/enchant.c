@@ -1703,7 +1703,7 @@ enchant_provider_free (gpointer data, gpointer user_data)
  * enchant_broker_init
  *
  * Returns: A new broker object capable of requesting
- * dictionaries from
+ * dictionaries from providers.
  */
 ENCHANT_MODULE_EXPORT (EnchantBroker *) 
 enchant_broker_init (void)
