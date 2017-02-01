@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantDictionaryTestFixture.h"
+#include "EnchantDictionaryTestFixture.h"
 
 /**
  * enchant_dict_get_error

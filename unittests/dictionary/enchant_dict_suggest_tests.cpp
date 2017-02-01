@@ -22,9 +22,10 @@
 #define NOMINMAX //don't want windows to collide with std::min
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantDictionaryTestFixture.h"
 #include <vector>
 #include <algorithm>
+
+#include "EnchantDictionaryTestFixture.h"
 
 static bool dictSuggestCalled;
 static bool providerFreeStringListCalled;

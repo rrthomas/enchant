@@ -30,11 +30,20 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shlwapi.h>
-#endif
 #include <io.h>
+#else
+#include <fcntl.h> /* For creat; should not be needed, but gstdio.h does not include fcntl.h */
+#endif
 #include <assert.h>
-#include <glib.h>
+#include <glib/gstdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include <string>
+#include <locale>
+#include <codecvt>
 
 struct EnchantTestFixture
 {
@@ -122,7 +131,7 @@ struct EnchantTestFixture
 
     std::string GetTempUserEnchantDir()
     {
-        return GetEnchantHomeDirFromBase(GetDirectoryOfThisModule());
+        return GetEnchantHomeDirFromBase(g_get_user_config_dir());
     }
 
     void MoveEnchantUserFilesOutOfTheWay()
@@ -200,7 +209,7 @@ struct EnchantTestFixture
                     break;
                 }
                 std::string filepath = AddToPath(dir, filename);
-				if(g_file_test(filepath.c_str(), G_FILE_TEST_IS_DIR)){
+                if(g_file_test(filepath.c_str(), G_FILE_TEST_IS_DIR)){
                     DeleteDirAndFiles(filepath);
                 }
                 else {
@@ -221,14 +230,14 @@ struct EnchantTestFixture
 
     static void CreateDirectory(const std::string& filepath)
     {
-        g_mkdir_with_parents(filepath.c_str(), S_IREAD | S_IWRITE | S_IEXEC);
+        g_mkdir_with_parents(filepath.c_str(), S_IRUSR | S_IWUSR | S_IXUSR);
     }
     static void CreateFile(const std::string& filepath)
     {
-        int fh = g_creat(filepath.c_str(), _S_IREAD | _S_IWRITE);
+        int fh = g_creat(filepath.c_str(), S_IRUSR | S_IWUSR);
         if(fh != -1) {
             close(fh);
-    }
+        }
     }
     static void DeleteFile(const std::string& filepath)
     {
@@ -243,18 +252,14 @@ struct EnchantTestFixture
 
     std::string Convert(const std::wstring & ws)
     {
-        gchar* str = g_utf16_to_utf8((gunichar2*)ws.c_str(), (glong)ws.length(), NULL, NULL, NULL);
-        std::string s(str);
-        g_free(str);
-        return s;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
+        return convert.to_bytes(ws);
     }
 
     std::wstring Convert(const std::string & s)
     {
-        gunichar2* str = g_utf8_to_utf16(s.c_str(), (glong)s.length(), NULL, NULL, NULL);
-        std::wstring ws((wchar_t*)str);
-        g_free(str);
-        return ws;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
+        return convert.from_bytes(s);
     }
 
     std::string GetDirectoryOfThisModule()
@@ -275,6 +280,7 @@ struct EnchantTestFixture
         return result;
       }
 
+#if defined(_WIN32)
     std::string GetRegistryHomeDir()
     {
         return Convert(GetRegistryValue(HKEY_CURRENT_USER, L"Software\\Enchant\\Config", L"Home_Dir"));
@@ -421,7 +427,7 @@ struct EnchantTestFixture
         RegCloseKey(hkey);
     }
   }
-
+#endif
 
   static std::string AddToPath(const std::string & path, const std::string & fileOrDirName)
     {
@@ -439,12 +445,22 @@ struct EnchantTestFixture
         return AddToPath(AddToPath(AddToPath(basePath,"Library"), 
                                                        "Application Support"), 
                                                        "Enchant");
-#elif defined(_WIN32)
-        return AddToPath(basePath,"enchant");
 #else
-        return AddToPath(basePath,".enchant");
+        return AddToPath(basePath, "enchant");
 #endif
     }
+
+    static std::string GetEnchantHomeDirFromHome(const std::string& homePath)
+    {
+#ifdef XP_TARGET_COCOA
+        return AddToPath(AddToPath(AddToPath(homePath,"Library"), 
+                                                       "Application Support"), 
+                                                       "Enchant");
+#else
+        return AddToPath(homePath, ".enchant");
+#endif
+    }
+
 };
 
 #endif

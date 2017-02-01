@@ -18,9 +18,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include <glib.h>
+#include <string.h>
 #include <string>
+#include <stdio.h>
 #include "mock_provider.h"
+
+#if !defined(_WIN32)
+#include <dlfcn.h>
+#endif
 
 ENCHANT_PLUGIN_DECLARE("mock")
 
@@ -56,30 +63,19 @@ set_configure(ConfigureHook hook){
 ENCHANT_MODULE_EXPORT(EnchantProvider *) 
 init_enchant_provider(void)
 {
+#ifndef ENCHANT_TEST_NULL_IDENTIFY
     bool hasIdentify = true;
+#else
+    bool hasIdentify = false;
+#endif
+#ifndef ENCHANT_TEST_NULL_DESCRIBE
     bool hasDescribe = true;
-#if defined(_WIN32)
-    std::wstring null_provider(L"null_provider.dll");
-    std::wstring null_identify(L"null_identify.dll");
-    std::wstring null_describe(L"null_describe.dll");
-    WCHAR szFilename[MAX_PATH];
-    DWORD cFilename = GetModuleFileName((HMODULE)s_hModule, (LPWSTR) &szFilename, sizeof(szFilename));
-    if(cFilename > null_provider.size()){
-        if(std::wstring(&szFilename[cFilename-null_provider.size()]) == null_provider){
-            return NULL;
-        }
-    }
-    if(cFilename > null_identify.size()){
-        if(std::wstring(&szFilename[cFilename-null_identify.size()]) == null_identify){
-            hasIdentify = false;
-        }
-    }
-    if(cFilename > null_describe.size()){
-        if(std::wstring(&szFilename[cFilename-null_describe.size()]) == null_describe){
-            hasDescribe = false;
-        }
-    }
+#else
+    bool hasDescribe = false;
+#endif
 
+#ifdef ENCHANT_TEST_NULL_PROVIDER
+    return NULL;
 #endif
 
     EnchantProvider *provider;

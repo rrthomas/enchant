@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-#include "../EnchantTestFixture.h"
+#include "EnchantTestFixture.h"
 #include <UnitTest++.h>
 #include <enchant-provider.h>
 
@@ -112,11 +112,11 @@ TEST_FIXTURE(EnchantTestFixture,
 
   CHECK(enchantUserConfigDirs);
   GSList* iter = enchantUserConfigDirs;
-#ifdef _WIN32
   CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), (gchar*) iter->data);
   iter = iter->next;
-#endif
 
-  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_home_dir()), (gchar*) iter->data);
+  std::string expected = GetEnchantHomeDirFromHome(g_get_home_dir());
+  std::string actual((char*) iter->data);
+  CHECK_EQUAL(expected, actual);
   g_slist_free(enchantUserConfigDirs);
 }

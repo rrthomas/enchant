@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantDictionaryTestFixture.h"
+#include "EnchantDictionaryTestFixture.h"
 
 struct EnchantDictionaryStoreReplacement_TestFixture : EnchantDictionaryTestFixture
 {
@@ -204,7 +204,6 @@ TEST_FIXTURE(EnchantDictionaryStoreReplacement_TestFixture,
 TEST_FIXTURE(EnchantDictionaryLacksStoreReplacement_TestFixture,
              EnchantDictStoreReplacment_ProviderLacksStoreReplacement_DoNothing)
 {
-    testResults_;
     enchant_dict_store_replacement(_dict, "helo", -1, "hello", -1);
 }
 

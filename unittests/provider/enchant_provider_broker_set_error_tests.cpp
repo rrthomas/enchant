@@ -22,7 +22,7 @@
 #include <UnitTest++.h>
 #include <enchant-provider.h>
 
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 
 struct EnchantBrokerSetErrorTests : EnchantBrokerTestFixture
 {
@@ -35,7 +35,7 @@ struct EnchantBrokerSetErrorTests : EnchantBrokerTestFixture
   std::string GetErrorMessage(){
       char* error = enchant_broker_get_error(_broker);
       if(error == NULL){
-          error = "";
+          return std::string();
       }
       return std::string(error);
   }

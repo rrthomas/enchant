@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantDictionaryTestFixture.h"
+#include "EnchantDictionaryTestFixture.h"
 
 struct EnchantDictFreeStringList_TestFixture : EnchantDictionaryTestFixture
 {
@@ -54,7 +54,6 @@ struct EnchantDictFreeStringList_TestFixture : EnchantDictionaryTestFixture
 TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
              EnchantDictFreeStringList)
 {
-    testResults_;
     enchant_dict_free_string_list(_dict, _string_list);
     _string_list = NULL;
 }
@@ -62,7 +61,6 @@ TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
 TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
              EnchantDictFreeStringListOnPwl)
 {
-    testResults_;
     enchant_dict_free_string_list(_pwl, _string_list);
     _string_list = NULL;
 }
@@ -83,13 +81,11 @@ TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
 TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
              EnchantDictFreeStringList_NullDict_DoNothing)
 {
-    testResults_;
     enchant_dict_free_string_list(NULL, _string_list);
 }
 
 TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
              EnchantDictFreeStringList_NullStringList_DoNothing)
 {
-    testResults_;
     enchant_dict_free_string_list(_dict, NULL);
 }

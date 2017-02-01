@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant-provider.h>
-#include "../EnchantDictionaryTestFixture.h"
+#include "EnchantDictionaryTestFixture.h"
 
 struct EnchantDictionarySetErrorTests : EnchantDictionaryTestFixture
 {
@@ -29,7 +29,7 @@ struct EnchantDictionarySetErrorTests : EnchantDictionaryTestFixture
   std::string GetErrorMessage(){
       char* error = enchant_dict_get_error(_dict);
       if(error == NULL){
-          error = "";
+          return std::string();
       }
       return std::string(error);
   }

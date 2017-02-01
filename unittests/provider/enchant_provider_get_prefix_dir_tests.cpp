@@ -22,13 +22,18 @@
 #include <UnitTest++.h>
 #include <enchant-provider.h>
 #include <glib.h>
-#include "../EnchantTestFixture.h"
+#include "EnchantTestFixture.h"
 
 struct EnchantGetPrefixDirTestFixture : EnchantTestFixture{
   //Setup
   EnchantGetPrefixDirTestFixture()
   {
-    expectedPrefixDir = GetDirectoryOfThisModule();
+      expectedPrefixDir = GetDirectoryOfThisModule();
+#if defined(ENCHANT_PREFIX_DIR)
+      if (expectedPrefixDir.empty()) {
+        expectedPrefixDir = std::string(ENCHANT_PREFIX_DIR);
+      }
+#endif
   }
 
   const char* ExpectedPrefixDir()
@@ -63,6 +68,8 @@ TEST_FIXTURE(EnchantGetPrefixDirTestFixture,
              EnchantGetPrefixDir)
 {
     char* prefixDir = enchant_get_prefix_dir();
-    CHECK_EQUAL(ExpectedPrefixDir(), prefixDir);
+    const char* expectedPrefixDir = ExpectedPrefixDir();
+    CHECK((expectedPrefixDir == NULL && prefixDir == NULL) ||
+          strcmp(expectedPrefixDir, prefixDir) == 0);
     g_free(prefixDir);
 }

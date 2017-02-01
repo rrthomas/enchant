@@ -22,6 +22,7 @@
 #include <UnitTest++.h>
 #include <enchant-provider.h>
 #include <glib.h>
+#include <string.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
@@ -57,15 +58,19 @@ TEST(EnchantGetUserLanguage_FromLangEnvironmentVariable)
     }
 }
 
-#ifndef _WIN32
-TEST(EnchantGetUserLanguage_FromLocale)
+static void SetLocaleAndCheckLanguage(const char *locale, const char *language)
 {
     std::string origLocale(setlocale (LC_ALL, NULL));
 
-    setlocale (LC_ALL, "qaa");
+    setlocale (LC_ALL, locale);
     char* userLanguage = enchant_get_user_language();
     CHECK(userLanguage);
-    CHECK_EQUAL("qaa", userLanguage);
+    // Language may be followed by country code and encoding
+    CHECK(strncmp(language, userLanguage, strlen(language)) == 0);
+    if (strlen(userLanguage) > 2)
+    {
+        CHECK(userLanguage[2] == '_');
+    }
 
     g_free(userLanguage);
 
@@ -74,15 +79,8 @@ TEST(EnchantGetUserLanguage_FromLocale)
 
 TEST(EnchantGetUserLanguage_LocaleIsC_LocalIsEn)
 {
-    std::string origLocale(setlocale (LC_ALL, NULL));
-
-    setlocale (LC_ALL, "C");
-    char* userLanguage = enchant_get_user_language();
-    CHECK(userLanguage);
-    CHECK_EQUAL("en", userLanguage);
-
-    g_free(userLanguage);
-
-    setlocale (LC_ALL, origLocale.c_str());
+    SetLocaleAndCheckLanguage("C", "en");
 }
-#endif
+
+// FIXME: Set and test a particular language. Perhaps use localedef?
+// Otherwise, we can't know which languages are available.

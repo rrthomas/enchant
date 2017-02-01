@@ -24,7 +24,7 @@
 #include <algorithm>
 #include <functional>
 #include <vector>
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 
 struct ProviderDescription 
 {
@@ -238,7 +238,7 @@ TEST_FIXTURE(EnchantBrokerDescribeTestFixture,
 TEST_FIXTURE(EnchantBrokerDescribeTestFixture, 
              EnchantBrokerDescribe_NullUserData_PassedThroughToCallback)
 {
-    global_user_data = "hello world";
+    global_user_data = const_cast<char *>("hello world");
 
     enchant_broker_describe(_broker, 
                           EnchantBrokerDescribeAssignUserDataToStaticCallback,
@@ -249,11 +249,11 @@ TEST_FIXTURE(EnchantBrokerDescribeTestFixture,
 TEST_FIXTURE(EnchantBrokerDescribeTestFixture, 
              EnchantBrokerDescribe_NonNullUserData_PassedThroughToCallback)
 {
-  char* data = "some data";
+  const char* data = "some data";
   global_user_data = NULL;
   enchant_broker_describe(_broker, 
                           EnchantBrokerDescribeAssignUserDataToStaticCallback,
-                          data);
+                          const_cast<char*>(data));
   CHECK(global_user_data);
 
   if(global_user_data){

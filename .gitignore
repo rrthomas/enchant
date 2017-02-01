@@ -1,9 +1,12 @@
 *.o
 *.lo
 *.la
+*.trs
+*.log
 enchant-*.tar.gz
 .libs
 .deps
+.dirstamp
 /aclocal.m4
 /autogen.err
 /autom4te.cache

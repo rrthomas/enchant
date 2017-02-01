@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 
 /**
  * enchant_broker_free
@@ -84,7 +84,6 @@ struct EnchantBrokerFreeNoDisposeTestFixture: EnchantBrokerTestFixture
 
 TEST(EnchantBrokerFree)
 {
-    testResults_;
     EnchantBroker* broker = enchant_broker_init ();
     enchant_broker_free(broker);
     broker = NULL;
@@ -101,7 +100,6 @@ TEST_FIXTURE(EnchantBrokerFreeTestFixture,
 TEST_FIXTURE(EnchantBrokerFreeNoDisposeTestFixture,
              EnchantBrokerFree_ProviderLacksDispose)
 {
-    testResults_;
     enchant_broker_free(_broker);
     _broker = NULL;
 }

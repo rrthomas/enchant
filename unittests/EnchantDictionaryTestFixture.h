@@ -28,11 +28,13 @@
 #pragma warning(disable: 4996) //The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name.
 #endif
 
-#include "../EnchantBrokerTestFixture.h"
-#include <io.h>
+#include "EnchantBrokerTestFixture.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <string>
 #include <vector>
 
 static EnchantDict*
@@ -239,9 +241,9 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 		enchant_dict_add(_dict, word.c_str(), word.size());
     }
 
-    void AddWordsToDictionary(const std::vector<const std::string>& sWords)
+    void AddWordsToDictionary(const std::vector<std::string>& sWords)
     {
-        for(std::vector<const std::string>::const_iterator itWord = sWords.begin();
+        for(std::vector<std::string>::const_iterator itWord = sWords.begin();
                                                               itWord != sWords.end();
                                                               ++itWord){
             AddWordToDictionary(*itWord);
@@ -260,7 +262,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     static void ExternalAddWordToFile(const std::string& word, const std::string& filename)
     {
-        Sleep(1000); // FAT systems have a 2 second resolution
+        sleep(1); // FAT systems have a 2 second resolution
                      // NTFS is appreciably faster but no specs on what it is exactly
                      // c runtime library's time_t has a 1 second resolution
         FILE * f = g_fopen(filename.c_str(), "at");
@@ -274,36 +276,35 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     void ExternalAddNewLineToDictionary()
     {
-        Sleep(1000); // FAT systems have a 2 second resolution
+        sleep(1); // FAT systems have a 2 second resolution
                      // NTFS is appreciably faster but no specs on what it is exactly
                      // c runtime library's time_t has a 1 second resolution
         FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
-		if(f) 
-		{
-		    fputc('\n', f);
-			fclose(f);
-		}
+        if(f)
+        {
+            fputc('\n', f);
+            fclose(f);
+        }
     }
 
-	void ExternalAddWordsToDictionary(const std::vector<const std::string>& sWords)
+    void ExternalAddWordsToDictionary(const std::vector<std::string>& sWords)
     {
-        Sleep(1000); // FAT systems have a 2 second resolution
+        sleep(1); // FAT systems have a 2 second resolution
                      // NTFS is appreciably faster but no specs on what it is exactly
                      // c runtime library's time_t has a 1 second resolution
         FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
-		if(f) 
-		{
-			for(std::vector<const std::string>::const_iterator 
-				itWord = sWords.begin();
+        if(f)
+        {
+            for (std::vector<std::string>::const_iterator itWord = sWords.begin();
                 itWord != sWords.end(); ++itWord)
             {
-                if(itWord != sWords.begin()){
-				    fputc('\n', f);
+                if (itWord != sWords.begin()) {
+                    fputc('\n', f);
                 }
-				fputs(itWord->c_str(), f);
-			}
-			fclose(f);
-		}
+                fputs(itWord->c_str(), f);
+            }
+            fclose(f);
+        }
     }
 
    std::vector<std::string> GetExpectedSuggestions(const std::string& s, size_t begin = 0)
@@ -324,9 +325,9 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
     }
 
 
-    std::vector<const std::string> GetSuggestionsFromWord(const std::string& word)
+    std::vector<std::string> GetSuggestionsFromWord(const std::string& word)
     {
-        std::vector<const std::string> result;
+        std::vector<std::string> result;
 
         size_t cSuggestions;
         char** suggestions = enchant_dict_suggest(_dict, word.c_str(), word.size(), &cSuggestions);
@@ -340,7 +341,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         return result;
     }
 
-    std::vector<const std::string> GetSuggestions(const std::string& s)
+    std::vector<std::string> GetSuggestions(const std::string& s)
     {
         return GetSuggestionsFromWord("helo");
     }

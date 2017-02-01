@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 #include <vector>
 
 
@@ -172,7 +172,7 @@ struct EnchantBrokerListDictionaries_ProviderDuplicateTags_TestFixture : Enchant
 TEST_FIXTURE(EnchantBrokerListDictionaries_TestFixture,
              EnchantBrokerListDictionaries_UserDataNotNull_PassedThrough)
 {
-    char* userData = "some user data";
+    char* userData = const_cast<char*>("some user data");
     enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeAssignUserDataToStaticCallback, userData);
     CHECK_EQUAL(userData, global_user_data);
 }
@@ -240,7 +240,7 @@ TEST_FIXTURE(EnchantBrokerListDictionaries_TestFixture,
 TEST_FIXTURE(EnchantBrokerTestFixture,
              EnchantBrokerListDictionaries_ProviderLacksListDictionaries_CallbackNeverCalled)
 {
-    void* userData = "some user data";
+    void* userData = const_cast<char*>("some user data");
     enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeAssignUserDataToStaticCallback, userData);
     CHECK_EQUAL((void*)NULL, global_user_data);
 }

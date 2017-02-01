@@ -33,7 +33,8 @@
 #include "mock_provider/mock_provider.h"
 #include <stack>
 #include <stdio.h>
-#include <direct.h>
+#include <gmodule.h>
+#include <assert.h>
 
 //////////////////////////////////////
 // Mock provider functions
@@ -114,7 +115,7 @@ typedef void (*SET_CONFIGURE)(ConfigureHook);
 struct EnchantBrokerTestFixture : EnchantTestFixture
 {
     EnchantBroker* _broker;
-    HMODULE hModule, hModule2;
+    GModule *hModule, *hModule2;
 
     //Setup
     EnchantBrokerTestFixture(ConfigureHook userConfiguration=NULL, 
@@ -124,48 +125,46 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         userMockProviderConfiguration = userConfiguration;
         userMockProvider2Configuration = user2Configuration;
 
-#if _WIN32
         CopyProvider("libenchant_mock_provider", "libenchant_mock_provider");
-        hModule = LoadLibrary(L"lib\\enchant\\libenchant_mock_provider.dll");
+        hModule = g_module_open("lib/enchant/libenchant_mock_provider", (GModuleFlags) 0);
         if(hModule!=NULL){
-            SET_CONFIGURE sc = (SET_CONFIGURE) GetProcAddress(hModule, "set_configure");
+            SET_CONFIGURE sc;
+            assert(g_module_symbol(hModule, "set_configure", (gpointer *)&sc));
             (sc)(ConfigureMockProvider);
         }
 
         hModule2 = NULL;
         if(user2Configuration != NULL){
-            CopyProvider("libenchant_mock_provider", "libenchant_mock_provider2");
-            hModule2 = LoadLibrary(L"lib\\enchant\\libenchant_mock_provider2.dll");
+            CopyProvider("libenchant_mock_provider2", "libenchant_mock_provider2");
+            hModule2 = g_module_open("lib/enchant/libenchant_mock_provider2", (GModuleFlags) 0);
             if(hModule2!=NULL){
-                SET_CONFIGURE sc = (SET_CONFIGURE) GetProcAddress(hModule2, "set_configure");
+                SET_CONFIGURE sc;
+                assert(g_module_symbol(hModule2, "set_configure", (gpointer *)&sc));
                 (sc)(ConfigureMockProvider2);
             }
         }
-#else
-        // What to do?
-#endif
 
         if(includeNullProviders){
-            CopyProvider("libenchant_mock_provider", "null_provider");
-            CopyProvider("libenchant_mock_provider", "null_identify");
-            CopyProvider("libenchant_mock_provider", "null_describe");
+            CopyProvider("libenchant_null_provider", "null_provider");
+            CopyProvider("libenchant_null_identify", "null_identify");
+            CopyProvider("libenchant_null_describe", "null_describe");
             CopyProvider("libenchant", "libenchant"); //not a provider
         }
 
+#if _WIN32
         SetUserRegistryConfigDir(GetTempUserEnchantDir());
+#endif
         InitializeBroker();
     }
 
     //Teardown
     ~EnchantBrokerTestFixture(){
-#if _WIN32
         if(hModule!=NULL){
-          FreeLibrary(hModule);
+          g_module_close(hModule);
         }
         if(hModule2!=NULL){
-          FreeLibrary(hModule2);
+          g_module_close(hModule2);
         }
-#endif
 
         if(_broker){
             enchant_broker_free (_broker);

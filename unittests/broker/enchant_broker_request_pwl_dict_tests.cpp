@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 
 struct EnchantBrokerRequestPwlDictionary_TestFixture : EnchantBrokerTestFixture
 {

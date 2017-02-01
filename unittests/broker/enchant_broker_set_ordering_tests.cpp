@@ -22,7 +22,7 @@
 #include <UnitTest++.h>
 #include <enchant.h>
 #include <fstream>
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 
 static bool mock1ProviderRequestDictionaryCalled;
 static bool mock2ProviderRequestDictionaryCalled;
@@ -317,32 +317,30 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 			 EnchantBrokerSetOrdering_EmptyAfterNormalization_DoNothing)
 {
-	testResults_;
 	enchant_broker_set_ordering(_broker, "  @  ", "mock1,mock2");
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 			 EnchantBrokerSetOrdering_EmptyLanguageTag_DoNothing)
 {
-	testResults_;
 	enchant_broker_set_ordering(_broker, "", "aspell,myspell,ispell");
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 			 EnchantBrokerSetOrdering_NullOrdering_DoNothing)
 {
-	testResults_;
 	enchant_broker_set_ordering(_broker, "en_GB", NULL);
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 			 EnchantBrokerSetOrdering_EmptyOrdering_DoNothing)
 {
-	testResults_;
 	enchant_broker_set_ordering(_broker, "en_GB", "");
 }
 
 
+// Windows only test.
+#ifdef _WIN32
 /*
  * Ordering can also be set in enchant.ordering file:
  * Language_Tag : Provider1, Provider2, ProviderN
@@ -575,3 +573,4 @@ EnchantBrokerFileOrdering_ListedTwice_LastTakesPrecedence_Mock2ThenMock1)
 
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
+#endif

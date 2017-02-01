@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 /**
  * enchant_broker_free_dict
  * @broker: A non-null #EnchantBroker
@@ -137,7 +137,6 @@ TEST_FIXTURE(EnchantBrokerFreeDictTestFixture,
 TEST_FIXTURE(EnchantBrokerFreeDictNoDisposeTestFixture, 
              EnchantBrokerFreeDict_NotOnProvider_DoNothing)
 {
-    testResults_;
     enchant_broker_free_dict(_broker, _dictionary);
     _dictionary = NULL;
 }

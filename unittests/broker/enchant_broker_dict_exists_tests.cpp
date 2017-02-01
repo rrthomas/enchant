@@ -21,7 +21,7 @@
 
 #include <UnitTest++.h>
 #include <enchant.h>
-#include "../EnchantBrokerTestFixture.h"
+#include "EnchantBrokerTestFixture.h"
 
 static int dictionaryExistsCalled;
 static int DoesDictionaryExist (EnchantProvider * me, const char *const tag)
