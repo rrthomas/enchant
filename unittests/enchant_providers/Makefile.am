@@ -8,13 +8,7 @@ AM_TESTS_ENVIRONMENT = \
 DEPS = $(top_builddir)/src/libenchant.la
 ldadd = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
 
-if WITH_CXX
-cxx_progs = main
-else
-cxx_progs =
-endif
-
-check_PROGRAMS = $(cxx_progs)
+check_PROGRAMS = main
 TESTS = main
 
 main_SOURCES = main.cpp \

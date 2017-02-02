@@ -18,13 +18,7 @@ EXTRA_DIST=test.pwl.orig ispell.in
 
 ldadd= $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
 
-if WITH_CXX
-cxx_progs = enchantxx.test
-else
-cxx_progs =
-endif
-
-check_PROGRAMS = enchant.test $(cxx_progs)
+check_PROGRAMS = enchant.test enchantxx.test
 bin_PROGRAMS= enchant-lsmod enchant
 
 enchant_test_SOURCES = enchant.test.c

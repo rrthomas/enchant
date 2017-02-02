@@ -33,7 +33,8 @@ AC_SUBST(ENCHANT_MICRO_VERSION)
 dnl Checks for programs.
 AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
-AC_PROG_CPP
+AC_PROG_CXX
+AX_CXX_COMPILE_STDCXX(11)
 AC_PROG_OBJC
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -44,14 +45,8 @@ ENCHANT_LT_OBJDIR=$lt_cv_objdir
 AC_SUBST(ENCHANT_LT_OBJDIR)
 gt_TYPE_SSIZE_T
 
-AC_C_CONST
-
 AC_CHECK_FUNCS(flock lockf)
 
-have_cxx=yes
-AC_PROG_CXX(,have_cxx=no)
-AX_CXX_COMPILE_STDCXX(11)
-AM_CONDITIONAL(WITH_CXX, test "x$have_cxx" = "xyes")
 
 PKG_PROG_PKG_CONFIG
 
@@ -314,9 +309,6 @@ build_ispell=yes
 
 AC_ARG_ENABLE(ispell, AS_HELP_STRING([--disable-ispell],[enable the ispell backend @<:@default=auto@:>@]), build_ispell="$enableval", build_ispell=yes)
 
-if test "x$have_cxx" = "xno"; then
-   build_ispell=no
-fi
 AM_CONDITIONAL(WITH_ISPELL, test "x$build_ispell" = "xyes")
 
 ispell_dir=${datadir}/enchant/ispell
@@ -333,9 +325,6 @@ build_myspell=yes
 
 AC_ARG_ENABLE(myspell, AS_HELP_STRING([--disable-myspell],[enable the myspell backend @<:@default=auto@:>@]), build_myspell="$enableval", build_myspell=yes)
 
-if test "x$have_cxx" = "xno"; then
-   build_myspell=no
-fi
 AM_CONDITIONAL(WITH_MYSPELL, test "x$build_myspell" = "xyes")
 
 myspell_dir=${datadir}/myspell/dicts
@@ -457,10 +446,6 @@ build_uspell=no
 check_uspell=yes
 AC_ARG_ENABLE(uspell, AS_HELP_STRING([--disable-uspell],[enable the uspell backend @<:@default=auto@:>@]), check_uspell="$enableval", check_uspell=yes)
 
-if test "x$have_cxx" = "xno"; then
-   check_uspell=no
-fi
-
 if test "x$check_uspell" != "xno"; then
    PKG_CHECK_MODULES(USPELL, [libuspell >= 1.1.0], build_uspell=yes, build_uspell=no)
 fi
@@ -511,9 +496,6 @@ build_zemberek=no
 
 AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--disable-zemberek],[enable the experimental zemberek (turkish) backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=no)
 
-if test "x$have_cxx" = "xno"; then
-   build_zemberek=no
-fi
 PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib-1 >= 0.62], build_zemberek=yes, build_zemberek=no)
 
 AC_SUBST(ZEMBEREK_CFLAGS)
