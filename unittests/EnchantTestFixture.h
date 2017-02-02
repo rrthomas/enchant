@@ -272,10 +272,6 @@ struct EnchantTestFixture
         PathRemoveFileSpec((LPWSTR)&szFilename);
 
         result = Convert(szFilename);
-#elif defined(ENABLE_BINRELOC) 
-        gchar* prefix = gbr_find_prefix(NULL);
-        result = std::string(prefix);
-        g_free(prefix);
 #endif
         return result;
       }

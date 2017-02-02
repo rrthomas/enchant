@@ -205,10 +205,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\src\prefix.h"
-				>
-			</File>
-			<File
 				RelativePath="..\src\pwl.h"
 				>
 			</File>
@@ -230,10 +226,6 @@
 			>
 			<File
 				RelativePath="..\src\enchant.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\prefix.c"
 				>
 			</File>
 			<File
