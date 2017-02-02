@@ -301,10 +301,6 @@ dnl supporting this old version.
 AC_SUBST(UNITTESTPP_CFLAGS)
 AC_SUBST(UNITTESTPP_LIBS)
 
-dnl binreloc
-dnl AM_BINRELOC
-AM_CONDITIONAL(WITH_BINRELOC, test "x$br_cv_binreloc" = "xyes")
-
 build_ispell=yes
 
 AC_ARG_ENABLE(ispell, AS_HELP_STRING([--disable-ispell],[enable the ispell backend @<:@default=auto@:>@]), build_ispell="$enableval", build_ispell=yes)
@@ -558,7 +554,7 @@ AC_OUTPUT
 dnl ===========================================================================================
 
 relocatable_library="no"
-if test "x$native_win32" = "xyes" || test "x$br_cv_binreloc" = "xyes"; then
+if test "x$native_win32" = "xyes"; then
    relocatable_library="yes"
 fi
 

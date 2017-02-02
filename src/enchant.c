@@ -54,10 +54,6 @@
 #define ENCHANT_USER_PATH_EXTENSION ".enchant"
 #endif
 
-#ifdef ENABLE_BINRELOC
-#include "prefix.h"
-#endif
-
 ENCHANT_PLUGIN_DECLARE("Enchant")
 
 static char *
@@ -1712,18 +1708,6 @@ enchant_broker_init (void)
 	
 	g_return_val_if_fail (g_module_supported (), NULL);
 
-#ifdef ENABLE_BINRELOC
-	{
-		static gboolean binreloc_initialized = FALSE;
-
-		if (!binreloc_initialized)
-			{
-				(void)gbr_init_lib (NULL);
-				binreloc_initialized = TRUE;
-			}
-	}
-#endif
-	
 	broker = g_new0 (EnchantBroker, 1);
 	
 	broker->dict_map = g_hash_table_new_full (g_str_hash, g_str_equal,
