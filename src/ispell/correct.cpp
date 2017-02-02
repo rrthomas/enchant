@@ -212,8 +212,8 @@ int compoundflag = COMPOUND_CONTROLLED;
 int
 ISpellChecker::casecmp (char *a, char *b, int canonical)
 {
-    register ichar_t *	ap;
-    register ichar_t *	bp;
+    ichar_t *		ap;
+    ichar_t *		bp;
     ichar_t		inta[INPUTWORDLEN + 4 * MAXAFFIXLEN + 4];
     ichar_t		intb[INPUTWORDLEN + 4 * MAXAFFIXLEN + 4];
 
@@ -258,7 +258,7 @@ ISpellChecker::casecmp (char *a, char *b, int canonical)
 void
 ISpellChecker::makepossibilities (ichar_t *word)
 {
-    register int	i;
+    int	i;
 
     for (i = 0; i < MAXPOSSIBLE; i++)
 	m_possibilities[i][0] = 0;
@@ -300,8 +300,8 @@ ISpellChecker::makepossibilities (ichar_t *word)
 int
 ISpellChecker::insert (ichar_t *word)
 {
-    register int	i;
-    register char *	realword;
+    int		i;
+    char *	realword;
 
     realword = ichartosstr (word, 0);
     for (i = 0; i < m_pcount; i++)
@@ -349,9 +349,9 @@ ISpellChecker::wrongcapital (ichar_t *word)
 void
 ISpellChecker::wrongletter (ichar_t *word)
 {
-    register int	i;
-    register int	j;
-    register int	n;
+    int			i;
+    int			j;
+    int			n;
     ichar_t		savechar;
     ichar_t		newword[INPUTWORDLEN + MAXAFFIXLEN];
 
@@ -388,8 +388,8 @@ void
 ISpellChecker::extraletter (ichar_t *word)
 {
     ichar_t		newword[INPUTWORDLEN + MAXAFFIXLEN];
-    register ichar_t *	p;
-    register ichar_t *	r;
+    ichar_t *		p;
+    ichar_t *		r;
 
     if (icharlen (word) < 2)
 		return;
@@ -413,9 +413,9 @@ void
 ISpellChecker::missingletter (ichar_t *word)
 {
     ichar_t		newword[INPUTWORDLEN + MAXAFFIXLEN + 1];
-    register ichar_t *	p;
-    register ichar_t *	r;
-    register int	i;
+    ichar_t *		p;
+    ichar_t *		r;
+    int			i;
 
     icharcpy (newword + 1, word);
     for (p = word, r = newword;  *p != 0;  )
@@ -457,7 +457,7 @@ void ISpellChecker::missingspace (ichar_t *word)
     ichar_t		newword[INPUTWORDLEN + MAXAFFIXLEN + 1];
     int			nfirsthalf;	/* No. words saved in 1st half */
     int			nsecondhalf;	/* No. words saved in 2nd half */
-    register ichar_t *	p;
+    ichar_t *		p;
     ichar_t		secondhalf[MAX_CAPS][INPUTWORDLEN + MAXAFFIXLEN];
     int			secondno;	/* Index into second */
 
@@ -515,8 +515,8 @@ int
 ISpellChecker::compoundgood (ichar_t *word, int pfxopts)
 {
     ichar_t		newword[INPUTWORDLEN + MAXAFFIXLEN];
-    register ichar_t *	p;
-    register ichar_t	savech;
+    ichar_t *		p;
+    ichar_t		savech;
     long		secondcap;	/* Capitalization of 2nd half */
 
     /*
@@ -574,8 +574,8 @@ void
 ISpellChecker::transposedletter (ichar_t *word)
 {
     ichar_t		newword[INPUTWORDLEN + MAXAFFIXLEN];
-    register ichar_t *	p;
-    register ichar_t	temp;
+    ichar_t *		p;
+    ichar_t		temp;
 
     icharcpy (newword, word);
     for (p = newword;  p[1] != 0;  p++)
@@ -720,12 +720,12 @@ ISpellChecker::save_root_cap (ichar_t *word, ichar_t *pattern,
 					      int * nsaved)
 {
 #ifndef NO_CAPITALIZATION_SUPPORT
-    register struct dent * dent;
+    struct dent *	dent;
 #endif /* NO_CAPITALIZATION_SUPPORT */
     int			firstisupper;
     ichar_t		newword[INPUTWORDLEN + 4 * MAXAFFIXLEN + 4];
 #ifndef NO_CAPITALIZATION_SUPPORT
-    register ichar_t *	p;
+    ichar_t *		p;
     int			len;
     int			i;
     int			limit;

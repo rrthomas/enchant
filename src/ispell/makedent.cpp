@@ -224,7 +224,7 @@ other abi documents
 long
 ISpellChecker::whatcap (ichar_t *word)
 {
-    register ichar_t *	p;
+    ichar_t *	p;
 
     for (p = word;  *p;  p++)
 	{
@@ -276,7 +276,7 @@ ISpellChecker::whatcap (ichar_t *word)
 */
 int ISpellChecker::addvheader ( struct dent *dp)
 {
-    register struct dent *	tdent; /* Copy of entry */
+    struct dent *	tdent; /* Copy of entry */
 
     /*
     ** Add a second entry with the correct capitalization, and then make
@@ -467,11 +467,11 @@ ISpellChecker::stringcharlen (char *bufp, int canonical)
     static char *	sp[MAXSTRINGCHARS];
     static int		inited = 0;
 #endif /* SLOWMULTIPLY */
-    register char *	bufcur;
-    register char *	stringcur;
-    register int	stringno;
-    register int	lowstringno;
-    register int	highstringno;
+    char *		bufcur;
+    char *		stringcur;
+    int			stringno;
+    int			lowstringno;
+    int			highstringno;
     int			dupwanted;
 
 #ifdef SLOWMULTIPLY
@@ -606,7 +606,7 @@ int l1_isstringch(char *ptr, int len, int canon) {
 int
 ISpellChecker::strtoichar (ichar_t *out, char *in, int outlen, int canonical)
 {
-    register int len = 1;		/* Length of next character */
+    int len = 1;		/* Length of next character */
 
     outlen /= sizeof (ichar_t);		/* Convert to an ichar_t count */
     for (  ;  --outlen > 0  &&  *in != '\0';  in += len)
@@ -638,9 +638,9 @@ ISpellChecker::strtoichar (ichar_t *out, char *in, int outlen, int canonical)
 int
 ISpellChecker::ichartostr ( char *out, ichar_t *in, int outlen, int canonical)
 {
-    register int	ch;		/* Next character to store */
-    register int	i;		/* Index into duplicates list */
-    register char *	scharp;		/* Pointer into a string char */
+    int	ch;		/* Next character to store */
+    int	i;		/* Index into duplicates list */
+    char *	scharp;		/* Pointer into a string char */
 
     while (--outlen > 0  &&  (ch = *in++) != 0)
 	{
@@ -760,7 +760,7 @@ icharcpy (ichar_t *out, ichar_t *in)
 int
 icharlen (ichar_t * in)
 {
-    register int	len;		/* Length so far */
+    int	len;		/* Length so far */
 
     for (len = 0;  *in++ != 0;  len++)
 		;
@@ -826,7 +826,7 @@ ISpellChecker::findfiletype (const char *name, int searchnames, int *deformatter
 {
     char *		cp;		/* Pointer into suffix list */
     int			cplen;		/* Length of current suffix */
-    register int	i;		/* Index into type table */
+    int			i;		/* Index into type table */
     int			len;		/* Length of the name */
 
     /*
