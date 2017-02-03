@@ -9,7 +9,6 @@ addons:
       - ubuntu-toolchain-r-test
     packages: &default_deps
       - libglib2.0-dev
-      - libdbus-glib-1-dev
       - libaspell-dev
       - ispell
       - hspell
@@ -18,7 +17,6 @@ addons:
       - aspell-en
       - libunittest++-dev
       - g++-5
-      # - zemberek-server: installs with error in Travis’s trusty environment
 
 env:
   global:

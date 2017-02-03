@@ -505,9 +505,9 @@ AM_CONDITIONAL(WITH_HSPELL, test "$build_hspell" = yes)
 
 build_zemberek=no
 
-AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--disable-zemberek],[enable the experimental zemberek (turkish) backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=no)
+AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--enable-zemberek],[enable the experimental zemberek (turkish) backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=no)
 
-PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib-1 >= 0.62], build_zemberek=yes, build_zemberek=no)
+PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib-1 >= 0.62], , build_zemberek=no)
 
 AC_SUBST(ZEMBEREK_CFLAGS)
 AC_SUBST(ZEMBEREK_LIBS)
