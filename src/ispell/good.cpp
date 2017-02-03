@@ -215,14 +215,14 @@ static int entryhasaffixes (struct dent *dent, struct success *hit)
  */
 int ISpellChecker::cap_ok (ichar_t *word, struct success *hit, int len)
 {
-    register ichar_t *		dword;
-    register ichar_t *		w;
-    register struct dent *	dent;
+    ichar_t *			dword;
+    ichar_t *			w;
+    struct dent *		dent;
     ichar_t			dentword[INPUTWORDLEN + MAXAFFIXLEN];
     int				preadd;
     int				prestrip;
     int				sufadd;
-    ichar_t *		limit;
+    ichar_t *			limit;
     long			thiscap;
     long			dentcap;
 
@@ -356,10 +356,10 @@ int ISpellChecker::good (ichar_t *w, int ignoreflagbits, int dummy, int pfxopts,
 #endif
 {
     ichar_t		nword[INPUTWORDLEN + MAXAFFIXLEN];
-    register ichar_t *	p;
-    register ichar_t *	q;
-    register int	n;
-    register struct dent * dp;
+    ichar_t *		p;
+    ichar_t *		q;
+    int			n;
+    struct dent * 	dp;
 
     /*
     ** Make an uppercase copy of the word we are checking.

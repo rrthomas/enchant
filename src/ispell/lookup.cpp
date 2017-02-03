@@ -241,13 +241,13 @@ int ISpellChecker::linit (char *hashname)
 {
 	FILE*	fpHash;
 		
-    register int	i;
-    register struct dent * dp;
+    int			i;
+    struct dent * 	dp;
     struct flagent *	entry;
     struct flagptr *	ind;
     int			nextchar, x;
     int			viazero;
-    register ichar_t *	cp;
+    ichar_t *		cp;
 
     if ((fpHash = enchant_fopen (hashname, "rb")) == NULL)
 	{
@@ -546,8 +546,8 @@ int ISpellChecker::linit (char *hashname)
  */
 void ISpellChecker::initckch (char *wchars)
 {
-	register ichar_t    c;
-	char                num[4];
+	ichar_t			c;
+	char                	num[4];
 
 	for (c = 0; c < static_cast<ichar_t>(SET_SIZE+ m_hashheader.nstrchars); ++c)
     {
@@ -631,7 +631,7 @@ void ISpellChecker::initckch (char *wchars)
  */
 void ISpellChecker::clearindex (struct flagptr *indexp)
 {
-    register int		i;
+    int		i;
     for (i = 0;  i < SET_SIZE + m_hashheader.nstrchars;  i++, indexp++)
 	{
 		if (indexp->numents == 0 && indexp->pu.fp != NULL)
@@ -643,11 +643,9 @@ void ISpellChecker::clearindex (struct flagptr *indexp)
 }
 	
 #ifdef INDEXDUMP
-static void dumpindex (indexp, depth)
-    register struct flagptr *	indexp;
-    register int		depth;
+static void dumpindex (struct flagptr * indexp, int depth)
 {
-    register int		i;
+    int				i;
     int				j;
     int				k;
     char			stripbuf[INPUTWORDLEN + 4 * MAXAFFIXLEN + 4];
@@ -708,8 +706,8 @@ static void dumpindex (indexp, depth)
  */
 struct dent * ISpellChecker::ispell_lookup (ichar_t *s, int dotree)
 {
-    register struct dent *	dp;
-    register char *		s1;
+    struct dent *		dp;
+    char *			s1;
     char			schar[INPUTWORDLEN + MAXAFFIXLEN];
 
     dp = &m_hashtbl[hash (s, m_hashsize)];

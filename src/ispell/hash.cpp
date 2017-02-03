@@ -148,8 +148,8 @@
  */
 int ISpellChecker::hash (ichar_t *s, int hashtblsize)
 {
-    register long	h = 0;
-    register int	i;
+    long	h = 0;
+    int		i;
 
 #ifdef ICHAR_IS_CHAR
     for (i = 4;  i--  &&  *s != 0;  )
