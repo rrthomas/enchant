@@ -275,11 +275,6 @@ hspell_provider_describe (EnchantProvider * me)
 	return "Hspell Provider";
 }
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-	
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
 	     init_enchant_provider (void);
 
@@ -300,7 +295,3 @@ init_enchant_provider (void)
 
 	return provider;
 }
-
-#ifdef __cplusplus
-}
-#endif

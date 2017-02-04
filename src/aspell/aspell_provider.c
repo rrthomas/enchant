@@ -40,19 +40,11 @@
 
 ENCHANT_PLUGIN_DECLARE("Aspell")
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 ENCHANT_MODULE_EXPORT(void)
      configure_enchant_provider(EnchantProvider * me, const char *dir_name);
 
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
      init_enchant_provider (void);
-
-#ifdef __cplusplus
-}
-#endif
 
 static int
 aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
@@ -268,10 +260,6 @@ aspell_provider_describe (EnchantProvider * me)
 	return "Aspell Provider";
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 EnchantProvider *
 init_enchant_provider (void)
 {
@@ -283,14 +271,7 @@ init_enchant_provider (void)
 	provider->dispose_dict = aspell_provider_dispose_dict;
 	provider->identify = aspell_provider_identify;
 	provider->describe = aspell_provider_describe;
-
-#if ASPELL_0_50_0
 	provider->list_dicts = aspell_provider_list_dicts;
-#else
-#  ifdef __GNUC__
-#    warning "You're using an ancient version of Aspell. Some things won't work properly."
-#  endif
-#endif
 	provider->free_string_list = aspell_provider_free_string_list;
 
 	return provider;
@@ -427,8 +408,3 @@ void configure_enchant_provider(EnchantProvider * me, const char *dir_name)
     }
 #endif
 }
-
-
-#ifdef __cplusplus
-}
-#endif
