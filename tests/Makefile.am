@@ -1,11 +1,11 @@
-AM_CPPFLAGS=-I$(top_srcdir)/src $(ENCHANT_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 # Note: each directory is given with and without $(ENCHANT_LT_OBJDIR) to
 # work with static builds and on systems that do not have static compilation
 # and hence don't use LT_OBJDIR.
 # FIXME: Following line is ugly (but inserting backslashes stops it
 # working), and not portable to Windows (need semicolons instead of colons)
-AM_TESTS_ENVIRONMENT=\
+AM_TESTS_ENVIRONMENT = \
 	ENCHANT_MODULE_PATH=$(top_builddir)/src/applespell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/applespell:$(top_builddir)/src/aspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/aspell:$(top_builddir)/src/hspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/hspell:$(top_builddir)/src/ispell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/ispell:$(top_builddir)/src/myspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/myspell:$(top_builddir)/src/uspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/uspell:$(top_builddir)/src/voikko/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/voikko:$(top_builddir)/src/zemberek/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/zemberek; \
 	export ENCHANT_MODULE_PATH; \
 	rm -f test.pwl; \
@@ -14,24 +14,16 @@ AM_TESTS_ENVIRONMENT=\
 
 DISTCLEANFILES = test.pwl
 
-EXTRA_DIST=test.pwl.orig ispell.in
+EXTRA_DIST = test.pwl.orig ispell.in
 
-ldadd= $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
+LDADD = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
 
 check_PROGRAMS = enchant.test enchantxx.test
-bin_PROGRAMS= enchant-lsmod enchant
+bin_PROGRAMS = enchant-lsmod enchant
 
 enchant_test_SOURCES = enchant.test.c
-enchant_test_LDADD = $(ldadd)
-
 enchant_SOURCES = enchant-ispell.c
-enchant_LDADD = $(ldadd)
-
 enchantxx_test_SOURCES = enchantxx.test.cpp
-enchantxx_test_LDADD = $(ldadd)
-
-enchant_lsmod_SOURCES = enchant-lsmod.c
-enchant_lsmod_LDADD = $(ldadd)
 
 TESTS = $(check_PROGRAMS)
 
