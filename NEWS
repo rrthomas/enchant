@@ -1,6 +1,65 @@
+1.6.1 (February 6, 2017)
+------------------------
+
+Improvements to the enchant-ispell front-end, which is now a working ispell replacement.
+Unit tests run on all platforms.
+Various bug fixes and code clean-up.
+
+
+1.6.0 (April 1, 2010)
+---------------------
+
+Fix bug 12567: the ispell sources aren't licensed under the LGPL
+Add a function to get enchant's version (enchant_get_version)
+Disable zemberek plugin by default, as it's known to cause issues/crashes with WebKit
+Fix bug 12472: Win32 DLL dependency not found popup occurs when module has unmet dependencies
+Possibly fix Ubuntu bug 474062
+Fix bug 12409: Registry handle not closed in enchant_get_registry_value_ex
+Fix bug 12406: Leak in _enchant_get_user_home_dirs() on Windows
+Fix bug 12007: Update FSF address
+Fix bug 12305: Zemberek module lists a Turkish dictionary even without Zemberek installed
+Don't assert if passed a null string list
+Fix bug 12350: enchant_pwl_init_with_file truncates pwl file
+Fix a double-free memory corruption bug
+Fix bug 12173: fix some small memory leaks
+Fix bug 12174: mis-acceptence of dictionaries which start with a partial match of the lang id
+Fix bug 12160: enchant 1.5.0 always looks in "lib" dir for plugins
+Fix the build with the MSVC compiler
+Add a --with-system-myspell option
+Package missing compile-resource file
+Compare paths ignoring case sensitivity on windows
+
+
+1.5.0 (May 23, 2009)
+--------------------
+
+(News missing!)
+
+
+1.4.2 (May 5, 2008)
+-------------------
+
+Voikko (Finnish) language support
+Zemberek (Turkish) language support
+Better support for Unicode in the personal dictionaries
+Personal dictionaries offer better suggestions
+Use OpenOffice's dictionaries on Windows
+Aspell works on Windows
+Can use a system-wide Hunspell/Myspell installation on Unix-like platforms
+Require Hunspell 1.2.1
+.NET bindings
+More lax language matching rules (eg. if you request a "pl" dictionary, but
+only have a "pl_PL" myspell dictionary installed, it will do the right
+thing)
+Use XDG's data-dirs spec for locating dictionaries (eg. ~/.config/enchant/myspell/)
+Lots of unit tests
+Lots of bug fixes
+
+
 0.4.0
 -------------------
 Ispell-like command line interface
+
 
 0.3.0
 -------------------
@@ -13,12 +72,14 @@ Refined C ABI
 Implemented some new APIs
 Better implemented some internals
 
+
 0.2.0
 -------------------
 Myspell support
 Better Uspell support
 Ability to enumerate providers
 Win32 support
+
 
 0.1.0
 -------------------
