@@ -396,9 +396,7 @@ if test "x$check_aspell" != "xno"; then
    AC_MSG_CHECKING([For aspell headers in $aspell_prefix/include])
    if test -f "$aspell_prefix/include/aspell.h"; then
        AC_MSG_RESULT([yes])
-
-       AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,,)
-       AC_CHECK_LIB(aspell,get_aspell_dict_info_list,ASPELL_CFLAGS="-DASPELL_0_50_0=1",)
+       AC_CHECK_LIB(aspell,get_aspell_dict_info_list,build_aspell=yes,AC_MSG_WARN([Aspell too old (version < 0.50)]))
    else
        AC_MSG_RESULT([no])
        if test "x$HAVE_ASPELL" = "xyes"; then

@@ -193,7 +193,6 @@ aspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	g_free (dict);
 }
 
-#if ASPELL_0_50_0
 static char ** 
 aspell_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
@@ -234,7 +233,6 @@ aspell_provider_list_dicts (EnchantProvider * me,
 	
 	return out_list;
 }
-#endif
 
 static void
 aspell_provider_free_string_list (EnchantProvider * me, char **str_list)
