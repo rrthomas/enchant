@@ -1,66 +1,52 @@
 libenchant -- Generic spell checking library
-Dom Lachowicz <cinamod@hotmail.com>
+Original author: Dom Lachowicz
 
-   libenchant is licensed under the terms of the GNU LGPL included in the
-file COPYING.LIB.
+libenchant is licensed under the terms of the GNU LGPL (see the file
+COPYING.LIB), with a special exception allowing the use of proprietary
+spell-checking systems.
 
-   The project aims to provide an efficient extensible abstraction for
-dealing with different spell checking libraries.
+Enchant aims to provide a simple but comprehensive abstraction for dealing
+with different spell checking libraries in a consistent way. A client, such
+as a text editor or word processor, need not know anything about a specific
+spell-checker, and since all back-ends are plugins, new spell-checkers can
+be added without needing any change to the program using Enchant.
 
-   Enchant is meant to provide a generic interface into various existing
-spell checking libraries. These include, but are not limited to:
+Enchant can be configured by the user, who can even add spell-checker
+plugins if desired.
+
+Enchant currently works with the following spell-checkers:
 
     * Hunspell (formerly Myspell)
-    * Apple Spell (OS X only)
-    * Aspell/Pspell
-    * Ispell
+    * GNU Aspell
+    * GNU Ispell[1]
     * Hspell
+    * Voikko
+    * Apple Spell (macOS only)
+    * Zemberek
     * Uspell
-    * Voikko (Linux only)
 
-   Enchant is also meant to be used in a cross-platform environment. Part
-of this means that Enchant wants to limit its number of external dependencies
-to 0, or as close is as humanly possible. Also, any enchant consumer (i.e. a
-Word Processor) should not need to know about what backend providers Enchant
-knows about. In fact, Enchant shouldn't even need to know this information
-itself. To accomplish this, all of Enchant's providers are DLLs.
+Enchant is written in C and C++, and its only external dependency is glib.
 
-   Enchant is also meant to be used in a multi-user environment, such as Unix.
-It is preferable to have both a $USER and a $GLOBAL location for both 
-provider DLLs and for dictionaries themselves, when possible. Enchant's DLL
-location algorithm takes this into account, and gives preference to the $USER
-DLLs, when found.
+[1] Enchant contains a version of Ispell built as a library, which enables
+it to use Ispell dictionaries.
 
-To report libenchant bugs, please visit https://github.com/AbiWord/enchant
 
-    This library is free software; you can redistribute it and/or modify
-    it under the terms of version 2.1 of the GNU Lesser General Public License
-    as published by the Free Software Foundation.
+Bug reports and development
+---------------------------
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+To report libenchant bugs or request features, please visit
+https://github.com/AbiWord/enchant
 
-    You should have received a copy of the GNU Lesser General Public License
-    along with this program; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA  02110-1301  USA
-
--- 
-
-This library has taken insight from
-
-Aspell/Pspell:
-	- http://aspell.net
-
-Mailing lists
--------------
-
-   There is NO mailing list used to discuss libenchant specifically as yet.
-For now please use the AbiWord-devel list. To subscribe send a mail to:
+If you can't use GitHub, you can use the (low-traffic) AbiWord-devel list.
+To subscribe send a mail to:
 
 	abiword-dev-request@abisource.com
-And in the body of the message write "subscribe"
+
+and in the body of the message write "subscribe"
 
 An archive of the mailing lists is available at:
+
 	http://www.abisource.com/mailinglists/abiword-dev/
+
+
+Enchant has taken insight from GNU Aspell: http://aspell.net
