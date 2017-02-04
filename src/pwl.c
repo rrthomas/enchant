@@ -66,10 +66,6 @@
 
 #include "pwl.h"
 
-#if defined(_MSC_VER)
-#pragma warning(disable: 4996) /* The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name. */
-#endif
-
 #define ENCHANT_PWL_MAX_ERRORS 3
 #define ENCHANT_PWL_MAX_SUGGS 15
 
@@ -851,23 +847,6 @@ static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word
 
 	return trie;
 }
-
-#if !GLIB_CHECK_VERSION(2,14,0)
-static void grab_keys (gpointer key,
-		       gpointer value,
-		       gpointer user_data)
-{
-	GList **l = user_data;
-	*l = g_list_prepend (*l, key);
-}
-
-static GList* g_hash_table_get_keys (GHashTable *hash_table)
-{
-	GList *l = NULL;
-	g_hash_table_foreach (hash_table, grab_keys, &l);
-	return l;
-}
-#endif
 
 static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
 {

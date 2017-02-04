@@ -33,11 +33,7 @@ bool zemberek_service_is_running ()
 {
   DBusGConnection *connection;
   DBusGProxy *proxy;
-
   GError *Error = NULL;
-#if !GLIB_CHECK_VERSION(2,35,0)
-  g_type_init ();
-#endif
 
   connection = dbus_g_bus_get (DBUS_BUS_SYSTEM,
                                &Error);
@@ -64,9 +60,6 @@ Zemberek::Zemberek()
   : connection(NULL), proxy(NULL)
 {
   GError *Error = NULL;
-#if !GLIB_CHECK_VERSION(2,35,0)
-  g_type_init ();
-#endif
 
   connection = dbus_g_bus_get (DBUS_BUS_SYSTEM,
                                &Error);
