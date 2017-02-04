@@ -24,7 +24,6 @@ bin_PROGRAMS = enchant-lsmod enchant
 enchant_test_SOURCES = enchant.test.c
 enchant_SOURCES = enchant-ispell.c
 enchantxx_test_SOURCES = enchantxx.test.cpp
-enchant_lsmod_SOURCES = enchant-lsmod.c
 
 TESTS = $(check_PROGRAMS)
 
