@@ -390,20 +390,30 @@ void enchant_pwl_add(EnchantPWL *pwl,
 	{
 		FILE *f;
 		
-		f = enchant_fopen(pwl->filename, "a");
+		f = enchant_fopen(pwl->filename, "a+");
 		if (f)
 			{
 				struct stat stats;
+
+				/* Since this function does not signal I/O
+				   errors, only use return values to avoid
+				   doing things that seem futile. */
 
 				enchant_lock_file (f);
 				if(g_stat(pwl->filename, &stats)==0)
 					pwl->file_changed = stats.st_mtime;
 
-                /* we write the new line first since we can't guarantee
-                   that the file was terminated by a new line before
-                   and we are just appending to the end of the file */
-				fwrite ("\n", sizeof(char), 1, f);
-				fwrite (word, sizeof(char), len, f);
+				/* Add a newline if the file doesn't end with one. */
+				if (fseek (f, -1, SEEK_END) == 0 &&
+				    getc (f) != '\n')
+					{
+						putc ('\n', f);
+					}
+
+				if (fwrite (word, sizeof(char), len, f) == len)
+					{
+						putc ('\n', f);
+					}
 				enchant_unlock_file (f);
 				fclose (f);
 			}	
