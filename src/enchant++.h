@@ -49,16 +49,14 @@ namespace enchant
 					m_ex = ex;
 			}
 
-			virtual ~Exception () throw() {
+			virtual ~Exception () noexcept {
 			}
 			
-			virtual const char * what () const throw() {
+			virtual const char * what () const noexcept {
 				return m_ex.c_str();
 			}
 
 		private:
-			Exception ();
-
 			std::string m_ex;
 		};
 
