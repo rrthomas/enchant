@@ -38,12 +38,6 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 
-#ifdef near
-#undef near
-#endif
-
-/* built against hunspell 1.2.2 on 2008-04-12 */
-
 #include <hunspell/hunspell.hxx>
 
 /* Some versions of hunspell (1.4.x) don't have this defined. */
