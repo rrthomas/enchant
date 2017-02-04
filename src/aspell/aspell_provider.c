@@ -33,46 +33,7 @@
 #include <string.h>
 
 #include <glib.h>
-
-#ifdef HAVE_PSPELL_H
-#include <pspell/pspell.h>
-#else
 #include <aspell.h>
-
-/* to allow this to build on places that lack pspell.h */
-
-#define PspellManager AspellSpeller
-#define PspellWordList AspellWordList
-#define PspellStringEmulation AspellStringEnumeration
-#define PspellCanHaveError   AspellCanHaveError 
-#define PspellConfig AspellConfig
-
-#define new_pspell_config new_aspell_config
-#define delete_pspell_config delete_aspell_config
-#define pspell_config_replace aspell_config_replace
-
-#define new_pspell_manager new_aspell_speller
-#define to_pspell_manager to_aspell_speller
-#define delete_pspell_manager delete_aspell_speller
-#define pspell_manager_error_number aspell_speller_error_number
-#define pspell_manager_error_message aspell_speller_error_message
-#define pspell_manager_save_all_word_lists aspell_speller_save_all_word_lists
-#define pspell_manager_check aspell_speller_check
-#define pspell_manager_add_to_personal aspell_speller_add_to_personal
-#define pspell_manager_add_to_session aspell_speller_add_to_session
-#define pspell_manager_suggest aspell_speller_suggest
-#define pspell_manager_store_replacement aspell_speller_store_replacement
-
-#define pspell_word_list_elements aspell_word_list_elements
-#define pspell_word_list_size aspell_word_list_size
-
-#define pspell_string_emulation_next    aspell_string_enumeration_next
-#define delete_pspell_string_emulation  delete_aspell_string_enumeration
-
-#define pspell_error_message    aspell_error_message
-#define pspell_error_number     aspell_error_number
-
-#endif
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -96,14 +57,14 @@ ENCHANT_MODULE_EXPORT (EnchantProvider *)
 static int
 aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
-	PspellManager *manager;
+	AspellSpeller *manager;
 	int val;
 	char *normalizedWord;
 
-	manager = (PspellManager *) me->user_data;
+	manager = (AspellSpeller *) me->user_data;
 
 	normalizedWord = g_utf8_normalize (word, len, G_NORMALIZE_NFC);
-	val = pspell_manager_check (manager, normalizedWord, strlen(normalizedWord));
+	val = aspell_speller_check (manager, normalizedWord, strlen(normalizedWord));
 	g_free(normalizedWord);
 
 	if (val == 0)
@@ -111,7 +72,7 @@ aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	else if (val > 0)
 		return 0;
 	else {
-		enchant_dict_set_error (me, pspell_manager_error_message (manager));
+		enchant_dict_set_error (me, aspell_speller_error_message (manager));
 		return -1;
 	}
 }
@@ -120,28 +81,28 @@ static char **
 aspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
-	PspellManager *manager;
+	AspellSpeller *manager;
 	
-	const PspellWordList *word_list;
-	PspellStringEmulation *suggestions;
+	const AspellWordList *word_list;
+	AspellStringEnumeration *suggestions;
 	char *normalizedWord;
 	
 	char **sugg_arr = NULL;
 	size_t n_suggestions, i;
 	const char *sugg;
 	
-	manager = (PspellManager *) me->user_data;
+	manager = (AspellSpeller *) me->user_data;
 	
 	normalizedWord = g_utf8_normalize (word, len, G_NORMALIZE_NFC);
-	word_list = pspell_manager_suggest (manager, normalizedWord, strlen(normalizedWord));
+	word_list = aspell_speller_suggest (manager, normalizedWord, strlen(normalizedWord));
 	g_free(normalizedWord);
 
 	if (word_list)
 		{
-			suggestions = pspell_word_list_elements (word_list);
+			suggestions = aspell_word_list_elements (word_list);
 			if (suggestions)
 				{
-					n_suggestions = pspell_word_list_size (word_list);
+					n_suggestions = aspell_word_list_size (word_list);
 					*out_n_suggs = n_suggestions;
 					
 					if (n_suggestions)
@@ -150,12 +111,12 @@ aspell_dict_suggest (EnchantDict * me, const char *const word,
 							
 							for (i = 0; i < n_suggestions; i++)
 								{
-									sugg = pspell_string_emulation_next (suggestions);
+									sugg = aspell_string_enumeration_next (suggestions);
 									if (sugg)
 										sugg_arr[i] = g_strdup (sugg);
 								}
 						}
-					delete_pspell_string_emulation (suggestions);
+					delete_aspell_string_enumeration (suggestions);
 				}
 		}
 	
@@ -166,21 +127,21 @@ static void
 aspell_dict_add_to_personal (EnchantDict * me,
 			     const char *const word, size_t len)
 {
-	PspellManager *manager;
+	AspellSpeller *manager;
 	
-	manager = (PspellManager *) me->user_data;
-	pspell_manager_add_to_personal (manager, word, len);
-	pspell_manager_save_all_word_lists (manager);
+	manager = (AspellSpeller *) me->user_data;
+	aspell_speller_add_to_personal (manager, word, len);
+	aspell_speller_save_all_word_lists (manager);
 }
 
 static void
 aspell_dict_add_to_session (EnchantDict * me,
 			    const char *const word, size_t len)
 {
-	PspellManager *manager;
+	AspellSpeller *manager;
 	
-	manager = (PspellManager *) me->user_data;
-	pspell_manager_add_to_session (manager, word, len);
+	manager = (AspellSpeller *) me->user_data;
+	aspell_speller_add_to_session (manager, word, len);
 }
 
 static void
@@ -188,35 +149,35 @@ aspell_dict_store_replacement (EnchantDict * me,
 			       const char *const mis, size_t mis_len,
 			       const char *const cor, size_t cor_len)
 {
-	PspellManager *manager;
+	AspellSpeller *manager;
 	
-	manager = (PspellManager *) me->user_data;
-	pspell_manager_store_replacement (manager, mis, mis_len,
+	manager = (AspellSpeller *) me->user_data;
+	aspell_speller_store_replacement (manager, mis, mis_len,
 					  cor, cor_len);
-	pspell_manager_save_all_word_lists (manager);
+	aspell_speller_save_all_word_lists (manager);
 }
 
 static EnchantDict *
 aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	EnchantDict *dict;
-	PspellManager *manager;
-	PspellConfig *spell_config;
-	PspellCanHaveError *spell_error;
+	AspellSpeller *manager;
+	AspellConfig *spell_config;
+	AspellCanHaveError *spell_error;
 	
-	spell_config = new_pspell_config ();
-	pspell_config_replace (spell_config, "language-tag", tag);
-	pspell_config_replace (spell_config, "encoding", "utf-8");
+	spell_config = new_aspell_config ();
+	aspell_config_replace (spell_config, "language-tag", tag);
+	aspell_config_replace (spell_config, "encoding", "utf-8");
 	
-	spell_error = new_pspell_manager (spell_config);
-	delete_pspell_config (spell_config);
+	spell_error = new_aspell_speller (spell_config);
+	delete_aspell_config (spell_config);
 	
-	if (pspell_error_number (spell_error) != 0)
+	if (aspell_error_number (spell_error) != 0)
 		{
 			return NULL;
 		}
 	
-	manager = to_pspell_manager (spell_error);
+	manager = to_aspell_speller (spell_error);
 	
 	dict = g_new0 (EnchantDict, 1);
 	dict->user_data = (void *) manager;
@@ -232,10 +193,10 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 static void
 aspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 {
-	PspellManager *manager;
+	AspellSpeller *manager;
 	
-	manager = (PspellManager *) dict->user_data;
-	delete_pspell_manager (manager);
+	manager = (AspellSpeller *) dict->user_data;
+	delete_aspell_speller (manager);
 	
 	g_free (dict);
 }
@@ -245,13 +206,13 @@ static char **
 aspell_provider_list_dicts (EnchantProvider * me, 
 			    size_t * out_n_dicts)
 {
-	PspellConfig * spell_config;
+	AspellConfig * spell_config;
 	AspellDictInfoList * dlist;
 	AspellDictInfoEnumeration * dels;
 	const AspellDictInfo * entry;
 	char ** out_list = NULL;
 	
-	spell_config = new_pspell_config ();
+	spell_config = new_aspell_config ();
 
 	dlist = get_aspell_dict_info_list (spell_config);
 
@@ -277,7 +238,7 @@ aspell_provider_list_dicts (EnchantProvider * me,
 		delete_aspell_dict_info_enumeration (dels);
 	}
 	
-	delete_pspell_config (spell_config);
+	delete_aspell_config (spell_config);
 	
 	return out_list;
 }

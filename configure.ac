@@ -394,26 +394,15 @@ if test "x$check_aspell" != "xno"; then
    fi
 
    AC_MSG_CHECKING([For aspell headers in $aspell_prefix/include])
-   if test -f "$aspell_prefix/include/pspell/pspell.h"; then
-       AC_MSG_RESULT([yes (pspell)])
+   if test -f "$aspell_prefix/include/aspell.h"; then
+       AC_MSG_RESULT([yes])
 
-       AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,
-          [AC_CHECK_LIB(pspell, new_pspell_config, build_aspell=yes, AC_MSG_WARN([Enchant building without the aspell library]))]
-         ,)
-       AC_CHECK_LIB(aspell,get_aspell_dict_info_list,ASPELL_CFLAGS="-DASPELL_0_50_0=1",)
-
-       ASPELL_CFLAGS+=" -DHAVE_PSPELL_H"
-   elif test -f "$aspell_prefix/include/aspell.h"; then
-       AC_MSG_RESULT([yes (aspell)])
-
-       AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,
-          [AC_CHECK_LIB(pspell, new_pspell_config, build_aspell=yes, AC_MSG_WARN([Enchant building without the aspell library]))]
-         ,)
+       AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,,)
        AC_CHECK_LIB(aspell,get_aspell_dict_info_list,ASPELL_CFLAGS="-DASPELL_0_50_0=1",)
    else
        AC_MSG_RESULT([no])
        if test "x$HAVE_ASPELL" = "xyes"; then
-           AC_MSG_WARN([Didn't find pspell (aspell) headers])
+           AC_MSG_WARN([Didn't find aspell headers])
        fi
    fi
    LDFLAGS=$saved_LDFLAGS
