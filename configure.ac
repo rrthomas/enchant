@@ -294,8 +294,26 @@ dnl supporting this old version.
             UNITTESTPP_CFLAGS="$UNITTESTPP_CFLAGS -I$UNITTESTPP_INCLUDE/UnitTest++"
         fi
     ],
-    [PKG_CHECK_EXISTS([unittest++],
-        [PKG_CHECK_MODULES(UNITTESTPP, [unittest++])]
+    [PKG_CHECK_EXISTS([unittest++], [
+        PKG_CHECK_MODULES(UNITTESTPP, [unittest++])
+            dnl Arch ships a broken custom pkgconfig file, try to fix includedir
+            dnl https://bugs.archlinux.org/task/44516
+            AC_LANG_PUSH([C++])
+            CACHED_CXXFLAGS="$CXXFLAGS"
+            CXXFLAGS="$CXXFLAGS $UNITTESTPP_CFLAGS"
+            AC_CHECK_HEADERS([UnitTest++.h], [], [
+                PKG_CHECK_VAR(UNITTESTPP_INCLUDE, [unittest++], [includedir])
+                UNITTESTPP_CFLAGS="$UNITTESTPP_CFLAGS -I$UNITTESTPP_INCLUDE/UnitTest++"
+
+                CXXFLAGS="$CACHED_CXXFLAGS $UNITTESTPP_CFLAGS"
+                unset ac_cv_header_UnitTestpp_h
+                AC_CHECK_HEADERS([UnitTest++.h], [], [
+                    AC_MSG_WARN([Failed to include UnitTest++.h])
+                ])
+            ])
+            CXXFLAGS="$CACHED_CXXFLAGS"
+            AC_LANG_POP
+        ]
     )]
 )
 AC_SUBST(UNITTESTPP_CFLAGS)
