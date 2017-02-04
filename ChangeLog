@@ -1,3 +1,5 @@
+For more recent changes, see git history.
+	
 2007-01-14  Hubert Figuiere  <hub@figuiere.net>
 
 	* src/Makefile.am (libenchant_includedir): removed trailing '/'
