@@ -9,8 +9,7 @@ test -z "$srcdir" && srcdir=.
         exit 1
 }
 
-aclocal --install -I m4 || exit 1
-autoreconf --install -Wno-portability || exit 1
+./bootstrap || exit 1
 
 if [ "$NOCONFIGURE" = "" ]; then
         $srcdir/configure "$@" || exit 1

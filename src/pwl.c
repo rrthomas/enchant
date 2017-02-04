@@ -57,13 +57,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <fcntl.h>
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <io.h>
-#endif
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -74,11 +69,6 @@
 #if defined(_MSC_VER)
 #pragma warning(disable: 4996) /* The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name. */
 #endif
-
-#if defined(HAVE_FLOCK) || defined(HAVE_LOCKF)
-#include <unistd.h>
-#include <sys/file.h>
-#endif /* HAVE_FLOCK || HAVE_LOCKF */
 
 #define ENCHANT_PWL_MAX_ERRORS 3
 #define ENCHANT_PWL_MAX_SUGGS 15
@@ -192,45 +182,8 @@ static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num);
 
 static int edit_dist(const char* word1, const char* word2);
 
-static void
-enchant_lock_file (FILE * f)
-{
-#if defined(HAVE_FLOCK)
-	flock (fileno (f), LOCK_EX);
-#elif defined(HAVE_LOCKF)
-	lockf (fileno (f), F_LOCK, 0);
-#elif defined(_WIN32)
-	OVERLAPPED overlapped;
-
-	overlapped.Offset = 0;
-	overlapped.OffsetHigh = 0;
-	overlapped.hEvent = NULL;
-	if (!LockFileEx ((HANDLE) _get_osfhandle (fileno (f)), LOCKFILE_EXCLUSIVE_LOCK, 0, 0, 0x80000000, &overlapped))
-		g_warning ("Could not lock file\n");
-#else
-	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
-#endif /* HAVE_FLOCK */
-}
-
-static void
-enchant_unlock_file (FILE * f)
-{
-#if defined(HAVE_FLOCK)
-	flock (fileno (f), LOCK_UN);
-#elif defined(HAVE_LOCKF)
-	lockf (fileno (f), F_ULOCK, 0);
-#elif defined(_WIN32)
-	OVERLAPPED overlapped;
-
-	overlapped.Offset = 0;
-	overlapped.OffsetHigh = 0;
-	overlapped.hEvent = NULL;
-	if (!UnlockFileEx ((HANDLE) _get_osfhandle (fileno (f)), 0, 0, 0x80000000, &overlapped))
-		g_warning ("Could not unlock file\n");
-#else
-	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
-#endif /* HAVE_FLOCK */
-}
+#define enchant_lock_file(f) flock (fileno (f), LOCK_EX)
+#define enchant_unlock_file(f) flock (fileno (f), LOCK_UN)
 
 /**
  * enchant_pwl_init

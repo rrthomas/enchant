@@ -1,6 +1,7 @@
 AC_INIT([enchant],[2.0.0])
 AC_PACKAGE_VERSION
 AC_CONFIG_SRCDIR(src/enchant.h)
+AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([no-define subdir-objects])
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
@@ -39,6 +40,7 @@ AC_SUBST(ENCHANT_MICRO_VERSION)
 dnl Checks for programs.
 AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
+gl_EARLY
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX(11)
 AC_PROG_OBJC
@@ -47,11 +49,10 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_HEADER_STDC
 LT_INIT([win32-dll])
+gl_INIT
 ENCHANT_LT_OBJDIR=$lt_cv_objdir
 AC_SUBST(ENCHANT_LT_OBJDIR)
 gt_TYPE_SSIZE_T
-
-AC_CHECK_FUNCS(flock lockf)
 
 
 PKG_PROG_PKG_CONFIG
@@ -546,6 +547,7 @@ Makefile
 enchant.pc
 enchant-uninstalled.pc
 enchant.spec
+lib/Makefile
 src/libenchant.rc
 src/Makefile
 src/aspell/Makefile

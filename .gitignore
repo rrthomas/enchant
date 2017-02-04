@@ -8,9 +8,8 @@ enchant-*.tar.gz
 .deps
 .dirstamp
 /aclocal.m4
-/autogen.err
 /autom4te.cache
-/autopackage/default.apspec
+/build-aux
 /compile
 /configure
 /config.*
@@ -19,7 +18,9 @@ enchant-*.tar.gz
 /enchant.pc
 /enchant.ps
 /enchant.spec
+/gnulib
 /install-sh
+/lib
 /libtool
 /ltmain.sh
 /missing
