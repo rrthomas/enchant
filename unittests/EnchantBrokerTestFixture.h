@@ -125,8 +125,8 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         userMockProviderConfiguration = userConfiguration;
         userMockProvider2Configuration = user2Configuration;
 
-        CopyProvider("libenchant_mock_provider", "libenchant_mock_provider");
-        hModule = g_module_open("lib/enchant/libenchant_mock_provider", (GModuleFlags) 0);
+        CopyProvider("enchant_mock_provider", "enchant_mock_provider");
+        hModule = g_module_open("lib/enchant/enchant_mock_provider", (GModuleFlags) 0);
         if(hModule!=NULL){
             SET_CONFIGURE sc;
             assert(g_module_symbol(hModule, "set_configure", (gpointer *)&sc));
@@ -135,8 +135,8 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
 
         hModule2 = NULL;
         if(user2Configuration != NULL){
-            CopyProvider("libenchant_mock_provider2", "libenchant_mock_provider2");
-            hModule2 = g_module_open("lib/enchant/libenchant_mock_provider2", (GModuleFlags) 0);
+            CopyProvider("enchant_mock_provider2", "enchant_mock_provider2");
+            hModule2 = g_module_open("lib/enchant/enchant_mock_provider2", (GModuleFlags) 0);
             if(hModule2!=NULL){
                 SET_CONFIGURE sc;
                 assert(g_module_symbol(hModule2, "set_configure", (gpointer *)&sc));
@@ -145,10 +145,10 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         }
 
         if(includeNullProviders){
-            CopyProvider("libenchant_null_provider", "null_provider");
-            CopyProvider("libenchant_null_identify", "null_identify");
-            CopyProvider("libenchant_null_describe", "null_describe");
-            CopyProvider("libenchant", "libenchant"); //not a provider
+            CopyProvider("enchant_null_provider", "null_provider");
+            CopyProvider("enchant_null_identify", "null_identify");
+            CopyProvider("enchant_null_describe", "null_describe");
+            CopyProvider("enchant", "enchant"); //not a provider
         }
 
 #if _WIN32
@@ -183,8 +183,18 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
 
     void CopyProvider(const std::string& sourceProviderName, const std::string& destinationProviderName)
     {
-        std::string sourceName = sourceProviderName +"."+ G_MODULE_SUFFIX;
-        std::string destinationName = destinationProviderName + "." +G_MODULE_SUFFIX;
+        std::string prefix =
+	  // FIXME: Get this information from libtool
+#if defined(__MSYS__)
+	  "msys-"
+#elif defined(__CYGWIN__)
+	  "cyg"
+#else
+	  "lib"
+#endif
+	  ;
+        std::string sourceName = prefix + sourceProviderName + "." + G_MODULE_SUFFIX;
+        std::string destinationName = destinationProviderName + "." + G_MODULE_SUFFIX;
 
         std::string destinationDir = AddToPath(AddToPath(GetDirectoryOfThisModule(), "lib"),"enchant");
 
