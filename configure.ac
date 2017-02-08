@@ -50,7 +50,7 @@ AC_CHECK_FUNCS(flock lockf)
 
 PKG_PROG_PKG_CONFIG
 
-PKG_CHECK_MODULES(ENCHANT, [glib-2.0 >= 2.6 gmodule-2.0])
+PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
 
 dnl ===========================================================================
 dnl check compiler flags
@@ -176,6 +176,8 @@ AC_CACHE_CHECK([for supported C++ warning flags], enchant_cxx_cv_warn_cflags, [
 CXX_WARN_CFLAGS="$enchant_cxx_cv_warn_cflags"
 AC_SUBST(CXX_WARN_CFLAGS)
 
+ENCHANT_CFLAGS=$GLIB_CFLAGS
+ENCHANT_LIBS=$GLIB_LIBS
 if test "x$prefix" != "xNONE"; then
 	ENCHANT_CFLAGS="$ENCHANT_CFLAGS -DENCHANT_PREFIX_DIR='\"$prefix\"'"
 fi
@@ -215,8 +217,6 @@ AC_SUBST(SOCKET_LIBS)
 
 # Courtesy of Glib: Ensure MSVC-compatible struct packing convention 
 # is used when compiling for Win32 with gcc.
-# What flag to depends on gcc version: gcc3 uses "-mms-bitfields", while
-# gcc2 uses "-fnative-struct".
 if test x"$native_win32" = xyes; then
   if test x"$GCC" = xyes; then
     msnative_struct=''
@@ -226,18 +226,9 @@ if test x"$native_win32" = xyes; then
     else
       our_gcc="$ac_cv_prog_CC"
     fi
-    case `$our_gcc --version | sed -e 's,\..*,.,' -e q` in
-      2.)
-	if $our_gcc -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
-	  msnative_struct='-fnative-struct'
-	fi
-	;;
-      *)
-	if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
-	  msnative_struct='-mms-bitfields'
-	fi
-	;;
-    esac
+    if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
+      msnative_struct='-mms-bitfields'
+    fi
     if test x"$msnative_struct" = x ; then
       AC_MSG_RESULT([no way])
       AC_MSG_WARN([produced libraries might be incompatible with MSVC-compiled code])
@@ -267,7 +258,7 @@ GLIB_LC_MESSAGES
 
 
 dnl ===========================================================================
-dnl Travis run Ubuntu 14.04 LTS which doesn't include that macro
+dnl Travis runs Ubuntu 14.04 LTS, which doesn't include the following macro
 dnl added to pkg-config in January 2013.
 dnl ===========================================================================
 m4_ifndef([PKG_CHECK_VAR], [
@@ -281,8 +272,8 @@ AC_DEFUN([PKG_CHECK_VAR],
 ])
 
 dnl ===========================================================================
-dnl very hackish.
-dnl Unbuntu / Debian ship older version of unittest++ with their own pkg-config
+dnl Very hackish.
+dnl Ubuntu / Debian ship older version of unittest++ with their own pkg-config
 dnl and include
 dnl ===========================================================================
 PKG_CHECK_EXISTS([UnitTest++],
