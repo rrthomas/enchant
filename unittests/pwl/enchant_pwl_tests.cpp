@@ -201,7 +201,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
     sleep(1); // FAT systems have a 2 second resolution
                  // NTFS is appreciably faster but no specs on what it is exactly
                  // c runtime library's time_t has a 1 second resolution
-    FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+    FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "a");
 	if(f)
 	{
 		fputs(Utf8Bom, f);
@@ -257,7 +257,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
     sleep(1); // FAT systems have a 2 second resolution
                  // NTFS is appreciably faster but no specs on what it is exactly
                  // c runtime library's time_t has a 1 second resolution
-    FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+    FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "a");
     if(f)
     {
 	    fputs(sWords[0].c_str(), f);
@@ -1153,7 +1153,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
   sleep(1); // FAT systems have a 2 second resolution
                // NTFS is appreciably faster but no specs on what it is exactly
                // c runtime library's time_t has a 1 second resolution
-  FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "at");
+  FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "a");
   if(f) {
     fputs(Utf8Bom, f);
     for(std::vector<std::string>::const_iterator itWord = sWords.begin();

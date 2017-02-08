@@ -6,7 +6,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(UNITTESTPP_CFLAGS)
 AM_TESTS_ENVIRONMENT = \
 	ENCHANT_MODULE_PATH=$(top_builddir)/unittests/lib/enchant; \
 	export ENCHANT_MODULE_PATH; \
-	cp $(builddir)/mock_provider/*.so $(builddir)/mock_provider/.libs/*.so . || :;
+	cp $(builddir)/mock_provider/*.so $(builddir)/mock_provider/.libs/*.so $(builddir)/mock_provider/*.dll $(builddir)/mock_provider/.libs/*.dll . || :;
 
 DEPS = $(top_builddir)/src/libenchant.la
 ldadd = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
@@ -53,4 +53,4 @@ main_LDFLAGS =
 main_DEPENDENCIES = $(DEPS)
 main_LDADD = $(ldadd) $(UNITTESTPP_LIBS) $(ENCHANT_LIBS)
 
-DISTCLEANFILES = libenchant_*.so
+DISTCLEANFILES = libenchant_*.so *enchant*.dll
