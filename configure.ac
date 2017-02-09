@@ -532,7 +532,6 @@ dnl ============================================================================
 AC_CONFIG_FILES([
 Makefile
 enchant.pc
-enchant.spec
 lib/Makefile
 src/libenchant.rc
 src/Makefile

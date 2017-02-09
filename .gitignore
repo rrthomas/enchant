@@ -14,10 +14,7 @@ enchant-*.tar.gz
 /configure
 /config.*
 /depcomp
-/enchant-uninstalled.pc
 /enchant.pc
-/enchant.ps
-/enchant.spec
 /gnulib
 /install-sh
 /lib
