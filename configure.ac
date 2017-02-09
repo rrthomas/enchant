@@ -313,6 +313,10 @@ dnl supporting this old version.
 AC_SUBST(UNITTESTPP_CFLAGS)
 AC_SUBST(UNITTESTPP_LIBS)
 
+
+dnl =======================================================================================
+
+dnl Ispell
 build_ispell=yes
 
 AC_ARG_ENABLE(ispell, AS_HELP_STRING([--disable-ispell],[enable the ispell backend @<:@default=auto@:>@]), build_ispell="$enableval", build_ispell=yes)
@@ -329,24 +333,27 @@ fi
 ISPELL_CFLAGS="-DENCHANT_ISPELL_DICT_DIR='\"$ispell_dir\"'"
 AC_SUBST(ISPELL_CFLAGS)
 
-build_myspell=yes
 
+dnl Hunspell
 AC_ARG_ENABLE(myspell, AS_HELP_STRING([--disable-myspell],[enable the myspell backend @<:@default=auto@:>@]), build_myspell="$enableval", build_myspell=yes)
 
 AM_CONDITIONAL(WITH_MYSPELL, test "x$build_myspell" = "xyes")
 
 myspell_dir=${datadir}/myspell/dicts
 AC_ARG_WITH(myspell-dir, AS_HELP_STRING([--with-myspell-dir=PATH],[path to installed myspell dicts]))
-
 if test "x$with_myspell_dir" != "x" ; then
    myspell_dir=$with_myspell_dir
 fi
 
-PKG_CHECK_MODULES(MYSPELL, [hunspell])
-AC_SUBST(MYSPELL_CFLAGS)
-AC_SUBST(MYSPELL_LIBS)
-MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dir\"'"
+if test "x$build_myspell" = xyes; then
+   PKG_CHECK_MODULES(MYSPELL, [hunspell])
+   AC_SUBST(MYSPELL_CFLAGS)
+   AC_SUBST(MYSPELL_LIBS)
+   MYSPELL_CFLAGS="$MYSPELL_CFLAGS -DENCHANT_MYSPELL_DICT_DIR='\"$myspell_dir\"'"
+fi
 
+
+dnl Aspell
 check_aspell=yes
 build_aspell=no
 
@@ -408,36 +415,21 @@ fi
 
 AM_CONDITIONAL(WITH_ASPELL, test "$build_aspell" = yes)
 
-check_voikko=yes
-build_voikko=no
 
-AC_ARG_ENABLE(voikko, AS_HELP_STRING([--disable-voikko],[enable the voikko backend @<:@default=auto@:>@]), check_voikko="$enableval", check_voikko=yes)
+dnl Voikko
+AC_ARG_ENABLE(voikko, AS_HELP_STRING([--disable-voikko],[enable the voikko backend @<:@default=auto@:>@]), build_voikko="$enableval", build_voikko=yes)
 
-AC_ARG_WITH(voikko-prefix, AS_HELP_STRING([--with-voikko-prefix=DIR],[specify under which prefix voikko is installed]), voikko_prefix="$withval", )
+AM_CONDITIONAL(WITH_VOIKKO, test "x$build_voikko" = "xyes")
 
-if test "x$check_voikko" != "xno"; then
-   saved_LDFLAGS=$LDFLAGS
-
-   VOIKKO_INC=
-   VOIKKO_LIBS="-lvoikko"
-   if test "x$voikko_prefix" != "x"; then
-       LDFLAGS="-L$voikko_prefix/lib "$LDFLAGS
-       VOIKKO_INC="-I$voikko_prefix/include"
-       VOIKKO_LIBS="-L$voikko_prefix/lib "$VOIKKO_LIBS
-   fi
-
-   AC_CHECK_LIB(voikko,voikko_init,build_voikko=yes)
-
-   LDFLAGS=$saved_LDFLAGS
-
-   AC_SUBST(VOIKKO_INC)
+if test "x$build_voikko" = xyes; then
+   PKG_CHECK_MODULES(VOIKKO, [libvoikko])
+   AC_SUBST(VOIKKO_CFLAGS)
    AC_SUBST(VOIKKO_LIBS)
 fi
 
-AM_CONDITIONAL(WITH_VOIKKO, test "$build_voikko" = yes)
 
+dnl Uspell
 build_uspell=no
-
 check_uspell=yes
 AC_ARG_ENABLE(uspell, AS_HELP_STRING([--disable-uspell],[enable the uspell backend @<:@default=auto@:>@]), check_uspell="$enableval", check_uspell=yes)
 
@@ -458,6 +450,8 @@ AC_SUBST(USPELL_LIBS)
 
 AM_CONDITIONAL(WITH_USPELL, test "$build_uspell" = yes)
 
+
+dnl Hspell
 build_hspell=no
 check_hspell=yes
 AC_ARG_ENABLE(hspell, AS_HELP_STRING([--disable-hspell],[enable the hspell backend @<:@default=auto@:>@]), check_hspell="$enableval", check_hspell=yes)
@@ -487,6 +481,8 @@ fi
 
 AM_CONDITIONAL(WITH_HSPELL, test "$build_hspell" = yes)
 
+
+dnl Zemberek
 build_zemberek=no
 
 AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--enable-zemberek],[enable the experimental zemberek (turkish) backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=no)
@@ -500,6 +496,8 @@ AM_CONDITIONAL(WITH_ZEMBEREK, test "x$build_zemberek" = "xyes")
 
 zemberek_dir=${datadir}/enchant/zemberek
 
+
+dnl Apple Spell
 APPLESPELL_CFLAGS=""
 APPLESPELL_LIBS=""
 APPLESPELL_LDFLAGS=""
