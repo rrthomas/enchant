@@ -2,9 +2,8 @@ AC_INIT([enchant],[2.0.0])
 AC_PACKAGE_VERSION
 AC_CONFIG_SRCDIR(src/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([no-define subdir-objects])
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CANONICAL_HOST
-AM_MAINTAINER_MODE
 AC_CONFIG_MACRO_DIR([m4])
 
 dnl Release number rules:
@@ -38,7 +37,6 @@ AC_SUBST(ENCHANT_MINOR_VERSION)
 AC_SUBST(ENCHANT_MICRO_VERSION)
 
 dnl Checks for programs.
-AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
 gl_EARLY
 AC_PROG_CXX
@@ -46,7 +44,6 @@ AX_CXX_COMPILE_STDCXX(11)
 AC_PROG_OBJC
 AC_PROG_INSTALL
 AC_PROG_LN_S
-AC_PROG_MAKE_SET
 AC_HEADER_STDC
 LT_INIT([win32-dll])
 gl_INIT
@@ -208,18 +205,6 @@ esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
 AC_SUBST([ENCHANT_WIN32_RESOURCE])
-
-AC_MSG_CHECKING([for OS X])
-case ${host_os} in
-    *darwin*)
-    check_applespell=yes
-    ;;
-    *)
-    check_applespell=no
-    ;;
-esac
-AC_MSG_RESULT([$check_applespell])
-
 AC_SUBST(SOCKET_LIBS)
 
 # Courtesy of Glib: Ensure MSVC-compatible struct packing convention 
@@ -246,6 +231,17 @@ if test x"$native_win32" = xyes; then
     fi
   fi
 fi 
+
+AC_MSG_CHECKING([for macOS])
+case ${host_os} in
+    *darwin*)
+    check_applespell=yes
+    ;;
+    *)
+    check_applespell=no
+    ;;
+esac
+AC_MSG_RESULT([$check_applespell])
 
 dnl ===========================================================================
 
