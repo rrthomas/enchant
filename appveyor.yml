@@ -3,7 +3,7 @@ clone_folder: c:\projects\enchant
 
 environment:
   global:
-    CONFIGURE_FLAGS: --with-myspell-dir=/mingw64/share/hunspell
+    CONFIGURE_FLAGS: --with-myspell-dir=/mingw64/share/hunspell --disable-voikko
     VERBOSE: 1 # Get test logs in output
 
 # FIXME: Build on mingw-w64, mingw-w32 and MSYS2
@@ -19,4 +19,4 @@ install:
 
 # FIXME: add all available providers (just aspell?)
 build_script:
-  - C:\msys64\usr\bin\bash.exe -lc "cd c:/projects/enchant && ./autogen.sh %CONFIGURE_FLAGS% && make && make DISTCHECK_CONFIGURE_FLAGS=%CONFIGURE_FLAGS% distcheck"
+  - C:\msys64\usr\bin\bash.exe -lc "cd c:/projects/enchant && ./autogen.sh %CONFIGURE_FLAGS% && make && make DISTCHECK_CONFIGURE_FLAGS=\"%CONFIGURE_FLAGS%\" distcheck"
