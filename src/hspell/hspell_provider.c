@@ -212,11 +212,7 @@ hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 	struct dict_radix *hspell_dict;
 	
 	hspell_dict = (struct dict_radix *)dict->user_data;
-	
-	/* deleting the dict is not posible on hspell ver. < v.0.8 */
-#if (HSPELL_VERSION_MAJOR > 0) || (HSPELL_VERSION_MINOR >= 8)
 	hspell_uninit (hspell_dict);
-#endif
 	g_free (dict);
 }
 
@@ -275,11 +271,6 @@ hspell_provider_describe (EnchantProvider * me)
 	return "Hspell Provider";
 }
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-	
 ENCHANT_MODULE_EXPORT (EnchantProvider *) 
 	     init_enchant_provider (void);
 
@@ -300,7 +291,3 @@ init_enchant_provider (void)
 
 	return provider;
 }
-
-#ifdef __cplusplus
-}
-#endif

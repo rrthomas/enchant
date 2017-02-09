@@ -47,6 +47,7 @@
 #include <string.h>
 #include <locale.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -57,9 +58,9 @@
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-
-static char charset[15] = "CP437";
 #endif
+
+static const char *charset;
 
 typedef enum 
 	{
@@ -111,12 +112,7 @@ consume_line (FILE * in, GString * str)
 	}
 
 	if (str->len) {
-#ifdef WIN32
 		utf = g_convert(str->str, str->len, "UTF-8", charset, &bytes_read, &bytes_written, NULL);
-#else
-		utf = g_locale_to_utf8 (str->str, str->len, &bytes_read, &bytes_written, NULL);
-#endif
-
 		if (utf) {
 			g_string_assign (str, utf);
 			g_free (utf);
@@ -557,12 +553,11 @@ int main (int argc, char ** argv)
 	/* Initialize system locale */
 	setlocale(LC_ALL, "");
 
+	g_get_charset(&charset);
 #ifdef WIN32
-	/* Workaround about glib's "locale" not being the set C locale */
-	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) != FILE_TYPE_CHAR) {
-		sprintf_s(charset,15,"CP%u",GetACP());
-	} else {
-		sprintf_s(charset,15,"CP%u",GetConsoleCP());
+	/* If reading from stdin, its CP may not be the system CP (which glib's locale gives us) */
+	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) == FILE_TYPE_CHAR) {
+		charset = g_strdup_printf("CP%u", GetConsoleCP());
 	}
 #endif
 
@@ -611,7 +606,7 @@ int main (int argc, char ** argv)
 	}
 	else {
 		if (file) {
-			fp = enchant_fopen (file, "rb");
+			fp = g_fopen (file, "rb");
 			if (!fp) {
 				fprintf (stderr, "Error: Could not open the file \"%s\" for reading.\n", file);
 				exit (1);

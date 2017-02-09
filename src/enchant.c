@@ -330,43 +330,6 @@ enchant_get_conf_dirs (void)
 	return conf_dirs;
 }
 
-ENCHANT_MODULE_EXPORT(FILE *)
-enchant_fopen (const gchar *filename, const gchar *mode)
-{
-#ifdef G_OS_WIN32
-  wchar_t *wfilename = g_utf8_to_utf16 (filename, -1, NULL, NULL, NULL);
-  wchar_t *wmode;
-  FILE *retval;
-  int save_errno;
-
-  if (wfilename == NULL)
-    {
-      errno = EINVAL;
-      return NULL;
-    }
-
-  wmode = g_utf8_to_utf16 (mode, -1, NULL, NULL, NULL);
-
-  if (wmode == NULL)
-    {
-      g_free (wfilename);
-      errno = EINVAL;
-      return NULL;
-    }
-
-  retval = _wfopen (wfilename, wmode);
-  save_errno = errno;
-
-  g_free (wfilename);
-  g_free (wmode);
-
-  errno = save_errno;
-  return retval;
-#else
-  return fopen (filename, mode);
-#endif
-}
-
 /**
  * enchant_get_user_config_dirs
  *
@@ -1066,36 +1029,6 @@ enchant_dict_add (EnchantDict * dict, const char *const word,
 }
 
 /**
- * enchant_dict_add_to_pwl
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- *
- * DEPRECATED. Please use enchant_dict_add() instead.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
-			 ssize_t len)
-{
-	enchant_dict_add(dict,word,len);
-}
-
-/**
- * enchant_dict_add_to_personal
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- *
- * DEPRECATED. Please use enchant_dict_add() instead.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
-				  ssize_t len)
-{
-	enchant_dict_add(dict, word, len);
-}
-
-/**
  * enchant_dict_add_to_session
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to add to this spell-checking session, in UTF-8 encoding
@@ -1150,21 +1083,6 @@ enchant_dict_is_added (EnchantDict * dict, const char *const word,
 	enchant_session_clear_error (session);
 
 	return enchant_session_contains (session, word, len);
-}
-
-/**
- * enchant_dict_is_in_session
- * @dict: A non-null #EnchantDict
- * @word: The word you wish to see if it's in your session in UTF8 encoding
- * @len: the byte length of @word, or -1 for strlen (@word)
- *
- * DEPRECATED. Please use enchant_dict_is_added() instead.
-*/
-ENCHANT_MODULE_EXPORT (int)
-enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
-				ssize_t len)
-{
-	return enchant_dict_is_added(dict, word, len);
 }
 
 /**
@@ -1314,21 +1232,6 @@ enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 	g_strfreev(string_list);
-}
-
-/**
- * enchant_dict_free_suggestions
- * @dict: A non-null #EnchantDict
- * @suggestions: The non-null suggestion list returned by
- *               'enchant_dict_suggest'
- *
- * Releases the suggestions
- * This function is DEPRECATED. Please use enchant_dict_free_string_list() instead.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions)
-{
-	enchant_dict_free_string_list (dict, suggestions);
 }
 
 /**
@@ -1557,7 +1460,7 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 
 	FILE * f;
 
-	f = enchant_fopen (file, "r");
+	f = g_fopen (file, "r");
 	if (!f)
 		return;
 
@@ -2362,7 +2265,7 @@ enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_na
 	return _enchant_get_dirs_from_string (param_value);
 }
 
-ENCHANT_MODULE_EXPORT(char *)
+ENCHANT_MODULE_EXPORT(const char *)
 enchant_get_version (void) {
 	return ENCHANT_VERSION_STRING;
 }

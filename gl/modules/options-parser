@@ -1,0 +1,20 @@
+Description:
+A portable, pluggable option parser for Bourne shell.
+
+Files:
+build-aux/options-parser
+
+Depends-on:
+funclib.sh
+
+configure.ac:
+
+Makefile.am:
+
+Include:
+
+License:
+GPLed build tool
+
+Maintainer:
+Gary V. Vaughan <gary@gnu.org>

@@ -51,8 +51,7 @@ extern "C" {
 typedef struct str_enchant_broker EnchantBroker;
 typedef struct str_enchant_dict   EnchantDict;
 
-/* const */
-ENCHANT_MODULE_EXPORT (char *)
+ENCHANT_MODULE_EXPORT (const char *)
      enchant_get_version (void);
 
 ENCHANT_MODULE_EXPORT (EnchantBroker *) 
@@ -131,20 +130,6 @@ ENCHANT_MODULE_EXPORT (void)
 				     const char *const cor, ssize_t cor_len);
 ENCHANT_MODULE_EXPORT (void)
 	     enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
-
-#ifndef ENCHANT_DISABLE_DEPRECATED
-ENCHANT_MODULE_EXPORT (void)
-     enchant_dict_free_suggestions (EnchantDict * dict, char **suggestions);
-ENCHANT_MODULE_EXPORT (void)
-     enchant_dict_add_to_personal (EnchantDict * dict, const char *const word,
-				   ssize_t len);
-ENCHANT_MODULE_EXPORT (void)
-     enchant_dict_add_to_pwl (EnchantDict * dict, const char *const word,
-			      ssize_t len);
-ENCHANT_MODULE_EXPORT (int)
-     enchant_dict_is_in_session (EnchantDict * dict, const char *const word,
-				 ssize_t len);
-#endif /* ENCHANT_DISABLE_DEPRECATED */
 
 /* const */
 ENCHANT_MODULE_EXPORT(char *)

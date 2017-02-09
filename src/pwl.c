@@ -57,28 +57,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <fcntl.h>
-
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <io.h>
-#endif
 
 #include <glib.h>
 #include <glib/gstdio.h>
 #include "enchant-provider.h"
 
 #include "pwl.h"
-
-#if defined(_MSC_VER)
-#pragma warning(disable: 4996) /* The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name. */
-#endif
-
-#if defined(HAVE_FLOCK) || defined(HAVE_LOCKF)
-#include <unistd.h>
-#include <sys/file.h>
-#endif /* HAVE_FLOCK || HAVE_LOCKF */
 
 #define ENCHANT_PWL_MAX_ERRORS 3
 #define ENCHANT_PWL_MAX_SUGGS 15
@@ -192,45 +178,8 @@ static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num);
 
 static int edit_dist(const char* word1, const char* word2);
 
-static void
-enchant_lock_file (FILE * f)
-{
-#if defined(HAVE_FLOCK)
-	flock (fileno (f), LOCK_EX);
-#elif defined(HAVE_LOCKF)
-	lockf (fileno (f), F_LOCK, 0);
-#elif defined(_WIN32)
-	OVERLAPPED overlapped;
-
-	overlapped.Offset = 0;
-	overlapped.OffsetHigh = 0;
-	overlapped.hEvent = NULL;
-	if (!LockFileEx ((HANDLE) _get_osfhandle (fileno (f)), LOCKFILE_EXCLUSIVE_LOCK, 0, 0, 0x80000000, &overlapped))
-		g_warning ("Could not lock file\n");
-#else
-	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
-#endif /* HAVE_FLOCK */
-}
-
-static void
-enchant_unlock_file (FILE * f)
-{
-#if defined(HAVE_FLOCK)
-	flock (fileno (f), LOCK_UN);
-#elif defined(HAVE_LOCKF)
-	lockf (fileno (f), F_ULOCK, 0);
-#elif defined(_WIN32)
-	OVERLAPPED overlapped;
-
-	overlapped.Offset = 0;
-	overlapped.OffsetHigh = 0;
-	overlapped.hEvent = NULL;
-	if (!UnlockFileEx ((HANDLE) _get_osfhandle (fileno (f)), 0, 0, 0x80000000, &overlapped))
-		g_warning ("Could not unlock file\n");
-#else
-	/* TODO: UNIX fcntl. This race condition probably isn't too bad. */
-#endif /* HAVE_FLOCK */
-}
+#define enchant_lock_file(f) flock (fileno (f), LOCK_EX)
+#define enchant_unlock_file(f) flock (fileno (f), LOCK_UN)
 
 /**
  * enchant_pwl_init
@@ -260,7 +209,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 
 	g_return_val_if_fail (file != NULL, NULL);
 
-	fd = enchant_fopen(file, "ab+");
+	fd = g_fopen(file, "ab+");
 	if(fd == NULL)
 		{
 			return NULL;
@@ -296,7 +245,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	g_hash_table_destroy (pwl->words_in_trie);
 	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	f = enchant_fopen(pwl->filename, "r");
+	f = g_fopen(pwl->filename, "r");
 	if (!f) 
 		return;
 
@@ -390,7 +339,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 	{
 		FILE *f;
 		
-		f = enchant_fopen(pwl->filename, "a+");
+		f = g_fopen(pwl->filename, "a+");
 		if (f)
 			{
 				struct stat stats;
@@ -440,7 +389,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 			if(!g_file_get_contents(pwl->filename, &contents, &length, NULL))
 				return;
 
-			f = enchant_fopen(pwl->filename, "wb"); /*binary because g_file_get_contents reads binary*/
+			f = g_fopen(pwl->filename, "wb"); /*binary because g_file_get_contents reads binary*/
 			if (f)
 				{
 					const gunichar BOM = 0xfeff;
@@ -729,8 +678,8 @@ static int best_distance(char** suggs, const char *const word, size_t len)
 
 /* gives the best set of suggestions from pwl that are at least as good as the 
  * given suggs (if suggs == NULL just best from pwl) */
-char** enchant_pwl_suggest(EnchantPWL *pwl,const char *const word,
-			   size_t len, const char*const*const suggs, size_t* out_n_suggs)
+char** enchant_pwl_suggest(EnchantPWL *pwl, const char *const word,
+			   size_t len, char** suggs, size_t* out_n_suggs)
 {
 	EnchantTrieMatcher* matcher;
 	EnchantSuggList sugg_list;
@@ -898,23 +847,6 @@ static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word
 
 	return trie;
 }
-
-#if !GLIB_CHECK_VERSION(2,14,0)
-static void grab_keys (gpointer key,
-		       gpointer value,
-		       gpointer user_data)
-{
-	GList **l = user_data;
-	*l = g_list_prepend (*l, key);
-}
-
-static GList* g_hash_table_get_keys (GHashTable *hash_table)
-{
-	GList *l = NULL;
-	g_hash_table_foreach (hash_table, grab_keys, &l);
-	return l;
-}
-#endif
 
 static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
 {

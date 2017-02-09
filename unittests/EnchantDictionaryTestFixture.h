@@ -224,7 +224,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
     }
 
     bool IsWordInSession(const std::string& word){
-        return enchant_dict_is_in_session(_dict, word.c_str(), word.size())!=0;
+        return enchant_dict_is_added(_dict, word.c_str(), word.size())!=0;
     }
 
     bool IsWordInDictionary(const std::string& word){
@@ -233,12 +233,12 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     void RemoveWordFromDictionary(const std::string& word)
     {
-         enchant_dict_remove(_dict, word.c_str(), word.size());
+        enchant_dict_remove(_dict, word.c_str(), word.size());
     }
 
     void AddWordToDictionary(const std::string& word)
     {
-		enchant_dict_add(_dict, word.c_str(), word.size());
+	enchant_dict_add(_dict, word.c_str(), word.size());
     }
 
     void AddWordsToDictionary(const std::vector<std::string>& sWords)
@@ -250,7 +250,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         }
     }
 
-	void ExternalAddWordToDictionary(const std::string& word)
+    void ExternalAddWordToDictionary(const std::string& word)
     {
         ExternalAddWordToFile(word, GetPersonalDictFileName());
     }
@@ -266,12 +266,12 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
                      // NTFS is appreciably faster but no specs on what it is exactly
                      // c runtime library's time_t has a 1 second resolution
         FILE * f = g_fopen(filename.c_str(), "a");
-		if(f)
-		{
-			fputc('\n', f);
-			fputs(word.c_str(), f);
-			fclose(f);
-		}
+	if(f)
+	{
+            fputc('\n', f);
+            fputs(word.c_str(), f);
+            fclose(f);
+	}
     }
 
     void ExternalAddNewLineToDictionary()
@@ -307,7 +307,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         }
     }
 
-   std::vector<std::string> GetExpectedSuggestions(const std::string& s, size_t begin = 0)
+    std::vector<std::string> GetExpectedSuggestions(const std::string& s, size_t begin = 0)
     {
         size_t cSuggestions;
         char** expectedSuggestions = MockDictionarySuggest (_dict, 

@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS=src tests unittests doc data
+SUBDIRS = lib src tests unittests doc data
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = enchant.pc
@@ -21,4 +21,5 @@ EXTRA_DIST =		\
 	ChangeLog 	\
 	MAINTAINERS	\
 	AUTHORS 	\
-	COPYING.LIB
+	COPYING.LIB	\
+	m4/gnulib-cache.m4

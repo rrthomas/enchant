@@ -1,6 +1,7 @@
-AC_INIT([enchant],[1.6.1])
+AC_INIT([enchant],[2.0.0])
 AC_PACKAGE_VERSION
 AC_CONFIG_SRCDIR(src/enchant.h)
+AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([no-define subdir-objects])
 AC_CANONICAL_HOST
 AM_MAINTAINER_MODE
@@ -20,10 +21,16 @@ dnl First extract pieces from the version number string
 ENCHANT_MAJOR_VERSION=`echo $VERSION | awk -F. '{print $1}'`
 ENCHANT_MINOR_VERSION=`echo $VERSION | awk -F. '{print $2}'`
 ENCHANT_MICRO_VERSION=`echo $VERSION | awk -F. '{print $3}'`
+ENCHANT_VERSION=$ENCHANT_MAJOR_VERSION.$ENCHANT_MINOR_VERSION.$ENCHANT_MICRO_VERSION$ENCHANT_MICRO_VERSION_SUFFIX
+ENCHANT_VERSION_NUMBER=`expr $ENCHANT_MAJOR_VERSION \* 1000000 + $ENCHANT_MINOR_VERSION \* 1000 + $ENCHANT_MICRO_VERSION`
+
+ENCHANT_SONUM=0
+AGE=`expr $ENCHANT_MAJOR_VERSION '*' 1000 + $ENCHANT_MINOR_VERSION`
+REVISION=$ENCHANT_MICRO_VERSION
+CURRENT=`expr $ENCHANT_SONUM + $AGE`
 
 dnl Version info for libraries = CURRENT:REVISION:AGE
-MAJOR_VERSION_PLUS_MINOR_VERSION=`expr $ENCHANT_MAJOR_VERSION + $ENCHANT_MINOR_VERSION`
-VERSION_INFO=$MAJOR_VERSION_PLUS_MINOR_VERSION:$ENCHANT_MICRO_VERSION:$ENCHANT_MINOR_VERSION
+VERSION_INFO=$CURRENT:$REVISION:$AGE
 
 AC_SUBST(VERSION_INFO)
 AC_SUBST(ENCHANT_MAJOR_VERSION)
@@ -33,6 +40,7 @@ AC_SUBST(ENCHANT_MICRO_VERSION)
 dnl Checks for programs.
 AC_SEARCH_LIBS([strerror],[cposix])
 AC_PROG_CC
+gl_EARLY
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX(11)
 AC_PROG_OBJC
@@ -41,16 +49,15 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_HEADER_STDC
 LT_INIT([win32-dll])
+gl_INIT
 ENCHANT_LT_OBJDIR=$lt_cv_objdir
 AC_SUBST(ENCHANT_LT_OBJDIR)
 gt_TYPE_SSIZE_T
 
-AC_CHECK_FUNCS(flock lockf)
-
 
 PKG_PROG_PKG_CONFIG
 
-PKG_CHECK_MODULES(ENCHANT, [glib-2.0 >= 2.6 gmodule-2.0])
+PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
 
 dnl ===========================================================================
 dnl check compiler flags
@@ -176,6 +183,8 @@ AC_CACHE_CHECK([for supported C++ warning flags], enchant_cxx_cv_warn_cflags, [
 CXX_WARN_CFLAGS="$enchant_cxx_cv_warn_cflags"
 AC_SUBST(CXX_WARN_CFLAGS)
 
+ENCHANT_CFLAGS=$GLIB_CFLAGS
+ENCHANT_LIBS=$GLIB_LIBS
 if test "x$prefix" != "xNONE"; then
 	ENCHANT_CFLAGS="$ENCHANT_CFLAGS -DENCHANT_PREFIX_DIR='\"$prefix\"'"
 fi
@@ -215,8 +224,6 @@ AC_SUBST(SOCKET_LIBS)
 
 # Courtesy of Glib: Ensure MSVC-compatible struct packing convention 
 # is used when compiling for Win32 with gcc.
-# What flag to depends on gcc version: gcc3 uses "-mms-bitfields", while
-# gcc2 uses "-fnative-struct".
 if test x"$native_win32" = xyes; then
   if test x"$GCC" = xyes; then
     msnative_struct=''
@@ -226,18 +233,9 @@ if test x"$native_win32" = xyes; then
     else
       our_gcc="$ac_cv_prog_CC"
     fi
-    case `$our_gcc --version | sed -e 's,\..*,.,' -e q` in
-      2.)
-	if $our_gcc -v --help 2>/dev/null | grep fnative-struct >/dev/null; then
-	  msnative_struct='-fnative-struct'
-	fi
-	;;
-      *)
-	if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
-	  msnative_struct='-mms-bitfields'
-	fi
-	;;
-    esac
+    if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
+      msnative_struct='-mms-bitfields'
+    fi
     if test x"$msnative_struct" = x ; then
       AC_MSG_RESULT([no way])
       AC_MSG_WARN([produced libraries might be incompatible with MSVC-compiled code])
@@ -267,7 +265,7 @@ GLIB_LC_MESSAGES
 
 
 dnl ===========================================================================
-dnl Travis run Ubuntu 14.04 LTS which doesn't include that macro
+dnl Travis runs Ubuntu 14.04 LTS, which doesn't include the following macro
 dnl added to pkg-config in January 2013.
 dnl ===========================================================================
 m4_ifndef([PKG_CHECK_VAR], [
@@ -281,8 +279,8 @@ AC_DEFUN([PKG_CHECK_VAR],
 ])
 
 dnl ===========================================================================
-dnl very hackish.
-dnl Unbuntu / Debian ship older version of unittest++ with their own pkg-config
+dnl Very hackish.
+dnl Ubuntu / Debian ship older version of unittest++ with their own pkg-config
 dnl and include
 dnl ===========================================================================
 PKG_CHECK_EXISTS([UnitTest++],
@@ -396,26 +394,13 @@ if test "x$check_aspell" != "xno"; then
    fi
 
    AC_MSG_CHECKING([For aspell headers in $aspell_prefix/include])
-   if test -f "$aspell_prefix/include/pspell/pspell.h"; then
-       AC_MSG_RESULT([yes (pspell)])
-
-       AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,
-          [AC_CHECK_LIB(pspell, new_pspell_config, build_aspell=yes, AC_MSG_WARN([Enchant building without the aspell library]))]
-         ,)
-       AC_CHECK_LIB(aspell,get_aspell_dict_info_list,ASPELL_CFLAGS="-DASPELL_0_50_0=1",)
-
-       ASPELL_CFLAGS+=" -DHAVE_PSPELL_H"
-   elif test -f "$aspell_prefix/include/aspell.h"; then
-       AC_MSG_RESULT([yes (aspell)])
-
-       AC_CHECK_LIB(aspell,new_aspell_config,build_aspell=yes,
-          [AC_CHECK_LIB(pspell, new_pspell_config, build_aspell=yes, AC_MSG_WARN([Enchant building without the aspell library]))]
-         ,)
-       AC_CHECK_LIB(aspell,get_aspell_dict_info_list,ASPELL_CFLAGS="-DASPELL_0_50_0=1",)
+   if test -f "$aspell_prefix/include/aspell.h"; then
+       AC_MSG_RESULT([yes])
+       AC_CHECK_LIB(aspell,get_aspell_dict_info_list,build_aspell=yes,AC_MSG_WARN([Aspell too old (version < 0.50)]))
    else
        AC_MSG_RESULT([no])
        if test "x$HAVE_ASPELL" = "xyes"; then
-           AC_MSG_WARN([Didn't find pspell (aspell) headers])
+           AC_MSG_WARN([Didn't find aspell headers])
        fi
    fi
    LDFLAGS=$saved_LDFLAGS
@@ -508,9 +493,9 @@ AM_CONDITIONAL(WITH_HSPELL, test "$build_hspell" = yes)
 
 build_zemberek=no
 
-AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--disable-zemberek],[enable the experimental zemberek (turkish) backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=no)
+AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--enable-zemberek],[enable the experimental zemberek (turkish) backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=no)
 
-PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib-1 >= 0.62], build_zemberek=yes, build_zemberek=no)
+PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib-1 >= 0.62], , build_zemberek=no)
 
 AC_SUBST(ZEMBEREK_CFLAGS)
 AC_SUBST(ZEMBEREK_LIBS)
@@ -549,6 +534,7 @@ Makefile
 enchant.pc
 enchant-uninstalled.pc
 enchant.spec
+lib/Makefile
 src/libenchant.rc
 src/Makefile
 src/aspell/Makefile

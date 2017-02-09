@@ -1,0 +1,482 @@
+@node Bootstrap
+@chapter Bootstrap
+
+The process of executing the various tools required to bring all the
+generated files up to date in a directory freshly checked out from
+source control can be quite involved.  Many GNU projects use
+@command{bootstrap} script to execute some or all of the following in the
+correct order: @command{gnulib-tool}, @command{autopoint},
+@command{libtoolize}, @command{autoreconf}. Often there's also
+additional file-processing and assorted book-keeping that also falls
+under the control of @command{bootstrap}, but it's wasteful for the
+maintainers of all these projects to manually reinvent a custom script
+on a case-by-case basis.
+
+Gnulib is designed to provide a central library of exemplar
+implementations to promote the sharing of useful common code among
+GNU project maintainers. However, the bootstrapping needs of these
+projects vary enormously, so Gnulib's @command{bootstrap} needs to be
+extremely @strong{customisable} and extensible, with less effort than
+would be otherwise required to invent an ad-hoc solution.
+
+@menu
+* Customisation::
+* Usage Patterns::
+* Known Bugs::
+@end menu
+
+
+@node Customisation
+@section Customisation
+
+There are four distinct ways to customize the functionality of
+@command{bootstrap}, all requiring creation of a @file{bootstrap.conf}
+file in the same directory as the imported @command{bootstrap} script
+itself.
+
+@menu
+* Configuration Variables::
+* Require Variables::
+* Hook Functions::
+* Function Replacement::
+@end menu
+
+
+@node Configuration Variables
+@subsection Configuration Variables
+
+For all but the more complex customisations, you need only change
+the value of a selection of the following shell variables in
+@file{bootstrap.conf}, to reflect whatever is appropriate to your
+package.
+
+@example
+    vc_ignore=.gitignore
+@end example
+
+@table @code
+
+@cnindex buildreq
+@item buildreq
+A newline-delimited list of triples of @strong{programs} (which must
+accept the option @option{--version} without hanging or failing), the
+@strong{minimum version required} (or just `-' in the version field if
+any version will be sufficient) and @strong{homepage URL (to
+help users locate missing packages)
+
+@smallexample
+buildreq='
+        git        1.5.5   http://git-scm.com
+        help2man   1.29    http://www.gnu.org/s/help2man
+'
+@end smallexample
+
+If you specify a minimum version of Autoconf with @code{AC_PREREQ},
+that version will be checked automatically without needing to be
+listed in @code{buildreq}.  Similarly for a minimum Automake version
+declared with @code{AM_INIT_AUTOMAKE}, Libtool version with
+@code{LT_PREREQ}, or Autopoint version with @code{AM_GNU_GETTEXT_VERSION}.
+
+If @code{AB_INIT} is declared in @file{configure.ac}, then a versionless
+requirement for Autobuild is added automatically, and finally if there
+are any diff files under @code{local_gl_dir}, then a versionless
+requirement for patch is also added.
+
+When @command{bootstrap} is invoked, it will check that all the listed
+and automatically added tools are available at the given minimum version,
+or else bail out with a diagnostic.
+
+
+@cnindex buildreq_readme
+@item buildreq_readme
+Name of a file containing instructions on installing missing packages
+required in @code{buildreq}. Usually, the instructions at the given
+URL should be sufficient, though some projects add additional notes
+in @file{HACKING}.
+
+@smallexample
+buildreq_readme=README-hacking
+@end smallexample
+
+
+@cnindex build_aux
+@item build_aux
+This is automatically extracted from the @code{AC_CONFIG_AUX_DIR}
+declaration in @file{configure.ac}, though you can specify it in
+@file{bootstrap.conf} if you don't otherwise want to declare
+@code{AC_CONFIG_AUX_DIR} in @file{configure.ac}.
+
+@cnindex macro_dir
+@item macro_dir
+This is automatically extracted from @file{configure.ac}, or if
+neither @code{AC_CONFIG_MACRO_DIRS} nor @code{AC_CONFIG_MACRO_DIR} is
+declared there, the option immediately following the first @samp{-I}
+from @code{ACLOCAL_AMFLAGS} in @file{Makefile.am} is used as a last
+resort. If you don't want to declare the macro directory in any of
+those places, then you can specify it in @file{bootstrap.conf} by
+using the @code{macro_dir} variable.
+
+@smallexample
+macro_dir=acm4
+@end smallexample
+
+
+@cnindex package
+@item package
+This is automatically extracted by downcasing the first argument to
+@code{AC_INIT} in @file{configure.ac}, though you can override it here
+if you prefer.
+
+@cnindex package_name
+@item package_name
+This is automatically extracted from the first argument to
+@code{AC_INIT} in @file{configure.ac}, though you can override it here
+if you prefer.
+
+@cnindex package_version
+@item package_version
+This is automatically extracted from the second argument to
+@code{AC_INIT} in @file{configure.ac}, though you can override it here
+if you prefer.
+
+@cnindex package_bugreport
+@item package_bugreport
+This is automatically extracted from the third argument to
+@code{AC_INIT} in @file{configure.ac} if given, though you can override
+it here if you prefer.
+
+
+@cnindex doc_base
+@cnindex gnulib_mk
+@cnindex gnulib_name
+@cnindex local_gl_dir
+@cnindex source_base
+@cnindex tests_base
+@item doc_base
+@itemx gnulib_mk
+@itemx gnulib_name
+@itemx local_gl_dir
+@itemx source_base
+@itemx tests_base
+These are normally extracted from @file{gnulib-cache.m4}, regardless of
+their values in @file{bootstrap.conf}.
+
+When that file is not yet created, then @command{bootstrap} will
+fall-back automatically to the gnulib defaults; unless you set
+alternative values here in @file{bootstrap.conf}.
+
+If you check @file{gnulib-cache.m4} into your repository, then these
+values will be extracted automatically. @xref{Usage Patterns}, for more
+details.
+
+
+@cnindex gnulib_modules
+@item gnulib_modules
+The list of gnulib modules required at @command{gnulib-tool} time.
+
+If you check @file{gnulib-cache.m4} into your repository, then this list
+will be extracted automatically. @xref{Usage Patterns}, for more
+details.
+
+
+@cnindex gnulib_non_module_files
+@item gnulib_non_module_files
+Extra gnulib files that are not part of a gnulib module, but which
+override files of the same name installed by other bootstrap tools, such
+as @command{automake}.
+
+@smallexample
+gnulib_non_module_files="$gnulib_non_module_files"'
+        doc/COPYINGv3
+'
+@end smallexample
+
+
+@cnindex gnulib_path
+@cnindex gnulib_url
+@item gnulib_path
+@itemx gnulib_url
+Relative path to the local gnulib submodule, and url to the upstream
+git repository for gnulib. These are only used if a new gnulib submodule
+needs to be created, otherwise they are ignored and the values stored in
+@file{.gitmodules} are used instead.
+
+Normally, you can leave these untouched, and @command{bootstrap} will
+correctly check out a gnulib submodule from the directory passed with
+@option{--gnulib-srcdir}, or else from the upstream repository at GNU
+savannah.
+
+
+@cnindex gnulib_tool_options
+@item gnulib_tool_options
+Additional options to pass to @command{gnulib-tool} when it is called.
+
+@smallexample
+gnulib_tool_options='
+        --no-changelog
+        --libtool
+'
+@end smallexample
+
+
+@cnindex gnulib_precious
+@item gnulib_precious
+Normally, @command{bootstrap} removes any macro-files that are not
+included by @file{aclocal.m4} before it returns, except for files listed
+in this variable which are always kept.
+
+@smallexample
+gnulib_precious='
+        gnulib-cache.m4
+'
+@end smallexample
+
+
+@cnindex min_cmd_len
+@item min_cmd_len
+When truncating long commands for display at runtime, always allow at
+least this many characters before truncating.
+
+
+@cnindex po_download_command_format
+@item po_download_command_format
+The command to download all @samp{.po} files for a specified domain into
+a specified directory, where the first %s is filled in with the
+@emph{domain name}, and the second with the @emph{destination
+directory}.  Use @command{rsync}'s @option{-L} and @option{-r} options
+because the latest @samp{/%s} directory and the @samp{.po} files within
+are all symlinks.
+
+@smallexample
+po_download_command_format=\
+"rsync --delete --exclude '*.s1' -Lrtvz \
+'translationproject.org::tp/latest/%s/' '%s'"
+@end smallexample
+
+This variable is only interesting to projects with NLS support, and even
+then, Usually, the default setting will be sufficient.
+
+
+@cnindex extra_locale_categories
+@item extra_locale_categories
+Other locale categories that need message catalogs.  This variable is
+only interesting to projects with NLS support.
+
+
+@cnindex xgettext_options
+@item xgettext_options
+Additional @command{xgettext} options to use.  Gnulib might provide you
+with an extensive list of additional options to append to this, but
+gettext 0.16.1 and newer already appends those automaticaly, so you can
+safely ignore the complaints from @command{gnulib-tool} as long as your
+@file{configure.ac} declares @code{AM_GNU_GETTEXT_VERSION([0.16.1])}.
+
+@smallexample
+xgettext_options='
+        --flag=_:1:pass-c-format
+        --flag=N_:1:pass-c-format
+'
+@end smallexample
+
+As with the previous two variables, you can safely ignore this one if
+your project does not have NLS support.
+
+
+@cnindex copyright_holder
+@item copyright_holder
+Package copyright holder for gettext files.  Defaults to @samp{FSF} if
+unset.
+
+@cnindex checkout_only_file
+@item checkout_only_file
+If you want @command{bootstrap} to abort if it is executed outside of
+a version controlled tree, this variable must hold the name of some file
+that is present only in a checked out tree, and is not in a distribution
+tarball.
+
+@smallexample
+checkout_only_file=HACKING
+@end smallexample
+
+@cnindex copy
+@item copy
+If set to @samp{true}, then make copies when adding files to this
+package, otherwise make symlinks by default. If set to @samp{true},
+then the @option{--copy} option to @command{bootstrap} will have no
+further effect.
+
+
+@cnindex vc_ignore
+@item vc_ignore
+Set this to @samp{.cvsignore .gitignore} if you want both of those files
+to be generated in directories such as @file{lib/}, @file{m4/}, and
+@file{po/}, or set it to @samp{auto} to make @command{bootstrap} select
+which to use based on which version control system (if any) is used in
+the source directory.  Or set it to @samp{none} to disregard VCS ignore
+files entirely.  Default is @samp{auto}.
+
+@smallexample
+vc_ignore='.cvsignore .gitignore'
+@end smallexample
+
+@end itemize
+
+
+@node Require Variables
+@subsection Require Variables
+
+Many of the functions in @command{bootstrap} should not be executed more
+than once, which is achieved by storing the name of that function in a
+variable and then calling it with:
+
+@smallexample
+$require_gnulib_tool
+@end smallexample
+
+At this stage, the value of the variable is interpreted as a function
+call by the shell, and the named function then runs.  Under normal
+circumstances, functions that are called in this way always set their
+associated variable name to simply @samp{:} so that subsequent
+occurrences of, in this instance, @code{$require_gnulib_tool} have no
+further effect.
+
+That means you can easily skip any functions that are called like this
+by unconditionally setting the require variable to @samp{:} in your
+@file{bootstrap.conf}. So, for example, if your package makes no use of
+@command{gnulib-tool}, you can add the following to your
+@file{bootstrap.conf}:
+
+@smallexample
+require_gnulib_tool=:
+@end smallexample
+
+You should be aware, however, that the function calls managed by this
+mechanism are designed to be called one time to ensure that some
+resource is available for use by the rest of any function that uses a
+@code{$require_some_resource} call.  Be careful to ensure that you
+remove any code paths that try to use that resource if you have
+effectively disabled it by setting its variable to @samp{:} early on.
+
+
+@node Hook Functions
+@subsection Hook Functions
+
+Many of the key functions in @command{bootstrap} will run one or more hook
+functions before they return.  Essentially, all that the entire script
+does is to define a lot of functions (some of which will run hooks),
+then source the contents of your @file{bootstrap.conf} customisations,
+and then finally run the @code{func_bootstrap} function.  Read the
+doc-comments above @code{func_bootstrap} in the @command{bootstrap} file,
+as well as the functions that it calls to find where you can hook your
+own functions, in order to be called during your customised execution of
+@command{bootstrap}.
+
+One of the trickier hook functions is set up to allow you to add
+additional arguments to the option parser for @command{bootstrap} without
+having to replace @code{func_parse_options} in its entirety:
+
+@smallexample
+my_silent_option ()
+@{
+    $debug_cmd
+
+    case $1 in
+      --silent|-s) opt_silent=:; shift ;;
+    esac
+
+    # return modified option list
+    func_quote_for_eval $@{1+"$@@"@}
+    func_run_hooks_result=$func_quote_for_eval_result
+@}
+func_add_hook func_parse_options my_silent_option
+@end smallexample
+
+
+@node Function Replacement
+@subsection Function Replacement
+
+In a few complex packages, you might find that some selection of
+functions called during the normal execution of @command{bootstrap} are
+wholly inappropriate for your project, where simply disabling
+@code{$require_some_resource} functions and hooking in additional code
+is not powerful enough to avoid or radically alter the parts of
+@command{bootstrap} you do not want.
+
+In that case you can simply write an entirely custom implementation of
+whatever function(s) you want to replace inside your
+@file{bootstrap.conf}, so that by the time @code{func_bootstrap} is
+called at the end of @command{bootstrap}, your new implementation is
+already in place.
+
+@example
+func_echo ()
+@{
+    # respect new --silent option
+    $opt_silent || echo "$progname: $*"
+@}
+@end example
+
+
+@node Usage Patterns
+@section Usage Patterns
+
+There are two ways to incorporate gnulib into your package, which are
+both supported by the @command{bootstrap} script.  Be sure that everyone
+working on your package is employing the same usage pattern, or things
+will turn bad!
+
+@menu
+* Configuration all kept in @file{bootstrap.conf}
+* Gnulib configuration stored in @file{gnulib-cache.m4}
+@end menu
+
+
+@node Configuration all kept in @file{bootstrap.conf}
+@subsection Configuration all kept in @file{bootstrap.conf}
+
+All the parameters for running @command{gnulib-tool} and other bootstrap-
+time commands are maintained in @file{bootstrap.conf}. This is the
+default usage pattern.
+
+In order for this to work, when you wish to add or remove a gnulib
+module from your package, amend the value of @var{gnulib_modules} in
+@file{bootstrap.conf} (and similarly for any other parameters) and rerun
+@command{bootstrap} to import everything anew.
+
+To avoid things getting out of sync, you should never run
+@command{gnulib-tool} directly.
+
+
+@node Gnulib configuration stored in @file{gnulib-cache.m4}
+@subsection Gnulib configuration stored in @file{gnulib-cache.m4}
+
+To implement this usage pattern, leave the value of @var{gnulib_modules}
+and the various @var{gl_xxx} variables empty in @file{bootstrap.conf}
+and call @command{gnulib-tool --import ...} from your shell, checking
+that @file{gnulib-cache.m4} reflects the values you wanted.  From now on
+you can either call @command{gnulib-tool --update} or rerun
+@command{bootstrap} whenever you want to resync the package modules with
+your local gnulib checkout.
+
+If you wish to add or remove a gnulib module from your package, call
+@command{gnulib-tool --import-add ...} or @command{gnulib-tool --import-
+remove} respectively.
+
+@node Known Bugs
+@section Known Bugs
+
+@itemize @bullet
+@item
+gnulib-tool has no @option{--force} option, so sometimes symlinks are
+left pointing to an old gnulib tree (even with @command{./bootstrap
+--force}):
+
+@smallexample
+$ ./bootstrap --skip-git --gnulib-srcdir=../gnulib
+$ ./bootstrap --gnulib-srcdir=../gnulib --force
+@end smallexample
+
+Note that now, plenty of symlinks still point to @file{../gnulib}
+instead of having being retargeted to the submodule in @file{./gnulib}.
+@end item
+@end itemize
