@@ -28,20 +28,23 @@ struct EnchantGetPrefixDirTestFixture : EnchantTestFixture{
   //Setup
   EnchantGetPrefixDirTestFixture()
   {
+    /* Use ENCHANT_PREFIX_DIR env var */
+    const gchar* env = g_getenv("ENCHANT_PREFIX_DIR");
+    if (env) {
+      expectedPrefixDir = std::string(g_filename_to_utf8(env, -1, NULL, NULL, NULL));
+    } else {
       expectedPrefixDir = GetDirectoryOfThisModule();
+
 #if defined(ENCHANT_PREFIX_DIR)
       if (expectedPrefixDir.empty()) {
         expectedPrefixDir = std::string(ENCHANT_PREFIX_DIR);
       }
 #endif
+    }
   }
 
   const char* ExpectedPrefixDir()
   {
-      if(expectedPrefixDir.empty()){
-          return NULL;
-      }
-
       return expectedPrefixDir.c_str();
   }
 
@@ -53,15 +56,9 @@ struct EnchantGetPrefixDirTestFixture : EnchantTestFixture{
  * enchant_get_prefix_dir
  *
  * Returns a string giving the location of the base directory
- * of the enchant installation.  This corresponds roughly to 
- * the --prefix option given to ./configure when enchant is
- * compiled, except it is determined at runtime based on the location
- * of the enchant library.
+ * of the enchant installation.
  *
  * This API is private to the providers.
- *
- * returns NULL if it cannot dynamically determine the location of 
- * the enchant library
  */
 
 TEST_FIXTURE(EnchantGetPrefixDirTestFixture,
@@ -69,6 +66,7 @@ TEST_FIXTURE(EnchantGetPrefixDirTestFixture,
 {
     char* prefixDir = enchant_get_prefix_dir();
     const char* expectedPrefixDir = ExpectedPrefixDir();
+    fprintf(stderr, "prefixDir: %s, expectedPrefixDir: %s\n", prefixDir, expectedPrefixDir);
     CHECK((expectedPrefixDir == NULL && prefixDir == NULL) ||
           strcmp(expectedPrefixDir, prefixDir) == 0);
     g_free(prefixDir);

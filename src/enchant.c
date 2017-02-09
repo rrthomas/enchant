@@ -56,9 +56,6 @@
 
 ENCHANT_PLUGIN_DECLARE("Enchant")
 
-static char *
-enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key);
-
 /********************************************************************************/
 /********************************************************************************/
 
@@ -102,24 +99,12 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 /********************************************************************************/
 
+/* Compare paths case-insensitively on Windows */
 #ifdef _WIN32
 #define path_cmp g_utf8_collate
 #else
 #define path_cmp strcmp
 #endif
-
-static GSList* enchant_slist_prepend_unique_path (GSList *slist, gchar* data)
-{
-	if (NULL == g_slist_find_custom (slist, data, (GCompareFunc)path_cmp))
-		{
-			return g_slist_prepend (slist, data);
-		}
-	else
-		{
-			g_free (data);
-			return slist;
-		}
-}
 
 static GSList* enchant_slist_append_unique_path (GSList *slist, gchar* data)
 {
@@ -139,11 +124,6 @@ _enchant_get_user_home_dirs (void)
 {
 	GSList *dirs = NULL;
 	const char* home_dir;
-	char *tmp;
-
-	tmp = enchant_get_registry_value_ex (1, "Config", "Home_Dir");
-	if (tmp)
-		dirs = enchant_slist_append_unique_path (dirs, tmp);
 
 	home_dir = g_get_home_dir ();
 	if (home_dir)
@@ -187,8 +167,8 @@ _enchant_get_dirs_from_string (const char * string)
 	return dirs;
 }
 
-static GSList *
-enchant_get_user_dirs (void)
+ENCHANT_MODULE_EXPORT (GSList *)
+enchant_get_user_config_dirs (void)
 {
 	GSList *user_dirs = NULL;
 
@@ -231,14 +211,6 @@ enchant_get_module_dirs (void)
 	char * module_dir = NULL;
 	char * prefix = NULL;
 
-	{
-		char* user_module_dir;
-		
-		user_module_dir = enchant_get_registry_value_ex (1, "Config", "Module_Dir");
-		if (user_module_dir)
-			module_dirs = enchant_slist_append_unique_path (module_dirs, user_module_dir);
-	}
-
 #ifdef XP_TARGET_COCOA
 	module_dirs = enchant_slist_append_unique_path (module_dirs, g_strdup ([[EnchantResourceProvider instance] moduleFolder]));
 #endif
@@ -246,18 +218,13 @@ enchant_get_module_dirs (void)
 	{
 		GSList *user_dirs, *iter;
 
-		user_dirs = enchant_get_user_dirs();
+		user_dirs = enchant_get_user_config_dirs();
 
 		for (iter = user_dirs; iter; iter = iter->next)
 			module_dirs = enchant_slist_append_unique_path (module_dirs, iter->data);
 		
 		g_slist_free (user_dirs);
 	}
-
-	/* Look for explicitly set registry values */
-	module_dir = enchant_get_registry_value_ex (0, "Config", "Module_Dir");
-	if (module_dir)
-		module_dirs = enchant_slist_append_unique_path (module_dirs, module_dir);
 
 #if defined(ENCHANT_GLOBAL_MODULE_DIR)
 	module_dirs = enchant_slist_append_unique_path (module_dirs, g_strdup (ENCHANT_GLOBAL_MODULE_DIR));
@@ -309,11 +276,6 @@ enchant_get_conf_dirs (void)
 	conf_dirs = enchant_slist_append_unique_path (conf_dirs, g_strdup ([[EnchantResourceProvider instance] configFolder]));
 #endif
 
-	/* Look for explicitly set registry values */
-	ordering_dir = enchant_get_registry_value_ex (0, "Config", "Data_Dir");
-	if (ordering_dir)
-		conf_dirs = enchant_slist_append_unique_path (conf_dirs, ordering_dir);
-
 	/* Dynamically locate library and search for files relative to it. */
 	prefix = enchant_get_prefix_dir();
 	if(prefix)
@@ -328,108 +290,6 @@ enchant_get_conf_dirs (void)
 #endif
 
 	return conf_dirs;
-}
-
-/**
- * enchant_get_user_config_dirs
- *
- * Returns: the user's enchant directory, or %null. Returned value
- * must be free'd.
- *
- * The enchant directory is the place where enchant finds user 
- * dictionaries and settings related to enchant
- *
- * This API is private to the providers.
- */
-ENCHANT_MODULE_EXPORT (GSList *)
-enchant_get_user_config_dirs (void)
-{
-	GSList *dirs;
-	char* user_config;
-
-	dirs = enchant_get_user_dirs();
-
-	user_config = enchant_get_registry_value_ex (1, "Config", "Data_Dir");
-	if (user_config)
-		dirs = enchant_slist_prepend_unique_path (dirs, user_config);
-
-	return dirs;
-}
-
-/*
- * Returns: the value if it exists and is not an empty string ("") or %null otherwise. Must be free'd.
- */
-static char *
-enchant_get_registry_value_ex (int current_user, const char * const prefix, const char * const key)
-{
-#ifndef _WIN32
-	/* TODO: GConf? KConfig? */
-	return NULL;
-#else
-	HKEY hKey;
-	HKEY baseKey;
-	unsigned long lType;	
-	DWORD dwSize;
-	char* keyName;
-	WCHAR* wszValue = NULL;
-	char* szValue = NULL;
-	gunichar2 * uKeyName;
-	gunichar2 * uKey;
-
-	if (current_user)
-		baseKey = HKEY_CURRENT_USER;
-	else
-		baseKey = HKEY_LOCAL_MACHINE;
-
-	keyName = g_strdup_printf("Software\\Enchant\\%s", prefix);
-	uKeyName = g_utf8_to_utf16 (keyName, -1, NULL, NULL, NULL);
-	uKey = g_utf8_to_utf16 (key, -1, NULL, NULL, NULL);
-
-	if(RegOpenKeyExW(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
-		{
-			/* Determine size of string */
-			if(RegQueryValueExW( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
-				{
-					wszValue = g_new0(WCHAR, dwSize + 1);
-					RegQueryValueExW(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
-				}
-			RegCloseKey(hKey);
-		}
-
-	if(wszValue && *wszValue)
-		szValue = g_utf16_to_utf8 (wszValue, -1, NULL, NULL, NULL);
-
-	g_free(keyName);
-	g_free(uKeyName);
-	g_free(uKey);
-	g_free(wszValue);
-
-	return szValue;
-#endif
-}
-
-/**
- * enchant_get_registry_value
- * @prefix: Your category, such as "Ispell" or "Myspell"
- * @key: The tag within your category that you're interested in
- *
- * Returns: the value if it exists and is not an empty string ("") or %null otherwise. Must be free'd.
- *
- * This API is private to the providers.
- */
-ENCHANT_MODULE_EXPORT (char *)
-enchant_get_registry_value (const char * const prefix, const char * const key)
-{
-	char *val;
-
-	g_return_val_if_fail (prefix, NULL);
-	g_return_val_if_fail (key, NULL);
-
-	val = enchant_get_registry_value_ex(1, prefix, key);
-	if(val == NULL) {
-			val = enchant_get_registry_value_ex (0, prefix, key);
-		}
-	return val;
 }
 
 /********************************************************************************/
@@ -2196,6 +2056,14 @@ enchant_get_prefix_dir(void)
 {
 	char * prefix = NULL;
 
+	{
+		/* Use ENCHANT_PREFIX_DIR env var */
+		const gchar* env = g_getenv("ENCHANT_PREFIX_DIR");
+		if (env) {
+			prefix = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
+		}
+	}
+
 #ifdef _WIN32
 	if (!prefix) {
 		/* Dynamically locate library and return containing directory */
@@ -2214,14 +2082,6 @@ enchant_get_prefix_dir(void)
 			}
 	}
 #endif
-
-	if (!prefix) {
-		/* Use ENCHANT_PREFIX_DIR env var */
-		const gchar* env = g_getenv("ENCHANT_PREFIX_DIR");
-		if (env) {
-			prefix = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
-		}
-	}
 
 #if defined(ENCHANT_PREFIX_DIR)
 	if (!prefix) {

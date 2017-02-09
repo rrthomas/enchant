@@ -206,14 +206,7 @@ struct EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture : Enchan
  * [on windows in the enchant directory in the user's Application Data
  *   directory]
  * 
- * The user's provider directory on windows can be overridden using the registry
- * setting HKEY_CURRENT_USER\Software\Enchant\Config\Data_Dir
- * 
  * Then from the module directory (that libenchant is in).
- *
- * The module directory can be overridden using the registry setting
- *    HKEY_CURRENT_USER\Software\Enchant\Config\Module_Dir
- * or HKEY_LOCAL_MACHINE\Software\Enchant\Config\Module_Dir
  */
 
 /////////////////////////////////////////////////////////////////////////////

@@ -74,56 +74,6 @@ private:
 
 /***************************************************************************/
 
-#if defined(_WIN32)
-static WCHAR* GetRegistryValue(HKEY baseKey, const WCHAR * uKeyName, const WCHAR * uKey)
-{
-  	HKEY hKey;
-	unsigned long lType;	
-	DWORD dwSize;
-	WCHAR* wszValue = NULL;
-
-	if(RegOpenKeyExW(baseKey, uKeyName, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
-		{
-			/* Determine size of string */
-			if(RegQueryValueExW( hKey, uKey, NULL, &lType, NULL, &dwSize) == ERROR_SUCCESS)
-				{
-					wszValue = g_new0(WCHAR, dwSize + 1);
-					RegQueryValueExW(hKey, uKey, NULL, &lType, (LPBYTE) wszValue, &dwSize);
-				}
-		}
-
-	return wszValue;
-}
-
-static char * 
-myspell_checker_get_open_office_dicts_dir(void)
-{
-    WCHAR* wszDirectory;
-    char* open_office_dir, * open_office_dicts_dir;
-
-    /*start by trying current user*/
-    wszDirectory = GetRegistryValue (HKEY_CURRENT_USER, L"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\soffice.exe", L"Path");
-    if(wszDirectory == NULL)
-    {
-        /*next try local machine*/
-        wszDirectory = GetRegistryValue (HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\soffice.exe", L"Path");
-    }
-
-    if(wszDirectory == NULL)
-    {
-        return NULL;
-    }
-
-    else {
-       	open_office_dir = g_utf16_to_utf8 ((gunichar2*)wszDirectory, -1, NULL, NULL, NULL);
-		open_office_dicts_dir = g_build_filename(open_office_dir, "share", "dict", "ooo", NULL);
-        g_free(wszDirectory);
-        g_free(open_office_dir);
-        return open_office_dicts_dir;
-    }
-}
-#endif
-
 static bool
 g_iconv_is_valid(GIConv i)
 {
@@ -252,11 +202,6 @@ myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 	 */
 #ifndef XP_TARGET_COCOA
 	char * myspell_prefix = NULL;
-
-	/* Look for explicitly set registry values */
-	myspell_prefix = enchant_get_registry_value ("Myspell", "Data_Dir");
-	if (myspell_prefix)
-		dirs = g_slist_append (dirs, myspell_prefix);
 
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
