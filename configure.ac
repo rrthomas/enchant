@@ -555,11 +555,6 @@ AC_OUTPUT
 
 dnl ===========================================================================================
 
-relocatable_library="no"
-if test "x$native_win32" = "xyes"; then
-   relocatable_library="yes"
-fi
-
 echo "
 $PACKAGE-$VERSION
 
@@ -573,8 +568,7 @@ $PACKAGE-$VERSION
     Build Myspell/Hunspell backend:         ${build_myspell}
     Build Voikko backend (Linux only):      ${build_voikko}
     Build Zemberek backend:                 ${build_zemberek}
-    Build Apple Spell backend (OS X only):  ${build_applespell}
-    Build a relocatable library:            ${relocatable_library}"
+    Build Apple Spell backend (OS X only):  ${build_applespell}"
 
 if test "x$build_zemberek" = "xyes"; then
    echo "
