@@ -16,7 +16,6 @@ EXTRA_DIST =		\
 	NEWS 		\
 	BUGS 		\
 	ChangeLog 	\
-	MAINTAINERS	\
 	AUTHORS 	\
 	COPYING.LIB	\
 	m4/gnulib-cache.m4
