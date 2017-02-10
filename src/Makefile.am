@@ -23,8 +23,6 @@ if WITH_APPLESPELL
 AM_CPPFLAGS += @APPLESPELL_CFLAGS@
 libenchant_la_LIBADD += @APPLESPELL_LIBS@
 libenchant_la_LDFLAGS += @APPLESPELL_LDFLAGS@
-libenchant_la_SOURCES += enchant_cocoa.m enchant_cocoa.h
-libenchant_include_HEADERS += enchant_cocoa.h
 endif
 
 EXTRA_DIST=enchant.i

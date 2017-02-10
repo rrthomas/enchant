@@ -43,10 +43,6 @@
 #include "pwl.h"
 
 #ifdef XP_TARGET_COCOA
-#import "enchant_cocoa.h"
-#endif
-
-#ifdef XP_TARGET_COCOA
 #define ENCHANT_USER_PATH_EXTENSION "Library", "Application Support", "Enchant"
 #elif defined(_WIN32)
 #define ENCHANT_USER_PATH_EXTENSION "enchant"
@@ -211,10 +207,6 @@ enchant_get_module_dirs (void)
 	char * module_dir = NULL;
 	char * prefix = NULL;
 
-#ifdef XP_TARGET_COCOA
-	module_dirs = enchant_slist_append_unique_path (module_dirs, g_strdup ([[EnchantResourceProvider instance] moduleFolder]));
-#endif
-
 	{
 		GSList *user_dirs, *iter;
 
@@ -271,10 +263,6 @@ enchant_get_conf_dirs (void)
 		}
 
 	g_slist_free (user_conf_dirs);
-
-#ifdef XP_TARGET_COCOA
-	conf_dirs = enchant_slist_append_unique_path (conf_dirs, g_strdup ([[EnchantResourceProvider instance] configFolder]));
-#endif
 
 	/* Dynamically locate library and search for files relative to it. */
 	prefix = enchant_get_prefix_dir();
