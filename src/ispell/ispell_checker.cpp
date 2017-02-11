@@ -292,32 +292,14 @@ ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
 		g_slist_free (config_dirs);
 	}
 
-#if 0
-	{
-		const gchar* const * system_data_dirs = g_get_system_data_dirs ();
-		const gchar* const * iter;
-
-		for (iter = system_data_dirs; *iter; iter++)
-			{
-				dirs = g_slist_append (dirs, g_build_filename (*iter, "ispell", "dicts", NULL));
-			}
-	}
-#endif
-
-	/* until I work out how to link the modules against enchant in MacOSX - fjf
-	 */
-#ifndef XP_TARGET_COCOA
-	char * ispell_prefix = NULL;
-
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			ispell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "ispell", NULL);
+			char * ispell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "ispell", NULL);
 			g_free(enchant_prefix);
 			dirs = g_slist_append (dirs, ispell_prefix);
 		}
-#endif
 
 #ifdef ENCHANT_ISPELL_DICT_DIR
 	dirs = g_slist_append (dirs, g_strdup (ENCHANT_ISPELL_DICT_DIR));
