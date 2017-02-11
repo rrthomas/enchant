@@ -42,7 +42,7 @@
 #include "enchant-provider.h"
 #include "pwl.h"
 
-#ifdef XP_TARGET_COCOA
+#if defined(__APPLE__) && defined(__MACH__)
 #define ENCHANT_USER_PATH_EXTENSION "Library", "Application Support", "Enchant"
 #elif defined(_WIN32)
 #define ENCHANT_USER_PATH_EXTENSION "enchant"

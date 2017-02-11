@@ -226,21 +226,18 @@ struct EnchantTestFixture
 
     static std::string GetEnchantHomeDirFromBase(const std::string& basePath)
     {
-#ifdef XP_TARGET_COCOA
-        return AddToPath(AddToPath(AddToPath(basePath,"Library"), 
-                                                       "Application Support"), 
-                                                       "Enchant");
-#else
         return AddToPath(basePath, "enchant");
-#endif
     }
 
     static std::string GetEnchantHomeDirFromHome(const std::string& homePath)
     {
-#ifdef XP_TARGET_COCOA
+        // FIXME: Integrate with ENCHANT_USER_PATH_EXTENSION in enchant.c
+#if defined(__APPLE__) && defined(__MACH__)
         return AddToPath(AddToPath(AddToPath(homePath,"Library"), 
                                                        "Application Support"), 
                                                        "Enchant");
+#elif defined(_WIN32)
+	return AddToPath(homePath, "enchant");
 #else
         return AddToPath(homePath, ".enchant");
 #endif
