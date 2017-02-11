@@ -339,8 +339,6 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 }
 
 
-// Windows only test.
-#ifdef _WIN32
 /*
  * Ordering can also be set in enchant.ordering file:
  * Language_Tag : Provider1, Provider2, ProviderN
@@ -349,17 +347,7 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
  * config directory, then in the .enchant directory in the user's home directory.
  * 
  * The user's config directory is located at share/enchant 
- * in the module directory (that libenchant is in)
- * but it can be overridden using the registry setting 
- *    HKEY_CURRENT_USER\Software\Enchant\Config\Data_Dir
- * or HKEY_LOCAL_MACHINE\Software\Enchant\Config\Data_Dir
- *
- * The user's home directory on windows can be overridden using the registry
- * setting HKEY_CURRENT_USER\Software\Enchant\Config\Home_Dir
- * 
- * The module directory can be overridden using the registry setting
- *    HKEY_CURRENT_USER\Software\Enchant\Config\Module_Dir
- * or HKEY_LOCAL_MACHINE\Software\Enchant\Config\Module_Dir
+ * in the module directory (that libenchant is in).
  */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -369,20 +357,22 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrderingMock1ThenMock2_DefaultConfigDirectory)
 {
 	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2");
-	 InitializeBroker();
+	InitializeBroker();
 
-	 CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrderingMock2ThenMock1_DefaultConfigDirectory)
 {
 	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1");
-	 InitializeBroker();
+	InitializeBroker();
 
-	 CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
+// FIXME: Resurrect these once we have a way to reconfigure user config directory
+#if 0
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrderingMock1ThenMock2_UserOverriddenConfigDirectory)
 {
@@ -443,6 +433,7 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 	
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
+#endif
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_ExtraSpacesAndTabs_Mock1Then2)
@@ -481,6 +472,8 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 }
 
 
+// FIXME: Resurrect these once we have a way to reconfigure user config directory
+#if 0
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_HomeAndGlobal_HomeMergedWithGlobal_HomeTakesPrecedence_Mock1Then2)
 {
@@ -506,6 +499,7 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
@@ -533,6 +527,8 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 	InitializeBroker();
 }
 
+// FIXME: Resurrect these once we have a way to reconfigure user config directory
+#if 0
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_NoProviders_DoesNotOverridePreviousOrdering_Mock1Then2)
 {
@@ -555,14 +551,15 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 	InitializeBroker();
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
+#endif
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrdering_ListedTwice_LastTakesPrecedence_Mock1ThenMock2)
 {
 	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1\nen_GB:mock1,mock2");
-	 InitializeBroker();
+	InitializeBroker();
 
-	 CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
+	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
@@ -573,4 +570,3 @@ EnchantBrokerFileOrdering_ListedTwice_LastTakesPrecedence_Mock2ThenMock1)
 
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
-#endif

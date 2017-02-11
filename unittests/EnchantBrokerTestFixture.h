@@ -151,9 +151,6 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
             CopyProvider("enchant", "enchant"); //not a provider
         }
 
-#if _WIN32
-        SetUserRegistryConfigDir(GetTempUserEnchantDir());
-#endif
         InitializeBroker();
     }
 

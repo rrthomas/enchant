@@ -7,6 +7,8 @@ enchant-*.tar.gz
 .libs
 .deps
 .dirstamp
+Makefile
+Makefile.in
 /aclocal.m4
 /autom4te.cache
 /build-aux
@@ -23,5 +25,4 @@ enchant-*.tar.gz
 /missing
 /INSTALL
 /test-driver
-Makefile
-Makefile.in
+/stamp-h1

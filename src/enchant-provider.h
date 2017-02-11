@@ -59,9 +59,6 @@ typedef struct str_enchant_provider EnchantProvider;
 ENCHANT_MODULE_EXPORT (GSList *)
 	enchant_get_user_config_dirs (void);
 
-ENCHANT_MODULE_EXPORT (char *)
-	enchant_get_registry_value (const char * const prefix, const char * const key);
-
 ENCHANT_MODULE_EXPORT(char *)
 	enchant_get_prefix_dir(void);
 

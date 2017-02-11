@@ -42,6 +42,8 @@
  * Modified in 2016 to implement most ispell prefix commands.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

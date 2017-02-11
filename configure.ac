@@ -49,7 +49,6 @@ LT_INIT([win32-dll])
 gl_INIT
 ENCHANT_LT_OBJDIR=$lt_cv_objdir
 AC_SUBST(ENCHANT_LT_OBJDIR)
-gt_TYPE_SSIZE_T
 
 
 PKG_PROG_PKG_CONFIG
@@ -523,6 +522,7 @@ AM_CONDITIONAL(WITH_APPLESPELL, test "x$build_applespell" = "xyes")
 
 dnl =======================================================================================
 
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 Makefile
 enchant.pc

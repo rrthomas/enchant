@@ -116,7 +116,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         _pwl = RequestPersonalDictionary();
         _pwlFileName = GetLastPersonalDictionaryFileName();
 
-        bool hasLangEnv = (g_getenv("LANG") != NULL);
+        hasLangEnv = (g_getenv("LANG") != NULL);
         if(hasLangEnv)
         {
             origLangEnv = std::string(g_getenv("LANG"));

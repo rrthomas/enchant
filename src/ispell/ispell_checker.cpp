@@ -309,11 +309,6 @@ ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
 #ifndef XP_TARGET_COCOA
 	char * ispell_prefix = NULL;
 
-	/* Look for explicitly set registry values */
-	ispell_prefix = enchant_get_registry_value ("Ispell", "Data_Dir");
-	if (ispell_prefix)
-		dirs = g_slist_append (dirs, ispell_prefix);
-
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)

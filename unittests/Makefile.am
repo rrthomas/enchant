@@ -4,8 +4,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(UNITTESTPP_CFLAGS)
 
 # FIXME: .so extension will not work on Windows
 AM_TESTS_ENVIRONMENT = \
-	ENCHANT_MODULE_PATH=$(top_builddir)/unittests/lib/enchant; \
-	export ENCHANT_MODULE_PATH; \
+	ENCHANT_PREFIX_DIR=""; \
+	export ENCHANT_PREFIX_DIR; \
 	cp $(builddir)/mock_provider/*.so $(builddir)/mock_provider/.libs/*.so $(builddir)/mock_provider/*.dll $(builddir)/mock_provider/.libs/*.dll . || :;
 
 DEPS = $(top_builddir)/src/libenchant.la

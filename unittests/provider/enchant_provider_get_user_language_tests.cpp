@@ -66,6 +66,7 @@ static void SetLocaleAndCheckLanguage(const char *locale, const char *language)
     char* userLanguage = enchant_get_user_language();
     CHECK(userLanguage);
     // Language may be followed by country code and encoding
+    fprintf(stderr, "language %s, userLanguage %s\n", language, userLanguage);
     CHECK(strncmp(language, userLanguage, strlen(language)) == 0);
     if (strlen(userLanguage) > 2)
     {
