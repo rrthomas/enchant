@@ -507,7 +507,7 @@ if test "x$check_applespell" = "xyes"; then
     AC_ARG_ENABLE(applespell, AS_HELP_STRING([--disable-applespell],[enable the applespell backend @<:@default=no@:>@]), build_applespell="$enableval", build_applespell=no)
 
     if test "x$build_applespell" != "xno"; then
-        APPLESPELL_CFLAGS+=" -DXP_TARGET_COCOA -xobjective-c"
+        APPLESPELL_CFLAGS+=" -xobjective-c"
         APPLESPELL_LIBS+=" -lobjc"
         APPLESPELL_LDFLAGS+=" -framework Cocoa"
     fi

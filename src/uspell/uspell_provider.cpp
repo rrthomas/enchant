@@ -80,25 +80,14 @@ uspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 			}
 	}
 
-	/* until I work out how to link the modules against enchant in MacOSX - fjf
-	 */
-#ifndef XP_TARGET_COCOA
-	char * uspell_prefix = NULL;
-
-	/* Look for explicitly set registry values */
-	uspell_prefix = enchant_get_registry_value ("Uspell", "Data_Dir");
-	if (uspell_prefix)
-		dirs = g_slist_append (dirs, uspell_prefix);
-
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
+			char * uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
 			g_free(enchant_prefix);
 			dirs = g_slist_append (dirs, uspell_prefix);
 		}
-#endif
 
 #ifdef ENCHANT_USPELL_DICT_DIR
 	dirs = g_slist_append (dirs, g_strdup (ENCHANT_USPELL_DICT_DIR));

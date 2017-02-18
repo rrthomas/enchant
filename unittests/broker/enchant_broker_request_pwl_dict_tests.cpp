@@ -117,18 +117,16 @@ TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture,
     CHECK_EQUAL((void*)NULL, _dict);
 }
 
+#if defined(_WIN32)
+// Colon is illegal for Windows but okay for Linux and macOS;
 TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture,
              EnchantBrokerRequestPwlDictionary_IllegalFilename_NULL)
 {
-    // Colon is illegal for Windows and Mac but okay for Linux;
-#if defined(XP_TARGET_COCOA) || defined(_WIN32)
     _dict = enchant_broker_request_pwl_dict(_broker, ":");
     CHECK(!_dict);
     CHECK((void*)enchant_broker_get_error(_broker));
-#endif
 }
 
-#if defined(_WIN32)
 TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture,
              EnchantBrokerRequestPwlDictionary_IllegalUtf8InFilename_NULL)
 {
