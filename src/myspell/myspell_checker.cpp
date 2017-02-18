@@ -211,14 +211,6 @@ myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 	dirs = g_slist_append (dirs, g_strdup (ENCHANT_MYSPELL_DICT_DIR));
 #endif
 
-#if defined(_WIN32)
-	char* open_office_dicts_dir = myspell_checker_get_open_office_dicts_dir ();
-	if (open_office_dicts_dir) 
-        {
-		dirs = g_slist_append (dirs, open_office_dicts_dir);
-	}
-#endif
-
 	{
 		GSList *config_dirs, *iter;
 

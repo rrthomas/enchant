@@ -2052,25 +2052,6 @@ enchant_get_prefix_dir(void)
 		}
 	}
 
-#ifdef _WIN32
-	if (!prefix) {
-		/* Dynamically locate library and return containing directory */
-		WCHAR dll_path[MAX_PATH];
-
-		if(GetModuleFileNameW(s_hModule,dll_path,MAX_PATH))
-			{
-				gchar* utf8_dll_path = g_utf16_to_utf8 (dll_path, -1, NULL, NULL, NULL);
-				prefix = g_path_get_dirname(utf8_dll_path);
-				g_free(utf8_dll_path);
-				/* Strip off "bin" subfolder if present */
-				if (strlen(prefix) >=6 &&
-				    G_IS_DIR_SEPARATOR(prefix[strlen(prefix)-4]) &&
-				    g_ascii_strcasecmp(prefix+strlen(prefix)-3, "bin") == 0)
-					prefix[strlen(prefix)-4] = '\0';
-			}
-	}
-#endif
-
 #if defined(ENCHANT_PREFIX_DIR)
 	if (!prefix) {
 		prefix = g_strdup (ENCHANT_PREFIX_DIR);
