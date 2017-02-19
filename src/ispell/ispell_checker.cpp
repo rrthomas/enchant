@@ -117,10 +117,6 @@ ISpellChecker::ISpellChecker(EnchantBroker * broker)
 	memset(m_pflagindex,0,sizeof(m_pflagindex));
 }
 
-#ifndef FREEP
-#define FREEP(p)        do { if (p) free(p); } while (0)
-#endif
-
 ISpellChecker::~ISpellChecker()
 {
 	if (m_bSuccessfulInit) {
@@ -130,10 +126,10 @@ ISpellChecker::~ISpellChecker()
 		clearindex (m_sflagindex);
 	}
 
-	FREEP(m_hashtbl);
-	FREEP(m_hashstrings);
-	FREEP(m_sflaglist);
-	FREEP(m_chartypes);
+	free(m_hashtbl);
+	free(m_hashstrings);
+	free(m_sflaglist);
+	free(m_chartypes);
 	                                                	
 	if (g_iconv_is_valid (m_translate_in ))
 		g_iconv_close(m_translate_in);

@@ -115,8 +115,7 @@ hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	/* check if hebrew ( if not hebrew give it the benefit of a doubt ) */
 	if (iso_word == NULL || !is_hebrew (iso_word, length))
 		{
-			if (iso_word)
-				g_free (iso_word);
+			g_free (iso_word);
 			return FALSE;
 		}
 	
@@ -155,8 +154,7 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	/* check if hebrew ( if not hebrew cant do anything ) */
 	if (iso_word == NULL || !is_hebrew (iso_word, length))
 		{
-			if (iso_word != NULL)
-				g_free (iso_word);
+			g_free (iso_word);
 			return NULL;
 		}
 

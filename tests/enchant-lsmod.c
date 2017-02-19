@@ -87,21 +87,18 @@ main (int argc, char **argv)
 				lang_tag = enchant_get_user_language();
 
 				if (!lang_tag || !strcmp (lang_tag, "C")) {
-					if (lang_tag) /* lang might be "C" */
-						g_free (lang_tag);
+					g_free(lang_tag); /* lang might be "C" */
 					lang_tag = g_strdup ("en");
 				}
 			}
 			mode = 1;
 		} else if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "-?") || !strcmp(argv[i], "-help")) {
 			printf ("%s [-lang [language_tag]] [-list-dicts] [-h] [-v]\n", argv[0]);
-			if (lang_tag)
-				g_free (lang_tag);
+			g_free (lang_tag);
 			return 0;
 		} else if (!strcmp (argv[i], "-v") || !strcmp (argv[i], "-version")) {
 			printf ("%s %s\n", argv[0], PACKAGE_VERSION);
-			if (lang_tag)
-				g_free (lang_tag);
+			g_free (lang_tag);
 			return 0;
 		} else if (!strcmp (argv[i], "-list-dicts")) {
 			mode = 2;
@@ -124,10 +121,7 @@ main (int argc, char **argv)
 		
 		if (!dict) {
 			printf ("No dictionary available for '%s'.\n", lang_tag);
-
-			if (lang_tag)
-				g_free (lang_tag);
-
+			g_free (lang_tag);
 			enchant_broker_free (broker);
 			return 1;
 		} else {
@@ -138,9 +132,7 @@ main (int argc, char **argv)
 		enchant_broker_list_dicts (broker, enumerate_dicts, stdout);
 	}
 
-	if (lang_tag)
-		g_free (lang_tag);
-	
+	g_free (lang_tag);
 	enchant_broker_free (broker);
 	
 	return 0;
