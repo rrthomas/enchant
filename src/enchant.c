@@ -95,26 +95,6 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 /********************************************************************************/
 
-/* Compare paths case-insensitively on Windows */
-#ifdef _WIN32
-#define path_cmp g_utf8_collate
-#else
-#define path_cmp strcmp
-#endif
-
-static GSList* enchant_slist_append_unique_path (GSList *slist, gchar* data)
-{
-	if (NULL == g_slist_find_custom (slist, data, (GCompareFunc)path_cmp))
-		{
-			return g_slist_append (slist, data);
-		}
-	else
-		{
-			g_free (data);
-			return slist;
-		}
-}
-
 static GSList *
 _enchant_get_user_home_dirs (void)
 {
@@ -123,7 +103,9 @@ _enchant_get_user_home_dirs (void)
 
 	home_dir = g_get_home_dir ();
 	if (home_dir)
-		dirs = enchant_slist_append_unique_path (dirs, g_strdup (home_dir));
+		{
+			dirs = g_slist_append (dirs, g_strdup (home_dir));
+		}
 
 	return dirs;
 }
@@ -175,7 +157,7 @@ enchant_get_user_config_dirs (void)
 			char * config_dir = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
 			if (config_dir)
 				{
-					user_dirs = enchant_slist_append_unique_path (user_dirs, config_dir);
+					user_dirs = g_slist_append (user_dirs, config_dir);
 				}
 		}
 	}
@@ -186,7 +168,7 @@ enchant_get_user_config_dirs (void)
 		user_config_dir = g_get_user_config_dir();
 		
 		if (user_config_dir)
-			user_dirs = enchant_slist_append_unique_path (user_dirs, g_build_filename (user_config_dir,
+			user_dirs = g_slist_append (user_dirs, g_build_filename (user_config_dir,
 										 "enchant",
 										 NULL));
 	}
@@ -197,7 +179,7 @@ enchant_get_user_config_dirs (void)
 		
 		for (dir = home_dirs; dir; dir = dir->next)
 			{
-				user_dirs = enchant_slist_append_unique_path (user_dirs,
+				user_dirs = g_slist_append (user_dirs,
 							    g_build_filename (dir->data,
 									      ENCHANT_USER_PATH_EXTENSION,
 									      NULL));
@@ -225,13 +207,13 @@ enchant_get_module_dirs (void)
 		user_dirs = enchant_get_user_config_dirs();
 
 		for (iter = user_dirs; iter; iter = iter->next)
-			module_dirs = enchant_slist_append_unique_path (module_dirs, iter->data);
+			module_dirs = g_slist_append (module_dirs, iter->data);
 		
 		g_slist_free (user_dirs);
 	}
 
 #if defined(ENCHANT_GLOBAL_MODULE_DIR)
-	module_dirs = enchant_slist_append_unique_path (module_dirs, g_strdup (ENCHANT_GLOBAL_MODULE_DIR));
+	module_dirs = g_slist_append (module_dirs, g_strdup (ENCHANT_GLOBAL_MODULE_DIR));
 #endif
 	/* Dynamically locate library and search for modules relative to it. */
 	prefix = enchant_get_prefix_dir();
@@ -239,7 +221,7 @@ enchant_get_module_dirs (void)
 		{
 			module_dir = g_build_filename(prefix,"lib","enchant",NULL);
 			g_free(prefix);
-			module_dirs = enchant_slist_append_unique_path (module_dirs, module_dir);
+			module_dirs = g_slist_append (module_dirs, module_dir);
 		}
 
 	/* Use ENCHANT_MODULE_PATH env var */
@@ -252,7 +234,7 @@ enchant_get_module_dirs (void)
 					GSList *dir;
 					for (dir = _enchant_get_dirs_from_string (path); dir; dir = dir->next)
 						{
-							module_dirs = enchant_slist_append_unique_path (module_dirs, dir->data);
+							module_dirs = g_slist_append (module_dirs, dir->data);
 						}
 				}
 		}
@@ -271,7 +253,7 @@ enchant_get_conf_dirs (void)
 
 	for (iter = user_conf_dirs; iter != NULL; iter = iter->next)
 		{
-			conf_dirs = enchant_slist_append_unique_path (conf_dirs, iter->data);
+			conf_dirs = g_slist_append (conf_dirs, iter->data);
 		}
 
 	g_slist_free (user_conf_dirs);
@@ -282,11 +264,11 @@ enchant_get_conf_dirs (void)
 		{
 			ordering_dir = g_build_filename(prefix,"share","enchant",NULL);
 			g_free(prefix);
-			conf_dirs = enchant_slist_append_unique_path (conf_dirs, ordering_dir);
+			conf_dirs = g_slist_append (conf_dirs, ordering_dir);
 		}
 
 #if defined(ENCHANT_GLOBAL_ORDERING)
-	conf_dirs = enchant_slist_append_unique_path (conf_dirs, g_strdup (ENCHANT_GLOBAL_ORDERING));
+	conf_dirs = g_slist_append (conf_dirs, g_strdup (ENCHANT_GLOBAL_ORDERING));
 #endif
 
 	return conf_dirs;
