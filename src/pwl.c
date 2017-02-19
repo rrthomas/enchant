@@ -790,10 +790,7 @@ static void enchant_trie_free(EnchantTrie* trie)
 		g_hash_table_destroy(trie->subtries);
 	}
 
-	if (trie->value != NULL) {
-		g_free(trie->value);
-	}
-
+	g_free(trie->value);
 	g_free(trie);
 }
 
