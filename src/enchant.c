@@ -169,6 +169,18 @@ enchant_get_user_config_dirs (void)
 	GSList *user_dirs = NULL;
 
 	{
+		/* Use ENCHANT_CONFIG_DIR env var */
+		const gchar* env = g_getenv("ENCHANT_CONFIG_DIR");
+		if (env) {
+			char * config_dir = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
+			if (config_dir)
+				{
+					user_dirs = enchant_slist_append_unique_path (user_dirs, config_dir);
+				}
+		}
+	}
+
+	{
 		const char * user_config_dir;
 		
 		user_config_dir = g_get_user_config_dir();
@@ -450,7 +462,7 @@ _enchant_session_new (EnchantProvider *provider, const char * const user_config_
 	g_free (filename);
 	
 	filename = g_strdup_printf ("%s.exc", lang);
-	excl = g_build_filename (user_config_dir, filename,	NULL);
+	excl = g_build_filename (user_config_dir, filename, NULL);
 	g_free (filename);
 	
 	session = enchant_session_new_with_pwl (provider, dic, excl, lang, fail_if_no_pwl);

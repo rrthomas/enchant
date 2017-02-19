@@ -51,12 +51,11 @@ struct EnchantTestFixture
     EnchantTestFixture()
     {
         CleanUpFiles(); //just in case we stopped the process in the middle.
-        MoveEnchantUserFilesOutOfTheWay();
+        CreateDirectory(GetTempUserEnchantDir());
     }
 
     //Teardown
     ~EnchantTestFixture(){
-        RestoreEnchantUserFiles();
         CleanUpFiles();
     }
     void CleanUpFiles()
@@ -69,69 +68,12 @@ struct EnchantTestFixture
 
     std::string GetTempUserEnchantDir()
     {
-        return GetEnchantHomeDirFromBase(g_get_user_config_dir());
-    }
-
-    void MoveEnchantUserFilesOutOfTheWay()
-    {
-        GetFilesOutOfTheWay(GetEnchantHomeDirFromBase(g_get_user_config_dir()));
-        GetFilesOutOfTheWay(GetEnchantHomeDirFromBase(g_get_home_dir()));
-    }
-
-    void RestoreEnchantUserFiles()
-    {
-        RestoreFiles(GetEnchantHomeDirFromBase(g_get_user_config_dir()));
-        RestoreFiles(GetEnchantHomeDirFromBase(g_get_home_dir()));
-    }
-
-#define OUT_OF_THE_WAY ".real";
-
-    void GetFilesOutOfTheWay(const std::string& dir)
-    {
-        std::string toTheSideDir = dir + OUT_OF_THE_WAY;
-        
-        if(DirExists(dir) && !DirExists(toTheSideDir))
-        {
-            MoveDir(dir, toTheSideDir);
-        }
-
-        DeleteDirAndFiles(dir);
-    }
-
-    void RestoreFiles(const std::string& dir)
-    {
-        std::string toTheSideDir = dir + OUT_OF_THE_WAY;
-        if(DirExists(toTheSideDir))
-        {
-            DeleteDirAndFiles(dir);
-            MoveDir(toTheSideDir, dir);
-        }
+        return getenv("ENCHANT_CONFIG_DIR");
     }
 
     std::string GetEnchantConfigDir()
     {
         return AddToPath(AddToPath(GetDirectoryOfThisModule(), "share"), "enchant");
-    }
-
-    static bool DirExists(const std::string& dir)
-    {
-        return g_file_test(dir.c_str(), G_FILE_TEST_IS_DIR) != 0;
-    }
-
-    static void MoveDir(const std::string& from, const std::string& to)
-    {
-        int result = g_rename(from.c_str(), to.c_str());
-        if(result!= 0)
-        {
-           perror("failed (will retry)");
-            // try once more.
-           result = g_rename(from.c_str(), to.c_str());
-        }
-        assert(result == 0);
-        if(result!= 0)
-        {
-           perror("failed (giving up)");
-        }
     }
 
     static void DeleteDirAndFiles(const std::string& dir)

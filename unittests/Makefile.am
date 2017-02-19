@@ -6,6 +6,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(UNITTESTPP_CFLAGS)
 AM_TESTS_ENVIRONMENT = \
 	ENCHANT_PREFIX_DIR=""; \
 	export ENCHANT_PREFIX_DIR; \
+	ENCHANT_CONFIG_DIR="config"; \
+	export ENCHANT_CONFIG_DIR; \
 	cp $(builddir)/mock_provider/*.so $(builddir)/mock_provider/.libs/*.so $(builddir)/mock_provider/*.dll $(builddir)/mock_provider/.libs/*.dll . || :;
 
 DEPS = $(top_builddir)/src/libenchant.la

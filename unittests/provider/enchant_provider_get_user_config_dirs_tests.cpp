@@ -42,10 +42,15 @@ TEST_FIXTURE(EnchantTestFixture,
 
   CHECK(enchantUserConfigDirs);
   GSList* iter = enchantUserConfigDirs;
+
+  std::string expected = getenv("ENCHANT_CONFIG_DIR");
+  CHECK_EQUAL(expected, (gchar *) iter->data);
+  iter = iter->next;
+  
   CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), (gchar*) iter->data);
   iter = iter->next;
 
-  std::string expected = GetEnchantHomeDirFromHome(g_get_home_dir());
+  expected = GetEnchantHomeDirFromHome(g_get_home_dir());
   std::string actual((char*) iter->data);
   CHECK_EQUAL(expected, actual);
   g_slist_free(enchantUserConfigDirs);
