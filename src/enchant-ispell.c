@@ -477,7 +477,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 
 				case '$': /* Save correction for rest of session [aspell extension] */
 					{ /* Syntax: $$ra <MISSPELLED>,<REPLACEMENT> */
-						gchar *prefix = "$$ra ";
+						const gchar *prefix = "$$ra ";
 						if (g_str_has_prefix(str->str, prefix)) {
 							gchar *comma = g_utf8_strchr(str->str, -1, (gunichar)',');
 							char *mis = str->str + strlen(prefix);
