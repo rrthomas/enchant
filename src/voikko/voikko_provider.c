@@ -30,12 +30,15 @@
  * do so, delete this exception statement from your version.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
 #include <libvoikko/voikko.h>
+#include "unused-parameter.h"
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -48,7 +51,7 @@
 ENCHANT_PLUGIN_DECLARE("Voikko")
 
 static int
-voikko_dict_check (EnchantDict * me, const char *const word, size_t len)
+voikko_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUSED_PARAMETER)
 {
 	int result;
 	int voikko_handle;
@@ -65,7 +68,7 @@ voikko_dict_check (EnchantDict * me, const char *const word, size_t len)
 
 static char **
 voikko_dict_suggest (EnchantDict * me, const char *const word,
-		     size_t len, size_t * out_n_suggs)
+		     size_t len _GL_UNUSED_PARAMETER, size_t * out_n_suggs)
 {
 	char **sugg_arr;
 	int voikko_handle;
@@ -104,14 +107,14 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 }
 
 static void
-voikko_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
+voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
 	voikko_terminate((long) dict->user_data);
 	g_free (dict);
 }
 
 static int
-voikko_provider_dictionary_exists (struct str_enchant_provider * me,
+voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
                                    const char *const tag)
 {
 	int voikko_handle;
@@ -130,7 +133,7 @@ voikko_provider_dictionary_exists (struct str_enchant_provider * me,
 
 
 static char **
-voikko_provider_list_dicts (EnchantProvider * me, 
+voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
 			    size_t * out_n_dicts)
 {
 	char ** out_list = NULL;
@@ -148,7 +151,8 @@ voikko_provider_list_dicts (EnchantProvider * me,
 }
 
 static void
-voikko_provider_free_string_list (EnchantProvider * me, char **str_list)
+voikko_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER,
+				  char **str_list)
 {
 	g_strfreev (str_list);
 }
@@ -160,13 +164,13 @@ voikko_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-voikko_provider_identify (EnchantProvider * me)
+voikko_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "voikko";
 }
 
 static const char *
-voikko_provider_describe (EnchantProvider * me)
+voikko_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "Voikko Provider";
 }

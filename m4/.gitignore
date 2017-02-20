@@ -35,3 +35,6 @@
 /wchar_t.m4
 /wint_t.m4
 /ssize_t.m4
+/manywarnings.m4
+/warnings.m4
+/manywarnings-cxx.m4

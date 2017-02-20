@@ -26,7 +26,7 @@ private:
 
 	char * loadDictionary (const char * szLang );
 	bool   loadDictionaryForLanguage ( const char * szLang );
-	void   setDictionaryEncoding ( const char * hashname, const char * enc );
+	void   setDictionaryEncoding ( const char * enc );
 
 	//
 	// The member functions after this point were formerly global functions

@@ -1,6 +1,6 @@
 SUBDIRS=. aspell ispell uspell myspell hspell applespell voikko zemberek
 
-AM_CPPFLAGS=-I$(top_srcdir) $(ENCHANT_CFLAGS) $(CC_WARN_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(ENCHANT_CFLAGS) $(WARN_CFLAGS)
 
 lib_LTLIBRARIES = libenchant.la
 

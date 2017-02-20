@@ -28,6 +28,8 @@
  * do so, delete this exception statement from your version.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,6 +39,7 @@
 
 #include "enchant.h"
 #include "enchant-provider.h"
+#include "unused-parameter.h"
 
 ENCHANT_PLUGIN_DECLARE("Aspell")
 
@@ -150,7 +153,7 @@ aspell_dict_store_replacement (EnchantDict * me,
 }
 
 static EnchantDict *
-aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
+aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, const char *const tag)
 {
 	EnchantDict *dict;
 	AspellSpeller *manager;
@@ -183,7 +186,7 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 }
 
 static void
-aspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
+aspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
 	AspellSpeller *manager;
 	
@@ -194,7 +197,7 @@ aspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 }
 
 static char ** 
-aspell_provider_list_dicts (EnchantProvider * me, 
+aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
 			    size_t * out_n_dicts)
 {
 	AspellConfig * spell_config;
@@ -235,7 +238,7 @@ aspell_provider_list_dicts (EnchantProvider * me,
 }
 
 static void
-aspell_provider_free_string_list (EnchantProvider * me, char **str_list)
+aspell_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER, char **str_list)
 {
 	g_strfreev (str_list);
 }
@@ -247,13 +250,13 @@ aspell_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-aspell_provider_identify (EnchantProvider * me)
+aspell_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "aspell";
 }
 
 static const char *
-aspell_provider_describe (EnchantProvider * me)
+aspell_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "Aspell Provider";
 }

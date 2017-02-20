@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "unused-parameter.h"
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -41,8 +42,8 @@
 static void
 describe_dict (const char * const lang_tag,
 	       const char * const provider_name,
-	       const char * const provider_desc,
-	       const char * const provider_file,
+	       const char * const provider_desc _GL_UNUSED_PARAMETER,
+	       const char * const provider_file _GL_UNUSED_PARAMETER,
 	       void * user_data)
 {
 	FILE * out = (FILE *)user_data;
@@ -52,7 +53,7 @@ describe_dict (const char * const lang_tag,
 static void
 enumerate_providers (const char * name,
 		     const char * desc,
-		     const char * file,
+		     const char * file _GL_UNUSED_PARAMETER,
 		     void * user_data)
 {
 	FILE * out = (FILE *)user_data;
@@ -62,8 +63,8 @@ enumerate_providers (const char * name,
 static void
 enumerate_dicts (const char * const lang_tag,
 		 const char * const provider_name,
-		 const char * const provider_desc,
-		 const char * const provider_file,
+		 const char * const provider_desc _GL_UNUSED_PARAMETER,
+		 const char * const provider_file _GL_UNUSED_PARAMETER,
 		 void * user_data)
 {
 	FILE * out = (FILE *)user_data;
