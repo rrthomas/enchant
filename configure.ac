@@ -158,17 +158,6 @@ if test x"$native_win32" = xyes; then
   fi
 fi 
 
-AC_MSG_CHECKING([for macOS])
-case ${host_os} in
-    *darwin*)
-    check_applespell=yes
-    ;;
-    *)
-    check_applespell=no
-    ;;
-esac
-AC_MSG_RESULT([$check_applespell])
-
 dnl ===========================================================================
 
 m4_copy([AC_DEFUN],[glib_DEFUN])
@@ -399,24 +388,33 @@ APPLESPELL_CFLAGS=""
 APPLESPELL_LIBS=""
 APPLESPELL_LDFLAGS=""
 
-build_applespell=no
-if test "x$check_applespell" = "xyes"; then
+AC_ARG_WITH([applespell],
+   AS_HELP_STRING([--with-applespell],
+      [enable the applespell backend @<:@default=check@:>@]),
+   [],
+   [with_applespell=check])
 
-    AC_ARG_ENABLE(applespell, AS_HELP_STRING([--disable-applespell],[enable the applespell backend @<:@default=no@:>@]), build_applespell="$enableval", build_applespell=no)
-
-    if test "x$build_applespell" != "xno"; then
-        APPLESPELL_CFLAGS+=" -xobjective-c"
-        APPLESPELL_LIBS+=" -lobjc"
-        APPLESPELL_LDFLAGS+=" -framework Cocoa"
-    fi
-
-fi
+AS_IF([test "x$with_applespell" != xno],
+   [case ${host_os} in
+        *darwin*)
+           APPLESPELL_CFLAGS+=" -xobjective-c"
+           APPLESPELL_LIBS+=" -lobjc"
+           APPLESPELL_LDFLAGS+=" -framework Cocoa"
+           with_applespell=yes
+        ;;
+        *)
+           if test "x$with_applespell" != xcheck; then
+             AC_MSG_FAILURE([--with-applespell was given, but not building for macOS])
+           fi
+           with_applespell=no
+        ;;
+    esac])
 
 AC_SUBST(APPLESPELL_CFLAGS)
 AC_SUBST(APPLESPELL_LIBS)
 AC_SUBST(APPLESPELL_LDFLAGS)
 
-AM_CONDITIONAL(WITH_APPLESPELL, test "x$build_applespell" = "xyes")
+AM_CONDITIONAL(WITH_APPLESPELL, test "x$with_applespell" = xyes)
 
 dnl =======================================================================================
 
@@ -460,7 +458,7 @@ $PACKAGE-$VERSION
     Build Hunspell backend:                 ${with_hunspell}
     Build Voikko backend:                   ${with_voikko}
     Build Zemberek backend:                 ${with_zemberek}
-    Build Apple Spell backend (OS X only):  ${build_applespell}"
+    Build Apple Spell backend (OS X only):  ${with_applespell}"
 
 if test "x$with_zemberek" = "xyes"; then
    echo "
