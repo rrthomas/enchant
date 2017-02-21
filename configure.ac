@@ -287,66 +287,26 @@ AM_CONDITIONAL(WITH_HUNSPELL, test "x$with_hunspell" = xyes)
 
 
 dnl Aspell
-check_aspell=yes
-build_aspell=no
+AC_ARG_WITH([aspell],
+   AS_HELP_STRING([--with-aspell],
+      [enable the aspell backend @<:@default=check@:>@]),
+   [],
+   [with_aspell=check])
 
-AC_ARG_ENABLE(aspell, AS_HELP_STRING([--disable-aspell],[enable the aspell backend @<:@default=auto@:>@]), check_aspell="$enableval", check_aspell=yes)
+AS_IF([test "x$with_aspell" != xno],
+   [AC_CHECK_HEADERS([aspell.h])
+   AC_CHECK_LIB([aspell], [get_aspell_dict_info_list])
 
-AC_ARG_WITH(aspell-prefix, AS_HELP_STRING([--with-aspell-prefix=DIR],[specify under which prefix aspell is installed]), aspell_prefix="$withval", )
-
-if test "x$check_aspell" != "xno"; then
-   saved_LDFLAGS=$LDFLAGS
-
-   ASPELL_CFLAGS=
-   if test "x$aspell_prefix" != "x"; then
-       LDFLAGS="-L$aspell_prefix/lib "$LDFLAGS
-       ASPELL_INC="-I$aspell_prefix/include"
-       ASPELL_LIBS="-L$aspell_prefix/lib -laspell"
-   else
-       aspell_prefix=${prefix}
-       if test "x$prefix" = "xNONE"; then
-	  aspell_prefix="/usr/local"
-       fi
-
-       AC_CHECK_PROG(HAVE_ASPELL, aspell, yes, no)
-       if test "x$HAVE_ASPELL" = "xyes"; then
-	  AC_MSG_CHECKING([For Aspell >= 0.50.0])
-	  aspell_major=`aspell -v | awk -F. '{print $4;}' | awk -F")" '{print $1;}'`
-	  if test "$aspell_major" -ge "50"; then
-	      aspell_prefix=`aspell config prefix`
-              LDFLAGS="-L${aspell_prefix}/lib "$LDFLAGS
-	      ASPELL_INC="-I${aspell_prefix}/include"
-	      ASPELL_LIBS="-L${aspell_prefix}/lib -laspell"
-	      AC_MSG_RESULT([yes])
-	  else
-	      AC_MSG_RESULT([unknown])
-	  fi
+   if test "x$ac_cv_header_aspell_h" != xyes -o "x$ac_cv_lib_aspell_get_aspell_dict_info_list" != xyes; then
+      if test "x$with_aspell" != xcheck; then
+         AC_MSG_FAILURE([--with-aspell was given, but tests for Aspell failed])
       fi
-
-      if test "x$HAVE_ASPELL" != "xyes"; then
-	      AC_MSG_WARN([Didn't find aspell >= 0.50.0 and no explicit path aspell specified. Guessing at $aspell_prefix])
-	      ASPELL_LIBS="-L$aspell_prefix/lib -laspell"
-      fi
-   fi
-
-   AC_MSG_CHECKING([For aspell headers in $aspell_prefix/include])
-   if test -f "$aspell_prefix/include/aspell.h"; then
-       AC_MSG_RESULT([yes])
-       AC_CHECK_LIB(aspell,get_aspell_dict_info_list,build_aspell=yes,AC_MSG_WARN([Aspell too old (version < 0.50)]))
+      with_aspell=no
    else
-       AC_MSG_RESULT([no])
-       if test "x$HAVE_ASPELL" = "xyes"; then
-           AC_MSG_WARN([Didn't find aspell headers])
-       fi
-   fi
-   LDFLAGS=$saved_LDFLAGS
-   
-   AC_SUBST(ASPELL_INC)
-   AC_SUBST(ASPELL_LIBS)
-   AC_SUBST(ASPELL_CFLAGS)
-fi
+      with_aspell=yes
+   fi])
 
-AM_CONDITIONAL(WITH_ASPELL, test "$build_aspell" = yes)
+AM_CONDITIONAL(WITH_ASPELL, test "x$with_aspell" = xyes)
 
 
 dnl Voikko
@@ -489,7 +449,7 @@ $PACKAGE-$VERSION
     prefix:                                 ${prefix}
     compiler:                               ${CC}
 
-    Build Aspell backend:                   ${build_aspell}
+    Build Aspell backend:                   ${with_aspell}
     Build Ispell backend:                   ${build_ispell}
     Build Uspell backend:                   ${build_uspell}
     Build Hspell backend:                   ${build_hspell}
