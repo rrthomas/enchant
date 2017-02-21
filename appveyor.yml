@@ -3,7 +3,7 @@ clone_folder: c:\projects\enchant
 
 environment:
   global:
-    CONFIGURE_FLAGS: --with-hunspell-dir=/mingw64/share/hunspell --disable-voikko
+    CONFIGURE_FLAGS: --with-hunspell-dir=/mingw64/share/hunspell
     VERBOSE: 1 # Get test logs in output
 
 # FIXME: Build on mingw-w64, mingw-w32 and MSYS2

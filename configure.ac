@@ -310,84 +310,88 @@ AM_CONDITIONAL(WITH_ASPELL, test "x$with_aspell" = xyes)
 
 
 dnl Voikko
-AC_ARG_ENABLE(voikko, AS_HELP_STRING([--disable-voikko],[enable the voikko backend @<:@default=auto@:>@]), build_voikko="$enableval", build_voikko=yes)
+AC_ARG_WITH([voikko],
+   AS_HELP_STRING([--with-voikko],
+      [enable the voikko backend @<:@default=check@:>@]),
+   [],
+   [with_voikko=check])
 
-AM_CONDITIONAL(WITH_VOIKKO, test "x$build_voikko" = "xyes")
+AS_IF([test "x$with_voikko" != xno],
+   [PKG_CHECK_MODULES([VOIKKO], [libvoikko],
+      [with_voikko=yes],
+      [if test "x$with_voikko" != xcheck; then
+         AC_MSG_FAILURE([--with-voikko was given, but test for Voikko failed])
+       fi
+       with_voikko=no])])
 
-if test "x$build_voikko" = xyes; then
-   PKG_CHECK_MODULES(VOIKKO, [libvoikko])
-   AC_SUBST(VOIKKO_CFLAGS)
-   AC_SUBST(VOIKKO_LIBS)
-fi
+AM_CONDITIONAL(WITH_VOIKKO, test "x$with_voikko" = "xyes")
 
 
 dnl Uspell
-build_uspell=no
-check_uspell=yes
-AC_ARG_ENABLE(uspell, AS_HELP_STRING([--disable-uspell],[enable the uspell backend @<:@default=auto@:>@]), check_uspell="$enableval", check_uspell=yes)
-
-if test "x$check_uspell" != "xno"; then
-   PKG_CHECK_MODULES(USPELL, [libuspell >= 1.1.0], build_uspell=yes, build_uspell=no)
-fi
+AC_ARG_WITH([uspell],
+   AS_HELP_STRING([--with-uspell],
+      [enable the uspell backend @<:@default=check@:>@]),
+   [],
+   [with_uspell=check])
 
 uspell_dir=${datadir}/uspell
-AC_ARG_WITH(uspell-dir, AS_HELP_STRING([--with-uspell-dir=PATH],[path to installed uspell dicts]))
+AC_ARG_WITH([uspell-dir],
+   AS_HELP_STRING([--with-uspell-dir=PATH],
+      [path to installed Uspell dicts]))
+AS_IF([test "x$with_uspell_dir" != "x"],
+   [uspell_dir=$with_uspell_dir])
 
-if test "x$with_uspell_dir" != "x" ; then
-   uspell_dir=$with_uspell_dir
-fi
+AS_IF([test "x$with_uspell" != xno],
+   [PKG_CHECK_MODULES([USPELL], [libuspell >= 1.1.0],
+      [USPELL_CFLAGS="$USPELL_CFLAGS -DENCHANT_USPELL_DICT_DIR='\"$uspell_dir\"'"
+      with_uspell=yes],
+      [if test "x$with_uspell" != xcheck; then
+         AC_MSG_FAILURE([--with-uspell was given, but test for Uspell failed])
+       fi
+       with_uspell=no])])
 
-USPELL_CFLAGS="$USPELL_CFLAGS -DENCHANT_USPELL_DICT_DIR='\"$uspell_dir\"'"
-AC_SUBST(USPELL_CFLAGS)
-AC_SUBST(USPELL_LIBS)
-
-AM_CONDITIONAL(WITH_USPELL, test "$build_uspell" = yes)
+AM_CONDITIONAL(WITH_USPELL, test "x$with_uspell" = xyes)
 
 
 dnl Hspell
-build_hspell=no
-check_hspell=yes
-AC_ARG_ENABLE(hspell, AS_HELP_STRING([--disable-hspell],[enable the hspell backend @<:@default=auto@:>@]), check_hspell="$enableval", check_hspell=yes)
+AC_ARG_WITH([hspell],
+   AS_HELP_STRING([--with-hspell],
+      [enable the hspell backend @<:@default=check@:>@]),
+   [],
+   [with_hspell=check])
 
-AC_ARG_WITH(hspell-prefix, AS_HELP_STRING([--with-hspell-prefix=DIR],[specify under which prefix hspell is installed]), hspell_prefix="$withval", )
+AS_IF([test "x$with_hspell" != xno],
+   [AC_CHECK_HEADERS([hspell.h])
+   AC_CHECK_LIB(hspell, hspell_get_dictionary_path,,, -lz)
 
-dnl change to pkg-config when hspell provides a hspell.pc file
+   if test "x$ac_cv_header_hspell_h" != xyes -o "x$ac_cv_lib_hspell_hspell_get_dictionary_path" != xyes; then
+      if test "x$with_hspell" != xcheck; then
+         AC_MSG_FAILURE([--with-hspell was given, but tests for Hspell failed])
+      fi
+      with_hspell=no
+   else
+      with_hspell=yes
+   fi])
 
-if test "x$check_hspell" != "xno"; then
-   saved_LDFLAGS=$LDFLAGS
-
-   HSPELL_CFLAGS=
-   HSPELL_LIBS=" -lhspell -lz"
-
-   if test "x$hspell_prefix" != "x"; then       
-       LDFLAGS="-L$hspell_prefix/lib "$LDFLAGS
-       HSPELL_CFLAGS="-I$hspell_prefix/include"
-       HSPELL_LIBS="-L$hspell_prefix/lib "$HSPELL_LIBS
-   fi
-
-   AC_CHECK_LIB(hspell, hspell_get_dictionary_path, build_hspell=yes, build_hspell=no, -lz)
-   LDFLAGS=$saved_LDFLAGS
-
-   AC_SUBST(HSPELL_CFLAGS)
-   AC_SUBST(HSPELL_LIBS)
-fi
-
-AM_CONDITIONAL(WITH_HSPELL, test "$build_hspell" = yes)
+AM_CONDITIONAL(WITH_HSPELL, test "x$with_hspell" = xyes)
 
 
 dnl Zemberek
-build_zemberek=no
+AC_ARG_WITH([zemberek],
+   AS_HELP_STRING([--enable-zemberek],
+      [enable the experimental zemberek backend @<:@default=check@:>@]),
+   [],
+   [with_zemberek=check])
 
-AC_ARG_ENABLE(zemberek, AS_HELP_STRING([--enable-zemberek],[enable the experimental zemberek (turkish) backend @<:@default=auto@:>@]), build_zemberek="$enableval", build_zemberek=no)
+AS_IF([test "x$with_zemberek" != xno],
+   [PKG_CHECK_MODULES([ZEMBEREK], [dbus-glib-1 >= 0.62],
+      [with_zemberek=yes],
+      [if test "x$with_zemberek" != xcheck; then
+         AC_MSG_FAILURE([--with-zemberek was given, but test for Zemberek failed])
+       fi
+       with_zemberek=no])])
 
-PKG_CHECK_MODULES(ZEMBEREK, [dbus-glib-1 >= 0.62], , build_zemberek=no)
-
-AC_SUBST(ZEMBEREK_CFLAGS)
-AC_SUBST(ZEMBEREK_LIBS)
-
-AM_CONDITIONAL(WITH_ZEMBEREK, test "x$build_zemberek" = "xyes")
-
-zemberek_dir=${datadir}/enchant/zemberek
+AM_CONDITIONAL(WITH_ZEMBEREK, test "x$with_zemberek" = xyes)
 
 
 dnl Apple Spell
@@ -451,14 +455,14 @@ $PACKAGE-$VERSION
 
     Build Aspell backend:                   ${with_aspell}
     Build Ispell backend:                   ${build_ispell}
-    Build Uspell backend:                   ${build_uspell}
-    Build Hspell backend:                   ${build_hspell}
+    Build Uspell backend:                   ${with_uspell}
+    Build Hspell backend:                   ${with_hspell}
     Build Hunspell backend:                 ${with_hunspell}
-    Build Voikko backend:                   ${build_voikko}
-    Build Zemberek backend:                 ${build_zemberek}
+    Build Voikko backend:                   ${with_voikko}
+    Build Zemberek backend:                 ${with_zemberek}
     Build Apple Spell backend (OS X only):  ${build_applespell}"
 
-if test "x$build_zemberek" = "xyes"; then
+if test "x$with_zemberek" = "xyes"; then
    echo "
 The Zemberek Turkish spell-checking plugin is enabled. It is known 
 to cause crashes with WebKit. Use at your own discretion."
