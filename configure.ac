@@ -55,129 +55,58 @@ PKG_PROG_PKG_CONFIG
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
 
-dnl ===========================================================================
-dnl check compiler flags
-AC_DEFUN([ENCHANT_CC_TRY_FLAG], [
-  AC_MSG_CHECKING([whether $CC supports $1])
+dnl Extra warnings with GCC and compatible compilers
+AC_ARG_ENABLE([gcc-warnings],
+  [AS_HELP_STRING([--disable-gcc-warnings],
+                  [turn off lots of GCC warnings])],
+  [case $enableval in
+     yes|no) ;;
+     *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
+   esac
+   gl_gcc_warnings=$enableval],
+  [gl_gcc_warnings=yes]
+)
+if test "$gl_gcc_warnings" = yes; then
+  dnl Set up the list of undesired warnings.
+  nw=
+  nw="$nw -Wsystem-headers"   # Don’t let system headers trigger warnings
+  nw="$nw -Wundef"            # All compiler preprocessors support #if UNDEF
+  nw="$nw -Wtraditional"      # All compilers nowadays support ANSI C
+  nw="$nw -Wdeclaration-after-statement" # We require C99.
+  nw="$nw -Wstrict-overflow"  # Use a lower level (see below).
+  nw="$nw -Wconversion"       # These warnings usually don’t point to mistakes.
+  nw="$nw -Wsign-conversion"  # Likewise.
 
-  enchant_save_CFLAGS="$CFLAGS"
-  CFLAGS="$CFLAGS $1"
+  gl_MANYWARN_ALL_GCC([warnings])
 
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])], [enchant_cc_flag=yes], [enchant_cc_flag=no])
-  CFLAGS="$enchant_save_CFLAGS"
+  dnl Enable all GCC warnings not in this list.
+  gl_MANYWARN_COMPLEMENT([warnings], [$warnings], [$nw])
+  for w in $warnings; do
+    gl_WARN_ADD([$w])
+  done
 
-  if test "x$enchant_cc_flag" = "xyes"; then
-    ifelse([$2], , :, [$2])
-  else
-    ifelse([$3], , :, [$3])
-  fi
-  AC_MSG_RESULT([$enchant_cc_flag])
-])
+  gl_MANYWARN_ALL_GXX([cxx_warnings])
 
-dnl check compiler flags
-AC_DEFUN([ENCHANT_CXX_TRY_FLAG], [
-  AC_MSG_CHECKING([whether $CXX supports $1])
+  dnl Enable all G++ warnings not in this list.
+  gl_MANYWARN_COMPLEMENT([cxx_warnings], [$cxx_warnings], [$nw])
+  for w in $cxx_warnings; do
+    gl_CXX_WARN_ADD([$w])
+  done
 
-  AC_LANG_PUSH(C++)
-  enchant_save_CXXFLAGS="$CXXFLAGS"
-  CXXFLAGS="$CXXFLAGS $1"
+  dnl Add an extra warning
+  gl_WARN_ADD([-Wstrict-overflow=1])
+  dnl Add some more safety measures
+  gl_WARN_ADD([-D_FORTIFY_SOURCE=2])
+  dnl Remove a warning being promoted to error: we trigger this and can't turn it off with pragmas.
+  gl_WARN_ADD([-Wno-error=format-security])
 
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[ ]])], [enchant_cxx_flag=yes], [enchant_cxx_flag=no])
-  CXXFLAGS="$enchant_save_CXXFLAGS"
-
-  if test "x$enchant_cxx_flag" = "xyes"; then
-    ifelse([$2], , :, [$2])
-  else
-    ifelse([$3], , :, [$3])
-  fi
-  AC_MSG_RESULT([$enchant_cxx_flag])
-  AC_LANG_POP(C++)
-])
-
-dnl Use lots of warning flags with gcc and compatible compilers
-
-dnl Note: if you change the following variable, the cache is automatically
-dnl skipped and all flags rechecked.  So there's no need to do anything
-dnl else.  If for any reason you need to force a recheck, just change
-dnl MAYBE_WARN in an ignorable way (like adding whitespace)
-
-CC_MAYBE_WARN="-Wall -Wextra \
--Wsign-compare -Werror-implicit-function-declaration \
--Wpointer-arith -Wwrite-strings -Wstrict-prototypes \
--Wmissing-prototypes -Wmissing-declarations -Wnested-externs \
--Wpacked -Wswitch-enum -Wmissing-format-attribute \
--Wstrict-aliasing=2 -Winit-self -Wunsafe-loop-optimizations \
--Wdeclaration-after-statement -Wold-style-definition \
--Wno-missing-field-initializers -Wno-unused-parameter \
--Wno-attributes -Wno-long-long -Winline -fno-strict-aliasing"
-
-# invalidate cached value if MAYBE_WARN has changed
-if test "x$enchant_cv_warn_maybe" != "x$CC_MAYBE_WARN"; then
-	unset enchant_cv_warn_cflags
+  # When compiling with GCC, prefer -isystem to -I when including system
+  # include files, to avoid generating useless diagnostics for the files.
+  ISYSTEM='-isystem '
+else
+  ISYSTEM='-I'
 fi
-AC_CACHE_CHECK([for supported C warning flags], enchant_cv_warn_cflags, [
-	echo
-	CC_WARN_CFLAGS=""
-
-	# Some warning options are not supported by all versions of
-	# gcc, so test all desired options against the current
-	# compiler.
-	#
-	# Note that there are some order dependencies
-	# here. Specifically, an option that disables a warning will
-	# have no net effect if a later option then enables that
-	# warnings, (perhaps implicitly). So we put some grouped
-	# options (-Wall and -Wextra) up front and the -Wno options
-	# last.
-
-	for W in $CC_MAYBE_WARN; do
-		ENCHANT_CC_TRY_FLAG([$W], [CC_WARN_CFLAGS="$CC_WARN_CFLAGS $W"])
-	done
-
-	enchant_cv_warn_cflags=$CC_WARN_CFLAGS
-	enchant_cv_warn_maybe=$CC_MAYBE_WARN
-
-	AC_MSG_CHECKING([which C warning flags were supported])])
-CC_WARN_CFLAGS="$enchant_cv_warn_cflags"
-AC_SUBST(CC_WARN_CFLAGS)
-
-CXX_MAYBE_WARN="-Wall -Wextra \
--Wsign-compare \
--Wpointer-arith -Wwrite-strings \
--Wpacked -Wswitch-enum -Wmissing-format-attribute \
--Wstrict-aliasing=2 -Winit-self -Wunsafe-loop-optimizations \
--Wno-missing-field-initializers -Wno-unused-parameter \
--Wno-attributes -Wno-long-long -Winline -fno-strict-aliasing"
-
-# invalidate cached value if MAYBE_WARN has changed
-if test "x$enchant_cxx_cv_warn_maybe" != "x$CXX_MAYBE_WARN"; then
-	unset enchant_cxx_cv_warn_cflags
-fi
-AC_CACHE_CHECK([for supported C++ warning flags], enchant_cxx_cv_warn_cflags, [
-	echo
-	CXX_WARN_CFLAGS=""
-
-	# Some warning options are not supported by all versions of
-	# gcc, so test all desired options against the current
-	# compiler.
-	#
-	# Note that there are some order dependencies
-	# here. Specifically, an option that disables a warning will
-	# have no net effect if a later option then enables that
-	# warnings, (perhaps implicitly). So we put some grouped
-	# options (-Wall and -Wextra) up front and the -Wno options
-	# last.
-
-	for W in $CXX_MAYBE_WARN; do
-		ENCHANT_CXX_TRY_FLAG([$W], [CXX_WARN_CFLAGS="$CXX_WARN_CFLAGS $W"])
-	done
-
-	enchant_cxx_cv_warn_cflags=$CXX_WARN_CFLAGS
-	enchant_cxx_cv_warn_maybe=$CXX_MAYBE_WARN
-
-	AC_MSG_CHECKING([which C++ warning flags were supported])])
-CXX_WARN_CFLAGS="$enchant_cxx_cv_warn_cflags"
-AC_SUBST(CXX_WARN_CFLAGS)
+AC_SUBST([ISYSTEM])
 
 ENCHANT_CFLAGS=$GLIB_CFLAGS
 ENCHANT_LIBS=$GLIB_LIBS

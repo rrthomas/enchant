@@ -28,6 +28,8 @@
  * do so, delete this exception statement from your version.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +43,7 @@
 #include "enchant.h"
 #include "enchant-provider.h"
 #include "pwl.h"
+#include "unused-parameter.h"
 
 #if defined(__APPLE__) && defined(__MACH__)
 #define ENCHANT_USER_PATH_EXTENSION "Library", "Application Support", "Enchant"
@@ -314,7 +317,7 @@ enchant_ascii_strdown (gchar *str,
 /* returns TRUE if tag is valid
  * for requires alphanumeric ASCII or underscore
  */
-static int
+static _GL_ATTRIBUTE_PURE int
 enchant_is_valid_dictionary_tag(const char * const tag)
 {
 	const char * it;
@@ -670,11 +673,7 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
  * returns the number of items in @suggs after merge is complete
  */
 static int
-enchant_dict_merge_suggestions(EnchantDict * dict, 
-								char ** suggs,
-								size_t n_suggs,
-								char ** new_suggs,
-								size_t n_new_suggs)
+enchant_dict_merge_suggestions(char ** suggs, size_t n_suggs, char ** new_suggs, size_t n_new_suggs)
 {
 	size_t i, j;
 
@@ -809,13 +808,11 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			suggs = g_new0 (char *, n_suggs + 1);
 
 			/* Copy over suggestions from dict, if no dupes */
-			n_suggs = enchant_dict_merge_suggestions(dict, 
-								 suggs, 0, 
+			n_suggs = enchant_dict_merge_suggestions(suggs, 0, 
 								 dict_suggs, n_dict_suggs);
 
 			/* Copy over suggestions from pwl, if no dupes */
-			n_suggs = enchant_dict_merge_suggestions(dict, 
-								 suggs, n_suggs, 
+			n_suggs = enchant_dict_merge_suggestions(suggs, n_suggs, 
 								 pwl_suggs, n_pwl_suggs);
 			if(n_suggs == 0)
 			{
@@ -1179,7 +1176,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 {
 	GModule *module = NULL;
 	GDir *dir;
-	G_CONST_RETURN char *dir_entry;
+	const char *dir_entry;
 	size_t entry_len, g_module_suffix_len;
 	
 	char * filename;
@@ -1423,7 +1420,7 @@ enchant_dict_destroyed (gpointer data)
 }
 
 static void
-enchant_provider_free (gpointer data, gpointer user_data)
+enchant_provider_free (gpointer data, gpointer user_data _GL_UNUSED_PARAMETER)
 {
 	EnchantProvider *provider;
 	GModule *module;
@@ -2088,7 +2085,7 @@ enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_na
 	return _enchant_get_dirs_from_string (param_value);
 }
 
-ENCHANT_MODULE_EXPORT(const char *)
+ENCHANT_MODULE_EXPORT(const char *) _GL_ATTRIBUTE_CONST
 enchant_get_version (void) {
 	return ENCHANT_VERSION_STRING;
 }

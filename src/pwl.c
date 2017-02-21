@@ -52,6 +52,8 @@
  *
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -63,6 +65,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include "enchant-provider.h"
+#include "unused-parameter.h"
 
 #include "pwl.h"
 
@@ -758,7 +761,8 @@ static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher)
 
 }
 
-void enchant_pwl_free_string_list(EnchantPWL *pwl, char** string_list)
+void enchant_pwl_free_string_list(EnchantPWL *pwl _GL_UNUSED_PARAMETER,
+				  char** string_list)
 {
 	g_strfreev(string_list);
 }
@@ -794,7 +798,9 @@ static void enchant_trie_free(EnchantTrie* trie)
 	g_free(trie);
 }
 
-static void enchant_trie_free_cb(void* key, void* value, void* data)
+static void enchant_trie_free_cb(void* key _GL_UNUSED_PARAMETER,
+				 void* value,
+				 void* data _GL_UNUSED_PARAMETER)
 {
 	enchant_trie_free((EnchantTrie*) value);
 }

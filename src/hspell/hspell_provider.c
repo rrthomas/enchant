@@ -29,6 +29,8 @@
  * do so, delete this exception statement from your version.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,6 +40,7 @@
 
 #include "enchant.h"
 #include "enchant-provider.h"
+#include "unused-parameter.h"
 
 ENCHANT_PLUGIN_DECLARE ("Hspell")
 
@@ -205,7 +208,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 }
 
 static void
-hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
+hspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
 	struct dict_radix *hspell_dict;
 	
@@ -217,7 +220,7 @@ hspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 /* test for the existence of, then return $prefix/share/hspell/hebrew.wgz */
 
 static char ** 
-hspell_provider_list_dicts (EnchantProvider * me, 
+hspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
 			    size_t * out_n_dicts)
 {
 	const char * dictionary_path;
@@ -246,7 +249,7 @@ hspell_provider_dictionary_exists (struct str_enchant_provider * me,
 }
 
 static void
-hspell_provider_free_string_list (EnchantProvider * me, char **str_list)
+hspell_provider_free_string_list (EnchantProvider * me  _GL_UNUSED_PARAMETER, char **str_list)
 {
 	g_strfreev (str_list);
 }
@@ -258,13 +261,13 @@ hspell_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-hspell_provider_identify (EnchantProvider * me)
+hspell_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "hspell";
 }
 
 static const char *
-hspell_provider_describe (EnchantProvider * me)
+hspell_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "Hspell Provider";
 }

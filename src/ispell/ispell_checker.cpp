@@ -1,4 +1,6 @@
 /* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 
@@ -10,6 +12,7 @@
 #include "sp_spell.h"
 #include "ispell_checker.h"
 #include "enchant.h"
+#include "unused-parameter.h"
 
 #ifndef ENCHANT_ISPELL_HOME_DIR
 #define ENCHANT_ISPELL_HOME_DIR "ispell"
@@ -67,6 +70,12 @@ static const IspellMap ispell_map [] = {
 
 static const size_t size_ispell_map = G_N_ELEMENTS(ispell_map);
 
+static void
+ispell_checker_free_helper (gpointer p, gpointer user _GL_UNUSED_PARAMETER)
+{
+	g_free (p);
+}
+
 static bool
 g_iconv_is_valid(GIConv i)
 {
@@ -99,16 +108,39 @@ ISpellChecker::ISpellChecker(EnchantBroker * broker)
      m_nd(NULL),
      m_so(NULL),
      m_se(NULL),
+     m_sg(0),
      m_ti(NULL),
      m_te(NULL),
+     m_li(0),
+     m_co(0),
+     m_numhits(0),
      m_hashstrings(NULL),
+     m_hashheader({}),
      m_hashtbl(NULL),
+     m_hashsize(0),
+     m_aflag(0),
+     m_cflag(0),
+     m_lflag(0),
+     m_incfileflag(0),
+     m_nodictflag(0),
+     m_uerasechar(0),
+     m_ukillchar(0),
+     m_laststringch(0U),
+     m_defdupchar(0),
+     m_numpflags(0),
+     m_numsflags(0),
      m_pflaglist(NULL),
      m_sflaglist(NULL),
      m_chartypes(NULL),
      m_infile(NULL),
      m_outfile(NULL),
      m_askfilename(NULL),
+     m_changes(0),
+     m_readonly(0),
+     m_quit(0),
+     m_pcount(0),
+     m_maxposslen(0),
+     m_easypossibilities(0),
      m_Trynum(0),
      m_translate_in(G_ICONV_INVALID),
      m_translate_out(G_ICONV_INVALID)
@@ -168,7 +200,7 @@ ISpellChecker::checkWord(const char * const utf8Word, size_t length)
 			len_out = sizeof( szWord ) - 1;
 			result = g_iconv(m_translate_in, &In, &len_in, &Out, &len_out);
 			g_free(normalizedWord);
-			if ((size_t)-1 == result)
+			if (static_cast<size_t>(-1) == result)
 				return false;
 			*Out = '\0';
 		}
@@ -215,7 +247,7 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 			len_out = sizeof( word8 ) - 1;
 			result = g_iconv(m_translate_in, &In, &len_in, &Out, &len_out);
 			g_free(normalizedWord);
-			if ((size_t)-1 == result)
+			if (static_cast<size_t>(-1) == result)
 				return NULL;
 			*Out = '\0';
 		}
@@ -250,11 +282,11 @@ ISpellChecker::suggestWord(const char * const utf8Word, size_t length,
 						
 						size_t len_in, len_out;
 						char *In = m_possibilities[c];
-						char *Out = reinterpret_cast<char *>(utf8Sugg);
+						char *Out = utf8Sugg;
 						
 						len_in = l;
 						len_out = INPUTWORDLEN + MAXAFFIXLEN;
-						if ((size_t)-1 == g_iconv(m_translate_out, &In, &len_in, &Out, &len_out)) {
+						if (static_cast<size_t>(-1) == g_iconv(m_translate_out, &In, &len_in, &Out, &len_out)) {
 							*out_n_suggestions = c;
 							return sugg_arr;
 						}
@@ -280,11 +312,11 @@ ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
 		
 		for (iter = config_dirs; iter; iter = iter->next)
 			{
-				dirs = g_slist_append (dirs, g_build_filename ((const gchar *)iter->data, 
-									       ENCHANT_ISPELL_HOME_DIR, NULL));
+				dirs = g_slist_append (dirs, g_build_filename (static_cast<const gchar *>(iter->data), 
+									       ENCHANT_ISPELL_HOME_DIR, nullptr));
 			}
 
-		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
+		g_slist_foreach (config_dirs, ispell_checker_free_helper, nullptr);
 		g_slist_free (config_dirs);
 	}
 
@@ -292,7 +324,7 @@ ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			char * ispell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "ispell", NULL);
+			char * ispell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "ispell", nullptr);
 			g_free(enchant_prefix);
 			dirs = g_slist_append (dirs, ispell_prefix);
 		}
@@ -308,10 +340,10 @@ ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
 		
 		for (iter = config_dirs; iter; iter = iter->next)
 			{
-				dirs = g_slist_append (dirs, g_strdup ((const gchar *)iter->data));
+				dirs = g_slist_append (dirs, g_strdup (static_cast<const gchar *>(iter->data)));
 			}
 
-		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
+		g_slist_foreach (config_dirs, ispell_checker_free_helper, nullptr);
 		g_slist_free (config_dirs);
 	}
 
@@ -330,12 +362,12 @@ s_buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, cons
 		{
 			char *tmp;
 
-			tmp = g_build_filename ((const gchar *)iter->data, dict, NULL);
+			tmp = g_build_filename (static_cast<const gchar *>(iter->data), dict, nullptr);
 			names.push_back (tmp);
 			g_free (tmp);
 		}
 
-	g_slist_foreach (dirs, (GFunc)g_free, NULL);
+	g_slist_foreach (dirs, ispell_checker_free_helper, nullptr);
 	g_slist_free (dirs);
 }
 
@@ -371,7 +403,7 @@ ISpellChecker::loadDictionaryForLanguage ( const char * szLang )
 	
 	for (size_t i = 0; i < size_ispell_map; i++)
 		{
-			const IspellMap * mapping = (const IspellMap *)(&(ispell_map[i]));
+			const IspellMap * mapping = &(ispell_map[i]);
 			if (!strcmp (szLang, mapping->lang))
 				{
 					szFile = mapping->dict;
@@ -389,14 +421,14 @@ ISpellChecker::loadDictionaryForLanguage ( const char * szLang )
 		return false;
 	
 	// one of the two above calls succeeded
-	setDictionaryEncoding (hashname, encoding);
+	setDictionaryEncoding (encoding);
 	g_free (hashname);
 
 	return true;
 }
 
 void
-ISpellChecker::setDictionaryEncoding( const char * hashname, const char * encoding )
+ISpellChecker::setDictionaryEncoding( const char * encoding )
 {
 	/* Get Hash encoding from XML file. This should always work! */
 	try_autodetect_charset(encoding);
@@ -405,7 +437,7 @@ ISpellChecker::setDictionaryEncoding( const char * hashname, const char * encodi
 		{
 			/* We still have to setup prefstringchar*/
 			prefstringchar = findfiletype("utf8", 1, deftflag < 0 ? &deftflag
-						      : static_cast<int *>(NULL));
+						      : nullptr);
 			
 			if (prefstringchar < 0)
 				{
@@ -414,7 +446,7 @@ ISpellChecker::setDictionaryEncoding( const char * hashname, const char * encodi
 						{
 							sprintf(teststring, "latin%d", n1);
 							prefstringchar = findfiletype(teststring, 1,				      
-										      deftflag < 0 ? &deftflag : static_cast<int *>(NULL));
+										      deftflag < 0 ? &deftflag : nullptr);
 							if (prefstringchar >= 0) 
 								break;
 						}
@@ -424,7 +456,7 @@ ISpellChecker::setDictionaryEncoding( const char * hashname, const char * encodi
 		}
 	
 	/* Test for UTF-8 first */
-	prefstringchar = findfiletype("utf8", 1, deftflag < 0 ? &deftflag : static_cast<int *>(NULL));
+	prefstringchar = findfiletype("utf8", 1, deftflag < 0 ? &deftflag : nullptr);
 	if (prefstringchar >= 0)
 		{
 			m_translate_in = g_iconv_open("UTF-8", "UTF-8");
@@ -438,11 +470,11 @@ ISpellChecker::setDictionaryEncoding( const char * hashname, const char * encodi
 	if (!g_iconv_is_valid(m_translate_in))
 		{
 			/* Look for "altstringtype" names from latin1 to latin15 */
-			for(int n1 = 1; n1 <= 15; n1++)
+			for(unsigned n1 = 1; n1 <= 15; n1++)
 				{
 					char * teststring = g_strdup_printf("latin%u", n1);
 					prefstringchar = findfiletype(teststring, 1,
-								      deftflag < 0 ? &deftflag : static_cast<int *>(NULL));
+								      deftflag < 0 ? &deftflag : nullptr);
 					if (prefstringchar >= 0)
 						{
 							m_translate_in = g_iconv_open(teststring, "UTF-8");
@@ -474,7 +506,7 @@ ISpellChecker::requestDictionary(const char *szLang)
 			std::string shortened_dict (szLang);
 			size_t uscore_pos;
 			
-			if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1)) {
+			if ((uscore_pos = shortened_dict.rfind ('_')) != (static_cast<size_t>(-1))) {
 				shortened_dict = shortened_dict.substr(0, uscore_pos);
 				if (!loadDictionaryForLanguage (shortened_dict.c_str()))
 					return false;
@@ -498,7 +530,7 @@ ispell_dict_suggest (EnchantDict * me, const char *const word,
 {
 	ISpellChecker * checker;
 	
-	checker = (ISpellChecker *) me->user_data;
+	checker = static_cast<ISpellChecker *>(me->user_data);
 	return checker->suggestWord (word, len, out_n_suggs);
 }
 
@@ -507,7 +539,7 @@ ispell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	ISpellChecker * checker;
 	
-	checker = (ISpellChecker *) me->user_data;
+	checker = static_cast<ISpellChecker *>(me->user_data);
 	
 	if (checker->checkWord(word, len))
 		return 0;
@@ -534,7 +566,7 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	}
 	
 	dict = g_new0 (EnchantDict, 1);
-	dict->user_data = (void *) checker;
+	dict->user_data = checker;
 	dict->check = ispell_dict_check;
 	dict->suggest = ispell_dict_suggest;
 	// don't implement session or personal
@@ -543,11 +575,11 @@ ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
 }
 
 static void
-ispell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
+ispell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
 	ISpellChecker * checker;
 	
-	checker = (ISpellChecker *) dict->user_data;
+	checker = static_cast<ISpellChecker *>(dict->user_data);
 	delete checker;
 	
 	g_free (dict);
@@ -589,7 +621,7 @@ ispell_provider_list_dictionaries (EnchantProvider * me,
 	*out_n_dicts = nb;
 	if (nb == 0) {
 		g_free (out_dicts);
-		out_dicts = NULL;
+		out_dicts = nullptr;
 	}
 
 	return out_dicts;
@@ -606,7 +638,7 @@ ispell_provider_dictionary_exists (struct str_enchant_provider * me,
 	
 	for (size_t i = 0; i < size_ispell_map; i++)
 		{
-			const IspellMap * mapping = (const IspellMap *)(&(ispell_map[i]));
+			const IspellMap * mapping = &(ispell_map[i]);
 			if (!strcmp (tag, mapping->lang) || !strcmp (shortened_dict.c_str(), mapping->lang)) 
 				return _ispell_provider_dictionary_exists(me->owner, mapping->dict);
 		}
@@ -615,7 +647,7 @@ ispell_provider_dictionary_exists (struct str_enchant_provider * me,
 }
 
 static void
-ispell_provider_free_string_list (EnchantProvider * me, char **str_list)
+ispell_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER, char **str_list)
 {
 	g_strfreev (str_list);
 }
@@ -627,13 +659,13 @@ ispell_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-ispell_provider_identify (EnchantProvider * me)
+ispell_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "ispell";
 }
 
 static const char *
-ispell_provider_describe (EnchantProvider * me)
+ispell_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "Ispell Provider";
 }

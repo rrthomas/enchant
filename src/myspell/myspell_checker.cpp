@@ -28,6 +28,8 @@
  * do so, delete this exception statement from your version.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> 
@@ -37,6 +39,7 @@
 
 #include "enchant.h"
 #include "enchant-provider.h"
+#include "unused-parameter.h"
 
 #include <hunspell/hunspell.hxx>
 
@@ -71,6 +74,12 @@ private:
 	Hunspell *myspell;
 	EnchantBroker *m_broker;
 };
+
+static void
+myspell_checker_free_helper (gpointer p, gpointer user _GL_UNUSED_PARAMETER)
+{
+	g_free (p);
+}
 
 /***************************************************************************/
 
@@ -109,7 +118,7 @@ MySpellChecker::checkWord(const char *utf8Word, size_t len)
 	size_t len_out = sizeof( word8 ) - 1;
 	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
 	g_free(normalizedWord);
-	if ((size_t)-1 == result)
+	if (static_cast<size_t>(-1) == result)
 		return false;
 	*out = '\0';
 	if (myspell->spell(word8))
@@ -124,7 +133,7 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 	if (len > MAXWORDLEN 
 		|| !g_iconv_is_valid(m_translate_in)
 		|| !g_iconv_is_valid(m_translate_out))
-		return 0;
+		return nullptr;
 
 	// the 8bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
@@ -135,8 +144,8 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 	size_t len_out = sizeof(word8) - 1;
 	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
 	g_free(normalizedWord);
-	if ((size_t)-1 == result)
-		return NULL;
+	if (static_cast<size_t>(-1) == result)
+		return nullptr;
 
 	*out = '\0';
 	char **sugMS;
@@ -148,8 +157,8 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 			len_in = strlen(in);
 			len_out = MAXWORDLEN;
 			char *word = g_new0(char, len_out + 1);
-			out = reinterpret_cast<char *>(word);
-			if ((size_t)-1 == g_iconv(m_translate_out, &in, &len_in, &out, &len_out)) {
+			out = word;
+			if (static_cast<size_t>(-1) == g_iconv(m_translate_out, &in, &len_in, &out, &len_out)) {
 				for (size_t j = i; j < *nsug; j++)
 					free(sugMS[j]);
 				free(sugMS);
@@ -165,7 +174,7 @@ MySpellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 		return sug;
 	}
 	else
-		return 0;
+		return nullptr;
 }
 
 static GSList *
@@ -180,11 +189,11 @@ myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 		
 		for (iter = config_dirs; iter; iter = iter->next)
 			{
-				dirs = g_slist_append (dirs, g_build_filename ((const gchar *)iter->data, 
-									       "myspell", NULL));
+				dirs = g_slist_append (dirs, g_build_filename (static_cast<const gchar *>(iter->data), 
+									       "myspell", nullptr));
 			}
 
-		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
+		g_slist_foreach (config_dirs, myspell_checker_free_helper, nullptr);
 		g_slist_free (config_dirs);
 	}
 
@@ -194,7 +203,7 @@ myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 
 		for (iter = system_data_dirs; *iter; iter++)
 			{
-				dirs = g_slist_append (dirs, g_build_filename (*iter, "myspell", "dicts", NULL));
+				dirs = g_slist_append (dirs, g_build_filename (*iter, "myspell", "dicts", nullptr));
 			}
 	}
 
@@ -202,7 +211,7 @@ myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			char * myspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "myspell", NULL);
+			char * myspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "myspell", nullptr);
 			g_free(enchant_prefix);
 			dirs = g_slist_append (dirs, myspell_prefix);
 		}
@@ -218,10 +227,10 @@ myspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 		
 		for (iter = config_dirs; iter; iter = iter->next)
 			{
-				dirs = g_slist_append (dirs, g_strdup ((const gchar *)iter->data));
+				dirs = g_slist_append (dirs, g_strdup (static_cast<const gchar *>(iter->data)));
 			}
 
-		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
+		g_slist_foreach (config_dirs, myspell_checker_free_helper, nullptr);
 		g_slist_free (config_dirs);
 	}
 
@@ -246,10 +255,10 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs, EnchantBroker * broker)
 	myspell_dirs = myspell_checker_get_dictionary_dirs (broker);
 	for (iter = myspell_dirs; iter; iter = iter->next)
 		{
-			dirs.push_back ((const char *)iter->data);
+			dirs.push_back (static_cast<const char *>(iter->data));
 		}
 
-	g_slist_foreach (myspell_dirs, (GFunc)g_free, NULL);
+	g_slist_foreach (myspell_dirs, myspell_checker_free_helper, nullptr);
 	g_slist_free (myspell_dirs);
 }
 
@@ -261,10 +270,10 @@ s_buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, cons
 	std::vector<std::string> dirs;
 	s_buildDictionaryDirs (dirs, broker);
 
-	char *dict_dic = g_strconcat(dict, ".dic", NULL);
+	char *dict_dic = g_strconcat(dict, ".dic", nullptr);
 	for (size_t i = 0; i < dirs.size(); i++)
 		{
-			char *tmp = g_build_filename (dirs[i].c_str(), dict_dic, NULL);
+			char *tmp = g_build_filename (dirs[i].c_str(), dict_dic, nullptr);
 			names.push_back (tmp);
 			g_free (tmp);
 		}
@@ -320,13 +329,13 @@ myspell_request_dictionary (EnchantBroker * broker, const char * tag)
 	s_buildDictionaryDirs (dirs, broker);
 
 	for (size_t i = 0; i < dirs.size(); i++) {
-		GDir *dir = g_dir_open (dirs[i].c_str(), 0, NULL);
+		GDir *dir = g_dir_open (dirs[i].c_str(), 0, nullptr);
 		if (dir) {
 			const char *dir_entry;
 			while ((dir_entry = g_dir_read_name (dir)) != NULL) {
 				if (is_plausible_dict_for_tag(dir_entry, tag)) {
 					char *dict = g_build_filename (dirs[i].c_str(), 
-								       dir_entry, NULL);
+								       dir_entry, nullptr);
                     if(s_hasCorrespondingAffFile(dict)){
 			                    g_dir_close (dir);
 					    return dict;
@@ -380,7 +389,7 @@ myspell_dict_suggest (EnchantDict * me, const char *const word,
 {
 	MySpellChecker * checker;
 	
-	checker = (MySpellChecker *) me->user_data;
+	checker = static_cast<MySpellChecker *>(me->user_data);
 	return checker->suggestWord (word, len, out_n_suggs);
 }
 
@@ -389,7 +398,7 @@ myspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	MySpellChecker * checker;
 	
-	checker = (MySpellChecker *) me->user_data;
+	checker = static_cast<MySpellChecker *>(me->user_data);
 	
 	if (checker->checkWord(word, len))
 		return 0;
@@ -401,12 +410,12 @@ static void
 myspell_provider_enum_dicts (const char * const directory,
 			     std::vector<std::string> & out_dicts)
 {
-	GDir * dir = g_dir_open (directory, 0, NULL);
+	GDir * dir = g_dir_open (directory, 0, nullptr);
 	if (dir) {
 		const char * entry;
 		
 		while ((entry = g_dir_read_name (dir)) != NULL) {
-			char * utf8_entry = g_filename_to_utf8 (entry, -1, NULL, NULL, NULL);
+			char * utf8_entry = g_filename_to_utf8 (entry, -1, nullptr, nullptr, nullptr);
 			if (utf8_entry) {
 				std::string dir_entry (utf8_entry);
 				g_free (utf8_entry);
@@ -419,7 +428,7 @@ myspell_provider_enum_dicts (const char * const directory,
 					{
 						std::string name(dir_entry.substr (0, hit));
 						std::string affFileName(name + ".aff");
-						char * aff = g_build_filename(directory, affFileName.c_str(), NULL);
+						char * aff = g_build_filename(directory, affFileName.c_str(), nullptr);
 						if (g_file_test(aff, G_FILE_TEST_EXISTS))
 						{
 							out_dicts.push_back (dir_entry.substr (0, hit));
@@ -465,7 +474,7 @@ myspell_provider_list_dicts (EnchantProvider * me,
 }
 
 static void
-myspell_provider_free_string_list (EnchantProvider * me, char **str_list)
+myspell_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER, char **str_list)
 {
 	g_strfreev (str_list);
 }
@@ -496,7 +505,7 @@ myspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 }
 
 static void
-myspell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
+myspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
 	MySpellChecker *checker;
 	
@@ -533,13 +542,13 @@ myspell_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-myspell_provider_identify (EnchantProvider * me)
+myspell_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "myspell";
 }
 
 static const char *
-myspell_provider_describe (EnchantProvider * me)
+myspell_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "Myspell Provider";
 }
