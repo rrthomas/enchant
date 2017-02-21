@@ -230,11 +230,14 @@ AC_SUBST(UNITTESTPP_LIBS)
 
 
 dnl =======================================================================================
+some_backend=no
 
 dnl Ispell
 build_ispell=yes
 
-AC_ARG_ENABLE(ispell, AS_HELP_STRING([--disable-ispell],[enable the ispell backend @<:@default=auto@:>@]), build_ispell="$enableval", build_ispell=yes)
+AC_ARG_ENABLE(ispell, AS_HELP_STRING([--disable-ispell],[enable the ispell backend @<:@default=auto@:>@]), build_ispell="$enableval",
+   [build_ispell=yes
+   some_backend=yes])
 
 AM_CONDITIONAL(WITH_ISPELL, test "x$build_ispell" = "xyes")
 
@@ -266,7 +269,8 @@ AS_IF([test "x$with_hunspell_dir" != "x"],
 AS_IF([test "x$with_hunspell" != xno],
    [PKG_CHECK_MODULES([HUNSPELL], [hunspell],
       [HUNSPELL_CFLAGS="$HUNSPELL_CFLAGS -DENCHANT_HUNSPELL_DICT_DIR='\"$hunspell_dir\"'"
-      with_hunspell=yes],
+      with_hunspell=yes
+      some_backend=yes],
       [if test "x$with_hunspell" != xcheck; then
          AC_MSG_FAILURE([--with-hunspell was given, but test for Hunspell failed])
        fi
@@ -293,6 +297,7 @@ AS_IF([test "x$with_aspell" != xno],
       with_aspell=no
    else
       with_aspell=yes
+      some_backend=yes
    fi])
 
 AM_CONDITIONAL(WITH_ASPELL, test "x$with_aspell" = xyes)
@@ -307,7 +312,8 @@ AC_ARG_WITH([voikko],
 
 AS_IF([test "x$with_voikko" != xno],
    [PKG_CHECK_MODULES([VOIKKO], [libvoikko],
-      [with_voikko=yes],
+      [with_voikko=yes
+      some_backend=yes],
       [if test "x$with_voikko" != xcheck; then
          AC_MSG_FAILURE([--with-voikko was given, but test for Voikko failed])
        fi
@@ -333,7 +339,8 @@ AS_IF([test "x$with_uspell_dir" != "x"],
 AS_IF([test "x$with_uspell" != xno],
    [PKG_CHECK_MODULES([USPELL], [libuspell >= 1.1.0],
       [USPELL_CFLAGS="$USPELL_CFLAGS -DENCHANT_USPELL_DICT_DIR='\"$uspell_dir\"'"
-      with_uspell=yes],
+      with_uspell=yes
+      some_backend=yes],
       [if test "x$with_uspell" != xcheck; then
          AC_MSG_FAILURE([--with-uspell was given, but test for Uspell failed])
        fi
@@ -360,6 +367,7 @@ AS_IF([test "x$with_hspell" != xno],
       with_hspell=no
    else
       with_hspell=yes
+      some_backend=yes
    fi])
 
 AM_CONDITIONAL(WITH_HSPELL, test "x$with_hspell" = xyes)
@@ -374,7 +382,8 @@ AC_ARG_WITH([zemberek],
 
 AS_IF([test "x$with_zemberek" != xno],
    [PKG_CHECK_MODULES([ZEMBEREK], [dbus-glib-1 >= 0.62],
-      [with_zemberek=yes],
+      [with_zemberek=yes
+      some_backend=yes],
       [if test "x$with_zemberek" != xcheck; then
          AC_MSG_FAILURE([--with-zemberek was given, but test for Zemberek failed])
        fi
@@ -401,6 +410,7 @@ AS_IF([test "x$with_applespell" != xno],
            APPLESPELL_LIBS+=" -lobjc"
            APPLESPELL_LDFLAGS+=" -framework Cocoa"
            with_applespell=yes
+           some_backend=yes
         ;;
         *)
            if test "x$with_applespell" != xcheck; then
@@ -464,4 +474,8 @@ if test "x$with_zemberek" = "xyes"; then
    echo "
 The Zemberek Turkish spell-checking plugin is enabled. It is known 
 to cause crashes with WebKit. Use at your own discretion."
+fi
+
+if test "x$some_backend" = "xno"; then
+   AC_MSG_WARN([No spell-checking back-end selected!])
 fi
