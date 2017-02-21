@@ -38,19 +38,19 @@ located in \fI~/.enchant\fR.
 The per-user file takes precedence, if found.
 .PP
 The ordering file takes the form language_tag:<comma-separated list of spelling
-backends>. I am currently aware of the following backends: aspell/pspell,
-myspell/hunspell, ispell, uspell, hspell, voikko, zemberek, and Apple Spell (macOS only). '*' is
+backends>. I am currently aware of the following backends: aspell,
+hunspell, ispell, uspell, hspell, voikko, zemberek, and Apple Spell (macOS only). '*' is
 used to mean "use this ordering for all languages, unless instructed otherwise." For example:
 .PP
-*:aspell,myspell,ispell
+*:aspell,hunspell,ispell
 .br
-en:aspell,myspell,ispell
+en:aspell,hunspell,ispell
 .br
-en_GB:myspell,aspell,ispell
+en_GB:hunspell,aspell,ispell
 .br
-fr:myspell,ispell:aspell
+fr:hunspell,ispell:aspell
 .SH DIRECTORIES IMPORTANT TO ENCHANT
-Unless configured otherwise, Enchant's Myspell, Ispell, and Uspell
+Unless configured otherwise, Enchant's Hunspell, Ispell, and Uspell
 backends will look for dictionaries in directories specific to Enchant,
 and will not use your system-wide installed dictionaries. This is for
 pragmatic reasons since many distributions install these dictionaries
@@ -59,11 +59,11 @@ into different locations.
 Like the \fIenchant.ordering\fR file described above, Enchant looks in
 the global directory for these dictionaries and a per-user directory.
 The per-user directory takes precedence if it is found.
-Enchant looks for Myspell dictionaries in \fI$(datadir)/enchant/myspell\fR and \fI~/.enchant/myspell\fR.
+Enchant looks for Hunspell dictionaries in \fI$(datadir)/enchant/hunspell\fR and \fI~/.enchant/hunspell\fR.
 Enchant looks for Ispell dictionaries in \fI$(datadir)/enchant/ispell\fR and \fI~/.enchant/ispell\fR.
 Enchant looks for Uspell dictionaries in \fI$(datadir)/enchant/uspell\fR and \fI~/.enchant/uspell\fR.
 .PP
-Packagers and users may wish to make symbolic links to the system\-wide dictionary directories. Or, preferably, use the \-\-with-myspell-dir, \-\-with\-ispell\-dir, and \-\-with\-uspell\-dir 'configure' arguments.
+Packagers and users may wish to make symbolic links to the system\-wide dictionary directories. Or, preferably, use the \-\-with-hunspell-dir, \-\-with\-ispell\-dir, and \-\-with\-uspell\-dir 'configure' arguments.
 .SH MORE INFORMATION
 http://www.abisource.com/enchant/
 .SH "SEE ALSO"
