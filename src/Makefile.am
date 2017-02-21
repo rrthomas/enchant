@@ -1,4 +1,4 @@
-SUBDIRS=. aspell ispell uspell myspell hspell applespell voikko zemberek
+SUBDIRS=. aspell ispell uspell hunspell hspell applespell voikko zemberek
 
 AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(ENCHANT_CFLAGS) $(WARN_CFLAGS)
 

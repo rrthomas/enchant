@@ -1905,7 +1905,7 @@ enchant_broker_dict_exists (EnchantBroker * broker,
  * enchant_broker_set_ordering
  * @broker: A non-null #EnchantBroker
  * @tag: A non-null language tag (en_US)
- * @ordering: A non-null ordering (aspell,myspell,ispell,uspell,hspell)
+ * @ordering: A non-null ordering (aspell,hunspell,ispell,uspell,hspell)
  *
  * Declares a preference of dictionaries to use for the language
  * described/referred to by @tag. The ordering is a comma delimited
