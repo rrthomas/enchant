@@ -391,26 +391,7 @@ extern int	TSTMASKBIT P ((MASKTYPE * mask, int bit));
 	# endif
 #endif
 
-/*
-** Data type for internal word storage.  If necessary, we use shorts rather
-** than chars so that string characters can be encoded as a single unit.
-*/
-#if (SET_SIZE + MAXSTRINGCHARS) <= 256
-#ifndef lint
-#define ICHAR_IS_CHAR
-#endif /* lint */
-#endif
-
-#ifdef ICHAR_IS_CHAR
-typedef unsigned char	ichar_t;	/* Internal character */
-#define icharlen(s)	strlen ((char *) (s))
-#define icharcpy(a, b)	strcpy ((char *) (a), (char *) (b))
-#define icharcmp(a, b)	strcmp ((char *) (a), (char *) (b))
-#define icharncmp(a, b, n) strncmp ((char *) (a), (char *) (b), (n))
-#define chartoichar(x)	((ichar_t) (x))
-#else
 typedef unsigned short	ichar_t;	/* Internal character */
-#define chartoichar(x)	((ichar_t) (unsigned char) (x))
 
 /*
  * Structure used to record data about successful lookups; these values
@@ -427,8 +408,6 @@ ichar_t* icharcpy (ichar_t* out, ichar_t* in);
 int icharlen (ichar_t* in);
 int icharcmp (ichar_t* s1, ichar_t* s2);
 int icharncmp (ichar_t* s1, ichar_t* s2, int n);
-
-#endif
 
 struct dent
 {

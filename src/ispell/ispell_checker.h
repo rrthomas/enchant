@@ -93,11 +93,8 @@ private:
 	ichar_t mytolower(ichar_t c);
 	ichar_t mytoupper(ichar_t c);
 
-#ifndef ICHAR_IS_CHAR
 	int cap_ok (ichar_t* word, struct success* hit, int len);
-
 	int hash (ichar_t* s, int hashtblsize);
-#endif
 
 	//
 	// From ispell lookup.c

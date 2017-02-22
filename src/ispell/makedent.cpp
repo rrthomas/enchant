@@ -194,12 +194,10 @@ void		toutent P ((FILE * outfile, struct dent * hent,
 		  struct dent * cent));
 static void	flagout P ((FILE * outfile, int flag));
 */
-#ifndef ICHAR_IS_CHAR
 ichar_t *	icharcpy P ((ichar_t * out, ichar_t * in));
 int		icharlen P ((ichar_t * str));
 int		icharcmp P ((ichar_t * s1, ichar_t * s2));
 int		icharncmp P ((ichar_t * s1, ichar_t * s2, int n));
-#endif /* ICHAR_IS_CHAR */
 
 /*static int  	has_marker;*/
 
@@ -730,7 +728,6 @@ ISpellChecker::printichar (int in)
     return out;
 }
 
-#ifndef ICHAR_IS_CHAR
 /*!
  * Copy an ichar_t.
  *
@@ -810,8 +807,6 @@ icharncmp (ichar_t *s1, ichar_t *s2, int n)
     else
 		return *s1 - *s2;
 }
-
-#endif /* ICHAR_IS_CHAR */
 
 /*
  * \param istate

@@ -151,13 +151,8 @@ int ISpellChecker::hash (ichar_t *s, int hashtblsize)
     long	h = 0;
     int		i;
 
-#ifdef ICHAR_IS_CHAR
-    for (i = 4;  i--  &&  *s != 0;  )
-		h = (h << 8) | HASHUPPER (*s++);
-#else /* ICHAR_IS_CHAR */
     for (i = 2;  i--  &&  *s != 0;  )
 		h = (h << 16) | HASHUPPER (*s++);
-#endif /* ICHAR_IS_CHAR */
     while (*s != 0)
 	{
 		/*
