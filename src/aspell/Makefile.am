@@ -4,7 +4,7 @@ else
 target_lib =
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(WARN_CFLAGS) @ASPELL_INC@ -D_ENCHANT_BUILD=1 @ASPELL_CFLAGS@
+AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(WARN_CFLAGS) -D_ENCHANT_BUILD=1
 
 aspell_LTLIBRARIES = $(target_lib)
 aspelldir= $(libdir)/enchant
