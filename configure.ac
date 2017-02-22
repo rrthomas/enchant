@@ -279,49 +279,6 @@ AS_IF([test "x$with_hunspell" != xno],
 AM_CONDITIONAL(WITH_HUNSPELL, test "x$with_hunspell" = xyes)
 
 
-dnl Aspell
-AC_ARG_WITH([aspell],
-   AS_HELP_STRING([--with-aspell],
-      [enable the aspell backend @<:@default=check@:>@]),
-   [],
-   [with_aspell=check])
-
-AS_IF([test "x$with_aspell" != xno],
-   [AC_CHECK_HEADERS([aspell.h])
-   AC_CHECK_LIB([aspell], [get_aspell_dict_info_list])
-
-   if test "x$ac_cv_header_aspell_h" != xyes -o "x$ac_cv_lib_aspell_get_aspell_dict_info_list" != xyes; then
-      if test "x$with_aspell" != xcheck; then
-         AC_MSG_FAILURE([--with-aspell was given, but tests for Aspell failed])
-      fi
-      with_aspell=no
-   else
-      with_aspell=yes
-      some_backend=yes
-   fi])
-
-AM_CONDITIONAL(WITH_ASPELL, test "x$with_aspell" = xyes)
-
-
-dnl Voikko
-AC_ARG_WITH([voikko],
-   AS_HELP_STRING([--with-voikko],
-      [enable the voikko backend @<:@default=check@:>@]),
-   [],
-   [with_voikko=check])
-
-AS_IF([test "x$with_voikko" != xno],
-   [PKG_CHECK_MODULES([VOIKKO], [libvoikko],
-      [with_voikko=yes
-      some_backend=yes],
-      [if test "x$with_voikko" != xcheck; then
-         AC_MSG_FAILURE([--with-voikko was given, but test for Voikko failed])
-       fi
-       with_voikko=no])])
-
-AM_CONDITIONAL(WITH_VOIKKO, test "x$with_voikko" = "xyes")
-
-
 dnl Uspell
 AC_ARG_WITH([uspell],
    AS_HELP_STRING([--with-uspell],
@@ -349,6 +306,30 @@ AS_IF([test "x$with_uspell" != xno],
 AM_CONDITIONAL(WITH_USPELL, test "x$with_uspell" = xyes)
 
 
+dnl Aspell
+AC_ARG_WITH([aspell],
+   AS_HELP_STRING([--with-aspell],
+      [enable the aspell backend @<:@default=check@:>@]),
+   [],
+   [with_aspell=check])
+
+AS_IF([test "x$with_aspell" != xno],
+   [AC_CHECK_HEADERS([aspell.h])
+   AC_CHECK_LIB([aspell], [get_aspell_dict_info_list])
+
+   if test "x$ac_cv_header_aspell_h" != xyes -o "x$ac_cv_lib_aspell_get_aspell_dict_info_list" != xyes; then
+      if test "x$with_aspell" != xcheck; then
+         AC_MSG_FAILURE([--with-aspell was given, but tests for Aspell failed])
+      fi
+      with_aspell=no
+   else
+      with_aspell=yes
+      some_backend=yes
+   fi])
+
+AM_CONDITIONAL(WITH_ASPELL, test "x$with_aspell" = xyes)
+
+
 dnl Hspell
 AC_ARG_WITH([hspell],
    AS_HELP_STRING([--with-hspell],
@@ -371,6 +352,25 @@ AS_IF([test "x$with_hspell" != xno],
    fi])
 
 AM_CONDITIONAL(WITH_HSPELL, test "x$with_hspell" = xyes)
+
+
+dnl Voikko
+AC_ARG_WITH([voikko],
+   AS_HELP_STRING([--with-voikko],
+      [enable the voikko backend @<:@default=check@:>@]),
+   [],
+   [with_voikko=check])
+
+AS_IF([test "x$with_voikko" != xno],
+   [PKG_CHECK_MODULES([VOIKKO], [libvoikko],
+      [with_voikko=yes
+      some_backend=yes],
+      [if test "x$with_voikko" != xcheck; then
+         AC_MSG_FAILURE([--with-voikko was given, but test for Voikko failed])
+       fi
+       with_voikko=no])])
+
+AM_CONDITIONAL(WITH_VOIKKO, test "x$with_voikko" = "xyes")
 
 
 dnl Zemberek
@@ -461,11 +461,11 @@ $PACKAGE-$VERSION
     prefix:                                 ${prefix}
     compiler:                               ${CC}
 
-    Build Aspell backend:                   ${with_aspell}
     Build Ispell backend:                   ${build_ispell}
-    Build Uspell backend:                   ${with_uspell}
-    Build Hspell backend:                   ${with_hspell}
     Build Hunspell backend:                 ${with_hunspell}
+    Build Uspell backend:                   ${with_uspell}
+    Build Aspell backend:                   ${with_aspell}
+    Build Hspell backend:                   ${with_hspell}
     Build Voikko backend:                   ${with_voikko}
     Build Zemberek backend:                 ${with_zemberek}
     Build Apple Spell backend (OS X only):  ${with_applespell}"
