@@ -97,7 +97,7 @@ HunspellChecker::HunspellChecker(EnchantBroker * broker)
 HunspellChecker::~HunspellChecker()
 {
 	delete hunspell;
-	if (g_iconv_is_valid (m_translate_in ))
+	if (g_iconv_is_valid (m_translate_in))
 		g_iconv_close(m_translate_in);
 	if (g_iconv_is_valid(m_translate_out))
 		g_iconv_close(m_translate_out);
