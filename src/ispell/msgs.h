@@ -247,7 +247,6 @@
 /*
  * The following strings are used in parse.y:
  */
-#define PARSE_Y_8_BIT		"Eighth bit ignored (recompile ispell without NO8BIT)"
 #define PARSE_Y_NO_WORD_STRINGS	"wordchars statement may not specify string characters"
 #define PARSE_Y_UNMATCHED	"Unmatched charset lengths"
 #define PARSE_Y_NO_BOUNDARY_STRINGS "boundarychars statement may not specify string characters"

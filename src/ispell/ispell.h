@@ -192,11 +192,7 @@ extern int		gnMaskBits;
 #define const
 #endif /* __STDC__ */
 
-#ifdef NO8BIT
-#define SET_SIZE	128
-#else
 #define SET_SIZE	256
-#endif
 
 #define MASKSIZE	(gnMaskBits / MASKTYPE_WIDTH)
 
@@ -417,12 +413,8 @@ struct hashheader
 #define MAGIC			0x9602
 
 /* compile options, put in the hash header for consistency checking */
-#ifdef NO8BIT
-# define MAGIC8BIT		0x01
-#else
-# define MAGIC8BIT		0x00
-#endif
-# define MAGICCAPITALIZATION	0x02
+#define MAGIC8BIT		0x00
+#define MAGICCAPITALIZATION	0x02
 
 #if MASKBITS <= 32
 # define MAGICMASKSET		0x00

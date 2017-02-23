@@ -486,11 +486,7 @@ ISpellChecker::stringcharlen (char *bufp, int canonical)
 		bufcur = bufp;
 		while (*stringcur)
 	    {
-#ifdef NO8BIT
-			if (((*bufcur++ ^ *stringcur) & 0x7F) != 0)
-#else /* NO8BIT */
 			if (*bufcur++ != *stringcur)
-#endif /* NO8BIT */
 				break;
 			/*
 			** We can't use autoincrement above because of the
@@ -514,17 +510,10 @@ ISpellChecker::stringcharlen (char *bufp, int canonical)
 				--stringcur;
 	    }
 		/* No match - choose which side to search on */
-#ifdef NO8BIT
-		if ((*--bufcur & 0x7F) < (*stringcur & 0x7F))
-			highstringno = stringno - 1;
-		else if ((*bufcur & 0x7F) > (*stringcur & 0x7F))
-			lowstringno = stringno + 1;
-#else /* NO8BIT */
 		if (*--bufcur < *stringcur)
 			highstringno = stringno - 1;
 		else if (*bufcur > *stringcur)
 			lowstringno = stringno + 1;
-#endif /* NO8BIT */
 		else if (dupwanted < m_hashheader.dupnos[stringno])
 			highstringno = stringno - 1;
 		else
