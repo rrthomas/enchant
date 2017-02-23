@@ -195,7 +195,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ispell_checker.h"
+#include "ispell.h"
 
 /*!
  * Check possible affixes

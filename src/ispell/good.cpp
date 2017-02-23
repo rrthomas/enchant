@@ -180,7 +180,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ispell_checker.h"
+#include "ispell.h"
 
 
 int		good P ((ichar_t * word, int ignoreflagbits, int allhits,

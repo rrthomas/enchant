@@ -172,7 +172,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "ispell_checker.h"
+#include "ispell.h"
 #include "msgs.h"
 
 int		makedent P ((char * lbuf, int lbuflen, struct dent * ent));

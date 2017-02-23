@@ -16,8 +16,8 @@ libenchant_ispell_la_SOURCES =	\
 	correct.cpp		\
 	good.cpp		\
 	hash.cpp		\
+	ispell.cpp		\
 	ispell_checker.cpp	\
-	ispell_checker.h	\
 	ispell_def.h		\
 	ispell.h		\
 	lookup.cpp		\

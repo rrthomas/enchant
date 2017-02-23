@@ -217,7 +217,7 @@
 #include <glib/gstdio.h>
 
 #include "enchant-provider.h"
-#include "ispell_checker.h"
+#include "ispell.h"
 #include "msgs.h"
 
 #define G_ICONV_INVALID (GIConv)-1

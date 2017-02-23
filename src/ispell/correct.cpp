@@ -191,7 +191,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "ispell_checker.h"
+#include "ispell.h"
 #include "msgs.h"
 
 /*

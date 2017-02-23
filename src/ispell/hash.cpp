@@ -127,7 +127,7 @@
  *
  */
 
-#include "ispell_checker.h"
+#include "ispell.h"
 
 /*
  * The following hash algorithm is due to Ian Dall, with slight modifications
