@@ -538,10 +538,6 @@ int ISpellChecker::linit (char *hashname)
     return (0);
 }
 
-#ifndef FREEP
-#define FREEP(p)	do { if (p) free(p); } while (0)
-#endif
-
 /*!
  * \param wchars Characters in -w option, if any
  */

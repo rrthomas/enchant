@@ -547,33 +547,11 @@ ISpellChecker::stringcharlen (char *bufp, int canonical)
 ** the possibility of string characters.  Note well that they take a POINTER,
 ** not a character.
 **
-** The "l_" versions set "len" to the length of the string character as a
-** handy side effect.  (Note that the global "laststringch" is also set,
-** and sometimes used, by these macros.)
-**
-** The "l1_" versions go one step further and guarantee that the "len"
+** The "l1_" versions guarantee that the "len"
 ** field is valid for *all* characters, being set to 1 even if the macro
 ** returns false.  This macro is a great example of how NOT to write
 ** readable C.
 */
-#define isstringch(ptr, canon)	(isstringstart (*(ptr)) \
-				  &&  stringcharlen ((ptr), (canon)) > 0)
-/*
-int isstringch(char *ptr, int canon) {
-	return (isstringstart (*(ptr)) && (len = stringcharlen ((ptr), (canon))) > 0);
-}
-*/
-
-#define l_isstringch(ptr, len, canon)	\
-				(isstringstart (*(ptr)) \
-				  &&  (len = stringcharlen ((ptr), (canon))) \
-				    > 0)
-/*
-int l_isstringch(char *ptr, int len, int canon) {
-	return (isstringstart (*(ptr)) &&  (len = stringcharlen ((ptr), (canon))) > 0);
-}
-*/
-
 #define l1_isstringch(ptr, len, canon)	\
 				(len = 1, \
 				  isstringstart ((unsigned char)(*(ptr))) \
