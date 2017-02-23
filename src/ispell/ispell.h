@@ -255,7 +255,6 @@ struct dent
 ** Flags in the directory entry.  If FULLMASKSET is undefined, these are
 ** stored in the highest bits of the last longword of the mask field.  If
 ** FULLMASKSET is defined, they are stored in the extra "flags" field.
-#ifndef NO_CAPITALIZATION_SUPPORT
 **
 ** If a word has only one capitalization form, and that form is not
 ** FOLLOWCASE, it will have exactly one entry in the dictionary.  The
@@ -315,7 +314,6 @@ struct dent
 ** (KEEP flag set) and the user adds "alpha" with the KEEP flag clear, a
 ** multiple-variant entry will be created so that "alpha" will be accepted
 ** but only "ALPHA" will actually be kept.
-#endif
 */
 #ifdef FULLMASKSET
 #define flagfield	flags
@@ -324,9 +322,6 @@ struct dent
 #endif
 #define USED		((MASKTYPE) 1 << (FLAGBASE + 0))
 #define KEEP		((MASKTYPE) 1 << (FLAGBASE + 1))
-#ifdef NO_CAPITALIZATION_SUPPORT
-#define ALLFLAGS	(USED | KEEP)
-#else /* NO_CAPITALIZATION_SUPPORT */
 #define ANYCASE		((MASKTYPE) 0 << (FLAGBASE + 2))
 #define ALLCAPS		((MASKTYPE) 1 << (FLAGBASE + 2))
 #define CAPITALIZED	((MASKTYPE) 2 << (FLAGBASE + 2))
@@ -335,7 +330,6 @@ struct dent
 #define MOREVARIANTS	((MASKTYPE) 1 << (FLAGBASE + 4))
 #define ALLFLAGS	(USED | KEEP | CAPTYPEMASK | MOREVARIANTS)
 #define captype(x)	((x) & CAPTYPEMASK)
-#endif /* NO_CAPITALIZATION_SUPPORT */
 
 /*
  * Language tables used to encode prefix and suffix information.
@@ -428,17 +422,13 @@ struct hashheader
 #else
 # define MAGIC8BIT		0x00
 #endif
-#ifdef NO_CAPITALIZATION_SUPPORT
-# define MAGICCAPITALIZATION	0x00
-#else
 # define MAGICCAPITALIZATION	0x02
-#endif
-#  define MAGICMASKSET		0x04
 
 #if MASKBITS <= 32
 # define MAGICMASKSET		0x00
 #else
 # if MASKBITS <= 64
+#  define MAGICMASKSET		0x04
 # else
 #  if MASKBITS <= 128
 #   define MAGICMASKSET		0x08
@@ -627,9 +617,7 @@ private:
 	int		casecmp P ((char * a, char * b, int canonical));
 	void		makepossibilities P ((ichar_t * word));
 	int	insert P ((ichar_t * word));
-#ifndef NO_CAPITALIZATION_SUPPORT
 	void	wrongcapital P ((ichar_t * word));
-#endif /* NO_CAPITALIZATION_SUPPORT */
 	void	wrongletter P ((ichar_t * word));
 	void	extraletter P ((ichar_t * word));
 	void	missingletter P ((ichar_t * word));

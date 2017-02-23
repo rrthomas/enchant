@@ -136,12 +136,6 @@
  */
 #define HASHSHIFT   5
 
-#ifdef NO_CAPITALIZATION_SUPPORT
-#define HASHUPPER(c)	c
-#else /* NO_CAPITALIZATION_SUPPORT */
-#define HASHUPPER(c)	mytoupper(c)
-#endif /* NO_CAPITALIZATION_SUPPORT */
-
 /*
  * \param s
  * \param hashtblsize
@@ -152,7 +146,7 @@ int ISpellChecker::hash (ichar_t *s, int hashtblsize)
     int		i;
 
     for (i = 2;  i--  &&  *s != 0;  )
-		h = (h << 16) | HASHUPPER (*s++);
+		h = (h << 16) | mytoupper (*s++);
     while (*s != 0)
 	{
 		/*
@@ -161,7 +155,7 @@ int ISpellChecker::hash (ichar_t *s, int hashtblsize)
 		 */
 		h = (h << HASHSHIFT)
 		  | ((h >> (32 - HASHSHIFT)) & ((1 << HASHSHIFT) - 1));
-		h ^= HASHUPPER (*s++);
+		h ^= mytoupper (*s++);
 	}
     return static_cast<unsigned long>(h) % hashtblsize;
 }

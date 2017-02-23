@@ -343,13 +343,9 @@ void ISpellChecker::pfx_list_chk (ichar_t *word, ichar_t *ucword, int len, int o
 					}
 					if (!allhits)
 					{
-#ifndef NO_CAPITALIZATION_SUPPORT
 						if (cap_ok (word, &m_hits[0], len))
 							return;
 						m_numhits = 0;
-#else /* NO_CAPITALIZATION_SUPPORT */
-						return;
-#endif /* NO_CAPITALIZATION_SUPPORT */
 					}
 				}
 				/*
@@ -531,13 +527,9 @@ void ISpellChecker::suf_list_chk (ichar_t *word, ichar_t *ucword,
 					}
 					if (!allhits)
 					{
-#ifndef NO_CAPITALIZATION_SUPPORT
 						if (cap_ok (word, &m_hits[0], len))
 							return;
 						m_numhits = 0;
-#else /* NO_CAPITALIZATION_SUPPORT */
-						return;
-#endif /* NO_CAPITALIZATION_SUPPORT */
 					}
 				}
 			}

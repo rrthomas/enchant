@@ -716,10 +716,8 @@ struct dent * ISpellChecker::ispell_lookup (ichar_t *s, int dotree)
 		s1 = dp->word;
 		if (s1  &&  s1[0] == schar[0]  &&  strcmp (s1 + 1, schar + 1) == 0)
 			return dp;
-#ifndef NO_CAPITALIZATION_SUPPORT
 		while (dp->flagfield & MOREVARIANTS)	/* Skip variations */
 			dp = dp->next;
-#endif
 	}
 	return NULL;
 }

@@ -177,10 +177,8 @@
 
 int		makedent P ((char * lbuf, int lbuflen, struct dent * ent));
 /*int		combinecaps P ((struct dent * hdr, struct dent * newent));
-#ifndef NO_CAPITALIZATION_SUPPORT
 static void	forcevheader P ((struct dent * hdrp, struct dent * oldp,
 		  struct dent * newp));
-#endif / * NO_CAPITALIZATION_SUPPORT * /
 static int	combine_two_entries P ((struct dent * hdrp,
 		  struct dent * oldp, struct dent * newp));
 static int	acoversb P ((struct dent * enta, struct dent * entb));
@@ -210,7 +208,6 @@ This function is not used by AbiWord.  I don't know if it'll be needed for
 other abi documents
  */
 	
-#ifndef NO_CAPITALIZATION_SUPPORT
 /*!
 ** Classify the capitalization of a sample entry.  Returns one of the
 ** four capitalization codes ANYCASE, ALLCAPS, CAPITALIZED, or FOLLOWCASE.
@@ -307,7 +304,6 @@ int ISpellChecker::addvheader ( struct dent *dp)
     dp->flagfield |= (ALLCAPS | MOREVARIANTS);
     return 0;
 }
-#endif /* NO_CAPITALIZATION_SUPPORT */
 
 /*
 ** Combine and resolve the entries describing two capitalizations of the same
@@ -335,7 +331,6 @@ int ISpellChecker::addvheader ( struct dent *dp)
 **	(1) Add newp's affixes and KEEP flag to oldp, and discard newp.
 **	(2) Add oldp's affixes and KEEP flag to newp, replace oldp with
 **	    newp, and discard newp.
-#ifndef NO_CAPITALIZATION_SUPPORT
 **	(3) Insert newp as a new entry in the variants list.  If there is
 **	    currently no variant header, this requires adding one.  Adding a
 **	    header splits into two sub-cases:
@@ -348,7 +343,6 @@ int ISpellChecker::addvheader ( struct dent *dp)
 **
 **	    After newp has been added as a variant, its affixes and KEEP
 **	    flag are OR-ed into the variant header.
-#endif
 **
 ** So how to choose which?  The default is always case (3), which adds newp
 ** as a new entry in the variants list.  Cases (1) and (2) are symmetrical
@@ -366,13 +360,11 @@ int ISpellChecker::addvheader ( struct dent *dp)
 **	    (4c) If the words are FOLLOWCASE, the capitalizations match
 **		exactly.
 **
-#ifndef NO_CAPITALIZATION_SUPPORT
 **	(5) For entries with mismatched capitalization types, A covers B
 **	    if (4a) and (4b) are true, and:
 **
 **	    (5a) B is ALLCAPS, or
 **	    (5b) A is ANYCASE, and B is CAPITALIZED.
-#endif
 **
 ** For any "hdrp" without variants, oldp is the same as hdrp.  Otherwise,
 ** the above tests are applied using each variant in turn for oldp.

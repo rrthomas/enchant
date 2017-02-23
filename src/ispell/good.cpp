@@ -186,8 +186,6 @@
 int		good P ((ichar_t * word, int ignoreflagbits, int allhits,
 			 int pfxopts, int sfxopts));
 
-#ifndef NO_CAPITALIZATION_SUPPORT
-
 /*!
 ** See if this particular capitalization (dent) is legal with these
 ** particular affixes.
@@ -337,9 +335,7 @@ int ISpellChecker::cap_ok (ichar_t *word, struct success *hit, int len)
     /* No matches found */
     return 0;
 }
-#endif
 
-#ifndef NO_CAPITALIZATION_SUPPORT
 /*!
  * \param w Word to look up
  * \param ignoreflagbits NZ to ignore affix flags in dict
@@ -350,10 +346,6 @@ int ISpellChecker::cap_ok (ichar_t *word, struct success *hit, int len)
  * \return
  */
 int ISpellChecker::good (ichar_t *w, int ignoreflagbits, int allhits, int pfxopts, int sfxopts)
-#else
-/* ARGSUSED */
-int ISpellChecker::good (ichar_t *w, int ignoreflagbits, int dummy, int pfxopts, int sfxopts)
-#endif
 {
     ichar_t		nword[INPUTWORDLEN + MAXAFFIXLEN];
     ichar_t *		p;
@@ -376,12 +368,8 @@ int ISpellChecker::good (ichar_t *w, int ignoreflagbits, int dummy, int pfxopts,
 		m_hits[0].dictent = dp;
 		m_hits[0].prefix = NULL;
 		m_hits[0].suffix = NULL;
-#ifndef NO_CAPITALIZATION_SUPPORT
 		if (allhits  ||  cap_ok (w, &m_hits[0], n))
 			m_numhits = 1;
-#else
-		m_numhits = 1;
-#endif
 	}
 
     if (m_numhits  &&  !allhits)
