@@ -14,7 +14,7 @@ AM_TESTS_ENVIRONMENT = \
 
 DISTCLEANFILES = test.pwl
 
-EXTRA_DIST = test.pwl.orig ispell.in
+EXTRA_DIST = test.pwl.orig
 
 LDADD = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
 

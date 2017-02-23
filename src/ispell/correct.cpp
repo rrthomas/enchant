@@ -191,7 +191,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "ispell_checker.h"
+#include "ispell.h"
 #include "msgs.h"
 
 /*
@@ -266,9 +266,7 @@ ISpellChecker::makepossibilities (ichar_t *word)
     m_maxposslen = 0;
     m_easypossibilities = 0;
 
-#ifndef NO_CAPITALIZATION_SUPPORT
     wrongcapital (word);
-#endif
 
 /* 
  * according to Pollock and Zamora, CACM April 1984 (V. 27, No. 4),
@@ -320,7 +318,6 @@ ISpellChecker::insert (ichar_t *word)
 		return (0);
 }
 
-#ifndef NO_CAPITALIZATION_SUPPORT
 /*
  * \param word
  */
@@ -341,7 +338,6 @@ ISpellChecker::wrongcapital (ichar_t *word)
 		ins_cap (newword, word);
 	}
 }
-#endif
 
 /*
  * \param word
@@ -357,9 +353,7 @@ ISpellChecker::wrongletter (ichar_t *word)
 
     n = icharlen (word);
     icharcpy (newword, word);
-#ifndef NO_CAPITALIZATION_SUPPORT
     upcase (newword);
-#endif
 
     for (i = 0; i < n; i++)
 	{
@@ -719,42 +713,18 @@ ISpellChecker::save_root_cap (ichar_t *word, ichar_t *pattern,
 						  ichar_t savearea[MAX_CAPS][INPUTWORDLEN + MAXAFFIXLEN], 
 					      int * nsaved)
 {
-#ifndef NO_CAPITALIZATION_SUPPORT
     struct dent *	dent;
-#endif /* NO_CAPITALIZATION_SUPPORT */
     int			firstisupper;
     ichar_t		newword[INPUTWORDLEN + 4 * MAXAFFIXLEN + 4];
-#ifndef NO_CAPITALIZATION_SUPPORT
     ichar_t *		p;
     int			len;
     int			i;
     int			limit;
-#endif /* NO_CAPITALIZATION_SUPPORT */
 
     if (*nsaved >= MAX_CAPS)
 		return;
     icharcpy (newword, word);
     firstisupper = myupper (pattern[0]);
-#ifdef NO_CAPITALIZATION_SUPPORT
-    /*
-    ** Apply the old, simple-minded capitalization rules.
-    */
-    if (firstisupper)
-	{
-		if (myupper (pattern[1]))
-			upcase (newword);
-		else
-	    {
-			lowcase (newword);
-			newword[0] = mytoupper (newword[0]);
-	    }
-	}
-    else
-		lowcase (newword);
-    icharcpy (savearea[*nsaved], newword);
-    (*nsaved)++;
-    return;
-#else /* NO_CAPITALIZATION_SUPPORT */
 #define flagsareok(dent)    \
     ((pfxent == NULL \
 	||  TSTMASKBIT (dent->mask, pfxent->flagbit)) \
@@ -911,7 +881,6 @@ ISpellChecker::save_root_cap (ichar_t *word, ichar_t *pattern,
 		dent = dent->next;
 	}
     return;
-#endif /* NO_CAPITALIZATION_SUPPORT */
 }
 
 

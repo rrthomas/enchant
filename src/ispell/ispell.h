@@ -1,12 +1,17 @@
 /* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
-#ifndef ISPELL_H
-#define ISPELL_H
+#ifndef ISPELL_CHECKER_H
+#define ISPELL_CHECKER_H
+
+#include <string>
+#include <vector>
+
+#include <glib.h> // give glib a chance to override MAXPATHLEN first before it is set in ispell.h
+#include "enchant.h"
+
+
+/******* START OF OLD ispell.h ******/
 
 #include <sys/types.h>
-
-/*
- * $Id$
- */
 
 /*
  * Copyright 1992, 1993, Geoff Kuenning, Granada Hills, CA
@@ -46,180 +51,7 @@
  * SUCH DAMAGE.
  */
 
-/*
- * $Log$
- * Revision 1.4  2003/08/14 17:51:27  dom
- * update license - exception clause should be Lesser GPL
- *
- * Revision 1.3  2003/07/28 20:40:26  dom
- * fix up the license clause, further win32-registry proof some directory getting functions
- *
- * Revision 1.2  2003/07/16 22:52:40  dom
- * LGPL + exception license
- *
- * Revision 1.1  2003/07/15 01:15:06  dom
- * ispell enchant backend
- *
- * Revision 1.10  2003/01/24 05:52:33  hippietrail
- *
- * Refactored ispell code. Old ispell global variables had been put into
- * an allocated structure, a pointer to which was passed to many functions.
- * I have now made all such functions and variables private members of the
- * ISpellChecker class. It was C OO, now it's C++ OO.
- *
- * I've fixed the makefiles and tested compilation but am unable to test
- * operation. Please back out my changes if they cause problems which
- * are not obvious or easy to fix.
- *
- * Revision 1.9  2002/09/19 05:31:15  hippietrail
- *
- * More Ispell cleanup.  Conditional globals and DEREF macros are removed.
- * K&R function declarations removed, converted to Doxygen style comments
- * where possible.  No code has been changed (I hope).  Compiles for me but
- * unable to test.
- *
- * Revision 1.8  2002/09/17 03:03:29  hippietrail
- *
- * After seeking permission on the developer list I've reformatted all the
- * spelling source which seemed to have parts which used 2, 3, 4, and 8
- * spaces for tabs.  It should all look good with our standard 4-space
- * tabs now.
- * I've concentrated just on indentation in the actual code.  More prettying
- * could be done.
- * * NO code changes were made *
- *
- * Revision 1.7  2002/03/22 14:31:57  dom
- * fix mg's compile problem
- *
- * Revision 1.6  2002/03/05 16:55:52  dom
- * compound word support, tested against swedish
- *
- * Revision 1.5  2001/08/10 18:32:40  dom
- * Spelling and iconv updates. god, i hate iconv
- *
- * Revision 1.4  2001/06/26 16:33:27  dom
- * 128 StringChars and some other stuff
- *
- * Revision 1.3  2001/05/12 16:05:42  thomasf
- * Big pseudo changes to ispell to make it pass around a structure rather
- * than rely on all sorts of gloabals willy nilly here and there.  Also
- * fixed our spelling class to work with accepting suggestions once more.
- * This code is dirty, gross and ugly (not to mention still not supporting
- * multiple hash sized just yet) but it works on my machine and will no
- * doubt break other machines.
- *
- * Revision 1.2  2001/04/18 00:59:36  thomasf
- * Removed the duplicate declarations of variables that was causing build
- * to bail.  This new ispell stuff is a total mess.
- *
- * Revision 1.1  2001/04/15 16:01:24  tomas_f
- * moving to spell/xp
- *
- * Revision 1.13  2001/04/13 12:33:12  tamlin
- * ispell can now be used from C++
- *
- * Revision 1.12  2001/03/25 01:30:02  tomb
- * 1. Fixed ispell #define problems on Win32
- * 2. Changed the way that togglable toolbars are tracked so that Full
- * Screen mode works right on Windows
- * 3. Fixed SET_GATHER macro in ap_Win32Dialog_Options.h
- * 4. Fixed Toggle Case dialog to default to Sentence Case when loaded
- * 5. Added #define for Auto Save checkbox (though I haven't updated the
- * Prefs dialog yet)
- *
- * Revision 1.11  2001/03/24 23:28:41  dom
- * Make C++ aware and watch out for VOID on Win32
- *
- * Revision 1.10  1999/12/21 18:46:29  sterwill
- * ispell patch for non-English dictionaries by Henrik Berg <henrik@lansen.se>
- *
- * Revision 1.9  1999/10/20 03:19:35  paul
- * Hacked ispell code to ignore any characters that don't fit in the lookup tables loaded from the dictionary.  It ain't pretty, but at least we don't crash there any more.
- *
- * Revision 1.8  1999/09/29 23:33:32  justin
- * Updates to the underlying ispell-based code to support suggested corrections.
- *
- * Revision 1.7  1999/04/13 17:12:51  jeff
- * Applied "Darren O. Benham" <gecko@benham.net> spell check changes.
- * Fixed crash on Win32 with the new code.
- *
- * Revision 1.6  1999/01/07 05:14:22  sterwill
- * So it builds on Unix... it might break win32 in ispell, since ut_types
- * is no longer included.  This is a temporary solution to a larger problem
- * of including C++ headers in C source files.
- *
- * Revision 1.6  1999/01/07 05:14:22  sterwill
- * So it builds on Unix... it might break win32 in ispell, since ut_types
- * is no longer included.  This is a temporary solution to a larger problem
- * of including C++ headers in C source files.
- *
- * Revision 1.5  1999/01/07 05:02:25  sterwill
- * Checking in half-broken to avoid tree lossage
- *
- * Revision 1.4  1999/01/07 01:07:48  paul
- * Fixed spell leaks.
- *
- * Revision 1.3  1998/12/29 15:03:54  eric
- *
- * minor fix to ispell.h to get things to compile on Linux again.
- *
- * Revision 1.2  1998/12/29 14:55:33  eric
- *
- * I've doctored the ispell code pretty extensively here.  It is now
- * warning-free on Win32.  It also *works* on Win32 now, since I
- * replaced all the I/O calls with ANSI standard ones.
- *
- * Revision 1.1  1998/12/28 18:04:43  davet
- * Spell checker code stripped from ispell.  At this point, there are
- * two external routines...  the Init routine, and a check-a-word routine
- * which returns a boolean value, and takes a 16 bit char string.
- * The code resembles the ispell code as much as possible still.
- *
- * Revision 1.68  1995/03/06  02:42:41  geoff
- * Be vastly more paranoid about parenthesizing macro arguments.  This
- * fixes a bug in defmt.c where a complex argument was passed to
- * isstringch.
- *
- * Revision 1.67  1995/01/03  19:24:12  geoff
- * Get rid of a non-global declaration.
- *
- * Revision 1.66  1994/12/27  23:08:49  geoff
- * Fix a lot of subtly bad assumptions about the widths of ints and longs
- * which only show up on 64-bit machines like the Cray and the DEC Alpha.
- *
- * Revision 1.65  1994/11/02  06:56:10  geoff
- * Remove the anyword feature, which I've decided is a bad idea.
- *
- * Revision 1.64  1994/10/25  05:46:18  geoff
- * Add the FF_ANYWORD flag for defining an affix that will apply to any
- * word, even if not explicitly specified.  (Good for French.)
- *
- * Revision 1.63  1994/09/16  04:48:28  geoff
- * Make stringdups and laststringch unsigned ints, and dupnos a plain
- * int, so that we can handle more than 128 stringchars and stringchar
- * types.
- *
- * Revision 1.62  1994/09/01  06:06:39  geoff
- * Change erasechar/killchar to uerasechar/ukillchar to avoid
- * shared-library problems on HP systems.
- *
- * Revision 1.61  1994/08/31  05:58:35  geoff
- * Add contextoffset, used in -a mode to handle extremely long lines.
- *
- * Revision 1.60  1994/05/17  06:44:15  geoff
- * Add support for controlled compound formation and the COMPOUNDONLY
- * option to affix flags.
- *
- * Revision 1.59  1994/03/15  06:25:16  geoff
- * Change deftflag's initialization so we can tell if -t/-n appeared.
- *
- * Revision 1.58  1994/02/07  05:53:28  geoff
- * Add typecasts to the the 7-bit versions of ichar* routines
- *
- * Revision 1.57  1994/01/25  07:11:48  geoff
- * Get rid of all old RCS log lines in preparation for the 3.1 release.
- *
- */
+/* Forked from Revision 1.68 of upstream ispell.h. */
 
 #include <stdio.h>
 /*  #include "ut_types.h" */
@@ -360,11 +192,7 @@ extern int		gnMaskBits;
 #define const
 #endif /* __STDC__ */
 
-#ifdef NO8BIT
-#define SET_SIZE	128
-#else
 #define SET_SIZE	256
-#endif
 
 #define MASKSIZE	(gnMaskBits / MASKTYPE_WIDTH)
 
@@ -391,26 +219,7 @@ extern int	TSTMASKBIT P ((MASKTYPE * mask, int bit));
 	# endif
 #endif
 
-/*
-** Data type for internal word storage.  If necessary, we use shorts rather
-** than chars so that string characters can be encoded as a single unit.
-*/
-#if (SET_SIZE + MAXSTRINGCHARS) <= 256
-#ifndef lint
-#define ICHAR_IS_CHAR
-#endif /* lint */
-#endif
-
-#ifdef ICHAR_IS_CHAR
-typedef unsigned char	ichar_t;	/* Internal character */
-#define icharlen(s)	strlen ((char *) (s))
-#define icharcpy(a, b)	strcpy ((char *) (a), (char *) (b))
-#define icharcmp(a, b)	strcmp ((char *) (a), (char *) (b))
-#define icharncmp(a, b, n) strncmp ((char *) (a), (char *) (b), (n))
-#define chartoichar(x)	((ichar_t) (x))
-#else
 typedef unsigned short	ichar_t;	/* Internal character */
-#define chartoichar(x)	((ichar_t) (unsigned char) (x))
 
 /*
  * Structure used to record data about successful lookups; these values
@@ -428,8 +237,6 @@ int icharlen (ichar_t* in);
 int icharcmp (ichar_t* s1, ichar_t* s2);
 int icharncmp (ichar_t* s1, ichar_t* s2, int n);
 
-#endif
-
 struct dent
 {
     struct dent *	next;
@@ -444,7 +251,6 @@ struct dent
 ** Flags in the directory entry.  If FULLMASKSET is undefined, these are
 ** stored in the highest bits of the last longword of the mask field.  If
 ** FULLMASKSET is defined, they are stored in the extra "flags" field.
-#ifndef NO_CAPITALIZATION_SUPPORT
 **
 ** If a word has only one capitalization form, and that form is not
 ** FOLLOWCASE, it will have exactly one entry in the dictionary.  The
@@ -504,7 +310,6 @@ struct dent
 ** (KEEP flag set) and the user adds "alpha" with the KEEP flag clear, a
 ** multiple-variant entry will be created so that "alpha" will be accepted
 ** but only "ALPHA" will actually be kept.
-#endif
 */
 #ifdef FULLMASKSET
 #define flagfield	flags
@@ -513,9 +318,6 @@ struct dent
 #endif
 #define USED		((MASKTYPE) 1 << (FLAGBASE + 0))
 #define KEEP		((MASKTYPE) 1 << (FLAGBASE + 1))
-#ifdef NO_CAPITALIZATION_SUPPORT
-#define ALLFLAGS	(USED | KEEP)
-#else /* NO_CAPITALIZATION_SUPPORT */
 #define ANYCASE		((MASKTYPE) 0 << (FLAGBASE + 2))
 #define ALLCAPS		((MASKTYPE) 1 << (FLAGBASE + 2))
 #define CAPITALIZED	((MASKTYPE) 2 << (FLAGBASE + 2))
@@ -524,7 +326,6 @@ struct dent
 #define MOREVARIANTS	((MASKTYPE) 1 << (FLAGBASE + 4))
 #define ALLFLAGS	(USED | KEEP | CAPTYPEMASK | MOREVARIANTS)
 #define captype(x)	((x) & CAPTYPEMASK)
-#endif /* NO_CAPITALIZATION_SUPPORT */
 
 /*
  * Language tables used to encode prefix and suffix information.
@@ -612,22 +413,14 @@ struct hashheader
 #define MAGIC			0x9602
 
 /* compile options, put in the hash header for consistency checking */
-#ifdef NO8BIT
-# define MAGIC8BIT		0x01
-#else
-# define MAGIC8BIT		0x00
-#endif
-#ifdef NO_CAPITALIZATION_SUPPORT
-# define MAGICCAPITALIZATION	0x00
-#else
-# define MAGICCAPITALIZATION	0x02
-#endif
-#  define MAGICMASKSET		0x04
+#define MAGIC8BIT		0x00
+#define MAGICCAPITALIZATION	0x02
 
 #if MASKBITS <= 32
 # define MAGICMASKSET		0x00
 #else
 # if MASKBITS <= 64
+#  define MAGICMASKSET		0x04
 # else
 #  if MASKBITS <= 128
 #   define MAGICMASKSET		0x08
@@ -766,4 +559,247 @@ INIT (char LaTeX_Mode, 'P');
 }
 #endif /* c++ */
 
-#endif /* ISPELL_H */
+/******* END OF OLD ispell.h ******/
+
+
+typedef struct str_ispell_map
+{
+	const char * lang;
+	const char * dict;
+	const char * enc;
+} IspellMap;
+
+class ISpellChecker
+{
+public:
+	ISpellChecker(EnchantBroker * broker);
+	~ISpellChecker();
+
+	bool checkWord(const char * const word, size_t len);
+	char ** suggestWord(const char * const word, size_t len, size_t * out_n_suggs);
+
+	bool requestDictionary (const char * szLang);
+	void buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, const char * dict);
+
+	size_t ispell_map_size (void);
+	const IspellMap *ispell_map (void);
+
+private:
+	EnchantBroker* m_broker;
+
+	ISpellChecker();
+	ISpellChecker(const ISpellChecker&);	// no impl
+	void operator=(const ISpellChecker&);	// no impl
+
+	char * loadDictionary (const char * szLang );
+	bool   loadDictionaryForLanguage ( const char * szLang );
+	void   setDictionaryEncoding ( const char * enc );
+
+	//
+	// The member functions after this point were formerly global functions
+	//  passed a context structure pointer...
+	//
+
+	void try_autodetect_charset(const char * inEncoding);
+
+	//
+	// From ispell correct.c
+	//
+
+	int		casecmp P ((char * a, char * b, int canonical));
+	void		makepossibilities P ((ichar_t * word));
+	int	insert P ((ichar_t * word));
+	void	wrongcapital P ((ichar_t * word));
+	void	wrongletter P ((ichar_t * word));
+	void	extraletter P ((ichar_t * word));
+	void	missingletter P ((ichar_t * word));
+	void	missingspace P ((ichar_t * word));
+	int		compoundgood P ((ichar_t * word, int pfxopts));
+	void	transposedletter P ((ichar_t * word));
+	int	ins_cap P ((ichar_t * word, ichar_t * pattern));
+	int	save_cap P ((ichar_t * word, ichar_t * pattern,
+			  ichar_t savearea[MAX_CAPS][INPUTWORDLEN + MAXAFFIXLEN]));
+	int		ins_root_cap P ((ichar_t * word, ichar_t * pattern,
+			  int prestrip, int preadd, int sufstrip, int sufadd,
+			  struct dent * firstdent, struct flagent * pfxent,
+			  struct flagent * sufent));
+	void	save_root_cap P ((ichar_t * word, ichar_t * pattern,
+			  int prestrip, int preadd, int sufstrip, int sufadd,
+			  struct dent * firstdent, struct flagent * pfxent,
+			  struct flagent * sufent,
+			  ichar_t savearea[MAX_CAPS][INPUTWORDLEN + MAXAFFIXLEN],
+			  int * nsaved));
+
+	//
+	// From ispell good.c
+	//
+
+	int good (ichar_t* w, int ignoreflagbits, int allhits, int pfxopts, int sfxopts);
+	void chk_aff (ichar_t* word, ichar_t* ucword, int len, int ignoreflagbits, int allhits, int pfxopts, int sfxopts);
+	int linit(char*);
+	struct dent * ispell_lookup (ichar_t* s, int dotree);
+	int strtoichar (ichar_t* out, char* in, int outlen, int canonical);
+	int ichartostr (char* out, ichar_t* in, int outlen, int canonical);
+	char * ichartosstr (ichar_t* in, int canonical);
+	int	findfiletype (const char * name, int searchnames, int * deformatter);
+	long whatcap (ichar_t* word);
+
+	/*
+		HACK: macros replaced with function implementations 
+		so we could do a side-effect-free check for unicode
+		characters which aren't in hashheader
+	*/
+	char myupper(ichar_t c);
+	char mylower(ichar_t c);
+	int myspace(ichar_t c);
+	char iswordch(ichar_t c);
+	char isboundarych(ichar_t c);
+	char isstringstart(ichar_t c);
+	ichar_t mytolower(ichar_t c);
+	ichar_t mytoupper(ichar_t c);
+
+	int cap_ok (ichar_t* word, struct success* hit, int len);
+	int hash (ichar_t* s, int hashtblsize);
+
+	//
+	// From ispell lookup.c
+	//
+
+	void	clearindex P ((struct flagptr * indexp));
+	void     initckch P ((char *));
+
+	void alloc_ispell_struct();
+	void free_ispell_struct();
+
+	//
+	// From ispell makedent.c
+	//
+
+	int		addvheader P ((struct dent * ent));
+	void		upcase P ((ichar_t * string));
+	void		lowcase P ((ichar_t * string));
+	void		chupcase P ((char * s));
+
+	int		stringcharlen P ((char * bufp, int canonical));
+	ichar_t *	strtosichar P ((char * in, int canonical));
+	char *		printichar P ((int in));
+
+	//
+	// From ispell tgood.c
+	//
+
+	void	pfx_list_chk P ((ichar_t * word, ichar_t * ucword,
+			  int len, int optflags, int sfxopts, struct flagptr * ind,
+			  int ignoreflagbits, int allhits));
+	void	chk_suf P ((ichar_t * word, ichar_t * ucword, int len,
+			  int optflags, struct flagent * pfxent, int ignoreflagbits,
+			  int allhits));
+	void	suf_list_chk P ((ichar_t * word, ichar_t * ucword, int len,
+			  struct flagptr * ind, int optflags, struct flagent * pfxent,
+			  int ignoreflagbits, int allhits));
+	int		expand_pre P ((char * croot, ichar_t * rootword,
+			  MASKTYPE mask[], int option, char * extra));
+	int	pr_pre_expansion P ((char * croot, ichar_t * rootword,
+			  struct flagent * flent, MASKTYPE mask[], int option,
+			  char * extra));
+	int		expand_suf P ((char * croot, ichar_t * rootword,
+			  MASKTYPE mask[], int optflags, int option, char * extra));
+	int	pr_suf_expansion P ((char * croot, ichar_t * rootword,
+			  struct flagent * flent, int option, char * extra));
+	void	forcelc P ((ichar_t * dst, int len));
+
+	/* this is used for converting form unsigned short to UCS-4 */
+
+	int deftflag;              /* NZ for TeX mode by default */
+	int prefstringchar;        /* Preferred string character type */
+	bool m_bSuccessfulInit;
+
+	//
+	// The members after this point were formerly global variables
+	//  in the original ispell code
+	//
+
+	char *	m_BC;	/* backspace if not ^H */
+	char *	m_cd;	/* clear to end of display */
+	char *	m_cl;	/* clear display */
+	char *	m_cm;	/* cursor movement */
+	char *	m_ho;	/* home */
+	char *	m_nd;	/* non-destructive space */
+	char *	m_so;	/* standout */
+	char *	m_se;	/* standout end */
+	int	m_sg;	/* space taken by so/se */
+	char *	m_ti;	/* terminal initialization sequence */
+	char *	m_te;	/* terminal termination sequence */
+	int	m_li;	/* lines */
+	int	m_co;	/* columns */
+
+	char	m_ctoken[INPUTWORDLEN + MAXAFFIXLEN]; /* Current token as char */
+	ichar_t	m_itoken[INPUTWORDLEN + MAXAFFIXLEN]; /* Ctoken as ichar_t str */
+
+	int	m_numhits;	/* number of hits in dictionary lookups */
+	struct success
+			m_hits[MAX_HITS]; /* table of hits gotten in lookup */
+
+	char *	m_hashstrings;	/* Strings in hash table */
+	struct hashheader
+			m_hashheader;	/* Header of hash table */
+	struct dent *
+			m_hashtbl;	/* Main hash table, for dictionary */
+	int	m_hashsize;	/* Size of main hash table */
+
+	char	m_hashname[MAXPATHLEN]; /* Name of hash table file */
+
+	int	m_aflag;		/* NZ if -a or -A option specified */
+	int	m_cflag;		/* NZ if -c (crunch) option */
+	int	m_lflag;		/* NZ if -l (list) option */
+	int	m_incfileflag;	/* whether xgets() acts exactly like gets() */
+	int	m_nodictflag;	/* NZ if dictionary not needed */
+
+	int	m_uerasechar;	/* User's erase character, from stty */
+	int	m_ukillchar;	/* User's kill character */
+
+	unsigned int m_laststringch; /* Number of last string character */
+	int	m_defdupchar;	/* Default duplicate string type */
+
+	int	m_numpflags;		/* Number of prefix flags in table */
+	int	m_numsflags;		/* Number of suffix flags in table */
+	struct flagptr m_pflagindex[SET_SIZE + MAXSTRINGCHARS];
+						/* Fast index to pflaglist */
+	struct flagent *	m_pflaglist;	/* Prefix flag control list */
+	struct flagptr m_sflagindex[SET_SIZE + MAXSTRINGCHARS];
+						/* Fast index to sflaglist */
+	struct flagent *	m_sflaglist;	/* Suffix flag control list */
+
+	struct strchartype *		/* String character type collection */
+			m_chartypes;
+
+	FILE *	m_infile;			/* File being corrected */
+	FILE *	m_outfile;		/* Corrected copy of infile */
+
+	char *	m_askfilename;		/* File specified in -f option */
+
+	int	m_changes;		/* NZ if changes made to cur. file */
+	int	m_readonly;		/* NZ if current file is readonly */
+	int	m_quit;			/* NZ if we're done with this file */
+
+#define MAXPOSSIBLE	100	/* Max no. of possibilities to generate */
+
+	char	m_possibilities[MAXPOSSIBLE][INPUTWORDLEN + MAXAFFIXLEN];
+					/* Table of possible corrections */
+	int	m_pcount;		/* Count of possibilities generated */
+	int	m_maxposslen;	/* Length of longest possibility */
+	int	m_easypossibilities; /* Number of "easy" corrections found */
+					/* ..(defined as those using legal affixes) */
+
+	/*
+	 * The following array contains a list of characters that should be tried
+	 * in "missingletter."  Note that lowercase characters are omitted.
+	 */
+	int	m_Trynum;		/* Size of "Try" array */
+	ichar_t	m_Try[SET_SIZE + MAXSTRINGCHARS];
+
+	GIConv  m_translate_in; /* Selected translation from/to Unicode */
+	GIConv  m_translate_out;
+};
+
+#endif /* ISPELL_CHECKER_H */

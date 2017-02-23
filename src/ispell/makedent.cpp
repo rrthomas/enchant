@@ -172,15 +172,13 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "ispell_checker.h"
+#include "ispell.h"
 #include "msgs.h"
 
 int		makedent P ((char * lbuf, int lbuflen, struct dent * ent));
 /*int		combinecaps P ((struct dent * hdr, struct dent * newent));
-#ifndef NO_CAPITALIZATION_SUPPORT
 static void	forcevheader P ((struct dent * hdrp, struct dent * oldp,
 		  struct dent * newp));
-#endif / * NO_CAPITALIZATION_SUPPORT * /
 static int	combine_two_entries P ((struct dent * hdrp,
 		  struct dent * oldp, struct dent * newp));
 static int	acoversb P ((struct dent * enta, struct dent * entb));
@@ -194,12 +192,10 @@ void		toutent P ((FILE * outfile, struct dent * hent,
 		  struct dent * cent));
 static void	flagout P ((FILE * outfile, int flag));
 */
-#ifndef ICHAR_IS_CHAR
 ichar_t *	icharcpy P ((ichar_t * out, ichar_t * in));
 int		icharlen P ((ichar_t * str));
 int		icharcmp P ((ichar_t * s1, ichar_t * s2));
 int		icharncmp P ((ichar_t * s1, ichar_t * s2, int n));
-#endif /* ICHAR_IS_CHAR */
 
 /*static int  	has_marker;*/
 
@@ -212,7 +208,6 @@ This function is not used by AbiWord.  I don't know if it'll be needed for
 other abi documents
  */
 	
-#ifndef NO_CAPITALIZATION_SUPPORT
 /*!
 ** Classify the capitalization of a sample entry.  Returns one of the
 ** four capitalization codes ANYCASE, ALLCAPS, CAPITALIZED, or FOLLOWCASE.
@@ -309,7 +304,6 @@ int ISpellChecker::addvheader ( struct dent *dp)
     dp->flagfield |= (ALLCAPS | MOREVARIANTS);
     return 0;
 }
-#endif /* NO_CAPITALIZATION_SUPPORT */
 
 /*
 ** Combine and resolve the entries describing two capitalizations of the same
@@ -337,7 +331,6 @@ int ISpellChecker::addvheader ( struct dent *dp)
 **	(1) Add newp's affixes and KEEP flag to oldp, and discard newp.
 **	(2) Add oldp's affixes and KEEP flag to newp, replace oldp with
 **	    newp, and discard newp.
-#ifndef NO_CAPITALIZATION_SUPPORT
 **	(3) Insert newp as a new entry in the variants list.  If there is
 **	    currently no variant header, this requires adding one.  Adding a
 **	    header splits into two sub-cases:
@@ -350,7 +343,6 @@ int ISpellChecker::addvheader ( struct dent *dp)
 **
 **	    After newp has been added as a variant, its affixes and KEEP
 **	    flag are OR-ed into the variant header.
-#endif
 **
 ** So how to choose which?  The default is always case (3), which adds newp
 ** as a new entry in the variants list.  Cases (1) and (2) are symmetrical
@@ -368,13 +360,11 @@ int ISpellChecker::addvheader ( struct dent *dp)
 **	    (4c) If the words are FOLLOWCASE, the capitalizations match
 **		exactly.
 **
-#ifndef NO_CAPITALIZATION_SUPPORT
 **	(5) For entries with mismatched capitalization types, A covers B
 **	    if (4a) and (4b) are true, and:
 **
 **	    (5a) B is ALLCAPS, or
 **	    (5b) A is ANYCASE, and B is CAPITALIZED.
-#endif
 **
 ** For any "hdrp" without variants, oldp is the same as hdrp.  Otherwise,
 ** the above tests are applied using each variant in turn for oldp.
@@ -496,11 +486,7 @@ ISpellChecker::stringcharlen (char *bufp, int canonical)
 		bufcur = bufp;
 		while (*stringcur)
 	    {
-#ifdef NO8BIT
-			if (((*bufcur++ ^ *stringcur) & 0x7F) != 0)
-#else /* NO8BIT */
 			if (*bufcur++ != *stringcur)
-#endif /* NO8BIT */
 				break;
 			/*
 			** We can't use autoincrement above because of the
@@ -524,17 +510,10 @@ ISpellChecker::stringcharlen (char *bufp, int canonical)
 				--stringcur;
 	    }
 		/* No match - choose which side to search on */
-#ifdef NO8BIT
-		if ((*--bufcur & 0x7F) < (*stringcur & 0x7F))
-			highstringno = stringno - 1;
-		else if ((*bufcur & 0x7F) > (*stringcur & 0x7F))
-			lowstringno = stringno + 1;
-#else /* NO8BIT */
 		if (*--bufcur < *stringcur)
 			highstringno = stringno - 1;
 		else if (*bufcur > *stringcur)
 			lowstringno = stringno + 1;
-#endif /* NO8BIT */
 		else if (dupwanted < m_hashheader.dupnos[stringno])
 			highstringno = stringno - 1;
 		else
@@ -549,33 +528,11 @@ ISpellChecker::stringcharlen (char *bufp, int canonical)
 ** the possibility of string characters.  Note well that they take a POINTER,
 ** not a character.
 **
-** The "l_" versions set "len" to the length of the string character as a
-** handy side effect.  (Note that the global "laststringch" is also set,
-** and sometimes used, by these macros.)
-**
-** The "l1_" versions go one step further and guarantee that the "len"
+** The "l1_" versions guarantee that the "len"
 ** field is valid for *all* characters, being set to 1 even if the macro
 ** returns false.  This macro is a great example of how NOT to write
 ** readable C.
 */
-#define isstringch(ptr, canon)	(isstringstart (*(ptr)) \
-				  &&  stringcharlen ((ptr), (canon)) > 0)
-/*
-int isstringch(char *ptr, int canon) {
-	return (isstringstart (*(ptr)) && (len = stringcharlen ((ptr), (canon))) > 0);
-}
-*/
-
-#define l_isstringch(ptr, len, canon)	\
-				(isstringstart (*(ptr)) \
-				  &&  (len = stringcharlen ((ptr), (canon))) \
-				    > 0)
-/*
-int l_isstringch(char *ptr, int len, int canon) {
-	return (isstringstart (*(ptr)) &&  (len = stringcharlen ((ptr), (canon))) > 0);
-}
-*/
-
 #define l1_isstringch(ptr, len, canon)	\
 				(len = 1, \
 				  isstringstart ((unsigned char)(*(ptr))) \
@@ -730,7 +687,6 @@ ISpellChecker::printichar (int in)
     return out;
 }
 
-#ifndef ICHAR_IS_CHAR
 /*!
  * Copy an ichar_t.
  *
@@ -810,8 +766,6 @@ icharncmp (ichar_t *s1, ichar_t *s2, int n)
     else
 		return *s1 - *s2;
 }
-
-#endif /* ICHAR_IS_CHAR */
 
 /*
  * \param istate

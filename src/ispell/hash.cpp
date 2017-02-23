@@ -127,7 +127,7 @@
  *
  */
 
-#include "ispell_checker.h"
+#include "ispell.h"
 
 /*
  * The following hash algorithm is due to Ian Dall, with slight modifications
@@ -135,12 +135,6 @@
  * dictionaries actually distributed with ispell.
  */
 #define HASHSHIFT   5
-
-#ifdef NO_CAPITALIZATION_SUPPORT
-#define HASHUPPER(c)	c
-#else /* NO_CAPITALIZATION_SUPPORT */
-#define HASHUPPER(c)	mytoupper(c)
-#endif /* NO_CAPITALIZATION_SUPPORT */
 
 /*
  * \param s
@@ -151,13 +145,8 @@ int ISpellChecker::hash (ichar_t *s, int hashtblsize)
     long	h = 0;
     int		i;
 
-#ifdef ICHAR_IS_CHAR
-    for (i = 4;  i--  &&  *s != 0;  )
-		h = (h << 8) | HASHUPPER (*s++);
-#else /* ICHAR_IS_CHAR */
     for (i = 2;  i--  &&  *s != 0;  )
-		h = (h << 16) | HASHUPPER (*s++);
-#endif /* ICHAR_IS_CHAR */
+		h = (h << 16) | mytoupper (*s++);
     while (*s != 0)
 	{
 		/*
@@ -166,7 +155,7 @@ int ISpellChecker::hash (ichar_t *s, int hashtblsize)
 		 */
 		h = (h << HASHSHIFT)
 		  | ((h >> (32 - HASHSHIFT)) & ((1 << HASHSHIFT) - 1));
-		h ^= HASHUPPER (*s++);
+		h ^= mytoupper (*s++);
 	}
     return static_cast<unsigned long>(h) % hashtblsize;
 }

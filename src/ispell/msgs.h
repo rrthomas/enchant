@@ -245,37 +245,6 @@
 #define MAKEDENT_C_BAD_WORD_CHAR "\r\nWord '%s' contains illegal characters\r\n"
 
 /*
- * The following strings are used in parse.y:
- */
-#define PARSE_Y_8_BIT		"Eighth bit ignored (recompile ispell without NO8BIT)"
-#define PARSE_Y_NO_WORD_STRINGS	"wordchars statement may not specify string characters"
-#define PARSE_Y_UNMATCHED	"Unmatched charset lengths"
-#define PARSE_Y_NO_BOUNDARY_STRINGS "boundarychars statement may not specify string characters"
-#define PARSE_Y_LONG_STRING	"String character is too long"
-#define PARSE_Y_NULL_STRING	"String character must have nonzero length"
-#define PARSE_Y_MANY_STRINGS	"Too many string characters"
-#define PARSE_Y_NO_SUCH_STRING	"No such string character"
-#define PARSE_Y_MULTIPLE_STRINGS "Alternate string character was already defined"
-#define PARSE_Y_LENGTH_MISMATCH	"Upper and lower versions of string character must be same length"
-#define PARSE_Y_WRONG_NROFF	"Incorrect character count in nroffchars statement"
-#define PARSE_Y_WRONG_TEX	"Incorrect character count in TeXchars statement"
-#define PARSE_Y_DOUBLE_COMPOUND	"Compoundwords option may only appear once"
-#define PARSE_Y_LONG_FLAG	"Flag must be single character"
-#define PARSE_Y_BAD_FLAG	"Flag must be alphabetic"
-#define PARSE_Y_DUP_FLAG	"Duplicate flag"
-#define PARSE_Y_NO_SPACE	"Out of memory"
-#define PARSE_Y_NEED_BLANK	"Single characters must be separated by a blank"
-#define PARSE_Y_MANY_CONDS	"Too many conditions;  8 maximum"
-#define PARSE_Y_EOF		"Unexpected EOF in quoted string"
-#define PARSE_Y_LONG_QUOTE	"Quoted string too long, max 256 characters"
-#define PARSE_Y_ERROR_FORMAT(file, lineno, error) \
-				"%s line %d: %s\n", file, lineno, error
-#define PARSE_Y_MALLOC_TROUBLE	"yyopen:  trouble allocating memory\n"
-#define PARSE_Y_UNGRAB_PROBLEM	"Internal error:  ungrab buffer overflow"
-#define PARSE_Y_BAD_DEFORMATTER	"Deformatter must be either 'nroff' or 'tex'"
-#define PARSE_Y_BAD_NUMBER	"Illegal digit in number"
-
-/*
  * The following strings are used in term.c:
  */
 #define TERM_C_SMALL_SCREEN	"Screen too small:  need at least %d lines\n"

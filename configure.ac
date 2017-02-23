@@ -444,7 +444,6 @@ src/applespell/Makefile
 src/voikko/Makefile
 src/zemberek/Makefile
 tests/Makefile
-tests/ispell
 unittests/Makefile
 unittests/enchant_providers/Makefile
 unittests/mock_provider/Makefile
