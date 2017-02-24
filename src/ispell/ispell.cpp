@@ -336,20 +336,6 @@ ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
 	dirs = g_slist_append (dirs, g_strdup (ENCHANT_ISPELL_DICT_DIR));
 #endif
 
-	{
-		GSList *config_dirs, *iter;
-
-		config_dirs = enchant_get_dirs_from_param (broker, "enchant.ispell.dictionary.path");
-		
-		for (iter = config_dirs; iter; iter = iter->next)
-			{
-				dirs = g_slist_append (dirs, g_strdup (static_cast<const gchar *>(iter->data)));
-			}
-
-		g_slist_foreach (config_dirs, ispell_checker_free_helper, nullptr);
-		g_slist_free (config_dirs);
-	}
-
 	return dirs;
 }
 

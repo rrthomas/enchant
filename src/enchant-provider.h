@@ -68,9 +68,6 @@ ENCHANT_MODULE_EXPORT(void)
 ENCHANT_MODULE_EXPORT(void)
 	enchant_provider_set_error (EnchantProvider * provider, const char * const err);
 
-ENCHANT_MODULE_EXPORT (GSList *)
-	enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_name);
-
 struct str_enchant_dict
 {
 	void *user_data;
