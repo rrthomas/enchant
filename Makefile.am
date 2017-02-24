@@ -11,10 +11,8 @@ EXTRA_DIST =		\
 	lt-compile-resource \
 	compile-resource \
 	README 		\
-	TODO 		\
 	HACKING 	\
 	NEWS 		\
-	BUGS 		\
 	ChangeLog 	\
 	AUTHORS 	\
 	COPYING.LIB	\
