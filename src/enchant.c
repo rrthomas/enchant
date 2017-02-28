@@ -63,7 +63,6 @@ struct str_enchant_broker
 	GSList *provider_list;	/* list of all of the spelling backend providers */
 	GHashTable *dict_map;		/* map of language tag -> dictionary */
 	GHashTable *provider_ordering; /* map of language tag -> provider order */
-	GHashTable *params;
 
 	gchar * error;
 };
@@ -1454,7 +1453,6 @@ enchant_broker_init (void)
 	
 	broker->dict_map = g_hash_table_new_full (g_str_hash, g_str_equal,
 						  g_free, enchant_dict_destroyed);
-	broker->params = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 	enchant_load_providers (broker);	
 	enchant_load_provider_ordering (broker);
 
@@ -1483,7 +1481,6 @@ enchant_broker_free (EnchantBroker * broker)
 	/* will destroy any remaining dictionaries for us */
 	g_hash_table_destroy (broker->dict_map);
 	g_hash_table_destroy (broker->provider_ordering);
-	g_hash_table_destroy (broker->params);
 	
 	g_slist_foreach (broker->provider_list, enchant_provider_free, NULL);
 	g_slist_free (broker->provider_list);
@@ -2050,39 +2047,6 @@ enchant_get_prefix_dir(void)
 #endif
 
 	return prefix;
-}
-
-ENCHANT_MODULE_EXPORT(char *)
-enchant_broker_get_param (EnchantBroker * broker, const char * const param_name) 
-{
-	g_return_val_if_fail (broker, NULL);
-	g_return_val_if_fail (param_name && *param_name, NULL);
-
-	return g_hash_table_lookup (broker->params, param_name);
-}
-
-ENCHANT_MODULE_EXPORT(void)
-enchant_broker_set_param (EnchantBroker * broker, const char * const param_name, const char * const param_value)
-{
-	g_return_if_fail (broker);
-	g_return_if_fail (param_name && *param_name);
-
-	if (param_value == NULL || *param_value == '\0')
-		g_hash_table_remove (broker->params, param_name);
-	else
-		g_hash_table_insert (broker->params, g_strdup (param_name), g_strdup (param_value));
-}
-
-ENCHANT_MODULE_EXPORT (GSList *)
-enchant_get_dirs_from_param (EnchantBroker * broker, const char * const param_name)
-{
-	const char *param_value;
-
-	param_value = enchant_broker_get_param (broker, param_name);
-	if (param_value == NULL)
-		return NULL;
-
-	return _enchant_get_dirs_from_string (param_value);
 }
 
 ENCHANT_MODULE_EXPORT(const char *) _GL_ATTRIBUTE_CONST

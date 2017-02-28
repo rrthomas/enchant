@@ -221,20 +221,6 @@ hunspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 #endif
 
 	{
-		GSList *config_dirs, *iter;
-
-		config_dirs = enchant_get_dirs_from_param (broker, "enchant.hunspell.dictionary.path");
-		
-		for (iter = config_dirs; iter; iter = iter->next)
-			{
-				dirs = g_slist_append (dirs, g_strdup (static_cast<const gchar *>(iter->data)));
-			}
-
-		g_slist_foreach (config_dirs, hunspell_checker_free_helper, nullptr);
-		g_slist_free (config_dirs);
-	}
-
-	{
 		const gchar* hun_dir = g_getenv("DICPATH");
 		if (hun_dir)
 			{

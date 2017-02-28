@@ -76,12 +76,6 @@ ENCHANT_MODULE_EXPORT (void)
 ENCHANT_MODULE_EXPORT(char *)
      enchant_broker_get_error (EnchantBroker * broker);
 
-/* const */
-ENCHANT_MODULE_EXPORT(char *)
-	enchant_broker_get_param (EnchantBroker * broker, const char * const param_name);
-ENCHANT_MODULE_EXPORT(void)
-	enchant_broker_set_param (EnchantBroker * broker, const char * const param_name, const char * const param_value);
-
 /**
  * EnchantBrokerDescribeFn
  * @provider_name: The provider's identifier, such as "ispell" or "aspell" in UTF8 encoding
