@@ -572,14 +572,15 @@ typedef struct str_ispell_map
 class ISpellChecker
 {
 public:
-	ISpellChecker(EnchantBroker * broker);
+	ISpellChecker();
 	~ISpellChecker();
 
 	bool checkWord(const char * const word, size_t len);
 	char ** suggestWord(const char * const word, size_t len, size_t * out_n_suggs);
 
+        void finishInit();
 	bool requestDictionary (const char * szLang);
-	void buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, const char * dict);
+	bool loadDictionaryWithEncoding(const char * szFile, const char * encoding, std::vector<std::string> dict_names);
 
 	size_t ispell_map_size (void);
 	const IspellMap *ispell_map (void);
@@ -587,12 +588,10 @@ public:
 private:
 	EnchantBroker* m_broker;
 
-	ISpellChecker();
 	ISpellChecker(const ISpellChecker&);	// no impl
 	void operator=(const ISpellChecker&);	// no impl
 
-	char * loadDictionary (const char * szLang );
-	bool   loadDictionaryForLanguage ( const char * szLang );
+	char * loadDictionary (const char * szLang, std::vector<std::string> dict_names );
 	void   setDictionaryEncoding ( const char * enc );
 
 	//

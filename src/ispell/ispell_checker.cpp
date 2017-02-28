@@ -11,6 +11,10 @@
 #include "unused-parameter.h"
 
 
+#ifndef ENCHANT_ISPELL_HOME_DIR
+#define ENCHANT_ISPELL_HOME_DIR "ispell"
+#endif
+
 ENCHANT_PLUGIN_DECLARE("Ispell")
 
 extern "C" {
@@ -18,22 +22,134 @@ extern "C" {
 ENCHANT_MODULE_EXPORT (EnchantProvider *)
              init_enchant_provider (void);
 
-static int
-_ispell_provider_dictionary_exists (EnchantBroker * broker, const char *const szFile)
+static void
+ispell_checker_free_helper (gpointer p, gpointer user _GL_UNUSED_PARAMETER)
 {
-        std::vector <std::string> names;
-        ISpellChecker * checker = new ISpellChecker (broker);
+        g_free (p);
+}
 
-        checker->buildHashNames (names, broker, szFile);
-        for (size_t i = 0; i < names.size(); i++) {
-                if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
+static GSList *
+ispell_checker_get_dictionary_dirs ()
+{
+        GSList *dirs = NULL;
+
+        {
+                GSList *config_dirs, *iter;
+
+                config_dirs = enchant_get_user_config_dirs ();
+
+                for (iter = config_dirs; iter; iter = iter->next)
                         {
-                                delete checker;
-                                return 1;
+                                dirs = g_slist_append (dirs, g_build_filename (static_cast<const gchar *>(iter->data),
+                                                                               ENCHANT_ISPELL_HOME_DIR, nullptr));
                         }
+
+                g_slist_foreach (config_dirs, ispell_checker_free_helper, nullptr);
+                g_slist_free (config_dirs);
         }
 
-        delete checker;
+        /* Dynamically locate library and search for modules relative to it. */
+        char * enchant_prefix = enchant_get_prefix_dir();
+        if(enchant_prefix)
+                {
+                        char * ispell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "ispell", nullptr);
+                        g_free(enchant_prefix);
+                        dirs = g_slist_append (dirs, ispell_prefix);
+                }
+
+#ifdef ENCHANT_ISPELL_DICT_DIR
+        dirs = g_slist_append (dirs, g_strdup (ENCHANT_ISPELL_DICT_DIR));
+#endif
+
+        return dirs;
+}
+
+static void
+buildHashNames (std::vector<std::string> & names, const char * dict)
+{
+        names.clear ();
+
+        GSList *dirs, *iter;
+
+        dirs = ispell_checker_get_dictionary_dirs();
+        for (iter = dirs; iter; iter = iter->next)
+                {
+                        char *tmp;
+
+                        tmp = g_build_filename (static_cast<const gchar *>(iter->data), dict, nullptr);
+                        names.push_back (tmp);
+                        g_free (tmp);
+                }
+
+        g_slist_foreach (dirs, ispell_checker_free_helper, nullptr);
+        g_slist_free (dirs);
+}
+
+/*!
+ * Load ispell dictionary hash file for given language.
+ *
+ * \param szLang -  The language tag ("en-US") we want to use
+ * \return The name of the dictionary file
+ */
+static bool
+loadDictionaryForLanguage (ISpellChecker * checker, const char * szLang)
+{
+        const char * encoding = NULL;
+        const char * szFile = NULL;
+
+        for (size_t i = 0; i < checker->ispell_map_size(); i++)
+                {
+                        const IspellMap * mapping = &(checker->ispell_map()[i]);
+                        if (!strcmp (szLang, mapping->lang))
+                                {
+                                        szFile = mapping->dict;
+                                        encoding = mapping->enc;
+                                        break;
+                                }
+                }
+
+        if (!szFile || !strlen(szFile))
+                return false;
+
+        std::vector<std::string> dict_names;
+        buildHashNames (dict_names, szFile);
+
+        return checker->loadDictionaryWithEncoding (szFile, encoding, dict_names);
+}
+
+static bool
+requestDictionary(ISpellChecker * checker, const char *szLang)
+{
+        if (!loadDictionaryForLanguage (checker, szLang))
+                {
+                        // handle a shortened version of the language tag: en_US => en
+                        std::string shortened_dict (szLang);
+                        size_t uscore_pos;
+
+                        if ((uscore_pos = shortened_dict.rfind ('_')) != (static_cast<size_t>(-1))) {
+                                shortened_dict = shortened_dict.substr(0, uscore_pos);
+                                if (!loadDictionaryForLanguage (checker, shortened_dict.c_str()))
+                                        return false;
+                        } else
+                                return false;
+                }
+
+        checker->finishInit();
+
+        return true;
+}
+
+static int
+_ispell_provider_dictionary_exists (const char *const szFile)
+{
+        std::vector <std::string> names;
+
+        buildHashNames (names, szFile);
+        for (size_t i = 0; i < names.size(); i++) {
+                if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
+                        return 1;
+        }
+
         return 0;
 }
 
@@ -61,19 +177,19 @@ ispell_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static EnchantDict *
-ispell_provider_request_dict (EnchantProvider * me, const char *const tag)
+ispell_provider_request_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, const char *const tag)
 {
         EnchantDict *dict;
         ISpellChecker * checker;
 
-        checker = new ISpellChecker (me->owner);
+        checker = new ISpellChecker ();
 
         if (!checker)
                 {
                         return NULL;
                 }
 
-        if (!checker->requestDictionary(tag)) {
+        if (!requestDictionary(checker, tag)) {
                 delete checker;
                 return NULL;
         }
@@ -103,12 +219,12 @@ ispell_provider_list_dictionaries (EnchantProvider * me _GL_UNUSED_PARAMETER,
                                    size_t * out_n_dicts)
 {
         size_t i, nb;
-        ISpellChecker * checker = new ISpellChecker (me->owner);
+        ISpellChecker * checker = new ISpellChecker ();
         char ** out_dicts = g_new0 (char *, checker->ispell_map_size() + 1);
 
         nb = 0;
         for (i = 0; i < checker->ispell_map_size(); i++)
-                if (_ispell_provider_dictionary_exists (me->owner, checker->ispell_map()[i].dict))
+                if (_ispell_provider_dictionary_exists (checker->ispell_map()[i].dict))
                         out_dicts[nb++] = g_strdup (checker->ispell_map()[i].lang);
 
         *out_n_dicts = nb;
@@ -122,11 +238,11 @@ ispell_provider_list_dictionaries (EnchantProvider * me _GL_UNUSED_PARAMETER,
 }
 
 static int
-ispell_provider_dictionary_exists (struct str_enchant_provider * me,
+ispell_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
                                    const char *const tag)
 {
         std::string shortened_dict (tag);
-        ISpellChecker * checker = new ISpellChecker (me->owner);
+        ISpellChecker * checker = new ISpellChecker ();
         size_t uscore_pos;
         if ((uscore_pos = shortened_dict.rfind ('_')) != ((size_t)-1))
                 shortened_dict = shortened_dict.substr(0, uscore_pos);
@@ -137,7 +253,7 @@ ispell_provider_dictionary_exists (struct str_enchant_provider * me,
                         if (!strcmp (tag, mapping->lang) || !strcmp (shortened_dict.c_str(), mapping->lang))
                                 {
                                         delete checker;
-                                        return _ispell_provider_dictionary_exists(me->owner, mapping->dict);
+                                        return _ispell_provider_dictionary_exists(mapping->dict);
                                 }
                 }
 

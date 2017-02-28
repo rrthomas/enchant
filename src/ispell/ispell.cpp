@@ -8,15 +8,9 @@
 #include <string>
 #include <vector>
 
-#include "enchant-provider.h"
 #include "sp_spell.h"
 #include "ispell.h"
-#include "enchant.h"
 #include "unused-parameter.h"
-
-#ifndef ENCHANT_ISPELL_HOME_DIR
-#define ENCHANT_ISPELL_HOME_DIR "ispell"
-#endif
 
 #define G_ICONV_INVALID (GIConv)-1
 
@@ -61,12 +55,6 @@ static const IspellMap ispell_map_array [] = {
 
 static const size_t size_ispell_map = G_N_ELEMENTS(ispell_map_array);
 
-static void
-ispell_checker_free_helper (gpointer p, gpointer user _GL_UNUSED_PARAMETER)
-{
-	g_free (p);
-}
-
 static bool
 g_iconv_is_valid(GIConv i)
 {
@@ -86,9 +74,8 @@ ISpellChecker::try_autodetect_charset(const char * const inEncoding)
 /***************************************************************************/
 /***************************************************************************/
 
-ISpellChecker::ISpellChecker(EnchantBroker * broker)
-: m_broker(broker),
-	deftflag(-1),
+ISpellChecker::ISpellChecker()
+: deftflag(-1),
      prefstringchar(-1),
      m_bSuccessfulInit(false),
      m_BC(nullptr),
@@ -303,70 +290,9 @@ ISpellChecker::ispell_map (void)
 	return &ispell_map_array[0];
 }
 
-static GSList *
-ispell_checker_get_dictionary_dirs (EnchantBroker * broker)
-{
-	GSList *dirs = NULL;
-
-	{
-		GSList *config_dirs, *iter;
-
-		config_dirs = enchant_get_user_config_dirs ();
-		
-		for (iter = config_dirs; iter; iter = iter->next)
-			{
-				dirs = g_slist_append (dirs, g_build_filename (static_cast<const gchar *>(iter->data), 
-									       ENCHANT_ISPELL_HOME_DIR, nullptr));
-			}
-
-		g_slist_foreach (config_dirs, ispell_checker_free_helper, nullptr);
-		g_slist_free (config_dirs);
-	}
-
-	/* Dynamically locate library and search for modules relative to it. */
-	char * enchant_prefix = enchant_get_prefix_dir();
-	if(enchant_prefix)
-		{
-			char * ispell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "ispell", nullptr);
-			g_free(enchant_prefix);
-			dirs = g_slist_append (dirs, ispell_prefix);
-		}
-
-#ifdef ENCHANT_ISPELL_DICT_DIR
-	dirs = g_slist_append (dirs, g_strdup (ENCHANT_ISPELL_DICT_DIR));
-#endif
-
-	return dirs;
-}
-
-void
-ISpellChecker::buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, const char * dict)
-{
-	names.clear ();
-
-	GSList *dirs, *iter;
-
-	dirs = ispell_checker_get_dictionary_dirs(broker);
-	for (iter = dirs; iter; iter = iter->next)
-		{
-			char *tmp;
-
-			tmp = g_build_filename (static_cast<const gchar *>(iter->data), dict, nullptr);
-			names.push_back (tmp);
-			g_free (tmp);
-		}
-
-	g_slist_foreach (dirs, ispell_checker_free_helper, nullptr);
-	g_slist_free (dirs);
-}
-
 char *
-ISpellChecker::loadDictionary (const char * szdict)
+ISpellChecker::loadDictionary (const char * szdict, std::vector<std::string> dict_names)
 {
-	std::vector<std::string> dict_names;
-
-	buildHashNames (dict_names, m_broker, szdict);
-
 	for (size_t i = 0; i < dict_names.size(); i++)
 		{
 			if (linit(const_cast<char*>(dict_names[i].c_str())) >= 0)
@@ -377,36 +303,30 @@ ISpellChecker::loadDictionary (const char * szdict)
 }
 
 /*!
- * Load ispell dictionary hash file for given language.
+ * Load ispell dictionary hash file.
  *
- * \param szLang -  The language tag ("en-US") we want to use
- * \return The name of the dictionary file
+ * \param szFile -   The name of the dictionary file
+ * \param encoding - The encoding of the dictionary file
+ * \return Whether dictionary was successfully loaded
  */
 bool
-ISpellChecker::loadDictionaryForLanguage ( const char * szLang )
+ISpellChecker::loadDictionaryWithEncoding (const char * szFile, const char * encoding, std::vector<std::string> dict_names)
 {
+	char *szDict = NULL;
 	char *hashname = NULL;
 	
-	const char * encoding = NULL;
-	const char * szFile = NULL;
-	
-	for (size_t i = 0; i < size_ispell_map; i++)
+	for (size_t i = 0; i < dict_names.size(); i++)
 		{
-			const IspellMap * mapping = &(ispell_map_array[i]);
-			if (!strcmp (szLang, mapping->lang))
-				{
-					szFile = mapping->dict;
-					encoding = mapping->enc;
-					break;
-				}
+			if (linit(const_cast<char*>(dict_names[i].c_str())) >= 0)
+				szDict = g_strdup (dict_names[i].c_str());
 		}
-	
-	if (!szFile || !strlen(szFile))
+
+	if (szDict == NULL)
 		return false;
 
 	alloc_ispell_struct();
 	
-	if (!(hashname = loadDictionary(szFile)))
+	if (!(hashname = loadDictionary(szDict, dict_names)))
 		return false;
 	
 	// one of the two above calls succeeded
@@ -486,29 +406,13 @@ ISpellChecker::setDictionaryEncoding( const char * encoding )
 		}
 }
 
-bool
-ISpellChecker::requestDictionary(const char *szLang)
+void
+ISpellChecker::finishInit()
 {
-	if (!loadDictionaryForLanguage (szLang))
-		{
-			// handle a shortened version of the language tag: en_US => en
-			std::string shortened_dict (szLang);
-			size_t uscore_pos;
-			
-			if ((uscore_pos = shortened_dict.rfind ('_')) != (static_cast<size_t>(-1))) {
-				shortened_dict = shortened_dict.substr(0, uscore_pos);
-				if (!loadDictionaryForLanguage (shortened_dict.c_str()))
-					return false;
-			} else
-				return false;
-		}
-	
-	m_bSuccessfulInit = true;
-	
-	if (prefstringchar < 0)
-		m_defdupchar = 0;
-	else
-		m_defdupchar = prefstringchar;
-	
-	return true;
+        m_bSuccessfulInit = true;
+
+        if (prefstringchar < 0)
+                m_defdupchar = 0;
+        else
+                m_defdupchar = prefstringchar;
 }
