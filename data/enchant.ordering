@@ -1,6 +1,6 @@
-*:hunspell,aspell,ispell
-fi:voikko,ispell,hunspell,aspell
-fi_FI:voikko,ispell,hunspell,aspell
+*:hunspell,aspell
+fi:voikko,hunspell,aspell
+fi_FI:voikko,hunspell,aspell
 he:hspell,hunspell
 he_IL:hspell,hunspell
 yi:uspell

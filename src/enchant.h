@@ -78,7 +78,7 @@ ENCHANT_MODULE_EXPORT(char *)
 
 /**
  * EnchantBrokerDescribeFn
- * @provider_name: The provider's identifier, such as "ispell" or "aspell" in UTF8 encoding
+ * @provider_name: The provider's identifier, such as "hunspell" or "aspell", in UTF8 encoding
  * @provider_desc: A description of the provider, such as "Aspell 0.53" in UTF8 encoding
  * @provider_dll_file: The provider's DLL filename in Glib file encoding (UTF8 on Windows)
  * @user_data: Supplied user data, or %null if you don't care

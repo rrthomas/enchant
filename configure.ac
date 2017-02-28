@@ -232,26 +232,6 @@ AC_SUBST(UNITTESTPP_LIBS)
 dnl =======================================================================================
 some_backend=no
 
-dnl Ispell
-build_ispell=yes
-
-AC_ARG_ENABLE(ispell, AS_HELP_STRING([--disable-ispell],[enable the ispell backend @<:@default=auto@:>@]), build_ispell="$enableval",
-   [build_ispell=yes
-   some_backend=yes])
-
-AM_CONDITIONAL(WITH_ISPELL, test "x$build_ispell" = "xyes")
-
-ispell_dir=${datadir}/enchant/ispell
-AC_ARG_WITH(ispell-dir, AS_HELP_STRING([--with-ispell-dir=PATH],[path to installed ispell dicts]))
-
-if test "x$with_ispell_dir" != "x" ; then
-   ispell_dir=$with_ispell_dir
-fi
-
-ISPELL_CFLAGS="-DENCHANT_ISPELL_DICT_DIR='\"$ispell_dir\"'"
-AC_SUBST(ISPELL_CFLAGS)
-
-
 dnl Hunspell
 AC_ARG_WITH([hunspell],
    AS_HELP_STRING([--with-hunspell],
@@ -436,7 +416,6 @@ lib/Makefile
 src/libenchant.rc
 src/Makefile
 src/aspell/Makefile
-src/ispell/Makefile
 src/uspell/Makefile
 src/hunspell/Makefile
 src/hspell/Makefile
@@ -460,7 +439,6 @@ $PACKAGE-$VERSION
     prefix:                                 ${prefix}
     compiler:                               ${CC}
 
-    Build Ispell backend:                   ${build_ispell}
     Build Hunspell backend:                 ${with_hunspell}
     Build Uspell backend:                   ${with_uspell}
     Build Aspell backend:                   ${with_aspell}

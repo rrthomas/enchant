@@ -6,7 +6,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 # FIXME: Following line is ugly (but inserting backslashes stops it
 # working), and not portable to Windows (need semicolons instead of colons)
 AM_TESTS_ENVIRONMENT = \
-	ENCHANT_MODULE_PATH=$(top_builddir)/src/applespell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/applespell:$(top_builddir)/src/aspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/aspell:$(top_builddir)/src/hspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/hspell:$(top_builddir)/src/ispell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/ispell:$(top_builddir)/src/hunspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/hunspell:$(top_builddir)/src/uspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/uspell:$(top_builddir)/src/voikko/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/voikko:$(top_builddir)/src/zemberek/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/zemberek; \
+	ENCHANT_MODULE_PATH=$(top_builddir)/src/applespell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/applespell:$(top_builddir)/src/aspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/aspell:$(top_builddir)/src/hspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/hspell:$(top_builddir)/src/hunspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/hunspell:$(top_builddir)/src/uspell/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/uspell:$(top_builddir)/src/voikko/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/voikko:$(top_builddir)/src/zemberek/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/zemberek; \
 	export ENCHANT_MODULE_PATH; \
 	rm -f test.pwl; \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \

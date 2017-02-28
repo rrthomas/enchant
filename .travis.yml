@@ -10,7 +10,6 @@ addons:
     packages: &default_deps
       - libglib2.0-dev
       - libaspell-dev
-      - ispell
       - hspell
       - libhunspell-dev
       - libvoikko-dev
@@ -44,7 +43,7 @@ matrix:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib aspell hspell hunspell libvoikko ispell unittest-cpp ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib aspell hspell hunspell libvoikko unittest-cpp ; fi
 
 script:
   - ./autogen.sh CXX=$COMPILER
