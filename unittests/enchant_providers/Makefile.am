@@ -1,6 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(UNITTESTPP_CFLAGS)
 
-# FIXME: .so extension will not work on Windows
 AM_TESTS_ENVIRONMENT = \
 	cp $(builddir)/../mock_provider/*.so $(builddir)/../mock_provider/.libs/*.so $(builddir)/../mock_provider/*.dll $(builddir)/../mock_provider/.libs/*.dll . || :;
 	cp $(top_builddir)/src/*/*.so $(top_builddir)/src/*/.libs/*.so cp $(top_builddir)/src/*/*.dll $(top_builddir)/src/*/.libs/*.dll . || :;

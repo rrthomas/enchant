@@ -2,7 +2,6 @@ SUBDIRS = enchant_providers mock_provider
 
 AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(UNITTESTPP_CFLAGS)
 
-# FIXME: .so extension will not work on Windows
 AM_TESTS_ENVIRONMENT = \
 	ENCHANT_PREFIX_DIR=""; \
 	export ENCHANT_PREFIX_DIR; \
