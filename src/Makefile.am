@@ -29,11 +29,13 @@ endif
 orderingdir=$(datadir)/enchant
 ordering_DATA = enchant.ordering
 
+man_MANS = enchant.1
+
 LDADD = libenchant.la $(ENCHANT_LIBS)
 bin_PROGRAMS = enchant-lsmod enchant
 enchant_SOURCES = enchant-ispell.c
 
-EXTRA_DIST = enchant.i $(ordering_DATA)
+EXTRA_DIST = enchant.i $(ordering_DATA) $(man_MANS)
 
 if OS_WIN32
 

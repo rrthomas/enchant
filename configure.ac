@@ -426,7 +426,6 @@ tests/Makefile
 unittests/Makefile
 unittests/enchant_providers/Makefile
 unittests/mock_provider/Makefile
-doc/Makefile
 ])
 AC_OUTPUT
 
