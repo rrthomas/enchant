@@ -125,31 +125,6 @@ esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
 
-# Courtesy of Glib: Ensure MSVC-compatible struct packing convention 
-# is used when compiling for Win32 with gcc.
-if test x"$native_win32" = xyes; then
-  if test x"$GCC" = xyes; then
-    msnative_struct=''
-    AC_MSG_CHECKING([how to get MSVC-compatible struct packing])
-    if test -z "$ac_cv_prog_CC"; then
-      our_gcc="$CC"
-    else
-      our_gcc="$ac_cv_prog_CC"
-    fi
-    if $our_gcc -v --help 2>/dev/null | grep ms-bitfields >/dev/null; then
-      msnative_struct='-mms-bitfields'
-    fi
-    if test x"$msnative_struct" = x ; then
-      AC_MSG_RESULT([no way])
-      AC_MSG_WARN([produced libraries might be incompatible with MSVC-compiled code])
-    else
-      CFLAGS="$CFLAGS $msnative_struct"
-      CXXFLAGS="$CXXFLAGS $msnative_struct"
-      AC_MSG_RESULT([${msnative_struct}])
-    fi
-  fi
-fi 
-
 dnl ===========================================================================
 
 m4_copy([AC_DEFUN],[glib_DEFUN])
