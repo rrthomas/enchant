@@ -46,6 +46,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_HEADER_STDC
 LT_INIT([win32-dll])
+LT_LANG([Windows Resource])
 gl_INIT
 ENCHANT_LT_OBJDIR=$lt_cv_objdir
 AC_SUBST(ENCHANT_LT_OBJDIR)
@@ -116,19 +117,14 @@ AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
 
 AC_MSG_CHECKING([for native Win32])
-case "$target" in
+native_win32=no
+case "$host" in
   *-*-mingw*)
     native_win32=yes
-    ENCHANT_WIN32_RESOURCE=enchant-win32res.lo
-    ;;
-  *)
-    native_win32=no
-    ENCHANT_WIN32_RESOURCE=
     ;;
 esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
-AC_SUBST([ENCHANT_WIN32_RESOURCE])
 
 # Courtesy of Glib: Ensure MSVC-compatible struct packing convention 
 # is used when compiling for Win32 with gcc.

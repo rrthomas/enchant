@@ -8,8 +8,6 @@ pkgconfig_DATA = enchant.pc
 EXTRA_DIST =		\
 	autogen.sh	\
 	enchant.pc.in	\
-	lt-compile-resource \
-	compile-resource \
 	README 		\
 	HACKING 	\
 	NEWS 		\
