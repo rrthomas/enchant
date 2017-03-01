@@ -119,19 +119,16 @@ AC_MSG_CHECKING([for native Win32])
 case "$target" in
   *-*-mingw*)
     native_win32=yes
-    SOCKET_LIBS='-lws2_32 -ldnsapi'
     ENCHANT_WIN32_RESOURCE=enchant-win32res.lo
     ;;
   *)
     native_win32=no
-    SOCKET_LIBS=''
     ENCHANT_WIN32_RESOURCE=
     ;;
 esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
 AC_SUBST([ENCHANT_WIN32_RESOURCE])
-AC_SUBST(SOCKET_LIBS)
 
 # Courtesy of Glib: Ensure MSVC-compatible struct packing convention 
 # is used when compiling for Win32 with gcc.
