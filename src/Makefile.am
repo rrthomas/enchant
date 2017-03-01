@@ -26,11 +26,14 @@ libenchant_la_LIBADD += @APPLESPELL_LIBS@
 libenchant_la_LDFLAGS += @APPLESPELL_LDFLAGS@
 endif
 
+orderingdir=$(datadir)/enchant
+ordering_DATA = enchant.ordering
+
 LDADD = libenchant.la $(ENCHANT_LIBS)
 bin_PROGRAMS = enchant-lsmod enchant
 enchant_SOURCES = enchant-ispell.c
 
-EXTRA_DIST=enchant.i
+EXTRA_DIST = enchant.i $(ordering_DATA)
 
 if OS_WIN32
 
