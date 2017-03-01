@@ -1,5 +1,4 @@
 AC_INIT([enchant],[2.0.0])
-AC_PACKAGE_VERSION
 AC_CONFIG_SRCDIR(src/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([subdir-objects])
@@ -46,6 +45,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_HEADER_STDC
 LT_INIT([win32-dll])
+LT_LANG([Windows Resource])
 gl_INIT
 ENCHANT_LT_OBJDIR=$lt_cv_objdir
 AC_SUBST(ENCHANT_LT_OBJDIR)
@@ -116,22 +116,14 @@ AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)
 
 AC_MSG_CHECKING([for native Win32])
-case "$target" in
+native_win32=no
+case "$host" in
   *-*-mingw*)
     native_win32=yes
-    SOCKET_LIBS='-lws2_32 -ldnsapi'
-    ENCHANT_WIN32_RESOURCE=enchant-win32res.lo
-    ;;
-  *)
-    native_win32=no
-    SOCKET_LIBS=''
-    ENCHANT_WIN32_RESOURCE=
     ;;
 esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
-AC_SUBST([ENCHANT_WIN32_RESOURCE])
-AC_SUBST(SOCKET_LIBS)
 
 # Courtesy of Glib: Ensure MSVC-compatible struct packing convention 
 # is used when compiling for Win32 with gcc.
@@ -231,26 +223,6 @@ AC_SUBST(UNITTESTPP_LIBS)
 
 dnl =======================================================================================
 some_backend=no
-
-dnl Ispell
-build_ispell=yes
-
-AC_ARG_ENABLE(ispell, AS_HELP_STRING([--disable-ispell],[enable the ispell backend @<:@default=auto@:>@]), build_ispell="$enableval",
-   [build_ispell=yes
-   some_backend=yes])
-
-AM_CONDITIONAL(WITH_ISPELL, test "x$build_ispell" = "xyes")
-
-ispell_dir=${datadir}/enchant/ispell
-AC_ARG_WITH(ispell-dir, AS_HELP_STRING([--with-ispell-dir=PATH],[path to installed ispell dicts]))
-
-if test "x$with_ispell_dir" != "x" ; then
-   ispell_dir=$with_ispell_dir
-fi
-
-ISPELL_CFLAGS="-DENCHANT_ISPELL_DICT_DIR='\"$ispell_dir\"'"
-AC_SUBST(ISPELL_CFLAGS)
-
 
 dnl Hunspell
 AC_ARG_WITH([hunspell],
@@ -436,7 +408,6 @@ lib/Makefile
 src/libenchant.rc
 src/Makefile
 src/aspell/Makefile
-src/ispell/Makefile
 src/uspell/Makefile
 src/hunspell/Makefile
 src/hspell/Makefile
@@ -447,8 +418,6 @@ tests/Makefile
 unittests/Makefile
 unittests/enchant_providers/Makefile
 unittests/mock_provider/Makefile
-doc/Makefile
-data/Makefile
 ])
 AC_OUTPUT
 
@@ -460,7 +429,6 @@ $PACKAGE-$VERSION
     prefix:                                 ${prefix}
     compiler:                               ${CC}
 
-    Build Ispell backend:                   ${build_ispell}
     Build Hunspell backend:                 ${with_hunspell}
     Build Uspell backend:                   ${with_uspell}
     Build Aspell backend:                   ${with_aspell}
