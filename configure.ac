@@ -196,168 +196,76 @@ AC_SUBST(UNITTESTPP_CFLAGS)
 AC_SUBST(UNITTESTPP_LIBS)
 
 
-dnl =======================================================================================
-build_backends=
+dnl Provider detection
+AC_DEFUN([ENCHANT_CHECK_PROVIDER_SETUP],
+  [m4_define([provider_check], [m4_default([$2],[check])])
+   AC_ARG_WITH([$1],
+   AS_HELP_STRING([--with-[]$1],
+      [enable the $1 provider @<:@default=provider_check@:>@]),
+      [with_[]$1=$withval],
+      [with_[]$1=provider_check])
+   $1[]_dir=${datadir}/$1
+   AC_ARG_WITH([$1[]-dir],
+      AS_HELP_STRING([--with-[]$1-dir=PATH],
+         [path to installed $1 dicts]))
+   AS_IF([test "x$with_[]$1_dir" != "x"],
+      [$1[]_dir=$with_[]$1_dir])])
 
-dnl Hunspell
-AC_ARG_WITH([hunspell],
-   AS_HELP_STRING([--with-hunspell],
-      [enable the hunspell backend @<:@default=check@:>@]),
-   [],
-   [with_hunspell=check])
+AC_DEFUN([ENCHANT_CHECK_PKG_CONFIG_PROVIDER],
+  [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
+   AS_IF([test "x$with_[]$1" != xno],
+      [PKG_CHECK_MODULES([$2], [m4_default([$3], [$1])],
+         [$2[]_CFLAGS="$[]$2[]_CFLAGS -DENCHANT_[]$2[]_DICT_DIR='\"$[]$1_dir\"'"
+         with_$1=yes
+         build_providers+=" $1"],
+         [if test "x$with_$1" != xcheck; then
+            AC_MSG_FAILURE([--with-[]$1 was given, but test(s) for $1 failed])
+          fi
+          with_$1=no])])
+   AM_CONDITIONAL(WITH_[]$2, test "x$with_[]$1" = xyes)])
 
-hunspell_dir=${datadir}/hunspell
-AC_ARG_WITH([hunspell-dir],
-   AS_HELP_STRING([--with-hunspell-dir=PATH],
-      [path to installed Hunspell dicts]))
-AS_IF([test "x$with_hunspell_dir" != "x"],
-   [hunspell_dir=$with_hunspell_dir])
+AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
+  [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
+   AS_IF([test "x$with_[]$1" != xno],
+      [AC_CHECK_HEADERS([$1[].h])
+      AC_CHECK_LIB([$1], [$3])
 
-AS_IF([test "x$with_hunspell" != xno],
-   [PKG_CHECK_MODULES([HUNSPELL], [hunspell],
-      [HUNSPELL_CFLAGS="$HUNSPELL_CFLAGS -DENCHANT_HUNSPELL_DICT_DIR='\"$hunspell_dir\"'"
-      with_hunspell=yes
-      build_backends+=" hunspell"],
-      [if test "x$with_hunspell" != xcheck; then
-         AC_MSG_FAILURE([--with-hunspell was given, but test for Hunspell failed])
-       fi
-       with_hunspell=no])])
-
-AM_CONDITIONAL(WITH_HUNSPELL, test "x$with_hunspell" = xyes)
-
-
-dnl Uspell
-AC_ARG_WITH([uspell],
-   AS_HELP_STRING([--with-uspell],
-      [enable the uspell backend @<:@default=check@:>@]),
-   [],
-   [with_uspell=check])
-
-uspell_dir=${datadir}/uspell
-AC_ARG_WITH([uspell-dir],
-   AS_HELP_STRING([--with-uspell-dir=PATH],
-      [path to installed Uspell dicts]))
-AS_IF([test "x$with_uspell_dir" != "x"],
-   [uspell_dir=$with_uspell_dir])
-
-AS_IF([test "x$with_uspell" != xno],
-   [PKG_CHECK_MODULES([USPELL], [libuspell >= 1.1.0],
-      [USPELL_CFLAGS="$USPELL_CFLAGS -DENCHANT_USPELL_DICT_DIR='\"$uspell_dir\"'"
-      with_uspell=yes
-      build_backends+=" uspell"],
-      [if test "x$with_uspell" != xcheck; then
-         AC_MSG_FAILURE([--with-uspell was given, but test for Uspell failed])
-       fi
-       with_uspell=no])])
-
-AM_CONDITIONAL(WITH_USPELL, test "x$with_uspell" = xyes)
+      if test "x$ac_cv_header_[]$1_h" != xyes -o "x$ac_cv_lib_[]$1[]_[]$3" != xyes; then
+         if test "x$with_[]$1" != xcheck; then
+            AC_MSG_FAILURE([--with-[]$1 was given, but tests for $1 failed])
+         fi
+         with_[]$1=no
+      else
+         with_[]$1=yes
+         build_providers+=" $1"
+      fi])
+   AM_CONDITIONAL(WITH_[]$2, test "x$with_[]$1" = xyes)])
 
 
-dnl Aspell
-AC_ARG_WITH([aspell],
-   AS_HELP_STRING([--with-aspell],
-      [enable the aspell backend @<:@default=check@:>@]),
-   [],
-   [with_aspell=check])
+dnl Check for providers
+build_providers=
 
-AS_IF([test "x$with_aspell" != xno],
-   [AC_CHECK_HEADERS([aspell.h])
-   AC_CHECK_LIB([aspell], [get_aspell_dict_info_list])
+dnl Standard providers
+ENCHANT_CHECK_PKG_CONFIG_PROVIDER([hunspell], [HUNSPELL])
+ENCHANT_CHECK_LIB_PROVIDER([aspell], [ASPELL], [get_aspell_dict_info_list])
+ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path])
+ENCHANT_CHECK_PKG_CONFIG_PROVIDER([voikko], [VOIKKO], [libvoikko])
 
-   if test "x$ac_cv_header_aspell_h" != xyes -o "x$ac_cv_lib_aspell_get_aspell_dict_info_list" != xyes; then
-      if test "x$with_aspell" != xcheck; then
-         AC_MSG_FAILURE([--with-aspell was given, but tests for Aspell failed])
-      fi
-      with_aspell=no
-   else
-      with_aspell=yes
-      build_backends+=" aspell"
-   fi])
-
-AM_CONDITIONAL(WITH_ASPELL, test "x$with_aspell" = xyes)
-
-
-dnl Hspell
-AC_ARG_WITH([hspell],
-   AS_HELP_STRING([--with-hspell],
-      [enable the hspell backend @<:@default=check@:>@]),
-   [],
-   [with_hspell=check])
-
-AS_IF([test "x$with_hspell" != xno],
-   [AC_CHECK_HEADERS([hspell.h])
-   AC_CHECK_LIB(hspell, hspell_get_dictionary_path,,, -lz)
-
-   if test "x$ac_cv_header_hspell_h" != xyes -o "x$ac_cv_lib_hspell_hspell_get_dictionary_path" != xyes; then
-      if test "x$with_hspell" != xcheck; then
-         AC_MSG_FAILURE([--with-hspell was given, but tests for Hspell failed])
-      fi
-      with_hspell=no
-   else
-      with_hspell=yes
-      build_backends+=" hspell"
-   fi])
-
-AM_CONDITIONAL(WITH_HSPELL, test "x$with_hspell" = xyes)
-
-
-dnl Voikko
-AC_ARG_WITH([voikko],
-   AS_HELP_STRING([--with-voikko],
-      [enable the voikko backend @<:@default=check@:>@]),
-   [],
-   [with_voikko=check])
-
-AS_IF([test "x$with_voikko" != xno],
-   [PKG_CHECK_MODULES([VOIKKO], [libvoikko],
-      [with_voikko=yes
-      build_backends+=" voikko"],
-      [if test "x$with_voikko" != xcheck; then
-         AC_MSG_FAILURE([--with-voikko was given, but test for Voikko failed])
-       fi
-       with_voikko=no])])
-
-AM_CONDITIONAL(WITH_VOIKKO, test "x$with_voikko" = "xyes")
-
-
-dnl Zemberek
-AC_ARG_WITH([zemberek],
-   AS_HELP_STRING([--enable-zemberek],
-      [enable the experimental zemberek backend @<:@default=check@:>@]),
-   [],
-   [with_zemberek=check])
-
-AS_IF([test "x$with_zemberek" != xno],
-   [PKG_CHECK_MODULES([ZEMBEREK], [dbus-glib-1 >= 0.62],
-      [with_zemberek=yes
-      build_backends+=" zemberek"],
-      [if test "x$with_zemberek" != xcheck; then
-         AC_MSG_FAILURE([--with-zemberek was given, but test for Zemberek failed])
-       fi
-       with_zemberek=no])])
-
-AM_CONDITIONAL(WITH_ZEMBEREK, test "x$with_zemberek" = xyes)
-
+dnl Experimental/deprecated providers
+ENCHANT_CHECK_PKG_CONFIG_PROVIDER([uspell], [USPELL], , [no])
+ENCHANT_CHECK_PKG_CONFIG_PROVIDER([zemberek], [ZEMBEREK], [dbus-glib-1 >= 0.62], [no])
 
 dnl Apple Spell
-APPLESPELL_CFLAGS=""
-APPLESPELL_LIBS=""
-APPLESPELL_LDFLAGS=""
-
-AC_ARG_WITH([applespell],
-   AS_HELP_STRING([--with-applespell],
-      [enable the applespell backend @<:@default=check@:>@]),
-   [],
-   [with_applespell=check])
-
+ENCHANT_CHECK_PROVIDER_SETUP([applespell])
 AS_IF([test "x$with_applespell" != xno],
-   [case ${host_os} in
+   [AC_MSG_CHECKING([for applespell])
+    case ${host_os} in
         *darwin*)
-           APPLESPELL_CFLAGS+=" -xobjective-c"
-           APPLESPELL_LIBS+=" -lobjc"
-           APPLESPELL_LDFLAGS+=" -framework Cocoa"
+           APPLESPELL_CFLAGS=" -xobjective-c"
+           APPLESPELL_LIBS=" -lobjc"
+           APPLESPELL_LDFLAGS=" -framework Cocoa"
            with_applespell=yes
-           build_backends+=" applespell"
+           build_providers+=" applespell"
         ;;
         *)
            if test "x$with_applespell" != xcheck; then
@@ -365,8 +273,9 @@ AS_IF([test "x$with_applespell" != xno],
            fi
            with_applespell=no
         ;;
-    esac])
-
+    esac
+    AC_MSG_RESULT([$with_applespell])
+   ])
 AC_SUBST(APPLESPELL_CFLAGS)
 AC_SUBST(APPLESPELL_LIBS)
 AC_SUBST(APPLESPELL_LDFLAGS)
@@ -398,13 +307,13 @@ AC_OUTPUT
 
 dnl ===========================================================================================
 
-echo "Backends to build: ${build_backends}"
-if test "x$build_backends" = "x"; then
-   AC_MSG_WARN([No spell-checking back-end selected!])
+echo "Providers to build:${build_providers}"
+if test "x$build_providers" = "x"; then
+   AC_MSG_WARN([No spell-checking provider selected!])
 fi
 
 if test "x$with_zemberek" = "xyes"; then
    echo "
-The Zemberek Turkish spell-checking plugin is enabled. It is known 
+The Zemberek Turkish spell-checking plugin is enabled. It is known
 to cause crashes with WebKit. Use at your own discretion."
 fi
