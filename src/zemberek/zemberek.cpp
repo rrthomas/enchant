@@ -57,7 +57,7 @@ bool zemberek_service_is_running ()
 }
 
 Zemberek::Zemberek()
-  : connection(NULL), proxy(NULL)
+  : connection(nullptr), proxy(nullptr)
 {
   GError *Error = NULL;
 

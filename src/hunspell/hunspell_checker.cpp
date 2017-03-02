@@ -51,8 +51,6 @@
 
 ENCHANT_PLUGIN_DECLARE("Hunspell")
 
-#define G_ICONV_INVALID (GIConv)-1
-
 #include <glib.h>
 
 /***************************************************************************/
@@ -60,7 +58,7 @@ ENCHANT_PLUGIN_DECLARE("Hunspell")
 class HunspellChecker
 {
 public:
-	HunspellChecker(EnchantBroker * broker);
+	HunspellChecker();
 	~HunspellChecker();
 
 	bool checkWord (const char *word, size_t len);
@@ -72,7 +70,6 @@ private:
 	GIConv  m_translate_in; /* Selected translation from/to Unicode */
 	GIConv  m_translate_out;
 	Hunspell *hunspell;
-	EnchantBroker *m_broker;
 };
 
 static void
@@ -86,11 +83,11 @@ hunspell_checker_free_helper (gpointer p, gpointer user _GL_UNUSED_PARAMETER)
 static bool
 g_iconv_is_valid(GIConv i)
 {
-	return (i != G_ICONV_INVALID);
+	return (i != nullptr);
 }
 
-HunspellChecker::HunspellChecker(EnchantBroker * broker)
-: m_translate_in(G_ICONV_INVALID), m_translate_out(G_ICONV_INVALID), hunspell(0), m_broker(broker)
+HunspellChecker::HunspellChecker()
+: m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr)
 {
 }
 
@@ -178,7 +175,7 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 }
 
 static GSList *
-hunspell_checker_get_dictionary_dirs (EnchantBroker * broker)
+hunspell_checker_get_dictionary_dirs ()
 {
 	GSList *dirs = NULL;
 
@@ -232,13 +229,13 @@ hunspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 }
 
 static void
-s_buildDictionaryDirs (std::vector<std::string> & dirs, EnchantBroker * broker)
+s_buildDictionaryDirs (std::vector<std::string> & dirs)
 {
 	GSList *hunspell_dirs, *iter;
 
 	dirs.clear ();
 
-	hunspell_dirs = hunspell_checker_get_dictionary_dirs (broker);
+	hunspell_dirs = hunspell_checker_get_dictionary_dirs ();
 	for (iter = hunspell_dirs; iter; iter = iter->next)
 		{
 			dirs.push_back (static_cast<const char *>(iter->data));
@@ -249,12 +246,12 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs, EnchantBroker * broker)
 }
 
 static void
-s_buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, const char * dict)
+s_buildHashNames (std::vector<std::string> & names, const char * dict)
 {
 	names.clear ();
 
 	std::vector<std::string> dirs;
-	s_buildDictionaryDirs (dirs, broker);
+	s_buildDictionaryDirs (dirs);
 
 	char *dict_dic = g_strconcat(dict, ".dic", nullptr);
 	for (size_t i = 0; i < dirs.size(); i++)
@@ -297,11 +294,11 @@ static bool is_plausible_dict_for_tag(const char *dir_entry, const char *tag)
 }
 
 static char *
-hunspell_request_dictionary (EnchantBroker * broker, const char * tag) 
+hunspell_request_dictionary (const char * tag)
 {
 	std::vector<std::string> names;
 
-	s_buildHashNames (names, broker, tag);
+	s_buildHashNames (names, tag);
 
 	for (size_t i = 0; i < names.size (); i++) {
 		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS)) {
@@ -312,7 +309,7 @@ hunspell_request_dictionary (EnchantBroker * broker, const char * tag)
 	}
 	
 	std::vector<std::string> dirs;
-	s_buildDictionaryDirs (dirs, broker);
+	s_buildDictionaryDirs (dirs);
 
 	for (size_t i = 0; i < dirs.size(); i++) {
 		GDir *dir = g_dir_open (dirs[i].c_str(), 0, nullptr);
@@ -341,7 +338,7 @@ HunspellChecker::requestDictionary(const char *szLang)
 {
 	char *dic = NULL, *aff = NULL;
 
-	dic = hunspell_request_dictionary (m_broker, szLang);
+	dic = hunspell_request_dictionary (szLang);
 	if (!dic)
 		return false;
 
@@ -435,13 +432,13 @@ ENCHANT_MODULE_EXPORT (EnchantProvider *)
 	     init_enchant_provider (void);
 
 static char ** 
-hunspell_provider_list_dicts (EnchantProvider * me, 
-			    size_t * out_n_dicts)
+hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
+			      size_t * out_n_dicts)
 {
 	std::vector<std::string> dict_dirs, dicts;
 	char ** dictionary_list = NULL;
 
-	s_buildDictionaryDirs (dict_dirs, me->owner);
+	s_buildDictionaryDirs (dict_dirs);
 
 	for (size_t i = 0; i < dict_dirs.size(); i++)
 		{
@@ -466,12 +463,12 @@ hunspell_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER, c
 }
 
 static EnchantDict *
-hunspell_provider_request_dict(EnchantProvider * me, const char *const tag)
+hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED_PARAMETER, const char *const tag)
 {
 	EnchantDict *dict;
 	HunspellChecker * checker;
 	
-	checker = new HunspellChecker(me->owner);
+	checker = new HunspellChecker();
 	
 	if (!checker)
 		return NULL;
@@ -502,12 +499,12 @@ hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, Encha
 }
 
 static int
-hunspell_provider_dictionary_exists (struct str_enchant_provider * me,
-				    const char *const tag)
+hunspell_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
+				     const char *const tag)
 {
 	std::vector <std::string> names;
 
-	s_buildHashNames (names, me->owner, tag);
+	s_buildHashNames (names, tag);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
 		{
