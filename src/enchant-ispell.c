@@ -50,17 +50,16 @@
 #include <locale.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #include "enchant.h"
 #include "enchant-provider.h"
 
+
 /* word has to be bigger than this to be checked */
 #define MIN_WORD_LENGTH 1
-
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#endif
 
 static const char *charset;
 
@@ -556,7 +555,7 @@ int main (int argc, char ** argv)
 	setlocale(LC_ALL, "");
 
 	g_get_charset(&charset);
-#ifdef WIN32
+#ifdef _WIN32
 	/* If reading from stdin, its CP may not be the system CP (which glib's locale gives us) */
 	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) == FILE_TYPE_CHAR) {
 		charset = g_strdup_printf("CP%u", GetConsoleCP());
