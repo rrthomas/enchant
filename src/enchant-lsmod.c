@@ -1,4 +1,3 @@
-/* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
  *
@@ -83,23 +82,23 @@ main (int argc, char **argv)
 	for (i = 1; i < argc; i++) {
 		if (!strcmp (argv[i], "-lang")) {
 			if (i < (argc - 1)) {
-				lang_tag = g_strdup (argv[++i]);
+				lang_tag = strdup (argv[++i]);
 			} else {
 				lang_tag = enchant_get_user_language();
 
 				if (!lang_tag || !strcmp (lang_tag, "C")) {
-					g_free(lang_tag); /* lang might be "C" */
-					lang_tag = g_strdup ("en");
+					free(lang_tag); /* lang might be "C" */
+					lang_tag = strdup ("en");
 				}
 			}
 			mode = 1;
 		} else if (!strcmp (argv[i], "-h") || !strcmp (argv[i], "-?") || !strcmp(argv[i], "-help")) {
 			printf ("%s [-lang [language_tag]] [-list-dicts] [-h] [-v]\n", argv[0]);
-			g_free (lang_tag);
+			free (lang_tag);
 			return 0;
 		} else if (!strcmp (argv[i], "-v") || !strcmp (argv[i], "-version")) {
 			printf ("%s %s\n", argv[0], PACKAGE_VERSION);
-			g_free (lang_tag);
+			free (lang_tag);
 			return 0;
 		} else if (!strcmp (argv[i], "-list-dicts")) {
 			mode = 2;
@@ -122,7 +121,7 @@ main (int argc, char **argv)
 		
 		if (!dict) {
 			printf ("No dictionary available for '%s'.\n", lang_tag);
-			g_free (lang_tag);
+			free (lang_tag);
 			enchant_broker_free (broker);
 			return 1;
 		} else {
@@ -133,7 +132,7 @@ main (int argc, char **argv)
 		enchant_broker_list_dicts (broker, enumerate_dicts, stdout);
 	}
 
-	g_free (lang_tag);
+	free (lang_tag);
 	enchant_broker_free (broker);
 	
 	return 0;

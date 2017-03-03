@@ -1,4 +1,3 @@
-/* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
  *
@@ -43,11 +42,10 @@
 extern "C" {
 #endif
 
-/* private */ 
-ENCHANT_MODULE_EXPORT(char *) 
-		 enchant_get_user_language(void);
-
 typedef struct str_enchant_provider EnchantProvider;
+
+ENCHANT_MODULE_EXPORT(char *)
+	enchant_get_user_language(void);
 
 ENCHANT_MODULE_EXPORT (GSList *)
 	enchant_get_user_config_dirs (void);

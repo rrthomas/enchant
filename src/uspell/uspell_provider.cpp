@@ -1,4 +1,3 @@
-/* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz, Raphael Finkel
  *
@@ -65,8 +64,7 @@ uspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 									       "uspell", NULL));
 			}
 
-		g_slist_foreach (config_dirs, (GFunc)g_free, NULL);
-		g_slist_free (config_dirs);
+		g_slist_free_full (config_dirs, free);
 	}
 
 	{
@@ -255,8 +253,7 @@ s_buildHashNames (std::vector<std::string> & names, EnchantBroker * broker, cons
 				g_free (tmp);
 			}
 
-		g_slist_foreach (dirs, (GFunc)g_free, NULL);
-		g_slist_free (dirs);
+		g_slist_free_full (dirs, g_free);
 	}
 }
 
@@ -346,8 +343,7 @@ uspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 			manager = uspell_request_manager ((const char *)iter->data, mapIndex);
 		}
 	
-	g_slist_foreach (dirs, (GFunc)g_free, NULL);
-	g_slist_free (dirs);
+	g_slist_free_full (dirs, g_free);
 
 	if (!manager) 
 		return NULL;

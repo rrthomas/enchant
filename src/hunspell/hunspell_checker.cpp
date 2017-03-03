@@ -1,4 +1,3 @@
-/* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
 /* enchant
  * Copyright (C) 2003-2004 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
  *
@@ -69,12 +68,6 @@ private:
 	GIConv  m_translate_out;
 	Hunspell *hunspell;
 };
-
-static void
-hunspell_checker_free_helper (gpointer p, gpointer user _GL_UNUSED_PARAMETER)
-{
-	g_free (p);
-}
 
 /***************************************************************************/
 
@@ -188,8 +181,7 @@ hunspell_checker_get_dictionary_dirs ()
 									       "hunspell", nullptr));
 			}
 
-		g_slist_foreach (config_dirs, hunspell_checker_free_helper, nullptr);
-		g_slist_free (config_dirs);
+		g_slist_free_full (config_dirs, free);
 	}
 
 	{
@@ -219,7 +211,7 @@ hunspell_checker_get_dictionary_dirs ()
 		const gchar* hun_dir = g_getenv("DICPATH");
 		if (hun_dir)
 			{
-				dirs = g_slist_append(dirs, g_strdup(hun_dir));
+				dirs = g_slist_append(dirs, strdup(hun_dir));
 			}
 	}
 
@@ -239,8 +231,7 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs)
 			dirs.push_back (static_cast<const char *>(iter->data));
 		}
 
-	g_slist_foreach (hunspell_dirs, hunspell_checker_free_helper, nullptr);
-	g_slist_free (hunspell_dirs);
+	g_slist_free_full (hunspell_dirs, g_free);
 }
 
 static void
@@ -301,7 +292,7 @@ hunspell_request_dictionary (const char * tag)
 	for (size_t i = 0; i < names.size (); i++) {
 		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS)) {
 			if(s_hasCorrespondingAffFile(names[i])){
-				return g_strdup (names[i].c_str());
+				return strdup (names[i].c_str());
 			}
 		}
 	}
@@ -340,15 +331,15 @@ HunspellChecker::requestDictionary(const char *szLang)
 	if (!dic)
 		return false;
 
-	aff = g_strdup(dic);
+	aff = strdup(dic);
 	int len_dic = strlen(dic);
 	strcpy(aff+len_dic-3, "aff");
 	if (g_file_test(aff, G_FILE_TEST_EXISTS))
 	{
 		hunspell = new Hunspell(aff, dic);
 	}
-	g_free(dic);
-	g_free(aff);
+	free(dic);
+	free(aff);
 	if(hunspell == NULL){
 		return false;
 	}

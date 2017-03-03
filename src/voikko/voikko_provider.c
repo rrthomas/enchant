@@ -1,4 +1,4 @@
-/* vim: set sw=8: -*- Mode: C; tab-width: 8; indent-tabs-mode: t; c-basic-offset: 8 -*- */
+/* FIXME: Use current voikko API, not deprecated */
 /* enchant
  * Copyright (C) 2003,2004 Dom Lachowicz
  *               2006-2007 Harri Pitkänen <hatapitk@iki.fi>
@@ -153,6 +153,7 @@ static void
 voikko_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER,
 				  char **str_list)
 {
+	/* FIXME: suggestion list should be freed with voikkoFreeCstrArray */
 	g_strfreev (str_list);
 }
 
