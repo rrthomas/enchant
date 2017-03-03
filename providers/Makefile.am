@@ -8,51 +8,44 @@ EXTRA_DIST =			\
 provider_LTLIBRARIES =
 providerdir = $(pkglibdir)
 
-# FIXME: WARN_C/CXXFLAGS should be set once, per language
 AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib -I$(top_srcdir)/src $(ENCHANT_CFLAGS)  -D_ENCHANT_BUILD=1
-AM_LDFLAGS = -module -avoid-version -no-undefined
+AM_CFLAGS = $(WARN_CFLAGS)
+AM_CXXFLAGS = $(WARN_CXXFLAGS)
+AM_LDFLAGS = -module -avoid-version -no-undefined $(ENCHANT_LIBS) $(top_builddir)/src/libenchant.la
 
 if WITH_ASPELL
-provider_LTLIBRARIES += libenchant_aspell.la
+provider_LTLIBRARIES += enchant_aspell.la
 endif
-libenchant_aspell_la_CPPFLAGS = $(AM_CPPFLAGS) $(WARN_CFLAGS)
-libenchant_aspell_la_LIBADD = $(ENCHANT_LIBS) $(ASPELL_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_aspell_la_SOURCES = aspell_provider.c
+enchant_aspell_la_LIBADD = $(ASPELL_LIBS)
 
 if WITH_HSPELL
-provider_LTLIBRARIES += libenchant_hspell.la
+provider_LTLIBRARIES += enchant_hspell.la
 endif
-libenchant_hspell_la_CPPFLAGS = $(AM_CPPFLAGS) $(WARN_CFLAGS)
-libenchant_hspell_la_LIBADD = $(ENCHANT_LIBS) $(HSPELL_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_hspell_la_SOURCES = hspell_provider.c
+enchant_hspell_la_LIBADD = $(HSPELL_LIBS)
 
 if WITH_HUNSPELL
-provider_LTLIBRARIES += libenchant_hunspell.la
+provider_LTLIBRARIES += enchant_hunspell.la
 endif
-libenchant_hunspell_la_CPPFLAGS = $(AM_CPPFLAGS) $(WARN_CXXFLAGS) $(HUNSPELL_CFLAGS)
-libenchant_hunspell_la_LIBADD = $(ENCHANT_LIBS) $(HUNSPELL_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_hunspell_la_SOURCES = hunspell_checker.cpp
+enchant_hunspell_la_CXXFLAGS = $(AM_CXXFLAGS) $(HUNSPELL_CFLAGS)
+enchant_hunspell_la_LIBADD = $(HUNSPELL_LIBS)
+enchant_hunspell_la_SOURCES = enchant_hunspell.cpp
 
 if WITH_USPELL
-provider_LTLIBRARIES += libenchant_uspell.la
+provider_LTLIBRARIES += enchant_uspell.la
 endif
-libenchant_uspell_la_CPPFLAGS = $(AM_CPPFLAGS) $(WARN_CXXFLAGS) $(USPELL_CFLAGS)
-libenchant_uspell_la_LIBADD = $(ENCHANT_LIBS) $(USPELL_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_uspell_la_SOURCES = uspell_provider.cpp
+enchant_uspell_la_CXXFLAGS = $(AM_CXXFLAGS) $(USPELL_CFLAGS)
+enchant_uspell_la_LIBADD = $(USPELL_LIBS)
+enchant_uspell_la_SOURCES = enchant_uspell.cpp
 
 if WITH_VOIKKO
-provider_LTLIBRARIES += libenchant_voikko.la
+provider_LTLIBRARIES += enchant_voikko.la
 endif
-libenchant_voikko_la_CPPFLAGS = $(AM_CPPFLAGS) $(WARN_CFLAGS) $(VOIKKO_CFLAGS)
-libenchant_voikko_la_LIBADD = $(ENCHANT_LIBS) $(VOIKKO_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_voikko_la_SOURCES = voikko_provider.c
+enchant_voikko_la_CXXFLAGS = $(AM_CXXFLAGS) $(VOIKKO_CFLAGS)
+enchant_voikko_la_LIBADD = $(VOIKKO_LIBS)
 
 if WITH_ZEMBEREK
-provider_LTLIBRARIES += libenchant_zemberek.la
+provider_LTLIBRARIES += enchant_zemberek.la
 endif
-libenchant_zemberek_la_CPPFLAGS = $(AM_CPPFLAGS) $(WARN_CXXFLAGS) $(ZEMBEREK_CFLAGS)
-libenchant_zemberek_la_LIBADD = $(ENCHANT_LIBS) $(ZEMBEREK_LIBS) $(top_builddir)/src/libenchant.la
-libenchant_zemberek_la_SOURCES =\
-	zemberek.cpp		\
-	zemberek.h		\
-	zemberek_provider.cpp
+enchant_zemberek_la_CXXFLAGS = $(AM_CXXFLAGS) $(ZEMBEREK_CFLAGS)
+enchant_zemberek_la_LIBADD = $(ZEMBEREK_LIBS)
+enchant_zemberek_la_SOURCES = enchant_zemberek.cpp

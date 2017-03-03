@@ -29,14 +29,119 @@
 
 #include "config.h"
 
-#include <glib.h>
 #include <string.h>
+#include <dbus/dbus-glib.h>
+#include <glib.h>
 
 #include "enchant.h"
 #include "enchant-provider.h"
 #include "unused-parameter.h"
 
-#include "zemberek.h"
+
+bool zemberek_service_is_running ()
+{
+  DBusGConnection *connection;
+  DBusGProxy *proxy;
+  GError *Error = NULL;
+
+  connection = dbus_g_bus_get (DBUS_BUS_SYSTEM,
+                               &Error);
+  if (connection == NULL) {
+      g_error_free (Error);
+      return false;
+  }
+  proxy = dbus_g_proxy_new_for_name_owner (connection,
+                                     "net.zemberekserver.server.dbus",
+                                     "/net/zemberekserver/server/dbus/ZemberekDbus",
+                                     "net.zemberekserver.server.dbus.ZemberekDbusInterface",
+                                     &Error);
+
+  dbus_g_connection_unref (connection);
+  if (proxy == NULL) {
+    return false;
+  }
+
+   g_object_unref (proxy);
+   return true;
+}
+
+class Zemberek
+{
+public:
+    Zemberek();
+    ~Zemberek();
+    
+    int checkWord(const char* word) const;
+    char** suggestWord(const char* word, size_t *out_n_suggs);
+
+private:
+    DBusGConnection *connection;
+    DBusGProxy *proxy;
+};
+
+Zemberek::Zemberek()
+  : connection(nullptr), proxy(nullptr)
+{
+  GError *Error = NULL;
+
+  connection = dbus_g_bus_get (DBUS_BUS_SYSTEM,
+                               &Error);
+  if (connection == NULL) {
+      g_error_free (Error);
+      throw "couldn't connect to the system bus";
+  }
+  proxy = dbus_g_proxy_new_for_name (connection,
+                                     "net.zemberekserver.server.dbus",
+                                     "/net/zemberekserver/server/dbus/ZemberekDbus",
+                                     "net.zemberekserver.server.dbus.ZemberekDbusInterface");
+
+  if (proxy == NULL) {
+    throw "couldn't connect to the Zemberek service";
+  }
+}
+
+
+Zemberek::~Zemberek()
+{
+    if(proxy)
+	    g_object_unref (proxy);
+    if(connection)
+	    dbus_g_connection_unref (connection);
+}
+
+
+int Zemberek::checkWord(const char* word) const
+{
+    gboolean result;
+    GError *Error = NULL;
+    if (!dbus_g_proxy_call (proxy, "kelimeDenetle", &Error,
+    	G_TYPE_STRING,word,G_TYPE_INVALID,
+    	G_TYPE_BOOLEAN, &result, G_TYPE_INVALID)) {
+    	g_error_free (Error);
+    	return -1;
+    }
+    else {
+    	if (result)
+    		return 0;
+    	else
+    		return 1;
+    }
+}
+
+
+char** Zemberek::suggestWord(const char* word, size_t *out_n_suggs)
+{
+    char** suggs;
+    GError *Error = NULL;
+    if (!dbus_g_proxy_call (proxy, "oner", &Error,
+    	G_TYPE_STRING,word,G_TYPE_INVALID,
+    	G_TYPE_STRV, &suggs,G_TYPE_INVALID)) {
+    	g_error_free (Error);
+    	return NULL;
+    }
+    *out_n_suggs = g_strv_length(suggs);
+    return suggs;
+}
 
 
 extern "C" {
