@@ -1,11 +1,7 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
-# Note: give library directory with and without $(ENCHANT_LT_OBJDIR) to
-# work with static builds and on systems that do not have static compilation
-# and hence don't use LT_OBJDIR.
-# FIXME: Following line is not portable to MingW (need semicolons instead of colons)
 AM_TESTS_ENVIRONMENT = \
-	ENCHANT_MODULE_PATH=$(top_builddir)/providers/$(ENCHANT_LT_OBJDIR):$(top_builddir)/src/providers; \
+	ENCHANT_MODULE_PATH=$(top_builddir)/providers/@objdir@; \
 	export ENCHANT_MODULE_PATH; \
 	rm -f test.pwl; \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
