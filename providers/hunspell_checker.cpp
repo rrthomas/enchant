@@ -27,6 +27,11 @@
  * do so, delete this exception statement from your version.
  */
 
+/*
+ * This is the Hunspell Enchant Backend.
+ * Hunspell is by László Németh. See: http://hunspell.github.io/
+ */
+
 #include "config.h"
 
 #include <stdio.h>

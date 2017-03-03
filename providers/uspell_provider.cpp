@@ -27,6 +27,10 @@
  * do so, delete this exception statement from your version.
  */
 
+/*
+ * Raphael Finkel <raphael@cs.uky.edu> is the primary author of Uspell.
+ * See: https://github.com/AbiWord/uspell
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

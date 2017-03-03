@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = lib src tests unittests
+SUBDIRS = lib src providers tests unittests
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = enchant.pc
