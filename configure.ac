@@ -47,8 +47,7 @@ AC_HEADER_STDC
 LT_INIT([win32-dll])
 LT_LANG([Windows Resource])
 gl_INIT
-ENCHANT_LT_OBJDIR=$lt_cv_objdir
-AC_SUBST(ENCHANT_LT_OBJDIR)
+AC_SUBST([objdir])
 
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
