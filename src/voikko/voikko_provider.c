@@ -48,7 +48,6 @@
  *
  * http://voikko.sourceforge.net/
  */
-ENCHANT_PLUGIN_DECLARE("Voikko")
 
 static int
 voikko_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUSED_PARAMETER)

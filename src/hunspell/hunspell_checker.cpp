@@ -49,8 +49,6 @@
 #define MAXWORDLEN 176
 #endif
 
-ENCHANT_PLUGIN_DECLARE("Hunspell")
-
 #include <glib.h>
 
 /***************************************************************************/

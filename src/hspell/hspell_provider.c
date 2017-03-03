@@ -42,8 +42,6 @@
 #include "enchant-provider.h"
 #include "unused-parameter.h"
 
-ENCHANT_PLUGIN_DECLARE ("Hspell")
-
 /**
  * hspell helper functions
  */
