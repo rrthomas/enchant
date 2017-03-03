@@ -213,6 +213,7 @@ enchant_get_module_dirs (void)
 #if defined(ENCHANT_GLOBAL_MODULE_DIR)
 	module_dirs = g_slist_append (module_dirs, strdup (ENCHANT_GLOBAL_MODULE_DIR));
 #endif
+
 	/* Dynamically locate library and search for modules relative to it. */
 	prefix = enchant_get_prefix_dir();
 	if(prefix)
@@ -221,22 +222,6 @@ enchant_get_module_dirs (void)
 			g_free(prefix);
 			module_dirs = g_slist_append (module_dirs, module_dir);
 		}
-
-	/* Use ENCHANT_MODULE_PATH env var */
-	{
-		const gchar* env = g_getenv("ENCHANT_MODULE_PATH");
-		if (env) {
-			const gchar * path = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
-			if (path)
-				{
-					GSList *dir;
-					for (dir = _enchant_get_dirs_from_string (path); dir; dir = dir->next)
-						{
-							module_dirs = g_slist_append (module_dirs, dir->data);
-						}
-				}
-		}
-	}
 
 	return module_dirs;
 }
