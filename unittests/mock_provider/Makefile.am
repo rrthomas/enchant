@@ -10,35 +10,20 @@ check_LTLIBRARIES = \
 	libenchant_null_provider.la \
 	libenchant_null_identify.la \
 	libenchant_null_describe.la
-mock_providerdir = $(libdir)/enchant
 
-libenchant_mock_provider_la_LIBADD = $(ENCHANT_LIBS) $(top_builddir)/src/libenchant.la
 # Adding -rpath to LDFLAGS causes the .so to be built even though the lib is noinst_
-libenchant_mock_provider_la_LDFLAGS = -module -avoid-version -no-undefined -rpath /foo
+AM_LDFLAGS = -module -avoid-version -no-undefined -rpath /foo $(ENCHANT_LIBS) $(top_builddir)/src/libenchant.la
 libenchant_mock_provider_la_SOURCES = mock_provider.cpp
-libenchant_mock_provider_lalibdir = $(libdir)/enchant
 
 # Build distinct libraries rather than copying a single one, to avoid being
 # defeated by caching, so we can configure each one differently.
-libenchant_mock_provider2_la_LIBADD = $(libenchant_mock_provider_la_LIBADD)
-libenchant_mock_provider2_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_mock_provider2_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
-libenchant_mock_provider2_lalibdir = $(libenchant_mock_provider_lalibdir)
 
 libenchant_null_provider_la_CPPFLAGS = $(AM_CPPFLAGS) -DENCHANT_TEST_NULL_PROVIDER
-libenchant_null_provider_la_LIBADD = $(libenchant_mock_provider_la_LIBADD)
-libenchant_null_provider_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_provider_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
-libenchant_null_provider_lalibdir = $(libenchant_mock_provider_lalibdir)
 
 libenchant_null_identify_la_CPPFLAGS = $(AM_CPPFLAGS) -DENCHANT_TEST_NULL_IDENTIFY
-libenchant_null_identify_la_LIBADD = $(libenchant_mock_provider_la_LIBADD)
-libenchant_null_identify_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_identify_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
-libenchant_null_identify_lalibdir = $(libenchant_mock_provider_lalibdir)
 
 libenchant_null_describe_la_CPPFLAGS = $(AM_CPPFLAGS) -DENCHANT_TEST_NULL_DESCRIBE
-libenchant_null_describe_la_LIBADD = $(libenchant_mock_provider_la_LIBADD)
-libenchant_null_describe_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_describe_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
-libenchant_null_describe_lalibdir = $(libenchant_mock_provider_lalibdir)
