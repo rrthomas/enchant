@@ -27,11 +27,14 @@
  * do so, delete this exception statement from your version.
  */
 
+#include "config.h"
+
 #include <glib.h>
 #include <string.h>
 
 #include "enchant.h"
 #include "enchant-provider.h"
+#include "unused-parameter.h"
 
 #include "zemberek.h"
 
@@ -43,7 +46,7 @@ ENCHANT_MODULE_EXPORT(EnchantProvider *)
   init_enchant_provider(void);
 
 static int
-zemberek_dict_check (EnchantDict * me, const char *const word, size_t len)
+zemberek_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUSED_PARAMETER)
 {
     Zemberek *checker;
     checker = (Zemberek *) me->user_data;
@@ -52,7 +55,7 @@ zemberek_dict_check (EnchantDict * me, const char *const word, size_t len)
 
 static char**
 zemberek_dict_suggest (EnchantDict * me, const char *const word,
-		     size_t len, size_t * out_n_suggs)
+                       size_t len _GL_UNUSED_PARAMETER, size_t * out_n_suggs)
 {
     Zemberek *checker;
     checker = (Zemberek *) me->user_data;
@@ -66,7 +69,7 @@ zemberek_provider_dispose(EnchantProvider *me)
 }
 
 static EnchantDict*
-zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
+zemberek_provider_request_dict(EnchantProvider *me _GL_UNUSED_PARAMETER, const char *tag)
 {
     if (!((strcmp(tag, "tr") == 0) || (strncmp(tag, "tr_", 3) == 0)))
 	return NULL; // only handle turkish
@@ -90,7 +93,7 @@ zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
 }
 
 static void
-zemberek_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
+zemberek_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
     Zemberek *checker;
     checker = (Zemberek *) dict->user_data;
@@ -99,25 +102,25 @@ zemberek_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 }
 
 static const char *
-zemberek_provider_identify (EnchantProvider * me)
+zemberek_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "zemberek";
 }
 
 static const char *
-zemberek_provider_describe (EnchantProvider * me)
+zemberek_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
 	return "Zemberek Provider";
 }
 
 static void
-zemberek_provider_free_string_list (EnchantProvider * me, char **str_list)
+zemberek_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER, char **str_list)
 {
 	g_strfreev (str_list);
 }
 
 static char **
-zemberek_provider_list_dicts (EnchantProvider * me,
+zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 			      size_t * out_n_dicts)
 {
   if (!zemberek_service_is_running ())
