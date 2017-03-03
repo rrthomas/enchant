@@ -9,9 +9,6 @@ AM_TESTS_ENVIRONMENT = \
 	export ENCHANT_CONFIG_DIR; \
 	cp $(builddir)/mock_provider/*.so $(builddir)/mock_provider/.libs/*.so $(builddir)/mock_provider/*.dll $(builddir)/mock_provider/.libs/*.dll . || :;
 
-DEPS = $(top_builddir)/src/libenchant.la
-ldadd = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
-
 check_PROGRAMS = main
 TESTS = main
 
@@ -50,8 +47,7 @@ main_SOURCES = main.cpp \
 	provider/enchant_provider_get_user_config_dirs_tests.cpp \
 	provider/enchant_provider_get_user_language_tests.cpp \
 	$(NULL)
-main_LDFLAGS =
-main_DEPENDENCIES = $(DEPS)
-main_LDADD = $(ldadd) $(UNITTESTPP_LIBS) $(ENCHANT_LIBS)
+main_DEPENDENCIES = $(top_builddir)/src/libenchant.la
+main_LDADD = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS) $(UNITTESTPP_LIBS)
 
 DISTCLEANFILES = libenchant_*.so *enchant*.dll

@@ -4,9 +4,6 @@ AM_TESTS_ENVIRONMENT = \
 	cp $(builddir)/../mock_provider/*.so $(builddir)/../mock_provider/.libs/*.so $(builddir)/../mock_provider/*.dll $(builddir)/../mock_provider/.libs/*.dll . || :;
 	cp $(top_builddir)/src/*/*.so $(top_builddir)/src/*/.libs/*.so cp $(top_builddir)/src/*/*.dll $(top_builddir)/src/*/.libs/*.dll . || :;
 
-DEPS = $(top_builddir)/src/libenchant.la
-ldadd = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
-
 check_PROGRAMS = main
 TESTS = main
 
@@ -23,8 +20,7 @@ main_SOURCES = main.cpp \
 	Provider/provider_list_dicts.cpp \
 	Provider/provider_request_dict.cpp \
 	$(NULL)
-main_LDFLAGS =
-main_DEPENDENCIES = $(DEPS)
-main_LDADD = $(ldadd) $(UNITTESTPP_LIBS)
+main_DEPENDENCIES = $(top_builddir)/src/libenchant.la
+main_LDADD = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS) $(UNITTESTPP_LIBS)
 
 DISTCLEANFILES = libenchant_*.so *enchant*.dll
