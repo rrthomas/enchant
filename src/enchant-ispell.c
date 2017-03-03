@@ -322,12 +322,10 @@ convert_language_code (gchar *code)
 	size_t i;
 	for (i = 0; lingua[i].ispell; i++) {
 	        if (!strcmp(code,lingua[i].ispell)) {
-			/* We must call g_strdup() because the calling program g_free()s the result. */
-		        return g_strdup (lingua[i].enchant);
+		        return strdup (lingua[i].enchant);
 		}
 	}
-	/* Let's call g_strdup() here too! */
-	return g_strdup (code);
+	return strdup (code);
 }
 
 
@@ -417,12 +415,12 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 
 	if (!dict) {
 		fprintf (stderr, "Couldn't create a dictionary for %s\n", lang);
-		g_free (lang);
+		free (lang);
 		enchant_broker_free (broker);
 		return 1;
 	}
 
-	g_free (lang);
+	free (lang);
 
 	str = g_string_new (NULL);
 	

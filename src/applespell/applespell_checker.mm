@@ -1,3 +1,4 @@
+// FIXME: Use @autoreleasepool
 /* enchant
  * Copyright (C) 2004 Remi Payette
  * Copyright (C) 2004 Francis James Franklin

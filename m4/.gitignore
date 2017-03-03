@@ -37,3 +37,6 @@
 /ssize_t.m4
 /manywarnings.m4
 /warnings.m4
+/malloc.m4
+/strdup.m4
+/string_h.m4

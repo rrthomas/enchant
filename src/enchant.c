@@ -103,7 +103,7 @@ _enchant_get_user_home_dirs (void)
 	home_dir = g_get_home_dir ();
 	if (home_dir)
 		{
-			dirs = g_slist_append (dirs, g_strdup (home_dir));
+			dirs = g_slist_append (dirs, strdup (home_dir));
 		}
 
 	return dirs;
@@ -135,7 +135,7 @@ _enchant_get_dirs_from_string (const char * string)
 		for (i = 0; tokens[i]; i++)
 			{
 				char *token = g_strstrip(tokens[i]);
-				dirs = g_slist_append (dirs, g_strdup (token));
+				dirs = g_slist_append (dirs, strdup (token));
 			}
 
 		g_strfreev (tokens);
@@ -184,8 +184,7 @@ enchant_get_user_config_dirs (void)
 									      NULL));
 			}
 
-		g_slist_foreach (home_dirs, (GFunc)g_free, NULL);
-		g_slist_free (home_dirs);
+		g_slist_free_full (home_dirs, free);
 	}
 
 	return user_dirs;
@@ -212,7 +211,7 @@ enchant_get_module_dirs (void)
 	}
 
 #if defined(ENCHANT_GLOBAL_MODULE_DIR)
-	module_dirs = g_slist_append (module_dirs, g_strdup (ENCHANT_GLOBAL_MODULE_DIR));
+	module_dirs = g_slist_append (module_dirs, strdup (ENCHANT_GLOBAL_MODULE_DIR));
 #endif
 	/* Dynamically locate library and search for modules relative to it. */
 	prefix = enchant_get_prefix_dir();
@@ -267,7 +266,7 @@ enchant_get_conf_dirs (void)
 		}
 
 #if defined(ENCHANT_GLOBAL_ORDERING)
-	conf_dirs = g_slist_append (conf_dirs, g_strdup (ENCHANT_GLOBAL_ORDERING));
+	conf_dirs = g_slist_append (conf_dirs, strdup (ENCHANT_GLOBAL_ORDERING));
 #endif
 
 	return conf_dirs;
@@ -329,7 +328,7 @@ enchant_is_valid_dictionary_tag(const char * const tag)
 static char *
 enchant_normalize_dictionary_tag (const char * const dict_tag)
 {
-	char * new_tag = g_strdup (dict_tag);
+	char * new_tag = strdup (dict_tag);
 	char * needle;
 
 	new_tag = g_strstrip (new_tag);
@@ -363,7 +362,7 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 static char *
 enchant_iso_639_from_tag (const char * const dict_tag)
 {
-	char * new_tag = g_strdup (dict_tag);
+	char * new_tag = strdup (dict_tag);
 	char * needle;
 
 	if ((needle = strchr (new_tag, '_')) != NULL)
@@ -381,7 +380,7 @@ enchant_session_destroy (EnchantSession * session)
 	enchant_pwl_free (session->exclude);
 	g_free (session->personal_filename);
 	g_free (session->exclude_filename);
-	g_free (session->language_tag);
+	free (session->language_tag);
 
 	if (session->error)
 		g_free (session->error);
@@ -421,9 +420,9 @@ enchant_session_new_with_pwl (EnchantProvider * provider,
 	session->personal = personal;
 	session->exclude = exclude;
 	session->provider = provider;
-	session->language_tag = g_strdup (lang);
-	session->personal_filename = g_strdup (pwl);
-	session->exclude_filename = g_strdup (excl);
+	session->language_tag = strdup (lang);
+	session->personal_filename = g_strdup (pwl); /* Need g_strdup because may be NULL */
+	session->exclude_filename = g_strdup (excl); /* Need g_strdup because may be NULL */
 
 	return session;
 }
@@ -473,8 +472,7 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 			session = _enchant_session_new (provider, user_config_dirs->data, lang, FALSE);
 		}
 
-	g_slist_foreach (user_config_dirs, (GFunc)g_free, NULL);
-	g_slist_free (user_config_dirs);
+	g_slist_free_full (user_config_dirs, g_free);
 
 	return session;
 }
@@ -595,7 +593,7 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 	session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 
 	enchant_session_clear_error (session);
-	session->error = g_strdup (err);
+	session->error = strdup (err);
 }
 
 /**
@@ -697,7 +695,7 @@ enchant_dict_merge_suggestions(char ** suggs, size_t n_suggs, char ** new_suggs,
 
 			if(!is_duplicate)
 				{
-					suggs[n_suggs] = g_strdup (new_suggs[i]);
+					suggs[n_suggs] = strdup (new_suggs[i]);
 					++n_suggs;
 				}
 		}
@@ -729,7 +727,7 @@ enchant_dict_get_good_suggestions(EnchantDict * dict,
 			if(g_utf8_validate(suggs[i], sugg_len, NULL) &&
 			   !enchant_session_exclude(session, suggs[i], sugg_len) )
 				{
-					filtered_suggs[n_filtered_suggs] = g_strdup (suggs[i]);
+					filtered_suggs[n_filtered_suggs] = strdup (suggs[i]);
 					++n_filtered_suggs;
 				}
 		}
@@ -1130,7 +1128,7 @@ static void
 enchant_broker_set_error (EnchantBroker * broker, const char * const err)
 {
 	enchant_broker_clear_error (broker);
-	broker->error = g_strdup (err);
+	broker->error = strdup (err);
 }
 
 static int
@@ -1281,8 +1279,7 @@ enchant_load_providers (EnchantBroker * broker)
 			enchant_load_providers_in_dir (broker, iter->data);
 		}
 
-	g_slist_foreach (module_dirs, (GFunc)g_free, NULL);
-	g_slist_free (module_dirs);
+	g_slist_free_full (module_dirs, free);
 }
 
 static void
@@ -1335,8 +1332,7 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 			g_free (ordering_file);
 		}
 
-	g_slist_foreach (conf_dirs, (GFunc)g_free, NULL);
-	g_slist_free (conf_dirs);
+	g_slist_free_full (conf_dirs, g_free);
 }
 
 static GSList *
@@ -1416,7 +1412,7 @@ enchant_dict_destroyed (gpointer data)
 }
 
 static void
-enchant_provider_free (gpointer data, gpointer user_data _GL_UNUSED_PARAMETER)
+enchant_provider_free (gpointer data)
 {
 	EnchantProvider *provider;
 	GModule *module;
@@ -1479,8 +1475,7 @@ enchant_broker_free (EnchantBroker * broker)
 	g_hash_table_destroy (broker->dict_map);
 	g_hash_table_destroy (broker->provider_ordering);
 
-	g_slist_foreach (broker->provider_list, enchant_provider_free, NULL);
-	g_slist_free (broker->provider_list);
+	g_slist_free_full (broker->provider_list, enchant_provider_free);
 
 	enchant_broker_clear_error (broker);
 
@@ -1534,8 +1529,7 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 	enchant_dict_private_data->session = session;
 	dict->enchant_private_data = (void *)enchant_dict_private_data;
 
-
-	g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (pwl), dict);
+	g_hash_table_insert (broker->dict_map, (gpointer)strdup (pwl), dict);
 
 	return dict;
 }
@@ -1574,7 +1568,7 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 							enchant_dict_private_data->reference_count = 1;
 							enchant_dict_private_data->session = session;
 							dict->enchant_private_data = (void *)enchant_dict_private_data;
-							g_hash_table_insert (broker->dict_map, (gpointer)g_strdup (tag), dict);
+							g_hash_table_insert (broker->dict_map, (gpointer)strdup (tag), dict);
 							break;
 						}
 				}
@@ -1616,10 +1610,10 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 
 			dict = _enchant_broker_request_dict (broker, iso_639_only_tag);
 
-			g_free (iso_639_only_tag);
+			free (iso_639_only_tag);
 		}
 
-	g_free (normalized_tag);
+	free (normalized_tag);
 
 	return dict;
 }
@@ -1721,7 +1715,7 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 									if (ptr != NULL)
 										min_priority = g_slist_index (providers, ptr);
 									if (this_priority < min_priority)
-										g_hash_table_insert (tags, g_strdup (tag), provider);
+										g_hash_table_insert (tags, strdup (tag), provider);
 								}
 							}
 						}
@@ -1888,10 +1882,10 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 					exists = _enchant_broker_dict_exists (broker, iso_639_only_tag);
 				}
 
-			g_free (iso_639_only_tag);
+			free (iso_639_only_tag);
 		}
 
-	g_free (normalized_tag);
+	free (normalized_tag);
 	return exists;
 }
 
@@ -1931,7 +1925,7 @@ enchant_broker_set_ordering (EnchantBroker * broker,
 		{
 			/* we will free ordering_dupl && tag_dupl when the hash is destroyed */
 			g_hash_table_insert (broker->provider_ordering, (gpointer)tag_dupl,
-						 (gpointer)(ordering_dupl));
+					     (gpointer)(ordering_dupl));
 		}
 	else
 		{
@@ -1979,34 +1973,45 @@ enchant_broker_get_error (EnchantBroker * broker)
 	return broker->error;
 }
 
-/* private. returned string should be free'd with g_free */
+/**
+ * enchant_get_user_language
+ *
+ * Returns a char string giving the current language.
+ * Defaults to "en" if no language or locale can be found, or
+ * locale is C.
+ *
+ * The returned string should be free'd with free.
+ */
 ENCHANT_MODULE_EXPORT(char *)
 enchant_get_user_language(void)
 {
-	char * locale = NULL;
+	const char * locale = NULL;
 
 #if defined(G_OS_WIN32)
 	if(!locale)
-		locale = g_win32_getlocale ();
+		{ /* Copy locale string so it does not need to be freed */
+			char * win_locale = g_win32_getlocale ();
+			locale = alloca (strlen (win_locale));
+			strcpy (locale, win_locale);
+			g_free (win_locale);
+		}
 #endif
 
 	if(!locale)
-		locale = g_strdup (g_getenv ("LANG"));
+		locale = g_getenv ("LANG");
 
 #if defined(HAVE_LC_MESSAGES)
 	if(!locale)
-		locale = g_strdup (setlocale (LC_MESSAGES, NULL));
+		locale = setlocale (LC_MESSAGES, NULL);
 #endif
 
 	if(!locale)
-		locale = g_strdup (setlocale (LC_ALL, NULL));
+		locale = setlocale (LC_ALL, NULL);
 
-	if(!locale || strcmp(locale, "C") == 0) {
-		g_free(locale);
-		locale = g_strdup("en");
-	}
+	if(!locale || strcmp(locale, "C") == 0)
+		locale = "en";
 
-	return locale;
+	return strdup (locale);
 }
 
 
@@ -2019,7 +2024,7 @@ enchant_get_user_language(void)
  * compiled, except it is determined at runtime based on the location
  * of the enchant library.
  *
- * Returns: the prefix dir if it can be determined, or %null otherwise. Must be free'd.
+ * Returns: the prefix dir if it can be determined, or %null otherwise. Must be g_free'd.
  *
  * This API is private to the providers.
  *
