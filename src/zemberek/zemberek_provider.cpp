@@ -38,7 +38,6 @@
 
 #include "zemberek.h"
 
-ENCHANT_PLUGIN_DECLARE("Zemberek")
 
 extern "C" {
 

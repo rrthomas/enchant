@@ -41,7 +41,6 @@
 #include "enchant-provider.h"
 #include "unused-parameter.h"
 
-ENCHANT_PLUGIN_DECLARE("Aspell")
 
 ENCHANT_MODULE_EXPORT(void)
      configure_enchant_provider(EnchantProvider * me, const char *dir_name);

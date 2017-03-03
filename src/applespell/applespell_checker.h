@@ -23,8 +23,6 @@
 
 #include "enchant-provider.h"
 
-ENCHANT_PLUGIN_DECLARE("AppleSpell")
-
 class AppleSpellChecker
 {
  public:

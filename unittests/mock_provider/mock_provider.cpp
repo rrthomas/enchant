@@ -29,8 +29,6 @@
 #include <dlfcn.h>
 #endif
 
-ENCHANT_PLUGIN_DECLARE("mock")
-
 static void
 mock_provider_dispose(EnchantProvider *me)
 {
