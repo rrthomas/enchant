@@ -1,5 +1,3 @@
-SUBDIRS=. aspell uspell hunspell hspell applespell voikko zemberek
-
 AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(ENCHANT_CFLAGS) $(WARN_CFLAGS)
 
 lib_LTLIBRARIES = libenchant.la
@@ -14,7 +12,7 @@ else
 libenchant_la_LDFLAGS += -version-info $(VERSION_INFO)
 endif
 
-libenchant_la_SOURCES = enchant.c pwl.c enchant.h pwl.h
+libenchant_la_SOURCES = lib.c pwl.c enchant.h pwl.h
 if OS_WIN32
 libenchant_la_SOURCES += libenchant.rc
 endif
@@ -35,7 +33,6 @@ man_MANS = enchant.1
 
 LDADD = libenchant.la $(ENCHANT_LIBS)
 bin_PROGRAMS = enchant-lsmod enchant
-enchant_SOURCES = enchant-ispell.c
 
 EXTRA_DIST = enchant.i $(ordering_DATA) $(man_MANS)
 

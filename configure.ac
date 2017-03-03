@@ -291,13 +291,7 @@ enchant.pc
 lib/Makefile
 src/libenchant.rc
 src/Makefile
-src/aspell/Makefile
-src/uspell/Makefile
-src/hunspell/Makefile
-src/hspell/Makefile
-src/applespell/Makefile
-src/voikko/Makefile
-src/zemberek/Makefile
+providers/Makefile
 tests/Makefile
 unittests/Makefile
 unittests/enchant_providers/Makefile

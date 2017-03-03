@@ -27,6 +27,11 @@
  * do so, delete this exception statement from your version.
  */
 
+/*
+ * This is the GNU Aspell Enchant Backend.
+ * GNU Aspell is by Kevin Atkinson.  See http://aspell.net/
+ */
+
 #include "config.h"
 
 #include <stdio.h>

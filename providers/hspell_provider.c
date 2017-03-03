@@ -28,6 +28,11 @@
  * do so, delete this exception statement from your version.
  */
 
+/*
+ * Hspell was written by Nadav Har'El and Dan Kenigsberg.
+ * See: http://www.ivrix.org.il/projects/spell-checker/
+ */
+
 #include "config.h"
 
 #include <stdio.h>
