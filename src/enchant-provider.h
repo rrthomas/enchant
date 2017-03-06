@@ -47,8 +47,8 @@ typedef struct str_enchant_provider EnchantProvider;
 ENCHANT_MODULE_EXPORT(char *)
 	enchant_get_user_language(void);
 
-ENCHANT_MODULE_EXPORT (GSList *)
-	enchant_get_user_config_dirs (void);
+ENCHANT_MODULE_EXPORT (char *)
+	enchant_get_user_config_dir (void);
 
 ENCHANT_MODULE_EXPORT(char *)
 	enchant_get_prefix_dir(void);

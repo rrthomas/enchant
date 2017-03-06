@@ -22,6 +22,7 @@
 #include "EnchantTestFixture.h"
 #include <UnitTest++.h>
 #include <enchant-provider.h>
+#include <string.h>
 
 /**
  * enchant_get_user_config_dir
@@ -38,20 +39,23 @@
 TEST_FIXTURE(EnchantTestFixture,
              GetUserConfigDir)
 {
-  GSList * enchantUserConfigDirs = enchant_get_user_config_dirs();
-
-  CHECK(enchantUserConfigDirs);
-  GSList* iter = enchantUserConfigDirs;
+  std::string enchantUserConfigDir = enchant_get_user_config_dir();
+  fprintf(stderr, "enchantUserConfigDir: %s\n", enchantUserConfigDir.c_str());
 
   std::string expected = getenv("ENCHANT_CONFIG_DIR");
-  CHECK_EQUAL(expected, (gchar *) iter->data);
-  iter = iter->next;
-  
-  CHECK_EQUAL(GetEnchantHomeDirFromBase(g_get_user_config_dir()), (gchar*) iter->data);
-  iter = iter->next;
+  fprintf(stderr, "ENCHANT_CONFIG_DIR: %s\n", expected.c_str());
 
-  expected = GetEnchantHomeDirFromHome(g_get_home_dir());
-  std::string actual((char*) iter->data);
-  CHECK_EQUAL(expected, actual);
-  g_slist_free(enchantUserConfigDirs);
+  // FIXME: following crashes in UnitTest 1.4 with CHECK_EQUAL: use that when we can require >= 1.6
+  CHECK(expected == enchantUserConfigDir);
+
+  // Check it also works with ENCHANT_CONFIG_DIR unset
+  g_unsetenv("ENCHANT_CONFIG_DIR");
+  std::string enchantUserConfigDir2 = enchant_get_user_config_dir();
+  fprintf(stderr, "updated enchantUserConfigDir2: %s\n", enchantUserConfigDir2.c_str());
+  char *expected2 = g_build_filename (g_get_user_config_dir(), "enchant", NULL);
+  fprintf(stderr, "enchantUserConfigDir (no env var): %s\n", expected2);
+  CHECK(strcmp(expected2, enchantUserConfigDir2.c_str()) == 0);
+
+  // Restore env var
+  g_setenv("ENCHANT_CONFIG_DIR", expected.c_str(), TRUE);
 }

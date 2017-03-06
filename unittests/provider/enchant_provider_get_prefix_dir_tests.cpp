@@ -22,6 +22,7 @@
 #include <UnitTest++.h>
 #include <enchant-provider.h>
 #include <glib.h>
+#include <string.h>
 #include "EnchantTestFixture.h"
 
 struct EnchantGetPrefixDirTestFixture : EnchantTestFixture{
