@@ -37,6 +37,10 @@
 
 namespace enchant 
 {
+	void set_prefix_dir (const std::string prefix) {
+		enchant_set_prefix_dir (prefix.c_str ());
+	}
+
 	class Broker;
 
 	class Exception : public std::exception
@@ -205,10 +209,15 @@ namespace enchant
 			
 		public:
 			
-			static Broker * instance () {
-				return &m_instance;
+			Broker ()
+				: m_broker (enchant_broker_init ())
+				{
+				}
+
+			~Broker () {
+				enchant_broker_free (m_broker);
 			}
-						
+
 			Dict * request_dict (const std::string & lang) {
 				EnchantDict * dict = enchant_broker_request_dict (m_broker, lang.c_str());
 				
@@ -251,30 +260,12 @@ namespace enchant
 
 		private:
 
-			// space reserved for API/ABI expansion
-			void * _private[5];
-			
-			Broker ()
-				: m_broker (enchant_broker_init ())
-				{
-				}
-			
-			~Broker () {
-				enchant_broker_free (m_broker);
-			}
-			
 			// not implemented
 			Broker (const Broker & rhs);
 			Broker& operator=(const Broker & rhs);
 			
-			static Broker m_instance;
-			
 			EnchantBroker * m_broker;
 		}; // class enchant::Broker
-	
-	// define the broker instance
-	Broker Broker::m_instance;
-	
 } // enchant namespace
 
 #endif /* ENCHANT_PLUS_PLUS_H */

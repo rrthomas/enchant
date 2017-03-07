@@ -154,6 +154,9 @@ ENCHANT_MODULE_EXPORT (void)
 				EnchantDictDescribeFn fn,
 				void * user_data);
 
+ENCHANT_MODULE_EXPORT(void)
+	enchant_set_prefix_dir(const char *);
+
 #ifdef __cplusplus
 }
 #endif

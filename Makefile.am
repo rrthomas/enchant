@@ -1,4 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
+AM_DISTCHECK_CONFIGURE_FLAGS = --enable-relocatable
 
 SUBDIRS = lib src providers tests unittests
 

@@ -1,21 +1,30 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 AM_TESTS_ENVIRONMENT = \
-	ENCHANT_PREFIX_DIR=""; \
-	export ENCHANT_PREFIX_DIR; \
 	ENCHANT_CONFIG_DIR="config"; \
 	export ENCHANT_CONFIG_DIR; \
-	rm -f test.pwl lib; \
-	mkdir -p lib/enchant; \
-	cp $(top_builddir)/providers/@objdir@/*@shlibext@ lib/enchant || :;
+	rm -rf test.pwl $(libdir_subdir); \
+	mkdir -p $(libdir_subdir)/enchant; \
+	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/; \
+	cp $(top_builddir)/src/libenchant.la $(libdir_subdir)/; \
+	cp $(top_builddir)/providers/@objdir@/*@shlibext@ $(libdir_subdir)/enchant || :; \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
 	chmod +w $(builddir)/test.pwl;
 
-DISTCLEANFILES = test.pwl lib/enchant/*@shlibext@ config/*
+DISTCLEANFILES = test.pwl $(libdir_subdir)/enchant/*@shlibext@ config/*
 
 EXTRA_DIST = test.pwl.orig
 
-LDADD = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS)
+# FIXME: Remove this duplicate stanza when build system is made non-recursive
+LIBENCHANT_COPY = $(builddir)/$(libdir_subdir)/libenchant.la
+$(LIBENCHANT_COPY): $(top_builddir)/src/@objdir@/libenchant@shlibext@
+	rm -rf $(libdir_subdir)/
+	$(MKDIR_P) $(libdir_subdir)/enchant
+	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/
+	cp $(top_builddir)/src/libenchant.la $(libdir_subdir)/
+
+LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS)
+DEPS = $(LIBENCHANT_COPY)
 
 check_PROGRAMS = enchant.test enchantxx.test
 

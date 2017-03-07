@@ -17,6 +17,7 @@ Makefile.in
 /configure
 /config.*
 /depcomp
+/doc
 /enchant.pc
 /gnulib
 /install-sh
