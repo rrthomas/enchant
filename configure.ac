@@ -229,7 +229,7 @@ AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
   [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
    AS_IF([test "x$with_[]$1" != xno],
       [AC_CHECK_HEADERS([$1[].h])
-      AC_CHECK_LIB([$1], [$3])
+      AC_CHECK_LIB([$1], [$3],,, [$5])
 
       if test "x$ac_cv_header_[]$1_h" != xyes -o "x$ac_cv_lib_[]$1[]_[]$3" != xyes; then
          if test "x$with_[]$1" != xcheck; then
@@ -239,6 +239,7 @@ AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
       else
          with_[]$1=yes
          build_providers+=" $1"
+         LIBS="$LIBS $5"
       fi])
    AM_CONDITIONAL(WITH_[]$2, test "x$with_[]$1" = xyes)])
 
@@ -249,7 +250,7 @@ build_providers=
 dnl Standard providers
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([hunspell], [HUNSPELL])
 ENCHANT_CHECK_LIB_PROVIDER([aspell], [ASPELL], [get_aspell_dict_info_list])
-ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path])
+ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path],, [-lz])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([voikko], [VOIKKO], [libvoikko])
 
 dnl Experimental/deprecated providers
