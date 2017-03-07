@@ -43,6 +43,8 @@
 #include "enchant-provider.h"
 #include "pwl.h"
 #include "unused-parameter.h"
+#include "relocatable.h"
+#include "configmake.h"
 
 /********************************************************************************/
 
@@ -85,6 +87,16 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 /********************************************************************************/
 
+/* Relocate a path and ensure the result is allocated on the heap */
+static char *
+enchant_relocate (const char *path)
+{
+	char *newpath = (char *) relocate (path);
+	if (path == newpath)
+		newpath = strdup (newpath);
+	return newpath;
+}
+
 static void
 enchant_ensure_dir_exists (const char* dir)
 {
@@ -110,16 +122,12 @@ enchant_get_conf_dirs (void)
 {
 	GSList *conf_dirs = NULL;
 
-	char *prefix = enchant_get_prefix_dir ();
-	if (prefix)
-		{
-			conf_dirs = g_slist_append (conf_dirs, g_build_filename (prefix, "share", "enchant", NULL));
-			g_free (prefix);
-		}
+	conf_dirs = g_slist_append (conf_dirs, enchant_relocate (PKGDATADIR));
 
-#if defined(ENCHANT_SYSTEM_ORDERING)
-	conf_dirs = g_slist_append (conf_dirs, strdup (ENCHANT_SYSTEM_ORDERING));
-#endif
+	char *sysconfdir = enchant_relocate (SYSCONFDIR);
+	char *pkgconfdir = g_build_filename (sysconfdir, "enchant", NULL);
+	conf_dirs = g_slist_append (conf_dirs, pkgconfdir);
+	free (sysconfdir);
 
 	conf_dirs = g_slist_append (conf_dirs, enchant_get_user_config_dir ());
 
@@ -1117,43 +1125,30 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	char *prefix = enchant_get_prefix_dir ();
-	const char *pkglibdir = PKGLIBDIR;
-
-	enchant_load_providers_in_dir (broker, pkglibdir);
-
-	if (prefix)
-	{
-		char *module_dir = g_build_filename (prefix, "lib", "enchant", NULL);
-		if (strcmp (module_dir, pkglibdir) != 0)
-			enchant_load_providers_in_dir (broker, module_dir);
-		g_free (module_dir);
-		g_free (prefix);
-	}
+	char *module_dir = enchant_relocate (PKGLIBDIR);
+	enchant_load_providers_in_dir (broker, module_dir);
+	free (module_dir);
 }
 
 static void
 enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 {
-	char line [1024];
-	char * tag, * ordering;
+	char line[1024];
 
-	size_t i, len;
-
-	FILE * f;
-
-	f = g_fopen (file, "r");
+	FILE * f = g_fopen (file, "r");
 	if (!f)
 		return;
 
 	while (NULL != fgets (line, sizeof(line), f)) {
+		size_t i, len;
+
 		for (i = 0, len = strlen(line); i < len && line[i] != ':'; i++)
 			;
 
 		if (i < len)
 			{
-				tag = g_strndup (line, i);
-				ordering = g_strndup (line+(i+1), len - i);
+				char * tag = g_strndup (line, i);
+				char * ordering = g_strndup (line + (i + 1), len - i);
 
 				enchant_broker_set_ordering (broker, tag, ordering);
 
@@ -1873,7 +1868,7 @@ enchant_get_user_language(void)
  * compiled, except it is determined at runtime based on the location
  * of the enchant library.
  *
- * Returns: the prefix dir if it can be determined, or %null otherwise. Must be g_free'd.
+ * Returns: the prefix dir. Must be free'd.
  *
  * This API is private to the providers.
  *
@@ -1881,23 +1876,21 @@ enchant_get_user_language(void)
 ENCHANT_MODULE_EXPORT (char *)
 enchant_get_prefix_dir(void)
 {
-	char * prefix = NULL;
+	return enchant_relocate (INSTALLPREFIX);
+}
 
-	{
-		/* Use ENCHANT_PREFIX_DIR env var */
-		const gchar* env = g_getenv("ENCHANT_PREFIX_DIR");
-		if (env) {
-			prefix = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
-		}
-	}
-
-#if defined(ENCHANT_PREFIX_DIR)
-	if (!prefix) {
-		prefix = g_strdup (ENCHANT_PREFIX_DIR);
-	}
-#endif
-
-	return prefix;
+/**
+ * enchant_set_prefix_dir
+ *
+ * Set the prefix dir. This overrides any auto-detected value,
+ * and can also be used on systems or installations where
+ * auto-detection does not work.
+ *
+ */
+ENCHANT_MODULE_EXPORT (void)
+enchant_set_prefix_dir(const char *new_prefix)
+{
+	set_relocation_prefix (INSTALLPREFIX, new_prefix);
 }
 
 ENCHANT_MODULE_EXPORT(const char *) _GL_ATTRIBUTE_CONST

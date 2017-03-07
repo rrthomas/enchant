@@ -40,3 +40,14 @@
 /malloc.m4
 /strdup.m4
 /string_h.m4
+/dirname.m4
+/double-slash-root.m4
+/errno_h.m4
+/error.m4
+/getprogname.m4
+/relocatable-lib.m4
+/stdbool.m4
+/stdio_h.m4
+/strerror.m4
+/sys_socket_h.m4
+/configmake.m4

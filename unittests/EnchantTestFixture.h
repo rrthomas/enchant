@@ -45,11 +45,14 @@
 #include <locale>
 #include <codecvt>
 
+#include "enchant.h"
+
 struct EnchantTestFixture
 {
     //Setup
     EnchantTestFixture()
     {
+        enchant_set_prefix_dir(GetDirectoryOfThisModule().c_str());
         CleanUpFiles(); //just in case we stopped the process in the middle.
         CreateDirectory(GetTempUserEnchantDir());
     }
@@ -60,9 +63,8 @@ struct EnchantTestFixture
     }
     void CleanUpFiles()
     {
-        //clean up personal dictionaries from home dir
         DeleteDirAndFiles(GetTempUserEnchantDir());
-        DeleteDirAndFiles(AddToPath(GetDirectoryOfThisModule(), "lib"));
+        DeleteDirAndFiles(AddToPath(AddToPath(GetDirectoryOfThisModule(), LIBDIR_SUBDIR), "enchant"));
         DeleteDirAndFiles(AddToPath(GetDirectoryOfThisModule(), "share"));
     }
 
@@ -144,7 +146,7 @@ struct EnchantTestFixture
 
     std::string GetDirectoryOfThisModule()
     {
-        std::string result;
+        std::string result = ".";
 #if defined(_WIN32)
         // should be in the same directory as our test fixture
         WCHAR szFilename[MAX_PATH];

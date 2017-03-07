@@ -95,10 +95,10 @@ run_dict_tests (enchant::Dict * dict)
 int
 main (int argc, char **argv)
 {
-	enchant::Broker *broker;
+	enchant::set_prefix_dir (".");
+
+	enchant::Broker *broker = new enchant::Broker();
 	enchant::Dict *dict;
-	
-	broker = enchant::Broker::instance ();
 	
 	try {
 		dict = broker->request_dict ("en_US");
