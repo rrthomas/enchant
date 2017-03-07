@@ -2,7 +2,7 @@ AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcd
 
 lib_LTLIBRARIES = libenchant.la
 
-libenchant_la_CPPFLAGS = $(AM_CPPFLAGS) -DENCHANT_SYSTEM_ORDERING=\"$(sysconfdir)/enchant\" -D_ENCHANT_BUILD=1 -DENCHANT_VERSION_STRING=\"@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.@ENCHANT_MICRO_VERSION@\"
+libenchant_la_CPPFLAGS = $(AM_CPPFLAGS) -DENCHANT_SYSTEM_ORDERING=\"$(sysconfdir)/enchant\" -DPKGLIBDIR=\"$(pkglibdir)\" -D_ENCHANT_BUILD=1 -DENCHANT_VERSION_STRING=\"@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.@ENCHANT_MICRO_VERSION@\"
 libenchant_la_LIBADD = $(top_builddir)/lib/libgnu.la $(ENCHANT_LIBS)
 
 libenchant_la_LDFLAGS = -no-undefined -export-symbols-regex '^enchant_.*'

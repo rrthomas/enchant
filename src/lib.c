@@ -1118,10 +1118,15 @@ static void
 enchant_load_providers (EnchantBroker * broker)
 {
 	char *prefix = enchant_get_prefix_dir ();
+	const char *pkglibdir = PKGLIBDIR;
+
+	enchant_load_providers_in_dir (broker, pkglibdir);
+
 	if (prefix)
 	{
 		char *module_dir = g_build_filename (prefix, "lib", "enchant", NULL);
-		enchant_load_providers_in_dir (broker, module_dir);
+		if (strcmp (module_dir, pkglibdir) != 0)
+			enchant_load_providers_in_dir (broker, module_dir);
 		g_free (module_dir);
 		g_free (prefix);
 	}
