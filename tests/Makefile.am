@@ -1,13 +1,17 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 AM_TESTS_ENVIRONMENT = \
-	ENCHANT_MODULE_PATH=$(top_builddir)/providers/@objdir@; \
-	export ENCHANT_MODULE_PATH; \
-	rm -f test.pwl; \
+	ENCHANT_PREFIX_DIR=""; \
+	export ENCHANT_PREFIX_DIR; \
+	ENCHANT_CONFIG_DIR="config"; \
+	export ENCHANT_CONFIG_DIR; \
+	rm -f test.pwl lib; \
+	mkdir -p lib/enchant; \
+	cp $(top_builddir)/providers/@objdir@/*@shlibext@ lib/enchant || :;
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
 	chmod +w $(builddir)/test.pwl;
 
-DISTCLEANFILES = test.pwl
+DISTCLEANFILES = test.pwl lib/enchant/*@shlibext@ config/*
 
 EXTRA_DIST = test.pwl.orig
 

@@ -55,21 +55,11 @@ static const size_t MAXCHARS = 100; // maximum number of bytes of utf8 or chars 
 static GSList *
 uspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 {
-	GSList *dirs = NULL;
+	GSList *dirs = nullptr;
 
-	{
-		GSList *config_dirs, *iter;
-
-		config_dirs = enchant_get_user_config_dirs ();
-		
-		for (iter = config_dirs; iter; iter = iter->next)
-			{
-				dirs = g_slist_append (dirs, g_build_filename ((const gchar *)iter->data, 
-									       "uspell", NULL));
-			}
-
-		g_slist_free_full (config_dirs, free);
-	}
+	char * config_dir = enchant_get_user_config_dir ();
+	dirs = g_slist_append (dirs, g_build_filename (config_dir, "uspell", nullptr));
+	g_free (config_dir);
 
 	{
 		const gchar* const * system_data_dirs = g_get_system_data_dirs ();
@@ -77,7 +67,7 @@ uspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 
 		for (iter = system_data_dirs; *iter; iter++)
 			{
-				dirs = g_slist_append (dirs, g_build_filename (*iter, "uspell", "dicts", NULL));
+				dirs = g_slist_append (dirs, g_build_filename (*iter, "uspell", "dicts", nullptr));
 			}
 	}
 
@@ -85,7 +75,7 @@ uspell_checker_get_dictionary_dirs (EnchantBroker * broker)
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			char * uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", NULL);
+			char * uspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "uspell", nullptr);
 			g_free(enchant_prefix);
 			dirs = g_slist_append (dirs, uspell_prefix);
 		}

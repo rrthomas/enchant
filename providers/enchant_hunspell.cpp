@@ -173,31 +173,16 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 static GSList *
 hunspell_checker_get_dictionary_dirs ()
 {
-	GSList *dirs = NULL;
+	GSList *dirs = nullptr;
 
-	{
-		GSList *config_dirs, *iter;
+	char * config_dir = enchant_get_user_config_dir ();
+	dirs = g_slist_append (dirs, g_build_filename (config_dir, "hunspell", nullptr));
+	g_free (config_dir);
 
-		config_dirs = enchant_get_user_config_dirs ();
-		
-		for (iter = config_dirs; iter; iter = iter->next)
-			{
-				dirs = g_slist_append (dirs, g_build_filename (static_cast<const gchar *>(iter->data), 
-									       "hunspell", nullptr));
-			}
-
-		g_slist_free_full (config_dirs, free);
-	}
-
-	{
-		const gchar* const * system_data_dirs = g_get_system_data_dirs ();
-		const gchar* const * iter;
-
-		for (iter = system_data_dirs; *iter; iter++)
-			{
-				dirs = g_slist_append (dirs, g_build_filename (*iter, "hunspell", "dicts", nullptr));
-			}
-	}
+	for (const gchar* const * iter = g_get_system_data_dirs (); *iter; iter++)
+		{
+			dirs = g_slist_append (dirs, g_build_filename (*iter, "hunspell", nullptr));
+		}
 
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();

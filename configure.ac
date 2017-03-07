@@ -48,6 +48,8 @@ LT_INIT([win32-dll])
 LT_LANG([Windows Resource])
 gl_INIT
 AC_SUBST([objdir])
+LT_SYS_MODULE_EXT
+AC_SUBST([shlibext], [$libltdl_cv_shlibext])
 
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])

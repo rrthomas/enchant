@@ -44,15 +44,6 @@
 #include "pwl.h"
 #include "unused-parameter.h"
 
-#if defined(__APPLE__) && defined(__MACH__)
-#define ENCHANT_USER_PATH_EXTENSION "Library", "Application Support", "Enchant"
-#elif defined(_WIN32)
-#define ENCHANT_USER_PATH_EXTENSION "enchant"
-#else
-#define ENCHANT_USER_PATH_EXTENSION ".enchant"
-#endif
-
-/********************************************************************************/
 /********************************************************************************/
 
 struct str_enchant_broker
@@ -94,23 +85,8 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 /********************************************************************************/
 
-static GSList *
-_enchant_get_user_home_dirs (void)
-{
-	GSList *dirs = NULL;
-	const char* home_dir;
-
-	home_dir = g_get_home_dir ();
-	if (home_dir)
-		{
-			dirs = g_slist_append (dirs, strdup (home_dir));
-		}
-
-	return dirs;
-}
-
 static void
-_enchant_ensure_dir_exists (const char* dir)
+enchant_ensure_dir_exists (const char* dir)
 {
 	if (dir && !g_file_test (dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))
 		{
@@ -119,155 +95,33 @@ _enchant_ensure_dir_exists (const char* dir)
 		}
 }
 
-static GSList *
-_enchant_get_dirs_from_string (const char * string)
+ENCHANT_MODULE_EXPORT (char *)
+enchant_get_user_config_dir (void)
 {
-	char **tokens;
-	GSList *dirs = NULL;
-
-#ifdef _WIN32
-	tokens = g_strsplit (string, ";", 0);
-#else
-	tokens = g_strsplit (string, ":", 0);
-#endif
-	if (tokens != NULL) {
-		int i;
-		for (i = 0; tokens[i]; i++)
-			{
-				char *token = g_strstrip(tokens[i]);
-				dirs = g_slist_append (dirs, strdup (token));
-			}
-
-		g_strfreev (tokens);
+	const gchar * env = g_getenv("ENCHANT_CONFIG_DIR");
+	if (env) {
+		return g_filename_to_utf8(env, -1, NULL, NULL, NULL);
 	}
-
-	return dirs;
-}
-
-ENCHANT_MODULE_EXPORT (GSList *)
-enchant_get_user_config_dirs (void)
-{
-	GSList *user_dirs = NULL;
-
-	{
-		/* Use ENCHANT_CONFIG_DIR env var */
-		const gchar* env = g_getenv("ENCHANT_CONFIG_DIR");
-		if (env) {
-			char * config_dir = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
-			if (config_dir)
-				{
-					user_dirs = g_slist_append (user_dirs, config_dir);
-				}
-		}
-	}
-
-	{
-		const char * user_config_dir;
-
-		user_config_dir = g_get_user_config_dir();
-
-		if (user_config_dir)
-			user_dirs = g_slist_append (user_dirs, g_build_filename (user_config_dir,
-										 "enchant",
-										 NULL));
-	}
-
-	{
-		GSList *home_dirs = NULL, *dir;
-		home_dirs = _enchant_get_user_home_dirs ();
-
-		for (dir = home_dirs; dir; dir = dir->next)
-			{
-				user_dirs = g_slist_append (user_dirs,
-							    g_build_filename (dir->data,
-									      ENCHANT_USER_PATH_EXTENSION,
-									      NULL));
-			}
-
-		g_slist_free_full (home_dirs, free);
-	}
-
-	return user_dirs;
-}
-
-/* place to look for system level providers */
-static GSList *
-enchant_get_module_dirs (void)
-{
-	GSList *module_dirs = NULL;
-
-	char * module_dir = NULL;
-	char * prefix = NULL;
-
-	{
-		GSList *user_dirs, *iter;
-
-		user_dirs = enchant_get_user_config_dirs();
-
-		for (iter = user_dirs; iter; iter = iter->next)
-			module_dirs = g_slist_append (module_dirs, iter->data);
-
-		g_slist_free (user_dirs);
-	}
-
-#if defined(ENCHANT_GLOBAL_MODULE_DIR)
-	module_dirs = g_slist_append (module_dirs, strdup (ENCHANT_GLOBAL_MODULE_DIR));
-#endif
-	/* Dynamically locate library and search for modules relative to it. */
-	prefix = enchant_get_prefix_dir();
-	if(prefix)
-		{
-			module_dir = g_build_filename(prefix,"lib","enchant",NULL);
-			g_free(prefix);
-			module_dirs = g_slist_append (module_dirs, module_dir);
-		}
-
-	/* Use ENCHANT_MODULE_PATH env var */
-	{
-		const gchar* env = g_getenv("ENCHANT_MODULE_PATH");
-		if (env) {
-			const gchar * path = g_filename_to_utf8(env, -1, NULL, NULL, NULL);
-			if (path)
-				{
-					GSList *dir;
-					for (dir = _enchant_get_dirs_from_string (path); dir; dir = dir->next)
-						{
-							module_dirs = g_slist_append (module_dirs, dir->data);
-						}
-				}
-		}
-	}
-
-	return module_dirs;
+	return g_build_filename (g_get_user_config_dir (), "enchant", NULL);
 }
 
 static GSList *
 enchant_get_conf_dirs (void)
 {
-	GSList *conf_dirs = NULL, *user_conf_dirs, *iter;
-	char * ordering_dir = NULL, * prefix = NULL;
+	GSList *conf_dirs = NULL;
 
-	user_conf_dirs = enchant_get_user_config_dirs();
-
-	for (iter = user_conf_dirs; iter != NULL; iter = iter->next)
+	char *prefix = enchant_get_prefix_dir ();
+	if (prefix)
 		{
-			conf_dirs = g_slist_append (conf_dirs, iter->data);
+			conf_dirs = g_slist_append (conf_dirs, g_build_filename (prefix, "share", "enchant", NULL));
+			g_free (prefix);
 		}
 
-	g_slist_free (user_conf_dirs);
-
-	/* Dynamically locate library and search for files relative to it. */
-	prefix = enchant_get_prefix_dir();
-	if(prefix)
-		{
-			ordering_dir = g_build_filename(prefix,"share","enchant",NULL);
-			g_free(prefix);
-			conf_dirs = g_slist_append (conf_dirs, ordering_dir);
-		}
-
-#if defined(ENCHANT_GLOBAL_ORDERING)
-	conf_dirs = g_slist_append (conf_dirs, strdup (ENCHANT_GLOBAL_ORDERING));
+#if defined(ENCHANT_SYSTEM_ORDERING)
+	conf_dirs = g_slist_append (conf_dirs, strdup (ENCHANT_SYSTEM_ORDERING));
 #endif
+
+	conf_dirs = g_slist_append (conf_dirs, enchant_get_user_config_dir ());
 
 	return conf_dirs;
 }
@@ -456,23 +310,16 @@ _enchant_session_new (EnchantProvider *provider, const char * const user_config_
 static EnchantSession *
 enchant_session_new (EnchantProvider *provider, const char * const lang)
 {
+	char *user_config_dir = enchant_get_user_config_dir ();
+
 	EnchantSession * session = NULL;
-	GSList *user_config_dirs, *iter;
+	session = _enchant_session_new (provider, user_config_dir, lang, TRUE);
 
-	user_config_dirs = enchant_get_user_config_dirs ();
-	for (iter = user_config_dirs; iter != NULL && session == NULL; iter = iter->next)
+	if (session == NULL && user_config_dir != NULL)
 		{
-			session = _enchant_session_new (provider, iter->data, lang, TRUE);
+			enchant_ensure_dir_exists (user_config_dir);
+			session = _enchant_session_new (provider, user_config_dir, lang, FALSE);
 		}
-
-	if (session == NULL && user_config_dirs != NULL)
-		{
-			_enchant_ensure_dir_exists (user_config_dirs->data);
-
-			session = _enchant_session_new (provider, user_config_dirs->data, lang, FALSE);
-		}
-
-	g_slist_free_full (user_config_dirs, g_free);
 
 	return session;
 }
@@ -1270,16 +1117,14 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	GSList *module_dirs, *iter;
-
-	module_dirs = enchant_get_module_dirs();
-
-	for (iter = module_dirs; iter; iter = iter->next)
-		{
-			enchant_load_providers_in_dir (broker, iter->data);
-		}
-
-	g_slist_free_full (module_dirs, free);
+	char *prefix = enchant_get_prefix_dir ();
+	if (prefix)
+	{
+		char *module_dir = g_build_filename (prefix, "lib", "enchant", NULL);
+		enchant_load_providers_in_dir (broker, module_dir);
+		g_free (module_dir);
+		g_free (prefix);
+	}
 }
 
 static void
@@ -1322,8 +1167,7 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 
 	broker->provider_ordering = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	/* we want the user's dirs to show up last, so they override system dirs */
-	conf_dirs = g_slist_reverse (enchant_get_conf_dirs ());
+	conf_dirs = enchant_get_conf_dirs ();
 	for (iter = conf_dirs; iter; iter = iter->next)
 		{
 			char *ordering_file;
@@ -1775,7 +1619,7 @@ enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 }
 
 static int
-_enchant_provider_dictionary_exists (EnchantProvider * provider,
+enchant_provider_dictionary_exists (EnchantProvider * provider,
 					 const char * const tag)
 {
 	int exists = 0;
@@ -1837,7 +1681,7 @@ _enchant_broker_dict_exists (EnchantBroker * broker,
 
 			provider = (EnchantProvider *) list->data;
 
-			if (_enchant_provider_dictionary_exists (provider, tag))
+			if (enchant_provider_dictionary_exists (provider, tag))
 				{
 					return 1;
 				}

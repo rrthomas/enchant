@@ -7,7 +7,7 @@ AM_TESTS_ENVIRONMENT = \
 	export ENCHANT_PREFIX_DIR; \
 	ENCHANT_CONFIG_DIR="config"; \
 	export ENCHANT_CONFIG_DIR; \
-	cp $(builddir)/mock_provider/@objdir@/*.so $(builddir)/mock_provider/@objdir@/*.dll . || :;
+	cp $(builddir)/mock_provider/@objdir@/*@shlibext@ .;
 
 check_PROGRAMS = main
 TESTS = main
