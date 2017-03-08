@@ -38,7 +38,7 @@
 #include "unused-parameter.h"
 
 
-bool zemberek_service_is_running ()
+static bool zemberek_service_is_running ()
 {
   DBusGConnection *connection;
   DBusGProxy *proxy;

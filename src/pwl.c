@@ -1194,6 +1194,3 @@ static int edit_dist(const char* utf8word1, const char* utf8word2)
 	g_free(table);
 	return cost;
 }
-
-
-
