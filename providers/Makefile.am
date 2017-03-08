@@ -1,7 +1,4 @@
-# FIXME: Build and test AppleSpell back-end
 EXTRA_DIST =			\
-	applespell_checker.h	\
-	applespell_checker.mm	\
 	AppleSpell.config	\
 	libenchant_hunspell.rc
 
@@ -47,3 +44,10 @@ endif
 enchant_zemberek_la_CXXFLAGS = $(AM_CXXFLAGS) $(ZEMBEREK_CFLAGS)
 enchant_zemberek_la_LIBADD = $(ZEMBEREK_LIBS)
 enchant_zemberek_la_SOURCES = enchant_zemberek.cpp
+
+if WITH_APPLESPELL
+provider_LTLIBRARIES += enchant_applespell.la
+endif
+enchant_applespell_la_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag=CXX
+enchant_applespell_la_OBJCXXFLAGS = $(AM_OBJCXXFLAGS)
+enchant_applespell_la_SOURCES = applespell_checker.mm
