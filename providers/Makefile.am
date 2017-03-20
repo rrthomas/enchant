@@ -1,6 +1,5 @@
 EXTRA_DIST =			\
-	AppleSpell.config	\
-	libenchant_hunspell.rc
+	AppleSpell.config
 
 provider_LTLIBRARIES =
 providerdir = $(pkglibdir)
