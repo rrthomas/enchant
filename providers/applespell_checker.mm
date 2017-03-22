@@ -19,6 +19,8 @@
  * 02110-1301, USA.
  */
 
+#include "config.h"
+
 #include <glib.h>
 #include <gmodule.h>
 
@@ -157,7 +159,8 @@ char ** AppleSpellChecker::suggestWord (const char * const word, size_t len, siz
 
 	// NSLog (@"AppleSpellChecker::suggestWord: word=\"%@\"", str);
 
-	NSArray * result = [m_checker guessesForWord:str];
+	NSRange range = NSMakeRange(0, [str length]);
+	NSArray<NSString *>* result = [m_checker guessesForWordRange:range:str:lang:0];
 
 	[str release];
 
