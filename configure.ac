@@ -40,7 +40,7 @@ AC_PROG_CC
 gl_EARLY
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX(11)
-AC_PROG_OBJC
+AC_PROG_OBJCXX
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_HEADER_STDC
@@ -162,6 +162,7 @@ dnl Very hackish.
 dnl Ubuntu / Debian ship older version of unittest++ with their own pkg-config
 dnl and include
 dnl ===========================================================================
+AC_LANG_PUSH([C++])
 PKG_CHECK_EXISTS([UnitTest++],
     [PKG_CHECK_MODULES(UNITTESTPP, [UnitTest++])
 dnl and because of the above, we need to tweak the include until we stop
@@ -195,6 +196,7 @@ dnl supporting this old version.
 )
 AC_SUBST(UNITTESTPP_CFLAGS)
 AC_SUBST(UNITTESTPP_LIBS)
+AC_LANG_POP([C++])
 
 
 dnl Provider detection
@@ -228,10 +230,14 @@ AC_DEFUN([ENCHANT_CHECK_PKG_CONFIG_PROVIDER],
 AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
   [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
    AS_IF([test "x$with_[]$1" != xno],
-      [AC_CHECK_HEADERS([$1[].h])
-      AC_CHECK_LIB([$1], [$3])
-
-      if test "x$ac_cv_header_[]$1_h" != xyes -o "x$ac_cv_lib_[]$1[]_[]$3" != xyes; then
+      [_enchant_header=m4_default([$6], [$1[].h])
+      AC_CHECK_HEADERS([$_enchant_header], [_header_found=yes], [_header_found=no], [])
+      if test "$3" != NOLIB; then
+         AC_CHECK_LIB([$1], [$3],,, [$5])
+      else
+         ac_cv_lib_[]$1[]_[]$3=yes
+      fi
+      if test "x$_header_found" != xyes -o "x$ac_cv_lib_[]$1[]_[]$3" != xyes; then
          if test "x$with_[]$1" != xcheck; then
             AC_MSG_FAILURE([--with-[]$1 was given, but tests for $1 failed])
          fi
@@ -239,6 +245,7 @@ AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
       else
          with_[]$1=yes
          build_providers+=" $1"
+         LIBS="$LIBS $5"
       fi])
    AM_CONDITIONAL(WITH_[]$2, test "x$with_[]$1" = xyes)])
 
@@ -249,39 +256,19 @@ build_providers=
 dnl Standard providers
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([hunspell], [HUNSPELL])
 ENCHANT_CHECK_LIB_PROVIDER([aspell], [ASPELL], [get_aspell_dict_info_list])
-ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path])
+ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path],, [-lz])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([voikko], [VOIKKO], [libvoikko])
+if test "$ac_cv_env_OBJCXX_value" != ""; then
+  AC_LANG_PUSH([Objective C++])
+  ENCHANT_CHECK_LIB_PROVIDER([applespell], [APPLESPELL], [NOLIB],, [-framework Cocoa], [Cocoa/Cocoa.h])
+  AC_LANG_POP([Objective C++])
+fi
+dnl Must call AM_CONDITIONAL outside conditional
+AM_CONDITIONAL(WITH_APPLESPELL, test "x$with_applespell" = xyes)
 
 dnl Experimental/deprecated providers
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([uspell], [USPELL], , [no])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([zemberek], [ZEMBEREK], [dbus-glib-1 >= 0.62], [no])
-
-dnl Apple Spell
-ENCHANT_CHECK_PROVIDER_SETUP([applespell])
-AS_IF([test "x$with_applespell" != xno],
-   [AC_MSG_CHECKING([for applespell])
-    case ${host_os} in
-        *darwin*)
-           APPLESPELL_CFLAGS=" -xobjective-c"
-           APPLESPELL_LIBS=" -lobjc"
-           APPLESPELL_LDFLAGS=" -framework Cocoa"
-           with_applespell=yes
-           build_providers+=" applespell"
-        ;;
-        *)
-           if test "x$with_applespell" != xcheck; then
-             AC_MSG_FAILURE([--with-applespell was given, but not building for macOS])
-           fi
-           with_applespell=no
-        ;;
-    esac
-    AC_MSG_RESULT([$with_applespell])
-   ])
-AC_SUBST(APPLESPELL_CFLAGS)
-AC_SUBST(APPLESPELL_LIBS)
-AC_SUBST(APPLESPELL_LDFLAGS)
-
-AM_CONDITIONAL(WITH_APPLESPELL, test "x$with_applespell" = xyes)
 
 dnl =======================================================================================
 

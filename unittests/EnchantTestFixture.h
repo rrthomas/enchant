@@ -165,26 +165,6 @@ struct EnchantTestFixture
 
         return result;
     }
-
-    static std::string GetEnchantHomeDirFromBase(const std::string& basePath)
-    {
-        return AddToPath(basePath, "enchant");
-    }
-
-    static std::string GetEnchantHomeDirFromHome(const std::string& homePath)
-    {
-        // FIXME: Integrate with ENCHANT_USER_PATH_EXTENSION in enchant.c
-#if defined(__APPLE__) && defined(__MACH__)
-        return AddToPath(AddToPath(AddToPath(homePath,"Library"), 
-                                                       "Application Support"), 
-                                                       "Enchant");
-#elif defined(_WIN32)
-	return AddToPath(homePath, "enchant");
-#else
-        return AddToPath(homePath, ".enchant");
-#endif
-    }
-
 };
 
 #endif

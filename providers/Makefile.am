@@ -1,9 +1,5 @@
-# FIXME: Build and test AppleSpell back-end
 EXTRA_DIST =			\
-	applespell_checker.h	\
-	applespell_checker.mm	\
-	AppleSpell.config	\
-	libenchant_hunspell.rc
+	AppleSpell.config
 
 provider_LTLIBRARIES =
 providerdir = $(pkglibdir)
@@ -16,12 +12,10 @@ AM_LDFLAGS = -module -avoid-version -no-undefined $(ENCHANT_LIBS) $(top_builddir
 if WITH_ASPELL
 provider_LTLIBRARIES += enchant_aspell.la
 endif
-enchant_aspell_la_LIBADD = $(ASPELL_LIBS)
 
 if WITH_HSPELL
 provider_LTLIBRARIES += enchant_hspell.la
 endif
-enchant_hspell_la_LIBADD = $(HSPELL_LIBS)
 
 if WITH_HUNSPELL
 provider_LTLIBRARIES += enchant_hunspell.la
@@ -49,3 +43,10 @@ endif
 enchant_zemberek_la_CXXFLAGS = $(AM_CXXFLAGS) $(ZEMBEREK_CFLAGS)
 enchant_zemberek_la_LIBADD = $(ZEMBEREK_LIBS)
 enchant_zemberek_la_SOURCES = enchant_zemberek.cpp
+
+if WITH_APPLESPELL
+provider_LTLIBRARIES += enchant_applespell.la
+endif
+enchant_applespell_la_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag=CXX
+enchant_applespell_la_OBJCXXFLAGS = $(AM_OBJCXXFLAGS)
+enchant_applespell_la_SOURCES = applespell_checker.mm

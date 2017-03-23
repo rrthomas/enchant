@@ -19,10 +19,40 @@
  * 02110-1301, USA.
  */
 
+#include "config.h"
+
 #include <glib.h>
 #include <gmodule.h>
 
-#include "applespell_checker.h"
+#import <Cocoa/Cocoa.h>
+
+#include "enchant-provider.h"
+
+class AppleSpellChecker
+{
+ public:
+	AppleSpellChecker();
+
+	~AppleSpellChecker();
+
+	void		parseConfigFile (const char * configFile);
+
+	bool		checkWord (const char * word, size_t len, NSString * lang);
+	char **		suggestWord (const char * const word, size_t len, size_t * nsug, NSString * lang);
+
+	NSString *	requestDictionary (const char * const code);
+ private:
+	NSString *	dictionaryForCode (NSString * code);
+
+	NSSpellChecker *	m_checker;
+	NSMutableDictionary *	m_languages;
+};
+
+typedef struct
+{
+	AppleSpellChecker *	AppleSpell;
+	NSString *		DictionaryName;
+} AppleSpellDictionary;
 
 AppleSpellChecker::AppleSpellChecker()
 {
@@ -129,7 +159,8 @@ char ** AppleSpellChecker::suggestWord (const char * const word, size_t len, siz
 
 	// NSLog (@"AppleSpellChecker::suggestWord: word=\"%@\"", str);
 
-	NSArray * result = [m_checker guessesForWord:str];
+	NSRange range = NSMakeRange(0, [str length]);
+	NSArray<NSString *>* result = [m_checker guessesForWordRange:range:str:lang:0];
 
 	[str release];
 

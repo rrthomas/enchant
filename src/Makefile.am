@@ -20,12 +20,6 @@ endif
 libenchant_includedir = $(includedir)/enchant
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
 
-if WITH_APPLESPELL
-libenchant_la_CPPFLAGS += @APPLESPELL_CFLAGS@
-libenchant_la_LIBADD += @APPLESPELL_LIBS@
-libenchant_la_LDFLAGS += @APPLESPELL_LDFLAGS@
-endif
-
 orderingdir=$(datadir)/enchant
 ordering_DATA = enchant.ordering
 
