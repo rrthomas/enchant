@@ -517,7 +517,7 @@ static int enchant_is_all_caps(const char*const word, size_t len)
 	return hasCap;
 }
 
-static int enchant_is_title_case(const char*const word, size_t len)
+static _GL_ATTRIBUTE_PURE int enchant_is_title_case(const char * const word, size_t len)
 {
 	gunichar ch;
 	GUnicodeType type;
