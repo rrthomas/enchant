@@ -7,16 +7,9 @@ libenchant_la_CPPFLAGS = $(AM_CPPFLAGS) -D_ENCHANT_BUILD=1 -DENCHANT_VERSION_STR
 libenchant_la_LIBADD = $(top_builddir)/lib/libgnu.la $(ENCHANT_LIBS) $(LTLIBOBJS)
 
 libenchant_la_LDFLAGS = -no-undefined -export-symbols-regex '^enchant_.*'
-if OS_WIN32
-libenchant_la_LDFLAGS += -avoid-version
-else
 libenchant_la_LDFLAGS += -version-info $(VERSION_INFO)
-endif
 
 libenchant_la_SOURCES = lib.c pwl.c enchant.h pwl.h
-if OS_WIN32
-libenchant_la_SOURCES += libenchant.rc
-endif
 
 libenchant_includedir = $(includedir)/enchant
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
