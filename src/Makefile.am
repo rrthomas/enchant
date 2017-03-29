@@ -12,17 +12,4 @@ libenchant_la_LDFLAGS += -version-info $(VERSION_INFO)
 libenchant_la_SOURCES = lib.c pwl.c enchant.h pwl.h
 
 libenchant_includedir = $(includedir)/enchant
-libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
-
-orderingdir=$(datadir)/enchant
-ordering_DATA = enchant.ordering
-
-man_MANS = enchant.1
-
-LDADD = libenchant.la $(ENCHANT_LIBS)
-bin_PROGRAMS = enchant-lsmod enchant
-
-EXTRA_DIST = enchant.i $(ordering_DATA) $(man_MANS)
-
-.rc.lo:
-	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --tag=RC --mode=compile $(RC) $(RCFLAGS) $< -o $@
+libenchant_include_HEADERS = enchant.h enchant-provider.h
