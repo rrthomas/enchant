@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(ENCHANT_CFLAGS) $(WARN_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(ENCHANT_CFLAGS)
 DEFS = -DNO_XMALLOC -DENABLE_COSTLY_RELOCATABLE -DIN_LIBRARY -DINSTALLDIR=\"$(libdir)\"
 
 lib_LTLIBRARIES = libenchant.la
