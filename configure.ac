@@ -40,13 +40,11 @@ AC_PROG_CC
 gl_EARLY
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX(11)
-AC_PROG_OBJCXX
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MKDIR_P
 AC_HEADER_STDC
 LT_INIT([win32-dll])
-LT_LANG([Windows Resource])
 gl_INIT
 AC_SUBST([objdir])
 LT_SYS_MODULE_EXT
@@ -63,24 +61,7 @@ gl_CONFIGMAKE_PREP
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
 
-dnl Extra warnings with GCC and compatible compilers
-AC_ARG_ENABLE([gcc-warnings],
-  [AS_HELP_STRING([--disable-gcc-warnings],
-                  [turn off lots of GCC warnings])],
-  [case $enableval in
-     yes|no) ;;
-     *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
-   esac
-   gl_gcc_warnings=$enableval],
-  [gl_gcc_warnings=yes]
-)
-if test "$gl_gcc_warnings" = yes; then
-  # When compiling with GCC, prefer -isystem to -I when including system
-  # include files, to avoid generating useless diagnostics for the files.
-  ISYSTEM='-isystem '
-else
-  ISYSTEM='-I'
-fi
+ISYSTEM='-I'
 AC_SUBST([ISYSTEM])
 
 libdir_subdir=`echo "$libdir" | sed -e 's|^${exec_prefix}/||'`
@@ -98,7 +79,6 @@ dnl ============================================================================
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 Makefile
-enchant.pc
 lib/Makefile
 src/Makefile
 ])

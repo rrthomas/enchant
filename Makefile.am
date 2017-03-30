@@ -3,12 +3,8 @@ AM_DISTCHECK_CONFIGURE_FLAGS = --enable-relocatable
 
 SUBDIRS = lib src
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = enchant.pc
-
 EXTRA_DIST =		\
 	autogen.sh	\
-	enchant.pc.in	\
 	README 		\
 	HACKING 	\
 	NEWS 		\
