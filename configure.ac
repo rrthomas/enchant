@@ -5,36 +5,6 @@ AM_INIT_AUTOMAKE([subdir-objects])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 
-dnl Release number rules:
-dnl This is derived from "Versioning" chapter of info libtool documentation.
-dnl Format is MAJOR:MINOR:MICRO
-dnl     4a) Increment major when removing or changing interfaces.
-dnl     4a) 5) Increment minor when adding interfaces.
-dnl     6) Set minor to zero when removing or changing interfaces.
-dnl     3) Increment micro when interfaces not changed at all,
-dnl               only bug fixes or internal changes made.
-dnl     4b) Set micro to zero when adding, removing or changing interfaces.
-
-dnl First extract pieces from the version number string
-ENCHANT_MAJOR_VERSION=`echo $VERSION | awk -F. '{print $1}'`
-ENCHANT_MINOR_VERSION=`echo $VERSION | awk -F. '{print $2}'`
-ENCHANT_MICRO_VERSION=`echo $VERSION | awk -F. '{print $3}'`
-ENCHANT_VERSION=$ENCHANT_MAJOR_VERSION.$ENCHANT_MINOR_VERSION.$ENCHANT_MICRO_VERSION$ENCHANT_MICRO_VERSION_SUFFIX
-ENCHANT_VERSION_NUMBER=`expr $ENCHANT_MAJOR_VERSION \* 1000000 + $ENCHANT_MINOR_VERSION \* 1000 + $ENCHANT_MICRO_VERSION`
-
-ENCHANT_SONUM=0
-AGE=`expr $ENCHANT_MAJOR_VERSION '*' 1000 + $ENCHANT_MINOR_VERSION`
-REVISION=$ENCHANT_MICRO_VERSION
-CURRENT=`expr $ENCHANT_SONUM + $AGE`
-
-dnl Version info for libraries = CURRENT:REVISION:AGE
-VERSION_INFO=$CURRENT:$REVISION:$AGE
-
-AC_SUBST(VERSION_INFO)
-AC_SUBST(ENCHANT_MAJOR_VERSION)
-AC_SUBST(ENCHANT_MINOR_VERSION)
-AC_SUBST(ENCHANT_MICRO_VERSION)
-
 dnl Checks for programs.
 AC_PROG_CC
 gl_EARLY
@@ -60,9 +30,6 @@ gl_CONFIGMAKE_PREP
 
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
-
-ISYSTEM='-I'
-AC_SUBST([ISYSTEM])
 
 libdir_subdir=`echo "$libdir" | sed -e 's|^${exec_prefix}/||'`
 AC_SUBST([libdir_subdir])

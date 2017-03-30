@@ -1895,5 +1895,5 @@ enchant_set_prefix_dir(const char *new_prefix)
 
 ENCHANT_MODULE_EXPORT(const char *) _GL_ATTRIBUTE_CONST
 enchant_get_version (void) {
-	return ENCHANT_VERSION_STRING;
+	return "";
 }
