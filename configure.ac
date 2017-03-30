@@ -11,8 +11,6 @@ gl_EARLY
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX(11)
 AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_MKDIR_P
 AC_HEADER_STDC
 LT_INIT([win32-dll])
 gl_INIT
@@ -28,20 +26,10 @@ else
 fi
 gl_CONFIGMAKE_PREP
 
-
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
 
 libdir_subdir=`echo "$libdir" | sed -e 's|^${exec_prefix}/||'`
 AC_SUBST([libdir_subdir])
-
-# FIXME: Use just GLIB_CFLAGS, GLIB_LIBS
-ENCHANT_CFLAGS=$GLIB_CFLAGS
-ENCHANT_LIBS=$GLIB_LIBS
-
-AC_SUBST(ENCHANT_CFLAGS)
-AC_SUBST(ENCHANT_LIBS)
-
-dnl =======================================================================================
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
