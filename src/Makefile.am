@@ -6,7 +6,4 @@ lib_LTLIBRARIES = libenchant.la
 libenchant_la_CPPFLAGS = $(AM_CPPFLAGS) -D_ENCHANT_BUILD=1
 libenchant_la_LIBADD = $(top_builddir)/lib/libgnu.la $(GLIB_LIBS) $(LTLIBOBJS)
 
-libenchant_la_SOURCES = lib.c pwl.c enchant.h pwl.h
-
-libenchant_includedir = $(includedir)/enchant
-libenchant_include_HEADERS = enchant.h enchant-provider.h
+libenchant_la_SOURCES = lib.c enchant.h
