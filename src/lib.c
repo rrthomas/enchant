@@ -34,9 +34,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include <glib.h>
-#include <gmodule.h>
-#include <glib/gstdio.h>
 #include <locale.h>
 
 #include "enchant.h"
@@ -46,17 +43,8 @@
 
 /********************************************************************************/
 
-struct str_enchant_broker
-{
-	GHashTable *dict_map;		/* map of language tag -> dictionary */
-	gchar * error;
-};
-
 typedef struct str_enchant_session
 {
-	GHashTable *session_include;
-	GHashTable *session_exclude;
-
 	char * personal_filename;
 	char * exclude_filename;
 	char * language_tag;
@@ -83,79 +71,8 @@ enchant_relocate (const char *path)
 	return newpath;
 }
 
-static void
-enchant_ensure_dir_exists (const char* dir)
-{
-	if (dir && !g_file_test (dir, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))
-		{
-			(void)g_remove (dir);
-			g_mkdir_with_parents (dir, 0700);
-		}
-}
-
-ENCHANT_MODULE_EXPORT (char *)
-enchant_get_user_config_dir (void)
-{
-	const gchar * env = g_getenv("ENCHANT_CONFIG_DIR");
-	if (env) {
-		return g_filename_to_utf8(env, -1, NULL, NULL, NULL);
-	}
-	return g_build_filename (g_get_user_config_dir (), "enchant", NULL);
-}
-
-static GSList *
-enchant_get_conf_dirs (void)
-{
-	GSList *conf_dirs = NULL;
-
-	conf_dirs = g_slist_append (conf_dirs, enchant_relocate (PKGDATADIR));
-
-	char *sysconfdir = enchant_relocate (SYSCONFDIR);
-	char *pkgconfdir = g_build_filename (sysconfdir, "enchant", NULL);
-	conf_dirs = g_slist_append (conf_dirs, pkgconfdir);
-	free (sysconfdir);
-
-	conf_dirs = g_slist_append (conf_dirs, enchant_get_user_config_dir ());
-
-	return conf_dirs;
-}
-
 /********************************************************************************/
 /********************************************************************************/
-
-static gchar*
-enchant_modify_string_chars (gchar *str,
-							 gssize len,
-							 gchar (*function)(gchar))
-{
-	gchar* it, *end;
-
-	g_return_val_if_fail (str != NULL, NULL);
-
-	if (len < 0)
-		len = strlen (str);
-
-	end = str + len;
-
-	for (it = str; it != end; ++it)
-		*it = function (*it);
-
-	return str;
-}
-
-static gchar*
-enchant_ascii_strup (gchar *str,
-					 gssize len)
-{
-	return enchant_modify_string_chars(str, len, g_ascii_toupper);
-}
-
-static gchar*
-enchant_ascii_strdown (gchar *str,
-						  gssize len)
-{
-	return enchant_modify_string_chars(str, len, g_ascii_tolower);
-}
 
 /* returns TRUE if tag is valid
  * for requires alphanumeric ASCII or underscore
@@ -164,12 +81,6 @@ static _GL_ATTRIBUTE_PURE int
 enchant_is_valid_dictionary_tag(const char * const tag)
 {
 	const char * it;
-	for (it = tag; *it; ++it)
-		{
-			if(!g_ascii_isalnum(*it) && *it != '_')
-				return 0;
-		}
-
 	return it != tag; /*empty tag invalid*/
 }
 
@@ -178,8 +89,6 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 {
 	char * new_tag = strdup (dict_tag);
 	char * needle;
-
-	new_tag = g_strstrip (new_tag);
 
 	/* strip off en_GB@euro */
 	if ((needle = strchr (new_tag, '@')) != NULL)
@@ -195,15 +104,9 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 
 	/* everything before first '_' is converted to lower case */
 	if ((needle = strchr (new_tag, '_')) != NULL) {
-			enchant_ascii_strdown(new_tag, needle - new_tag);
 			++needle;
 			/* everything after first '_' is converted to upper case */
-			enchant_ascii_strup(needle, -1);
 		}
-	else {
-			enchant_ascii_strdown(new_tag, -1);
-		}
-
 	return new_tag;
 }
 
@@ -220,89 +123,10 @@ enchant_iso_639_from_tag (const char * const dict_tag)
 }
 
 static void
-enchant_session_destroy (EnchantSession * session)
-{
-	g_hash_table_destroy (session->session_include);
-	g_hash_table_destroy (session->session_exclude);
-	g_free (session->personal_filename);
-	g_free (session->exclude_filename);
-	free (session->language_tag);
-
-	if (session->error)
-		g_free (session->error);
-
-	g_free (session);
-}
-
-static void
-enchant_session_add (EnchantSession * session, const char * const word, size_t len)
-{
-	char* key = g_strndup (word, len);
-	g_hash_table_remove (session->session_exclude, key);
-	g_hash_table_insert (session->session_include, key, GINT_TO_POINTER(TRUE));
-}
-
-static void
-enchant_session_remove (EnchantSession * session, const char * const word, size_t len)
-{
-	char* key = g_strndup (word, len);
-	g_hash_table_remove (session->session_include, key);
-	g_hash_table_insert (session->session_exclude, key, GINT_TO_POINTER(TRUE));
-}
-
-static void
-enchant_session_add_personal (EnchantSession * session, const char * const word, size_t len)
-{
-}
-
-static void
-enchant_session_remove_personal (EnchantSession * session, const char * const word, size_t len)
-{
-}
-
-static void
-enchant_session_add_exclude (EnchantSession * session, const char * const word, size_t len)
-{
-}
-
-static void
-enchant_session_remove_exclude (EnchantSession * session, const char * const word, size_t len)
-{
-}
-
-/* a word is excluded if it is in the exclude dictionary or in the session exclude list
- *  AND the word has not been added to the session include list
- */
-static gboolean
-enchant_session_exclude (EnchantSession * session, const char * const word, size_t len)
-{
-	gboolean result = FALSE;
-
-	char * utf = g_strndup (word, len);
-
-	g_free (utf);
-
-	return result;
-}
-
-static gboolean
-enchant_session_contains (EnchantSession * session, const char * const word, size_t len)
-{
-	gboolean result = FALSE;
-
-	char * utf = g_strndup (word, len);
-
-	g_free (utf);
-
-	return result;
-}
-
-static void
 enchant_session_clear_error (EnchantSession * session)
 {
 	if (session->error)
 		{
-			g_free (session->error);
 			session->error = NULL;
 		}
 }
@@ -320,87 +144,11 @@ enchant_dict_merge_suggestions(char ** suggs, size_t n_suggs, char ** new_suggs,
 {
 	size_t i, j;
 
-	for(i = 0; i < n_new_suggs; i++)
-		{
-			int is_duplicate = 0;
-			char * normalized_new_sugg;
-
-			normalized_new_sugg = g_utf8_normalize (new_suggs[i], -1, G_NORMALIZE_NFD);
-
-			for(j = 0; j < n_suggs; j++)
-				{
-					char* normalized_sugg;
-					normalized_sugg = g_utf8_normalize (suggs[j], -1, G_NORMALIZE_NFD);
-
-					if(strcmp(normalized_sugg,normalized_new_sugg)==0)
-						{
-							is_duplicate = 1;
-							g_free(normalized_sugg);
-							break;
-						}
-					g_free(normalized_sugg);
-				}
-			g_free(normalized_new_sugg);
-
-			if(!is_duplicate)
-				{
-					suggs[n_suggs] = strdup (new_suggs[i]);
-					++n_suggs;
-				}
-		}
-
 	return n_suggs;
 }
 
 /***********************************************************************************/
 /***********************************************************************************/
-
-static void
-enchant_broker_clear_error (EnchantBroker * broker)
-{
-	if (broker->error)
-		{
-			g_free (broker->error);
-			broker->error = NULL;
-		}
-}
-
-static void
-enchant_broker_set_error (EnchantBroker * broker, const char * const err)
-{
-	enchant_broker_clear_error (broker);
-	broker->error = strdup (err);
-}
-
-static void
-enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
-{
-	char line[1024];
-
-	FILE * f = g_fopen (file, "r");
-	if (!f)
-		return;
-
-	while (NULL != fgets (line, sizeof(line), f)) {
-		size_t i, len;
-
-		for (i = 0, len = strlen(line); i < len && line[i] != ':'; i++)
-			;
-
-		if (i < len)
-			{
-				char * tag = g_strndup (line, i);
-				char * ordering = g_strndup (line + (i + 1), len - i);
-
-				enchant_broker_set_ordering (broker, tag, ordering);
-
-				g_free (tag);
-				g_free (ordering);
-			}
-	}
-
-	fclose (f);
-}
 
 /**
  * enchant_broker_init
@@ -413,111 +161,17 @@ enchant_broker_init (void)
 {
 	EnchantBroker *broker = NULL;
 
-	g_return_val_if_fail (g_module_supported (), NULL);
-
-	broker = g_new0 (EnchantBroker, 1);
-
 	return broker;
-}
-
-/**
- * enchant_broker_free
- * @broker: A non-null #EnchantBroker
- *
- * Destroys the broker object. Must only be called once per broker init
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_broker_free (EnchantBroker * broker)
-{
-	guint n_remaining;
-
-	g_return_if_fail (broker);
-
-	n_remaining = g_hash_table_size (broker->dict_map);
-	if (n_remaining)
-		{
-			g_warning ("%u dictionaries weren't free'd.\n", n_remaining);
-		}
-
-	/* will destroy any remaining dictionaries for us */
-	g_hash_table_destroy (broker->dict_map);
-
-	enchant_broker_clear_error (broker);
-
-	g_free (broker);
-}
-
-/**
- * enchant_broker_describe
- * @broker: A non-null #EnchantBroker
- * @fn: A non-null #EnchantBrokerDescribeFn
- * @user_data: Optional user-data
- *
- * Enumerates the Enchant providers and tells
- * you some rudimentary information about them.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_broker_describe (EnchantBroker * broker,
-			 EnchantBrokerDescribeFn fn,
-			 void * user_data)
-{
-	GSList *list;
-	GModule *module;
-
-	const char * name, * desc, * file;
-
-	g_return_if_fail (broker);
-	g_return_if_fail (fn);
-
-	enchant_broker_clear_error (broker);
-}
-
-/**
- * enchant_broker_list_dicts
- * @broker: A non-null #EnchantBroker
- * @fn: A non-null #EnchantDictDescribeFn
- * @user_data: Optional user-data
- *
- * Enumerates the dictionaries available from
- * all Enchant providers.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_broker_list_dicts (EnchantBroker * broker,
-			   EnchantDictDescribeFn fn,
-			   void * user_data)
-{
-	GSList *list;
-	GHashTable *tags;
-	GHashTableIter iter;
-	gpointer key, value;
-
-	g_return_if_fail (broker);
-	g_return_if_fail (fn);
-
-	tags = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
-
-	enchant_broker_clear_error (broker);
-
-	g_hash_table_iter_init (&iter, tags);
-	g_hash_table_destroy (tags);
 }
 
 static int
 _enchant_broker_dict_exists (EnchantBroker * broker,
 				 const char * const tag)
 {
-	GSList * list;
-
 	/* don't query the providers if it is an empty string */
 	if (tag == NULL || *tag == '\0') {
 		return 0;
 	}
-
-	/* don't query the providers if we can just do a quick map lookup */
-	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL) {
-		return 1;
-	}
-
 	return 0;
 }
 
@@ -535,81 +189,10 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 	char * normalized_tag;
 	int exists = 0;
 
-	g_return_val_if_fail (broker, 0);
-	g_return_val_if_fail (tag && strlen(tag), 0);
-
-	enchant_broker_clear_error (broker);
-
 	normalized_tag = enchant_normalize_dictionary_tag (tag);
-
-	if(!enchant_is_valid_dictionary_tag(normalized_tag))
-		{
-			enchant_broker_set_error (broker, "invalid tag character found");
-		}
-	else if ((exists = _enchant_broker_dict_exists (broker, normalized_tag)) == 0)
-		{
-			char * iso_639_only_tag;
-
-			iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
-
-			if (strcmp (normalized_tag, iso_639_only_tag) != 0)
-				{
-					exists = _enchant_broker_dict_exists (broker, iso_639_only_tag);
-				}
-
-			free (iso_639_only_tag);
-		}
 
 	free (normalized_tag);
 	return exists;
-}
-
-/**
- * enchant_broker_set_ordering
- * @broker: A non-null #EnchantBroker
- * @tag: A non-null language tag (en_US)
- * @ordering: A non-null ordering (aspell,hunspell,uspell,hspell)
- *
- * Declares a preference of dictionaries to use for the language
- * described/referred to by @tag. The ordering is a comma delimited
- * list of provider names. As a special exception, the "*" tag can
- * be used as a language tag to declare a default ordering for any
- * language that does not explictly declare an ordering.
- */
-ENCHANT_MODULE_EXPORT (void)
-enchant_broker_set_ordering (EnchantBroker * broker,
-				 const char * const tag,
-				 const char * const ordering)
-{
-	char * tag_dupl;
-	char * ordering_dupl;
-
-	g_return_if_fail (broker);
-	g_return_if_fail (tag && strlen(tag));
-	g_return_if_fail (ordering && strlen(ordering));
-
-	enchant_broker_clear_error (broker);
-
-	tag_dupl = enchant_normalize_dictionary_tag (tag);
-
-	ordering_dupl = g_strdup (ordering);
-	ordering_dupl = g_strstrip (ordering_dupl);
-}
-
-/**
- * enchant_broker_get_error
- * @broker: A non-null broker
- *
- * Returns a const char string or NULL describing the last exception in UTF8 encoding.
- * WARNING: error is transient and is likely cleared as soon as the
- * next broker operation happens
- */
-ENCHANT_MODULE_EXPORT(char *)
-enchant_broker_get_error (EnchantBroker * broker)
-{
-	g_return_val_if_fail (broker, NULL);
-
-	return broker->error;
 }
 
 /**
@@ -625,24 +208,6 @@ ENCHANT_MODULE_EXPORT(char *)
 enchant_get_user_language(void)
 {
 	const char * locale = NULL;
-
-#if defined(G_OS_WIN32)
-	if(!locale)
-		{ /* Copy locale string so it does not need to be freed */
-			char * win_locale = g_win32_getlocale ();
-			locale = alloca (strlen (win_locale));
-			strcpy (locale, win_locale);
-			g_free (win_locale);
-		}
-#endif
-
-	if(!locale)
-		locale = g_getenv ("LANG");
-
-#if defined(HAVE_LC_MESSAGES)
-	if(!locale)
-		locale = setlocale (LC_MESSAGES, NULL);
-#endif
 
 	if(!locale)
 		locale = setlocale (LC_ALL, NULL);

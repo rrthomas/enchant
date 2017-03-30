@@ -26,8 +26,6 @@ else
 fi
 gl_CONFIGMAKE_PREP
 
-PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
-
 libdir_subdir=`echo "$libdir" | sed -e 's|^${exec_prefix}/||'`
 AC_SUBST([libdir_subdir])
 
