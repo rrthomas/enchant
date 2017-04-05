@@ -44,18 +44,55 @@ extern "C" {
 
 typedef struct str_enchant_provider EnchantProvider;
 
+/**
+ * enchant_get_user_language
+ *
+ * Returns a char string giving the current language.
+ * Defaults to "en" if no language or locale can be found, or
+ * locale is C.
+ *
+ * The returned string should be free'd with free.
+ */
 ENCHANT_MODULE_EXPORT(char *)
 	enchant_get_user_language(void);
 
 ENCHANT_MODULE_EXPORT (char *)
 	enchant_get_user_config_dir (void);
 
+/**
+ * enchant_get_prefix_dir
+ *
+ * Returns a string giving the location of the base directory
+ * of the enchant installation.  This corresponds roughly to
+ * the --prefix option given to ./configure when enchant is
+ * compiled, except it is determined at runtime based on the location
+ * of the enchant library.
+ *
+ * Returns: the prefix dir. Must be free'd.
+ *
+ */
 ENCHANT_MODULE_EXPORT(char *)
 	enchant_get_prefix_dir(void);
 
+/**
+ * enchant_dict_set_error
+ * @dict: A non-null dictionary
+ * @err: A non-null error message
+ *
+ * Sets the current runtime error to @err. This API is private to the
+ * providers.
+ */
 ENCHANT_MODULE_EXPORT(void)
 	enchant_dict_set_error (EnchantDict * dict, const char * const err);
 
+/**
+ * enchant_provider_set_error
+ * @provider: A non-null provider
+ * @err: A non-null error message
+ *
+ * Sets the current runtime error to @err. This API is private to
+ * the providers.
+ */
 ENCHANT_MODULE_EXPORT(void)
 	enchant_provider_set_error (EnchantProvider * provider, const char * const err);
 
