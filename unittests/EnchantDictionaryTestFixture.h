@@ -206,7 +206,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         return AddToPath(GetTempUserEnchantDir(), "qaa.dic");
     }
 
-	std::string GetExcludeDictFileName(){
+    std::string GetExcludeDictFileName(){
         return AddToPath(GetTempUserEnchantDir(), "qaa.exc");
     }
 
