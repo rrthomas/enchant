@@ -1,3 +1,33 @@
+2.0.0 (???)
+-----------
+
+The major version number has been incremented owing to API/ABI changes, but
+in practice upgrading from 1.6.x should be easy.
+
+Previously-deprecated APIs have been removed.
+
+The little-used enchant_broker_get/set_param calls have been removed.
+
+Some trivial API changes have been made to fix otherwise-unavoidable
+compilation warnings both in libenchant and in application code. This is
+strictly an ABI change (although the ABI may not actually have changed,
+depending on the platform).
+
+The provider API has been changed slightly: enchant_get_user_language is now
+a documented public API (before it was marked private, but it has in fact
+been exported for some years). enchant_get_user_config_dirs is now
+enchant_get_user_config_dir, and returns only a single directory.
+
+The plethora of configuration options previously available has been
+rationalised and documented. In particular, support for relocation (so that
+Enchant, or an application of which it is part, can be installed anywhere in
+a filing system) has been rewritten and documented (see INSTALL).
+
+The Myspell backend has been renamed to Hunspell to match the upstream
+project. Users with their own enchant.ordering files will need to change
+“myspell” to “hunspell”.
+
+
 1.6.1 (February 6, 2017)
 ------------------------
 

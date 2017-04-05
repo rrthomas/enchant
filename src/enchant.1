@@ -1,4 +1,4 @@
-.TH ENCHANT 1 "July 2006" enchant "Enchant Mini Help File"
+.TH ENCHANT 1 "April 2017"
 .SH NAME
 Enchant \- a spellchecker
 .SH SYNOPSIS
@@ -15,8 +15,8 @@ is an ispell-compatible spellchecker.
 .B "\-a"
 List suggestions in ispell pipe mode format.
 .TP
-.B "\-d dict"
-Use dictionary <dict>.
+.B "\-d DICTIONARY"
+Use the given dictionary.
 .TP
 .B "\-h"
 Show short help.
@@ -30,16 +30,12 @@ Include the line number in the output.
 .B "\-v"
 Prints the program's version.
 .SH ENCHANT ORDERING FILE
-Enchant has a global and a per-user ordering file named \fIenchant.ordering\fR.
-It lets the user specify which spelling backend to use for individual
-languages in the case when you care which backend gets used. The global
-file is located in \fI$(datadir)/enchant\fR and the per-user file is
-located in \fI~/.enchant\fR.
-The per-user file takes precedence, if found.
+Enchant uses global and per-user ordering files named \fIenchant.ordering\fR
+to decide which spelling provider to use for particular languages.
+The per-user file takes precedence.
 .PP
 The ordering file takes the form language_tag:<comma-separated list of spelling
-backends>. I am currently aware of the following backends: aspell,
-hunspell, uspell, hspell, voikko, zemberek, and Apple Spell (macOS only). '*' is
+providers>. To see what providers are available, run \fIenchant-lsmod\fR. '*' is
 used to mean "use this ordering for all languages, unless instructed otherwise." For example:
 .PP
 *:aspell,hunspell
@@ -49,25 +45,19 @@ en:aspell,hunspell
 en_GB:hunspell,aspell
 .br
 fr:hunspell,aspell
-.SH DIRECTORIES IMPORTANT TO ENCHANT
-Unless configured otherwise, Enchant's Hunspell and Uspell
-backends will look for dictionaries in directories specific to Enchant,
-and will not use your system-wide installed dictionaries. This is
-because these dictionaries are installed
-in different locations on different systems.
-.PP
-Like the \fIenchant.ordering\fR file described above, Enchant looks in
-the global directory for these dictionaries and a per-user directory.
+.SH FILES AND DIRECTORIES
+Enchant looks in two places for files, in the \fIenchant\fR subdirectory of
+the system data directory (default: \fI$(datadir)\fR) and of the user
+configuration directory (default: \fIENCHANT_CONFIG_DIR\fR, or, if that is
+not set, \fIXDG_CONFIG_HOME/enchant\fR on UNIX systems, which defaults to
+\fI~/.config\fR, and the user's \fIAppData\fR directory on Windows).
 The per-user directory takes precedence if it is found.
-Enchant looks for Hunspell dictionaries in \fI$(datadir)/enchant/hunspell\fR and \fI~/.enchant/hunspell\fR.
-Enchant looks for Uspell dictionaries in \fI$(datadir)/enchant/uspell\fR and \fI~/.enchant/uspell\fR.
-.PP
-Packagers and users may wish to make symbolic links to the system\-wide dictionary directories. Or, preferably, use the \-\-with-hunspell-dir and \-\-with\-uspell\-dir 'configure' arguments.
-.SH MORE INFORMATION
-http://www.abisource.com/enchant/
+Dictionaries are looked for in a subdirectory with the same name as the
+provider; for example, \fI/usr/share/enchant/hunspell\fR and
+\fI~/.config/enchant/hunspell\fR. Some providers can be configured at
+build time to look in a different system directory, which is useful when there is a
+standard place to put dictionaries for that provider.
 .SH "SEE ALSO"
 .BR aspell(1)
 .SH "AUTHOR"
- Dom Lachowicz
- WEB: http://www.abisource.com/enchant/
- MAIL: domlachowicz@gmail.com
+Written by Dom Lachowicz and Reuben Thomas.

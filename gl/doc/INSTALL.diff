@@ -1,0 +1,39 @@
+--- gnulib/doc/INSTALL	2017-02-23 15:26:15.296354123 +0000
++++ gl/doc/INSTALL	2017-04-05 18:45:08.778495451 +0100
+@@ -1,3 +1,36 @@
++Building and installing libenchant
++**********************************
++
++For standard GNU autotools installation instructions, see below. There
++follow some enchant-specific notes.
++
++The usual GNU autotools package instructions apply, except that Enchant must
++be built with --enable-relocatable. This is done automatically by
++autogen.sh.
++
++To build from git, or without relying on the generated files in a source
++release, automake, autoconf, libtool, pkg-config and git must be installed.
++Run
++
++./autogen.sh
++
++to set up and configure the source tree; optional configure arguments can be
++supplied as normal.
++
++If Enchant is installed in a fixed location, and on Windows and Linux
++systems, no further configuration should be needed to make it relocatable;
++that is, work when copied from its original installation directory to
++another location.
++
++Otherwise, and in code intended to be portable to other systems, your code
++should call enchant_set_prefix_dir (see enchant.h) before any other Enchant
++function.
++
++For more details of how the relocation support works, including how you can
++use it in your own program, see doc/relocatable.texi and
++doc/relocatable-maint.texi.
++
++
+ Installation Instructions
+ *************************
+ 
