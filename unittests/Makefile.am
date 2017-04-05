@@ -1,16 +1,22 @@
 SUBDIRS = enchant_providers mock_provider
 
-AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(UNITTESTPP_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
+
+ENCHANT_CONFIG_DIR="config"
 
 AM_TESTS_ENVIRONMENT = \
-	ENCHANT_PREFIX_DIR=""; \
-	export ENCHANT_PREFIX_DIR; \
-	ENCHANT_CONFIG_DIR="config"; \
-	export ENCHANT_CONFIG_DIR; \
+	export ENCHANT_CONFIG_DIR=$(ENCHANT_CONFIG_DIR); \
 	cp $(builddir)/mock_provider/@objdir@/*@shlibext@ .;
 
 check_PROGRAMS = main
 TESTS = main
+
+LIBENCHANT_COPY = $(builddir)/$(libdir_subdir)/libenchant.la
+$(LIBENCHANT_COPY): $(top_builddir)/src/libenchant.la
+	rm -rf $(libdir_subdir)/
+	$(MKDIR_P) $(libdir_subdir)/enchant
+	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/
+	cp $(top_builddir)/src/libenchant.la $(libdir_subdir)/
 
 main_SOURCES = main.cpp \
 	EnchantBrokerTestFixture.h \
@@ -47,7 +53,10 @@ main_SOURCES = main.cpp \
 	provider/enchant_provider_get_user_config_dirs_tests.cpp \
 	provider/enchant_provider_get_user_language_tests.cpp \
 	$(NULL)
-main_DEPENDENCIES = $(top_builddir)/src/libenchant.la
-main_LDADD = $(top_builddir)/src/libenchant.la $(ENCHANT_LIBS) $(UNITTESTPP_LIBS)
+main_DEPENDENCIES = $(LIBENCHANT_COPY)
+main_LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS) $(UNITTESTPP_LIBS)
 
-DISTCLEANFILES = libenchant_*.so *enchant*.dll
+DISTCLEANFILES = *@shlibext@ $(libdir_subdir)/enchant/*@shlibext@ config/
+
+distclean-local:
+	rm -rf $(libdir_subdir) $(ENCHANT_CONFIG_DIR)

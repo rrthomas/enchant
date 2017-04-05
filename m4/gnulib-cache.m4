@@ -27,15 +27,17 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --local-dir=gl --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --no-conditional-dependencies --libtool --macro-prefix=gl alloca bootstrap flock manywarnings snippet/unused-parameter strdup-posix
+#   gnulib-tool --import --local-dir=gl --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --no-conditional-dependencies --libtool --macro-prefix=gl alloca bootstrap configmake flock manywarnings relocatable-lib-lgpl snippet/unused-parameter strdup-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([gl])
 gl_MODULES([
   alloca
   bootstrap
+  configmake
   flock
   manywarnings
+  relocatable-lib-lgpl
   snippet/unused-parameter
   strdup-posix
 ])

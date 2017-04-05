@@ -43,6 +43,7 @@ AX_CXX_COMPILE_STDCXX(11)
 AC_PROG_OBJCXX
 AC_PROG_INSTALL
 AC_PROG_LN_S
+AC_PROG_MKDIR_P
 AC_HEADER_STDC
 LT_INIT([win32-dll])
 LT_LANG([Windows Resource])
@@ -50,6 +51,10 @@ gl_INIT
 AC_SUBST([objdir])
 LT_SYS_MODULE_EXT
 AC_SUBST([shlibext], [$libltdl_cv_shlibext])
+AC_CONFIG_LIBOBJ_DIR([lib])
+if test $RELOCATABLE != yes; then
+  AC_MSG_ERROR([Enchant must be built with --enable-relocatable])
+fi
 
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
@@ -107,11 +112,12 @@ else
 fi
 AC_SUBST([ISYSTEM])
 
+libdir_subdir=`echo "$libdir" | sed -e 's|^${exec_prefix}/||'`
+AC_SUBST([libdir_subdir])
+
+# FIXME: Use just GLIB_CFLAGS, GLIB_LIBS
 ENCHANT_CFLAGS=$GLIB_CFLAGS
 ENCHANT_LIBS=$GLIB_LIBS
-if test "x$prefix" != "xNONE"; then
-        ENCHANT_CFLAGS="$ENCHANT_CFLAGS -DENCHANT_PREFIX_DIR='\"$prefix\"'"
-fi
 
 AC_SUBST(ENCHANT_CFLAGS)
 AC_SUBST(ENCHANT_LIBS)

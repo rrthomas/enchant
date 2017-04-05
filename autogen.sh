@@ -12,7 +12,7 @@ test -z "$srcdir" && srcdir=.
 ./bootstrap || exit 1
 
 if [ "$NOCONFIGURE" = "" ]; then
-        $srcdir/configure "$@" || exit 1
+        $srcdir/configure --enable-relocatable "$@" || exit 1
 
         if [ "$1" = "--help" ]; then exit 0 else
                 echo "Now type \`make\' to compile" || exit 1

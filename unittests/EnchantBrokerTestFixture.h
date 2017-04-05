@@ -126,7 +126,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         userMockProvider2Configuration = user2Configuration;
 
         CopyProvider("enchant_mock_provider", "enchant_mock_provider");
-        hModule = g_module_open("lib/enchant/enchant_mock_provider", (GModuleFlags) 0);
+        hModule = g_module_open(LIBDIR_SUBDIR "/enchant/enchant_mock_provider", (GModuleFlags) 0);
         if(hModule!=NULL){
             SET_CONFIGURE sc;
             assert(g_module_symbol(hModule, "set_configure", (gpointer *)&sc));
@@ -136,7 +136,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         hModule2 = NULL;
         if(user2Configuration != NULL){
             CopyProvider("enchant_mock_provider2", "enchant_mock_provider2");
-            hModule2 = g_module_open("lib/enchant/enchant_mock_provider2", (GModuleFlags) 0);
+            hModule2 = g_module_open(LIBDIR_SUBDIR "/enchant/enchant_mock_provider2", (GModuleFlags) 0);
             if(hModule2!=NULL){
                 SET_CONFIGURE sc;
                 assert(g_module_symbol(hModule2, "set_configure", (gpointer *)&sc));
@@ -193,7 +193,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         std::string sourceName = prefix + sourceProviderName + "." + G_MODULE_SUFFIX;
         std::string destinationName = destinationProviderName + "." + G_MODULE_SUFFIX;
 
-        std::string destinationDir = AddToPath(AddToPath(GetDirectoryOfThisModule(), "lib"),"enchant");
+        std::string destinationDir = AddToPath(AddToPath(GetDirectoryOfThisModule(), LIBDIR_SUBDIR), "enchant");
 
         CreateDirectory(destinationDir);
 

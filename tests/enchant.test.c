@@ -110,14 +110,13 @@ run_dict_tests (EnchantDict * dict)
 int
 main (int argc, char **argv)
 {
-	EnchantBroker *broker;
-	EnchantDict *dict;
+	enchant_set_prefix_dir (".");
+
 	const char * err;
-	
-	broker = enchant_broker_init ();
+	EnchantBroker *broker = enchant_broker_init ();
+	EnchantDict *dict;
 	
 	dict = enchant_broker_request_dict (broker, "en_US");
-	
 	if (!dict) 
 		{
 			err = enchant_broker_get_error (broker);
@@ -127,12 +126,9 @@ main (int argc, char **argv)
 				fprintf (stderr, "Couldn't create dictionary for en_US\n");
 			return 1;
 		} 
-	else 
-		{
-			enchant_dict_describe (dict, describe_dict_fn, NULL);
-			run_dict_tests (dict);			
-			enchant_broker_free_dict (broker, dict);
-		}
+	enchant_dict_describe (dict, describe_dict_fn, NULL);
+	run_dict_tests (dict);
+	enchant_broker_free_dict (broker, dict);
 	
 	dict = enchant_broker_request_pwl_dict (broker, "test.pwl");
 	if (!dict) 
@@ -144,12 +140,9 @@ main (int argc, char **argv)
 				fprintf (stderr, "Couldn't create personal wordlist dictionary\n");
 			return 1;
 		} 
-	else 
-		{
-			enchant_dict_describe (dict, describe_dict_fn, NULL);
-			run_dict_tests (dict);
-			enchant_broker_free_dict (broker, dict);
-		}
+	enchant_dict_describe (dict, describe_dict_fn, NULL);
+	run_dict_tests (dict);
+	enchant_broker_free_dict (broker, dict);
 
 	enchant_broker_describe (broker, enumerate_providers_fn, NULL);
 	enchant_broker_free (broker);
