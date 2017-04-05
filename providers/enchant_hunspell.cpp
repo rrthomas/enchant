@@ -197,14 +197,6 @@ hunspell_checker_get_dictionary_dirs ()
 	dirs = g_slist_append (dirs, g_strdup (ENCHANT_HUNSPELL_DICT_DIR));
 #endif
 
-	{
-		const gchar* hun_dir = g_getenv("DICPATH");
-		if (hun_dir)
-			{
-				dirs = g_slist_append(dirs, strdup(hun_dir));
-			}
-	}
-
 	return dirs;
 }
 
