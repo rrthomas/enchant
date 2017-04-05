@@ -80,14 +80,14 @@ print_version (FILE * to)
 static void
 print_help (FILE * to, const char * prog)
 {
-	fprintf (to, "Usage: %s [options] -a|-d dict|-l|-L|-m|-v[v]|<file>\n", prog);
-	fprintf (to, "\t-a lists suggestions in ispell pipe mode format.\n");
-	fprintf (to, "\t-d dict uses dictionary <dict>.\n");
-	fprintf (to, "\t-h Show this help message.\n");
-	fprintf (to, "\t-l lists misspellings.\n");
-	fprintf (to, "\t-m is ignored.\n");
-	fprintf (to, "\t-L displays line numbers.\n");
-	fprintf (to, "\t-v displays program version.\n");
+	fprintf (to,
+		 "Usage: %s [OPTION...] FILE\n\
+  -a lists suggestions in ispell pipe mode format\n\
+  -d DICTIONARY uses the given dictionary\n\
+  -h Show this help message\n\
+  -l lists misspellings\n\
+  -L displays line numbers\n\
+  -v displays program version.\n", prog);
 }
 
 static gboolean
@@ -580,7 +580,7 @@ int main (int argc, char ** argv)
 				}
 			} 
 			else if ((strlen (arg) == 3) && (arg[1] == 'v') && (arg[2] == 'v')) {
-			     	mode = MODE_VERSION;   /* Emacs (or ispell.el) calls [ai]spell with '-vv'. */
+				mode = MODE_VERSION;   /* Emacs calls ispell with '-vv'. */
 			}
 			else if (arg[1] == 'd') {
 			        dictionary = arg + 2;  /* Accept "-ddictionary", i.e. no space between -d and dictionary. */
