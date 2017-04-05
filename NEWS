@@ -19,7 +19,9 @@ been exported for some years). enchant_get_user_config_dirs is now
 enchant_get_user_config_dir, and returns only a single directory.
 
 The plethora of configuration options previously available has been
-rationalised and documented.
+rationalised and documented. In particular, support for relocation (so that
+Enchant, or an application of which it is part, can be installed anywhere in
+a filing system) has been rewritten and documented (see INSTALL).
 
 The Myspell backend has been renamed to Hunspell to match the upstream
 project. Users with their own enchant.ordering files will need to change
