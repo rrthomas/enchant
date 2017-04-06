@@ -3,13 +3,13 @@ clone_folder: c:\projects\enchant
 
 environment:
   global:
+    # Only need one flavour of dictionary
     CONFIGURE_FLAGS: --with-hunspell-dir=/mingw64/share/hunspell
     VERBOSE: 1 # Get test logs in output
-
-# FIXME: Build on mingw-w64, mingw-w32 and MSYS2
-# matrix:
-#   - COMPILER: MinGW-w64
-#   - COMPILER: MinGW-w32
+  matrix:
+    - MSYSTEM: MSYS
+    - MSYSTEM: MINGW64
+    - MSYSTEM: MINGW32
 
 init:
   - git config --global core.autocrlf input
