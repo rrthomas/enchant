@@ -7,7 +7,6 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = enchant.pc
 
 EXTRA_DIST =		\
-	autogen.sh	\
 	enchant.pc.in	\
 	README 		\
 	HACKING 	\

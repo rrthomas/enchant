@@ -46,6 +46,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib aspell hspell hunspell libvoikko unittest-cpp ; fi
 
 script:
-  - ./autogen.sh --with-uspell=check --with-zemberek=check CXX=$COMPILER
+  - ./bootstrap
+  - ./configure --enable-relocatable --with-uspell=check --with-zemberek=check CXX=$COMPILER
   - make
   - make distcheck
