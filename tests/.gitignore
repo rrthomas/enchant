@@ -3,3 +3,8 @@
 /enchantxx.test
 /enchantxx.test.exe
 /test.pwl
+/main
+/main.exe
+libenchant_*.so
+libenchant_*.dylib
+*enchant*.dll

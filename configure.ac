@@ -287,9 +287,8 @@ src/libenchant.rc
 src/Makefile
 providers/Makefile
 tests/Makefile
-unittests/Makefile
-unittests/enchant_providers/Makefile
-unittests/mock_provider/Makefile
+tests/enchant_providers/Makefile
+tests/mock_provider/Makefile
 ])
 AC_OUTPUT
 

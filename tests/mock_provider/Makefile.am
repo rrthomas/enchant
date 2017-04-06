@@ -11,7 +11,7 @@ check_LTLIBRARIES = \
 	libenchant_null_identify.la \
 	libenchant_null_describe.la
 
-# FIXME: This stanza from unittests/Makefile.am because for testing to work this directory must be built first,
+# FIXME: This stanza from tests/Makefile.am because for testing to work this directory must be built first,
 # but the test copy is required in the directory above.
 # When the build system is made non-recursive, this copy of the stanza can be removed.
 LIBENCHANT_COPY = $(builddir)/../$(libdir_subdir)/libenchant.la
