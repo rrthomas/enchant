@@ -231,7 +231,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	char* line;
 	size_t line_number = 1;
 	FILE *f;
-	struct stat stats;
+	GStatBuf stats;
 
 	if(!pwl->filename)
 		return;
@@ -344,7 +344,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 		f = g_fopen(pwl->filename, "a+");
 		if (f)
 			{
-				struct stat stats;
+				GStatBuf stats;
 
 				/* Since this function does not signal I/O
 				   errors, only use return values to avoid
@@ -397,7 +397,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 					const gunichar BOM = 0xfeff;
 					char * filestart, *searchstart, *needle;
 					char * key;
-					struct stat stats;
+					GStatBuf stats;
 
 					enchant_lock_file (f);
 					key = g_strndup(word, len);
