@@ -3,7 +3,6 @@ EXTRA_DIST = mock_provider.h
 # Should not really use _ENCHANT_BUILD here, but seems to be necessary to get correct DLL exports for Windows
 AM_CPPFLAGS=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -D_ENCHANT_BUILD=1
 
-# Need to build this for installation to get .so file for testing
 check_LTLIBRARIES = \
 	libenchant_mock_provider.la \
 	libenchant_mock_provider2.la \
