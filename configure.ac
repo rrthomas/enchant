@@ -287,7 +287,6 @@ src/Makefile
 providers/Makefile
 tests/Makefile
 tests/enchant_providers/Makefile
-tests/mock_provider/Makefile
 ])
 AC_OUTPUT
 

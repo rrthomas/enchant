@@ -30,7 +30,7 @@
 #endif
 
 #include "EnchantTestFixture.h"
-#include "mock_provider/mock_provider.h"
+#include "mock_provider.h"
 #include <stack>
 #include <stdio.h>
 #include <gmodule.h>
