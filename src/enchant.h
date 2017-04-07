@@ -30,8 +30,8 @@
 #ifndef ENCHANT_H
 #define ENCHANT_H
 
-/* for size_t, ssize_t */
-#include <sys/types.h>
+#include <sys/types.h> /* for size_t, ssize_t */
+
 
 #ifdef __cplusplus
 extern "C" {
