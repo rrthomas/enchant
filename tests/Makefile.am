@@ -4,6 +4,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 ENCHANT_CONFIG_DIR = config
 
+# FIXME: Duplication of LIBENCHANT_COPY actions
 AM_TESTS_ENVIRONMENT = \
 	export ENCHANT_CONFIG_DIR=$(ENCHANT_CONFIG_DIR); \
 	rm -rf test.pwl $(libdir_subdir); \
