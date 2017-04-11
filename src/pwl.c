@@ -247,7 +247,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	g_hash_table_destroy (pwl->words_in_trie);
 	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	f = g_fopen(pwl->filename, "r");
+	f = g_fopen(pwl->filename, "rb");
 	if (!f) 
 		return;
 
@@ -341,7 +341,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 	{
 		FILE *f;
 		
-		f = g_fopen(pwl->filename, "a+");
+		f = g_fopen(pwl->filename, "a+b");
 		if (f)
 			{
 				GStatBuf stats;
@@ -355,10 +355,12 @@ void enchant_pwl_add(EnchantPWL *pwl,
 					pwl->file_changed = stats.st_mtime;
 
 				/* Add a newline if the file doesn't end with one. */
-				if (fseek (f, -1, SEEK_END) == 0 &&
-				    getc (f) != '\n')
+				if (fseek (f, -1, SEEK_END) == 0)
 					{
-						putc ('\n', f);
+						int c = getc (f);
+						fseek (f, 0L, SEEK_CUR); /* ISO C requires positioning between read and write. */
+						if (c != '\n')
+							putc ('\n', f);
 					}
 
 				if (fwrite (word, sizeof(char), len, f) == len)
