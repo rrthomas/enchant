@@ -1062,7 +1062,7 @@ static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcher
 			enchant_trie_find_matches(subtrie2,matcher);
 			enchant_trie_matcher_poppath(matcher,strlen(key2));
 			enchant_trie_matcher_poppath(matcher,strlen(key));
-}
+		}
 	}
 
 	g_free(key2);
@@ -1071,11 +1071,11 @@ static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcher
 }
 
 static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
-													 size_t len,
-				int maxerrs,
-				EnchantTrieMatcherMode mode,
-				void(*cbfunc)(char*,EnchantTrieMatcher*),
-				void* cbdata)
+						     size_t len,
+						     int maxerrs,
+						     EnchantTrieMatcherMode mode,
+						     void(*cbfunc)(char*,EnchantTrieMatcher*),
+						     void* cbdata)
 {
 	EnchantTrieMatcher* matcher;
 	char * normalized_word, * pattern;
@@ -1094,7 +1094,9 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 	matcher = g_new(EnchantTrieMatcher,1);
 	matcher->num_errors = 0;
 	matcher->max_errors = maxerrs;
-	matcher->word = pattern;
+	matcher->word = g_new0(char,len+maxerrs+1); // Ensure matcher does not overrun buffer
+	strcpy(matcher->word, pattern);
+	g_free(pattern);
 	matcher->word_pos = 0;
 	matcher->path = g_new0(char,len+maxerrs+1);
 	matcher->path[0] = '\0';
