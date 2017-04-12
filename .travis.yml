@@ -15,6 +15,7 @@ addons:
       - libvoikko-dev
       - aspell-en
       - libunittest++-dev
+      - valgrind
       - g++-5
 
 env:

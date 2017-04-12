@@ -7,6 +7,8 @@ ENCHANT_CONFIG_DIR = config
 # FIXME: Duplication of LIBENCHANT_COPY actions
 AM_TESTS_ENVIRONMENT = \
 	export ENCHANT_CONFIG_DIR=$(ENCHANT_CONFIG_DIR); \
+	if test -n "$(VALGRIND)"; then export VALGRIND='$(VALGRIND) --suppressions=$(top_srcdir)/build-aux/relocatable.supp'; fi; \
+	export LIBTOOL=$(top_builddir)/libtool; \
 	rm -rf test.pwl $(libdir_subdir); \
 	mkdir -p $(libdir_subdir)/enchant; \
 	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/; \
@@ -23,7 +25,7 @@ DISTCLEANFILES = test.pwl *@shlibext@
 distclean-local:
 	rm -rf $(libdir_subdir) $(ENCHANT_CONFIG_DIR)
 
-EXTRA_DIST = test.pwl.orig mock_provider.h
+EXTRA_DIST = test.pwl.orig mock_provider.h run-test
 
 LIBENCHANT_COPY = $(builddir)/$(libdir_subdir)/libenchant.la
 $(LIBENCHANT_COPY): $(top_builddir)/src/libenchant.la
@@ -68,6 +70,7 @@ libenchant_null_describe_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_describe_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
 check_PROGRAMS = enchant.test enchantxx.test main
+LOG_COMPILER = $(srcdir)/run-test
 
 enchant_test_SOURCES = enchant.test.c
 enchantxx_test_SOURCES = enchantxx.test.cpp
