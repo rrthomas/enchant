@@ -34,10 +34,6 @@
 #include <glib.h>
 #include <stdio.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

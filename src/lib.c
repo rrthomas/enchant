@@ -39,6 +39,10 @@
 #include <glib/gstdio.h>
 #include <locale.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "enchant.h"
 #include "enchant-provider.h"
 #include "pwl.h"
