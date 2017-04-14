@@ -329,6 +329,8 @@ enchant_session_new (EnchantProvider *provider, const char * const lang)
 			session = _enchant_session_new (provider, user_config_dir, lang, FALSE);
 		}
 
+	g_free (user_config_dir);
+
 	return session;
 }
 
@@ -1403,6 +1405,7 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 									if (this_priority < min_priority)
 										g_hash_table_insert (tags, strdup (tag), provider);
 								}
+								g_slist_free (providers);
 							}
 						}
 
