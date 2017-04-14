@@ -170,50 +170,31 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 		return nullptr;
 }
 
-static GSList *
-hunspell_checker_get_dictionary_dirs ()
+static void
+s_buildDictionaryDirs (std::vector<std::string> & dirs)
 {
-	GSList *dirs = nullptr;
+	dirs.clear ();
 
 	char * config_dir = enchant_get_user_config_dir ();
-	dirs = g_slist_append (dirs, g_build_filename (config_dir, "hunspell", nullptr));
-	g_free (config_dir);
+	dirs.push_back (g_build_filename (config_dir, "hunspell", nullptr));
+	free (config_dir);
 
 	for (const gchar* const * iter = g_get_system_data_dirs (); *iter; iter++)
 		{
-			dirs = g_slist_append (dirs, g_build_filename (*iter, "hunspell", nullptr));
+			dirs.push_back (g_build_filename (*iter, "hunspell", nullptr));
 		}
 
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			char * hunspell_prefix = g_build_filename(enchant_prefix, "share", "enchant", "hunspell", nullptr);
+			dirs.push_back (g_build_filename(enchant_prefix, "share", "enchant", "hunspell", nullptr));
 			g_free(enchant_prefix);
-			dirs = g_slist_append (dirs, hunspell_prefix);
 		}
 
 #ifdef ENCHANT_HUNSPELL_DICT_DIR
-	dirs = g_slist_append (dirs, g_strdup (ENCHANT_HUNSPELL_DICT_DIR));
+	dirs.push_back (g_strdup (ENCHANT_HUNSPELL_DICT_DIR));
 #endif
-
-	return dirs;
-}
-
-static void
-s_buildDictionaryDirs (std::vector<std::string> & dirs)
-{
-	GSList *hunspell_dirs, *iter;
-
-	dirs.clear ();
-
-	hunspell_dirs = hunspell_checker_get_dictionary_dirs ();
-	for (iter = hunspell_dirs; iter; iter = iter->next)
-		{
-			dirs.push_back (static_cast<const char *>(iter->data));
-		}
-
-	g_slist_free_full (hunspell_dirs, g_free);
 }
 
 static void
