@@ -203,6 +203,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         gsize length;
         if(g_file_get_contents(sourceName.c_str(), &contents, &length, NULL)){
             g_file_set_contents(destinationPath.c_str(), contents, length, NULL);
+            g_free(contents);
         }
     }
 

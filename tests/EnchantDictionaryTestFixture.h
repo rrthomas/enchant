@@ -64,11 +64,9 @@ MockDictionarySuggest (EnchantDict * ,
 		               size_t len, 
                        size_t * out_n_suggs)
 {
-    char **sugg_arr = NULL;
-
     *out_n_suggs = 4;
 
-	sugg_arr = g_new0 (char *, *out_n_suggs + 1);
+    char **sugg_arr = g_new0 (char *, *out_n_suggs + 1);
     for(size_t i=0; i<*out_n_suggs;++i){
         if(len == -1) {
             sugg_arr[i] = g_strdup (word);

@@ -39,7 +39,8 @@
 TEST_FIXTURE(EnchantTestFixture,
              GetUserConfigDir)
 {
-  std::string enchantUserConfigDir = enchant_get_user_config_dir();
+  char *user_config_dir = enchant_get_user_config_dir();
+  std::string enchantUserConfigDir = user_config_dir;
   std::string expected = getenv("ENCHANT_CONFIG_DIR");
 
   // FIXME: following crashes in UnitTest 1.4 with CHECK_EQUAL: use that when we can require >= 1.6
@@ -47,10 +48,13 @@ TEST_FIXTURE(EnchantTestFixture,
 
   // Check it also works with ENCHANT_CONFIG_DIR unset
   g_unsetenv("ENCHANT_CONFIG_DIR");
-  std::string enchantUserConfigDir2 = enchant_get_user_config_dir();
-  char *expected2 = g_build_filename (g_get_user_config_dir(), "enchant", NULL);
-  CHECK(strcmp(expected2, enchantUserConfigDir2.c_str()) == 0);
+  char *enchantUserConfigDir2 = enchant_get_user_config_dir();
+  char *expected2 = g_build_filename(g_get_user_config_dir(), "enchant", NULL);
+  CHECK(strcmp(expected2, enchantUserConfigDir2) == 0);
+  g_free(enchantUserConfigDir2);
 
   // Restore env var
   g_setenv("ENCHANT_CONFIG_DIR", expected.c_str(), TRUE);
+  g_free(user_config_dir);
+  g_free(expected2);
 }

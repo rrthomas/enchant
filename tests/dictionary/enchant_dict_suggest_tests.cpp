@@ -101,6 +101,12 @@ MyMockProviderFreeStringList (EnchantProvider * provider, char **str_list)
     return MockProviderFreeStringList(provider, str_list);
 }
 
+static void
+MyMockProviderAlternativeFreeStringList (EnchantProvider * provider, char **str_list)
+{
+    return MockProviderFreeStringList(provider, str_list);
+}
+
 static EnchantDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
 {
     
@@ -154,7 +160,7 @@ struct EnchantDictionarySuggestNotImplemented_TestFixture : EnchantDictionarySug
 };
 
 
-static EnchantDict* MockProviderRequestNoFreeMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantDict* MockProviderRequestAlternativeFreeMockDictionary(EnchantProvider * me, const char *tag)
 {
     
     EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
@@ -162,18 +168,18 @@ static EnchantDict* MockProviderRequestNoFreeMockDictionary(EnchantProvider * me
     return dict;
 }
 
-static void DictionaryNoFree_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryAlternativeFree_ProviderConfiguration (EnchantProvider * me, const char *)
 {
-     me->request_dict = MockProviderRequestNoFreeMockDictionary;
+     me->request_dict = MockProviderRequestAlternativeFreeMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
-     me->free_string_list = NULL;
+     me->free_string_list = MyMockProviderAlternativeFreeStringList;
 }
 
 struct EnchantDictionaryFreeNotImplemented_TestFixture : EnchantDictionarySuggestTestFixtureBase
 {
     //Setup
     EnchantDictionaryFreeNotImplemented_TestFixture():
-            EnchantDictionarySuggestTestFixtureBase(DictionaryNoFree_ProviderConfiguration)
+            EnchantDictionarySuggestTestFixtureBase(DictionaryAlternativeFree_ProviderConfiguration)
     { }
 };
 

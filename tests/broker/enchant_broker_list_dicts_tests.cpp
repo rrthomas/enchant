@@ -53,6 +53,7 @@ static void FreeStringList (EnchantProvider * me, char **str_list)
    return MockProviderFreeStringList(me, str_list);
 }
 
+
 static bool listDictionariesCalled;
 static char** ListDictionaries (EnchantProvider * me, size_t * out_n_dicts)
 {
@@ -89,17 +90,17 @@ struct EnchantBrokerListDictionaries_TestFixture : EnchantBrokerListDictionaries
     { }
 };
 
-static void List_Dictionaries_ProviderConfigurationLacksFreeStringList (EnchantProvider * me, const char *)
+static void List_Dictionaries_ProviderConfigurationAlternativeFreeStringList (EnchantProvider * me, const char *)
 {
      me->list_dicts=ListDictionaries;
-     me->free_string_list = NULL;
+     me->free_string_list = MockProviderFreeStringList;
 }
 
-struct EnchantBrokerListDictionaries_ProviderLacksFreeStringList_TestFixture : EnchantBrokerListDictionaries_TestFixtureBase
+struct EnchantBrokerListDictionaries_ProviderAlternativeFreeStringList_TestFixture : EnchantBrokerListDictionaries_TestFixtureBase
 {
     //Setup
-    EnchantBrokerListDictionaries_ProviderLacksFreeStringList_TestFixture():
-            EnchantBrokerListDictionaries_TestFixtureBase(List_Dictionaries_ProviderConfigurationLacksFreeStringList)
+    EnchantBrokerListDictionaries_ProviderAlternativeFreeStringList_TestFixture():
+            EnchantBrokerListDictionaries_TestFixtureBase(List_Dictionaries_ProviderConfigurationAlternativeFreeStringList)
     { }
 };
 
@@ -252,7 +253,7 @@ TEST_FIXTURE(EnchantBrokerListDictionaries_ProviderDuplicateTags_TestFixture,
     CHECK_EQUAL((unsigned int)1, _dictionaryList.size());
 }
 
-TEST_FIXTURE(EnchantBrokerListDictionaries_ProviderLacksFreeStringList_TestFixture,
+TEST_FIXTURE(EnchantBrokerListDictionaries_ProviderAlternativeFreeStringList_TestFixture,
              EnchantBrokerListDictionaries_freeStringListCalledOnProvider)
 {
     enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeCallback, &_dictionaryList);
