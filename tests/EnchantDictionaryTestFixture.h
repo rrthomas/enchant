@@ -22,12 +22,6 @@
 #ifndef __ENCHANTDICTIONARYTESTFIXTURE
 #define __ENCHANTDICTIONARYTESTFIXTURE
 
-#if defined(_MSC_VER)
-#pragma once
-#pragma warning(push)
-#pragma warning(disable: 4996) //The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name.
-#endif
-
 #include "EnchantBrokerTestFixture.h"
 
 #include <sys/types.h>
@@ -344,8 +338,5 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         return GetSuggestionsFromWord("helo");
     }
 };
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
 #endif
