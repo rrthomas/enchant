@@ -390,8 +390,7 @@ static void appleSpell_provider_free_string_list (EnchantProvider * me, char **s
 }
 
 extern "C" {
-	ENCHANT_MODULE_EXPORT (EnchantProvider *) 
-	     init_enchant_provider (void)
+	EnchantProvider *init_enchant_provider (void)
 	{
 		NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
@@ -437,8 +436,7 @@ extern "C" {
 
 	static bool s_bReloadSelf = true;
 
-	ENCHANT_MODULE_EXPORT (void)
-	     configure_enchant_provider (EnchantProvider * me, const char * module_dir)
+	void configure_enchant_provider (EnchantProvider * me, const char * module_dir)
 	{
 		NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 

@@ -111,7 +111,7 @@ enchant_ensure_dir_exists (const char* dir)
 		}
 }
 
-ENCHANT_MODULE_EXPORT (char *)
+char *
 enchant_get_user_config_dir (void)
 {
 	const gchar * env = g_getenv("ENCHANT_CONFIG_DIR");
@@ -434,7 +434,7 @@ enchant_provider_free_string_list (EnchantProvider * provider, char ** string_li
 		(*provider->free_string_list) (provider, string_list);
 }
 
-ENCHANT_MODULE_EXPORT(void)
+void
 enchant_dict_set_error (EnchantDict * dict, const char * const err)
 {
 	EnchantSession * session;
@@ -449,7 +449,7 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 	session->error = strdup (err);
 }
 
-ENCHANT_MODULE_EXPORT(char *)
+char *
 enchant_dict_get_error (EnchantDict * dict)
 {
 	EnchantSession * session;
@@ -460,7 +460,7 @@ enchant_dict_get_error (EnchantDict * dict)
 	return session->error;
 }
 
-ENCHANT_MODULE_EXPORT (int)
+int
 enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 {
 	EnchantSession * session;
@@ -570,7 +570,7 @@ enchant_dict_get_good_suggestions(EnchantDict * dict,
 	return filtered_suggs;
 }
 
-ENCHANT_MODULE_EXPORT (char **)
+char **
 enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			  ssize_t len, size_t * out_n_suggs)
 {
@@ -648,7 +648,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 	return suggs;
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_dict_add (EnchantDict * dict, const char *const word,
 			 ssize_t len)
 {
@@ -672,7 +672,7 @@ enchant_dict_add (EnchantDict * dict, const char *const word,
 		(*dict->add_to_personal) (dict, word, len);
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 				 ssize_t len)
 {
@@ -695,7 +695,7 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 		(*dict->add_to_session) (dict, word, len);
 }
 
-ENCHANT_MODULE_EXPORT (int)
+int
 enchant_dict_is_added (EnchantDict * dict, const char *const word,
 				ssize_t len)
 {
@@ -716,7 +716,7 @@ enchant_dict_is_added (EnchantDict * dict, const char *const word,
 	return enchant_session_contains (session, word, len);
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_dict_remove (EnchantDict * dict, const char *const word,
 			 ssize_t len)
 {
@@ -741,7 +741,7 @@ enchant_dict_remove (EnchantDict * dict, const char *const word,
 		(*dict->add_to_exclude) (dict, word, len);
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
 			 ssize_t len)
 {
@@ -762,7 +762,7 @@ enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
 	enchant_session_remove (session, word, len);
 }
 
-ENCHANT_MODULE_EXPORT (int)
+int
 enchant_dict_is_removed (EnchantDict * dict, const char *const word,
 				ssize_t len)
 {
@@ -783,7 +783,7 @@ enchant_dict_is_removed (EnchantDict * dict, const char *const word,
 	return enchant_session_exclude (session, word, len);
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_dict_store_replacement (EnchantDict * dict,
 				const char *const mis, ssize_t mis_len,
 				const char *const cor, ssize_t cor_len)
@@ -814,7 +814,7 @@ enchant_dict_store_replacement (EnchantDict * dict,
 		(*dict->store_replacement) (dict, mis, mis_len, cor, cor_len);
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 {
 	EnchantSession * session;
@@ -825,7 +825,7 @@ enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 	g_strfreev(string_list);
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_dict_describe (EnchantDict * dict,
 			   EnchantDictDescribeFn fn,
 			   void * user_data)
@@ -1168,7 +1168,7 @@ enchant_provider_free (gpointer data)
 	g_module_close (module);
 }
 
-ENCHANT_MODULE_EXPORT (EnchantBroker *)
+EnchantBroker *
 enchant_broker_init (void)
 {
 	EnchantBroker *broker = NULL;
@@ -1185,7 +1185,7 @@ enchant_broker_init (void)
 	return broker;
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_broker_free (EnchantBroker * broker)
 {
 	guint n_remaining;
@@ -1209,7 +1209,7 @@ enchant_broker_free (EnchantBroker * broker)
 	g_free (broker);
 }
 
-ENCHANT_MODULE_EXPORT (EnchantDict *)
+EnchantDict *
 enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 {
 	EnchantSession *session;
@@ -1296,7 +1296,7 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	return dict;
 }
 
-ENCHANT_MODULE_EXPORT (EnchantDict *)
+EnchantDict *
 enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 {
 	EnchantDict *dict = NULL;
@@ -1328,7 +1328,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	return dict;
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_broker_describe (EnchantBroker * broker,
 			 EnchantBrokerDescribeFn fn,
 			 void * user_data)
@@ -1357,7 +1357,7 @@ enchant_broker_describe (EnchantBroker * broker,
 		}
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_broker_list_dicts (EnchantBroker * broker,
 			   EnchantDictDescribeFn fn,
 			   void * user_data)
@@ -1436,7 +1436,7 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 	g_hash_table_destroy (tags);
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 {
 	EnchantSession * session;
@@ -1532,7 +1532,7 @@ _enchant_broker_dict_exists (EnchantBroker * broker,
 	return 0;
 }
 
-ENCHANT_MODULE_EXPORT (int)
+int
 enchant_broker_dict_exists (EnchantBroker * broker,
 				const char * const tag)
 {
@@ -1568,7 +1568,7 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 	return exists;
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_broker_set_ordering (EnchantBroker * broker,
 				 const char * const tag,
 				 const char * const ordering)
@@ -1601,7 +1601,7 @@ enchant_broker_set_ordering (EnchantBroker * broker,
 		}
 }
 
-ENCHANT_MODULE_EXPORT(void)
+void
 enchant_provider_set_error (EnchantProvider * provider, const char * const err)
 {
 	EnchantBroker * broker;
@@ -1616,7 +1616,7 @@ enchant_provider_set_error (EnchantProvider * provider, const char * const err)
 	enchant_broker_set_error (broker, err);
 }
 
-ENCHANT_MODULE_EXPORT(char *)
+char *
 enchant_broker_get_error (EnchantBroker * broker)
 {
 	g_return_val_if_fail (broker, NULL);
@@ -1624,7 +1624,7 @@ enchant_broker_get_error (EnchantBroker * broker)
 	return broker->error;
 }
 
-ENCHANT_MODULE_EXPORT(char *)
+char *
 enchant_get_user_language(void)
 {
 #if defined(G_OS_WIN32)
@@ -1649,19 +1649,19 @@ enchant_get_user_language(void)
 }
 
 
-ENCHANT_MODULE_EXPORT (char *)
+char *
 enchant_get_prefix_dir(void)
 {
 	return enchant_relocate (INSTALLPREFIX);
 }
 
-ENCHANT_MODULE_EXPORT (void)
+void
 enchant_set_prefix_dir(const char *new_prefix)
 {
 	set_relocation_prefix (INSTALLPREFIX, new_prefix);
 }
 
-ENCHANT_MODULE_EXPORT(const char *) _GL_ATTRIBUTE_CONST
+const char * _GL_ATTRIBUTE_CONST
 enchant_get_version (void) {
 	return ENCHANT_VERSION_STRING;
 }

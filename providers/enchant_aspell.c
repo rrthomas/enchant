@@ -46,11 +46,7 @@
 #include "unused-parameter.h"
 
 
-ENCHANT_MODULE_EXPORT(void)
-     configure_enchant_provider(EnchantProvider * me, const char *dir_name);
-
-ENCHANT_MODULE_EXPORT (EnchantProvider *) 
-     init_enchant_provider (void);
+EnchantProvider *init_enchant_provider (void);
 
 static int
 aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
