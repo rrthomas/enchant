@@ -51,3 +51,4 @@
 /strerror.m4
 /sys_socket_h.m4
 /configmake.m4
+/valgrind-tests.m4

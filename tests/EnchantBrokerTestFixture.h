@@ -22,15 +22,8 @@
 #ifndef __ENCHANTBROKERTESTFIXTURE
 #define __ENCHANTBROKERTESTFIXTURE
 
-#if defined(_MSC_VER)
-#pragma once
-#pragma warning(push)
-#pragma warning(disable:4505) //unreferenced local function has been removed
-#pragma warning(disable: 4996) //The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name.
-#endif
-
 #include "EnchantTestFixture.h"
-#include "mock_provider/mock_provider.h"
+#include "mock_provider.h"
 #include <stack>
 #include <stdio.h>
 #include <gmodule.h>
@@ -203,6 +196,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         gsize length;
         if(g_file_get_contents(sourceName.c_str(), &contents, &length, NULL)){
             g_file_set_contents(destinationPath.c_str(), contents, length, NULL);
+            g_free(contents);
         }
     }
 
@@ -299,9 +293,5 @@ struct DictionaryDescription
                 DllFile.length());
     }
 };
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
 #endif

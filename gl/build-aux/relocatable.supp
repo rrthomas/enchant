@@ -1,0 +1,8 @@
+# set_this_relocation_prefix leaks intentionally
+{
+  relocatable/set_this_relocation_prefix
+  Memcheck:Leak
+  fun:malloc
+  fun:set_this_relocation_prefix
+  fun:set_relocation_prefix
+}

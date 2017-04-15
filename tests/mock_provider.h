@@ -3,10 +3,6 @@
 
 #include "enchant-provider.h"
 
-#ifdef _MSC_VER
-#pragma once
-#endif
-
 typedef void (*ConfigureHook) (EnchantProvider * me, const char * dir_name);
 
 #ifdef __cplusplus

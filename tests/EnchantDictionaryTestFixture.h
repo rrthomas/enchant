@@ -22,12 +22,6 @@
 #ifndef __ENCHANTDICTIONARYTESTFIXTURE
 #define __ENCHANTDICTIONARYTESTFIXTURE
 
-#if defined(_MSC_VER)
-#pragma once
-#pragma warning(push)
-#pragma warning(disable: 4996) //The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name.
-#endif
-
 #include "EnchantBrokerTestFixture.h"
 
 #include <sys/types.h>
@@ -64,11 +58,9 @@ MockDictionarySuggest (EnchantDict * ,
 		               size_t len, 
                        size_t * out_n_suggs)
 {
-    char **sugg_arr = NULL;
-
     *out_n_suggs = 4;
 
-	sugg_arr = g_new0 (char *, *out_n_suggs + 1);
+    char **sugg_arr = g_new0 (char *, *out_n_suggs + 1);
     for(size_t i=0; i<*out_n_suggs;++i){
         if(len == -1) {
             sugg_arr[i] = g_strdup (word);
@@ -346,8 +338,5 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         return GetSuggestionsFromWord("helo");
     }
 };
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
 #endif

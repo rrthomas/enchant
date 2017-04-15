@@ -162,7 +162,6 @@ static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 static void enchant_pwl_refresh_from_file(EnchantPWL* pwl);
 static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher);
 static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher);
-static EnchantTrie* enchant_trie_init(void);
 static void enchant_trie_free(EnchantTrie* trie);
 static void enchant_trie_free_cb(void*,void*,void*);
 static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word);
@@ -323,8 +322,10 @@ static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
 	if( g_hash_table_remove (pwl->words_in_trie, normalized_word) )
 		{
 			enchant_trie_remove(pwl->trie, normalized_word);
-			if(pwl->trie && pwl->trie->subtries == NULL && pwl->trie->value == NULL)
+			if(pwl->trie && pwl->trie->subtries == NULL && pwl->trie->value == NULL) {
+				enchant_trie_free (pwl->trie);
 				pwl->trie = NULL; /* make trie empty if has no content */
+			}
 		}
 	
 	g_free(normalized_word);
@@ -768,20 +769,9 @@ void enchant_pwl_free_string_list(EnchantPWL *pwl _GL_UNUSED_PARAMETER,
 	g_strfreev(string_list);
 }
 
-static EnchantTrie* enchant_trie_init(void)
-{
-	EnchantTrie* trie;
-
-	trie = g_new(EnchantTrie,1);
-	trie->value = NULL;
-	trie->subtries = NULL;
-
-	return trie;
-}
-
 static void enchant_trie_free(EnchantTrie* trie)
 {
-	/* Dont ever free NULL, or the EOSTrie pointer */
+	/* Don't try to free NULL or the EOSTrie pointer */
 	if(trie == NULL || trie == EOSTrie) {
 		return;
 	}
@@ -813,7 +803,7 @@ static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word
 	EnchantTrie* subtrie;
 
 	if (trie == NULL) {
-		trie = enchant_trie_init();
+		trie = g_new0(EnchantTrie, 1);
 	}
 
 	if (trie->value == NULL) {
@@ -825,27 +815,23 @@ static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word
 			if (word[0] == '\0') {
 				/* Mark end-of-string with special node */
 				tmpWord = g_strdup("");
-				g_hash_table_insert(trie->subtries,
-							tmpWord,EOSTrie);
+				g_hash_table_insert(trie->subtries, tmpWord, EOSTrie);
 			} else {
 				nxtCh = (ssize_t)(g_utf8_next_char(word)-word);
 				tmpWord = g_strndup(word,nxtCh);
-				subtrie = g_hash_table_lookup(trie->subtries,
-								tmpWord);
-							subtrie = enchant_trie_insert(subtrie,
-								(word+nxtCh));
-				g_hash_table_insert(trie->subtries,
-							tmpWord,subtrie);
+				subtrie = g_hash_table_lookup(trie->subtries, tmpWord);
+				subtrie = enchant_trie_insert(subtrie, word + nxtCh);
+				g_hash_table_insert(trie->subtries, tmpWord, subtrie);
 			}
 		}
 	} else {
-		/* Create new hastable for subtries, and reinsert */
+		/* Create new hash table for subtries, and reinsert */
 		trie->subtries = g_hash_table_new_full(g_str_hash, 
-					g_str_equal,g_free, NULL);
+						       g_str_equal, g_free, NULL);
 		tmpWord = trie->value;
 		trie->value = NULL;
-		enchant_trie_insert(trie,tmpWord);
-		enchant_trie_insert(trie,word);
+		enchant_trie_insert(trie, tmpWord);
+		enchant_trie_insert(trie, word);
 		g_free(tmpWord);
 	}
 
@@ -865,18 +851,18 @@ static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
 		if (trie->subtries != NULL) {
 			/* Store multiple words in subtries */
 			if (word[0] == '\0') {
-				/* Mark end-of-string with special node */
+				/* End-of-string is marked with special node */
 				g_hash_table_remove(trie->subtries, "");
 			} else {
-				nxtCh = (ssize_t)(g_utf8_next_char(word)-word);
-				tmpWord = g_strndup(word,nxtCh);
-				subtrie = g_hash_table_lookup(trie->subtries,
-								tmpWord);
-				enchant_trie_remove(subtrie,
-								(word+nxtCh));
+				nxtCh = (ssize_t)(g_utf8_next_char(word) - word);
+				tmpWord = g_strndup(word, nxtCh);
+				subtrie = g_hash_table_lookup(trie->subtries, tmpWord);
+				enchant_trie_remove(subtrie, word + nxtCh);
 
-				if(subtrie->subtries == NULL && subtrie->value == NULL)
+				if(subtrie->subtries == NULL && subtrie->value == NULL) {
 					g_hash_table_remove(trie->subtries, tmpWord);
+					enchant_trie_free (subtrie);
+				}
 
 				g_free(tmpWord);
 			}
@@ -888,7 +874,7 @@ static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
 					key = (char*) keys->data;
 					subtrie = g_hash_table_lookup(trie->subtries, key);
 
-					/* only remove trie nodes that have values by propogating these up */
+					/* only remove trie nodes that have values by propagating these up */
 					if(subtrie->value)
 						{
 							trie->value = g_strconcat(key, subtrie->value, NULL);
@@ -910,8 +896,8 @@ static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
 }
 
 static EnchantTrie* enchant_trie_get_subtrie(EnchantTrie* trie, 
-											 EnchantTrieMatcher* matcher,
-											 char** nxtChS)
+					     EnchantTrieMatcher* matcher,
+					     char** nxtChS)
 {
 	EnchantTrie* subtrie;
 

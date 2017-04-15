@@ -24,13 +24,6 @@ enchant_hunspell_la_CXXFLAGS = $(AM_CXXFLAGS) $(HUNSPELL_CFLAGS)
 enchant_hunspell_la_LIBADD = $(HUNSPELL_LIBS)
 enchant_hunspell_la_SOURCES = enchant_hunspell.cpp
 
-if WITH_USPELL
-provider_LTLIBRARIES += enchant_uspell.la
-endif
-enchant_uspell_la_CXXFLAGS = $(AM_CXXFLAGS) $(USPELL_CFLAGS)
-enchant_uspell_la_LIBADD = $(USPELL_LIBS)
-enchant_uspell_la_SOURCES = enchant_uspell.cpp
-
 if WITH_VOIKKO
 provider_LTLIBRARIES += enchant_voikko.la
 endif

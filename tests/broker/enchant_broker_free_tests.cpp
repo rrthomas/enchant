@@ -40,6 +40,12 @@ Dispose (EnchantProvider *me)
     MockProviderDispose(me);
 }
 
+static void
+AlternativeDispose (EnchantProvider *me)
+{
+    MockProviderDispose(me);
+}
+
 bool disposeDictionaryCalled;
 static void
 DisposeDictionary (EnchantProvider *me, EnchantDict * dict)
@@ -66,15 +72,15 @@ struct EnchantBrokerFreeTestFixture: EnchantBrokerTestFixture
 };
 
 
-static void NoDisposeProviderConfiguration (EnchantProvider * me, const char *)
+static void AlternativeDisposeProviderConfiguration (EnchantProvider * me, const char *)
 {
-     me->dispose = NULL;
+     me->dispose = AlternativeDispose;
 }
 
-struct EnchantBrokerFreeNoDisposeTestFixture: EnchantBrokerTestFixture
+struct EnchantBrokerFreeAlternativeDisposeTestFixture: EnchantBrokerTestFixture
 {
     //Setup
-    EnchantBrokerFreeNoDisposeTestFixture():EnchantBrokerTestFixture(NoDisposeProviderConfiguration)
+    EnchantBrokerFreeAlternativeDisposeTestFixture():EnchantBrokerTestFixture(AlternativeDisposeProviderConfiguration)
     {  }
 };
 
@@ -97,8 +103,8 @@ TEST_FIXTURE(EnchantBrokerFreeTestFixture,
     _broker = NULL;
 }
 
-TEST_FIXTURE(EnchantBrokerFreeNoDisposeTestFixture,
-             EnchantBrokerFree_ProviderLacksDispose)
+TEST_FIXTURE(EnchantBrokerFreeAlternativeDisposeTestFixture,
+             EnchantBrokerFree_ProviderAlternativeDispose)
 {
     enchant_broker_free(_broker);
     _broker = NULL;

@@ -22,10 +22,6 @@
 #ifndef __ENCHANTTESTFIXTURE
 #define __ENCHANTTESTFIXTURE
 
-#if defined(_MSC_VER)
-#pragma once
-#endif
-
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

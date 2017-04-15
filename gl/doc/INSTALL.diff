@@ -1,6 +1,6 @@
 --- gnulib/doc/INSTALL	2017-02-23 15:26:15.296354123 +0000
-+++ gl/doc/INSTALL	2017-04-05 18:45:08.778495451 +0100
-@@ -1,3 +1,36 @@
++++ gl/doc/INSTALL	2017-04-06 14:15:43.472889000 +0100
+@@ -1,3 +1,35 @@
 +Building and installing libenchant
 +**********************************
 +
@@ -8,14 +8,13 @@
 +follow some enchant-specific notes.
 +
 +The usual GNU autotools package instructions apply, except that Enchant must
-+be built with --enable-relocatable. This is done automatically by
-+autogen.sh.
++be built with --enable-relocatable.
 +
 +To build from git, or without relying on the generated files in a source
 +release, automake, autoconf, libtool, pkg-config and git must be installed.
 +Run
 +
-+./autogen.sh
++./bootstrap && ./configure --enable-relocatable
 +
 +to set up and configure the source tree; optional configure arguments can be
 +supplied as normal.

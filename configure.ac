@@ -273,7 +273,6 @@ dnl Must call AM_CONDITIONAL outside conditional
 AM_CONDITIONAL(WITH_APPLESPELL, test "x$with_applespell" = xyes)
 
 dnl Experimental/deprecated providers
-ENCHANT_CHECK_PKG_CONFIG_PROVIDER([uspell], [USPELL], , [no])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([zemberek], [ZEMBEREK], [dbus-glib-1 >= 0.62], [no])
 
 dnl =======================================================================================
@@ -287,9 +286,7 @@ src/libenchant.rc
 src/Makefile
 providers/Makefile
 tests/Makefile
-unittests/Makefile
-unittests/enchant_providers/Makefile
-unittests/mock_provider/Makefile
+tests/enchant_providers/Makefile
 ])
 AC_OUTPUT
 

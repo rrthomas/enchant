@@ -4,9 +4,7 @@
 Building from git
 -----------------
 
-Before running ./configure in a fresh git checkout, run:
-
-./autogen.sh
+See INSTALL.
 
 
 Working in libenchant

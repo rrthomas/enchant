@@ -1,7 +1,7 @@
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
  *               2007 Hannu Väisänen
- *               2016 Reuben Thomas
+ *               2016-2017 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,15 +30,7 @@
  */
 
 /**
- * This is a rough approximation of an "ispell compatibility mode"
- * for Enchant.
- *
- * Modified in 2007 to work when called from emacs which
- * calls a spelling program (e.g. enchant) like this
- *
- * enchant -a -m -d dictionary
- *
- * Modified in 2016 to implement most ispell prefix commands.
+ * This is an ispell-compatible command-line version of Enchant.
  */
 
 #include "config.h"
