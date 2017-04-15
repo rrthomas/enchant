@@ -52,7 +52,7 @@ struct EnchantTestFixture
     //Setup
     EnchantTestFixture()
     {
-        enchant_set_prefix_dir(GetDirectoryOfThisModule().c_str());
+        enchant_set_prefix_dir(".");
         CleanUpFiles(); //just in case we stopped the process in the middle.
         CreateDirectory(GetTempUserEnchantDir());
     }
@@ -64,8 +64,8 @@ struct EnchantTestFixture
     void CleanUpFiles()
     {
         DeleteDirAndFiles(GetTempUserEnchantDir());
-        DeleteDirAndFiles(AddToPath(AddToPath(GetDirectoryOfThisModule(), LIBDIR_SUBDIR), "enchant"));
-        DeleteDirAndFiles(AddToPath(GetDirectoryOfThisModule(), "share"));
+        DeleteDirAndFiles(AddToPath(LIBDIR_SUBDIR, "enchant"));
+        DeleteDirAndFiles("share");
     }
 
     std::string GetTempUserEnchantDir()
@@ -75,7 +75,7 @@ struct EnchantTestFixture
 
     std::string GetEnchantConfigDir()
     {
-        return AddToPath(AddToPath(GetDirectoryOfThisModule(), "share"), "enchant");
+        return AddToPath("share", "enchant");
     }
 
     static void DeleteDirAndFiles(const std::string& dir)
@@ -143,20 +143,6 @@ struct EnchantTestFixture
         std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
         return convert.from_bytes(s);
     }
-
-    std::string GetDirectoryOfThisModule()
-    {
-        std::string result = ".";
-#if defined(_WIN32)
-        // should be in the same directory as our test fixture
-        WCHAR szFilename[MAX_PATH];
-        GetModuleFileName(NULL, (LPWSTR) &szFilename, sizeof(szFilename));
-        PathRemoveFileSpec((LPWSTR)&szFilename);
-
-        result = Convert(szFilename);
-#endif
-        return result;
-      }
 
   static std::string AddToPath(const std::string & path, const std::string & fileOrDirName)
     {

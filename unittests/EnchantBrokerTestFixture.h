@@ -193,7 +193,7 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
         std::string sourceName = prefix + sourceProviderName + "." + G_MODULE_SUFFIX;
         std::string destinationName = destinationProviderName + "." + G_MODULE_SUFFIX;
 
-        std::string destinationDir = AddToPath(AddToPath(GetDirectoryOfThisModule(), LIBDIR_SUBDIR), "enchant");
+        std::string destinationDir = AddToPath(LIBDIR_SUBDIR, "enchant");
 
         CreateDirectory(destinationDir);
 
@@ -201,14 +201,8 @@ struct EnchantBrokerTestFixture : EnchantTestFixture
 
         gchar * contents;
         gsize length;
-        if(g_file_get_contents(AddToPath(GetDirectoryOfThisModule(), sourceName).c_str(),
-                            &contents, 
-                            &length, 
-                            NULL)){
-            g_file_set_contents(destinationPath.c_str(),
-                                contents,
-                                length,
-                                NULL);
+        if(g_file_get_contents(sourceName.c_str(), &contents, &length, NULL)){
+            g_file_set_contents(destinationPath.c_str(), contents, length, NULL);
         }
     }
 

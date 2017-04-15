@@ -29,19 +29,7 @@ struct EnchantGetPrefixDirTestFixture : EnchantTestFixture{
   //Setup
   EnchantGetPrefixDirTestFixture()
   {
-    /* Use ENCHANT_PREFIX_DIR env var */
-    const gchar* env = g_getenv("ENCHANT_PREFIX_DIR");
-    if (env) {
-      expectedPrefixDir = std::string(g_filename_to_utf8(env, -1, NULL, NULL, NULL));
-    } else {
-      expectedPrefixDir = GetDirectoryOfThisModule();
-
-#if defined(ENCHANT_PREFIX_DIR)
-      if (expectedPrefixDir.empty()) {
-        expectedPrefixDir = std::string(ENCHANT_PREFIX_DIR);
-      }
-#endif
-    }
+    expectedPrefixDir = ".";
   }
 
   const char* ExpectedPrefixDir()

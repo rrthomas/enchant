@@ -26,7 +26,7 @@ ordering_DATA = enchant.ordering
 
 man_MANS = enchant.1
 
-LDADD = libenchant.la $(ENCHANT_LIBS)
+LDADD = libenchant.la $(ENCHANT_LIBS) $(top_builddir)/lib/libgnu.la
 bin_PROGRAMS = enchant-lsmod enchant
 
 EXTRA_DIST = enchant.i $(ordering_DATA) $(man_MANS)

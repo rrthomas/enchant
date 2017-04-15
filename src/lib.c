@@ -1620,20 +1620,11 @@ enchant_broker_get_error (EnchantBroker * broker)
 ENCHANT_MODULE_EXPORT(char *)
 enchant_get_user_language(void)
 {
-	const char * locale = NULL;
-
 #if defined(G_OS_WIN32)
-	if(!locale)
-		{ /* Copy locale string so it does not need to be freed */
-			char * win_locale = g_win32_getlocale ();
-			locale = alloca (strlen (win_locale));
-			strcpy (locale, win_locale);
-			g_free (win_locale);
-		}
-#endif
+	return g_win32_getlocale ();
+#else
 
-	if(!locale)
-		locale = g_getenv ("LANG");
+	const char * locale = g_getenv ("LANG");
 
 #if defined(HAVE_LC_MESSAGES)
 	if(!locale)
@@ -1647,6 +1638,7 @@ enchant_get_user_language(void)
 		locale = "en";
 
 	return strdup (locale);
+#endif /* !G_OS_WIN32 */
 }
 
 

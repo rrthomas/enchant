@@ -211,7 +211,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 
 	g_return_val_if_fail (file != NULL, NULL);
 
-	fd = g_fopen(file, "ab+");
+	fd = g_fopen(file, "a+b");
 	if(fd == NULL)
 		{
 			return NULL;
@@ -231,7 +231,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	char* line;
 	size_t line_number = 1;
 	FILE *f;
-	struct stat stats;
+	GStatBuf stats;
 
 	if(!pwl->filename)
 		return;
@@ -247,7 +247,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	g_hash_table_destroy (pwl->words_in_trie);
 	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	f = g_fopen(pwl->filename, "r");
+	f = g_fopen(pwl->filename, "rb");
 	if (!f) 
 		return;
 
@@ -341,10 +341,10 @@ void enchant_pwl_add(EnchantPWL *pwl,
 	{
 		FILE *f;
 		
-		f = g_fopen(pwl->filename, "a+");
+		f = g_fopen(pwl->filename, "a+b");
 		if (f)
 			{
-				struct stat stats;
+				GStatBuf stats;
 
 				/* Since this function does not signal I/O
 				   errors, only use return values to avoid
@@ -355,10 +355,12 @@ void enchant_pwl_add(EnchantPWL *pwl,
 					pwl->file_changed = stats.st_mtime;
 
 				/* Add a newline if the file doesn't end with one. */
-				if (fseek (f, -1, SEEK_END) == 0 &&
-				    getc (f) != '\n')
+				if (fseek (f, -1, SEEK_END) == 0)
 					{
-						putc ('\n', f);
+						int c = getc (f);
+						fseek (f, 0L, SEEK_CUR); /* ISO C requires positioning between read and write. */
+						if (c != '\n')
+							putc ('\n', f);
 					}
 
 				if (fwrite (word, sizeof(char), len, f) == len)
@@ -397,7 +399,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 					const gunichar BOM = 0xfeff;
 					char * filestart, *searchstart, *needle;
 					char * key;
-					struct stat stats;
+					GStatBuf stats;
 
 					enchant_lock_file (f);
 					key = g_strndup(word, len);
@@ -1060,7 +1062,7 @@ static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcher
 			enchant_trie_find_matches(subtrie2,matcher);
 			enchant_trie_matcher_poppath(matcher,strlen(key2));
 			enchant_trie_matcher_poppath(matcher,strlen(key));
-}
+		}
 	}
 
 	g_free(key2);
@@ -1069,11 +1071,11 @@ static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcher
 }
 
 static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
-													 size_t len,
-				int maxerrs,
-				EnchantTrieMatcherMode mode,
-				void(*cbfunc)(char*,EnchantTrieMatcher*),
-				void* cbdata)
+						     size_t len,
+						     int maxerrs,
+						     EnchantTrieMatcherMode mode,
+						     void(*cbfunc)(char*,EnchantTrieMatcher*),
+						     void* cbdata)
 {
 	EnchantTrieMatcher* matcher;
 	char * normalized_word, * pattern;
@@ -1092,7 +1094,9 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 	matcher = g_new(EnchantTrieMatcher,1);
 	matcher->num_errors = 0;
 	matcher->max_errors = maxerrs;
-	matcher->word = pattern;
+	matcher->word = g_new0(char,len+maxerrs+1); // Ensure matcher does not overrun buffer
+	strcpy(matcher->word, pattern);
+	g_free(pattern);
 	matcher->word_pos = 0;
 	matcher->path = g_new0(char,len+maxerrs+1);
 	matcher->path[0] = '\0';
