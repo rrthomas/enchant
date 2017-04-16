@@ -111,8 +111,6 @@ struct str_enchant_dict
 	
 	void (*add_to_exclude) (struct str_enchant_dict * me,
 				 const char *const word, size_t len);
-	
-	void * _reserved[5];
 };
 	
 struct str_enchant_provider
@@ -143,8 +141,6 @@ struct str_enchant_provider
 
 	char ** (*list_dicts) (struct str_enchant_provider * me,
 							   size_t * out_n_dicts);
-
-	void * _reserved[5];
 };
 
 #ifdef __cplusplus
