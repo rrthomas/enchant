@@ -35,7 +35,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib.h>
 #include <libvoikko/voikko.h>
 #include "unused-parameter.h"
 
@@ -88,7 +87,7 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 
-	dict = g_new0 (EnchantDict, 1);
+	dict = calloc (sizeof (EnchantDict), 1);
 	dict->user_data = (void *)voikko_handle;
 	dict->check = voikko_dict_check;
 	dict->suggest = voikko_dict_suggest;
@@ -100,7 +99,7 @@ static void
 voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
 	voikkoTerminate((struct VoikkoHandle *)dict->user_data);
-	g_free (dict);
+	free (dict);
 }
 
 static int
@@ -135,8 +134,8 @@ voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 	if ((voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL))) {
 		voikkoTerminate(voikko_handle);
 		*out_n_dicts = 1;
-		out_list = g_new0 (char *, *out_n_dicts + 1);
-		out_list[0] = g_strdup("fi");
+		out_list = calloc (sizeof (char *), *out_n_dicts + 1);
+		out_list[0] = strdup("fi");
 	}
 
 	return out_list;
@@ -152,7 +151,7 @@ voikko_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER,
 static void
 voikko_provider_dispose (EnchantProvider * me)
 {
-	g_free (me);
+	free (me);
 }
 
 static const char *
@@ -174,7 +173,7 @@ init_enchant_provider (void)
 {
 	EnchantProvider *provider;
 
-	provider = g_new0 (EnchantProvider, 1);
+	provider = calloc (sizeof (EnchantProvider), 1);
 	provider->dispose = voikko_provider_dispose;
 	provider->request_dict = voikko_provider_request_dict;
 	provider->dispose_dict = voikko_provider_dispose_dict;
