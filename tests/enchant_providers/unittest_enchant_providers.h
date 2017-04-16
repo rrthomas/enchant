@@ -63,18 +63,15 @@ struct Provider_TestFixture
         // get the first dictionary listed as being available
         if(_provider->list_dicts && _provider->request_dict)
         {
-		    size_t n_dicts;
+                size_t n_dicts;
 
 	    	char ** dicts = (*_provider->list_dicts) (_provider, &n_dicts);
-		    for (size_t i = 0; i < n_dicts; i++)
-		    {
-   			    dict = (*_provider->request_dict) (_provider, dicts[i]);
-                break;
-            }
-            if (dicts && _provider->free_string_list)
-            {
-		        (*_provider->free_string_list) (_provider, dicts);
-            }
+                for (size_t i = 0; i < n_dicts; i++)
+                {
+                        dict = (*_provider->request_dict) (_provider, dicts[i]);
+                        break;
+                }
+                g_strfreev (dicts);
         }
         return dict;
     }

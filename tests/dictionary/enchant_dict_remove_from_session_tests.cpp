@@ -52,7 +52,6 @@ static void DictionaryCheck_ProviderConfiguration (EnchantProvider * me, const c
 {
      me->request_dict = MockProviderRequestCheckMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
-     me->free_string_list = MockProviderFreeStringList;
 }
 
 struct EnchantDictionaryRemoveFromSession_TestFixture : EnchantDictionaryTestFixture

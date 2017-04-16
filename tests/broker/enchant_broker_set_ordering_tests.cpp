@@ -110,8 +110,6 @@ struct EnchantBrokerSetOrdering_TestFixture : EnchantBrokerTestFixture
 
 struct EnchantBrokerFileSetOrdering_TestFixture: EnchantBrokerSetOrdering_TestFixture
 {
-	std::string _tempPath;
-
 	EnchantBrokerFileSetOrdering_TestFixture()
 	{
 		if(_broker){ // this is now freed so that individual tests can set up the file state they
@@ -119,12 +117,6 @@ struct EnchantBrokerFileSetOrdering_TestFixture: EnchantBrokerSetOrdering_TestFi
 			enchant_broker_free (_broker);
 			_broker = NULL;
 		}
-		_tempPath = GetTemporaryFilename("");
-	}
-
-	~EnchantBrokerFileSetOrdering_TestFixture()
-	{
-		DeleteDirAndFiles(_tempPath);
 	}
 
 	static void WriteStringToOrderingFile(const std::string& path, const std::string& contents)
@@ -471,18 +463,13 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
-
-// FIXME: Resurrect these once we have a way to reconfigure user config directory
-#if 0
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_HomeAndGlobal_HomeMergedWithGlobal_HomeTakesPrecedence_Mock1Then2)
 {
 	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1\nqaa:mock1,mock2");
-	WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
-	SetUserRegistryConfigDir(_tempPath);
+	WriteStringToOrderingFile(GetTempUserEnchantDir(), "en_GB:mock1,mock2");
 
 	InitializeBroker();
-	
 	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("qaa"));
 }
@@ -491,15 +478,13 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_HomeAndGlobal_HomeMergedWithGlobal_HomeTakesPrecedence_Mock2Then1)
 {
 	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2\nqaa:mock2,mock1");
-	WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
-	SetUserRegistryConfigDir(_tempPath);
+	WriteStringToOrderingFile(GetTempUserEnchantDir(), "en_GB:mock2,mock1");
 
 	InitializeBroker();
 	
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
@@ -527,14 +512,11 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 	InitializeBroker();
 }
 
-// FIXME: Resurrect these once we have a way to reconfigure user config directory
-#if 0
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_NoProviders_DoesNotOverridePreviousOrdering_Mock1Then2)
 {
 	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:");
-	WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
-	SetUserRegistryConfigDir(_tempPath);
+	WriteStringToOrderingFile(GetTempUserEnchantDir(), "en_GB:mock1,mock2");
 
 	InitializeBroker();
 
@@ -545,13 +527,11 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_NoProviders_DoesNotOverridePreviousOrdering_Mock2Then1)
 {
 	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:");
-	WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
-	SetUserRegistryConfigDir(_tempPath);
+	WriteStringToOrderingFile(GetTempUserEnchantDir(), "en_GB:mock2,mock1");
 
 	InitializeBroker();
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
-#endif
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrdering_ListedTwice_LastTakesPrecedence_Mock1ThenMock2)

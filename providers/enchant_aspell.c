@@ -237,12 +237,6 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 }
 
 static void
-aspell_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
-static void
 aspell_provider_dispose (EnchantProvider * me)
 {
 	g_free (me);
@@ -272,7 +266,6 @@ init_enchant_provider (void)
 	provider->identify = aspell_provider_identify;
 	provider->describe = aspell_provider_describe;
 	provider->list_dicts = aspell_provider_list_dicts;
-	provider->free_string_list = aspell_provider_free_string_list;
 
 	return provider;
 }

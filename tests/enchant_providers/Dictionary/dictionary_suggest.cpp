@@ -53,9 +53,7 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
                 result.insert(result.begin(), suggestions, suggestions+cSuggestions);
             }
 
-            if(_provider->free_string_list){
-                _provider->free_string_list(_provider, suggestions);
-            }
+            g_strfreev(suggestions);
         }
         
         return result;

@@ -28,7 +28,6 @@
 #include "EnchantDictionaryTestFixture.h"
 
 static bool dictSuggestCalled;
-static bool providerFreeStringListCalled;
 std::string suggestWord;
 
 static enum SuggestBehavior{
@@ -46,7 +45,6 @@ struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
             EnchantDictionaryTestFixture(userConfiguration)
     { 
         dictSuggestCalled = false;
-        providerFreeStringListCalled = false;
         _suggestions = NULL;
         suggestWord = std::string();
         suggestBehavior = returnFour;
@@ -94,19 +92,6 @@ MyMockDictionarySuggest (EnchantDict * dict, const char *const word, size_t len,
     return sugg_arr;
 }
 
-static void
-MyMockProviderFreeStringList (EnchantProvider * provider, char **str_list)
-{
-    providerFreeStringListCalled = true;
-    return MockProviderFreeStringList(provider, str_list);
-}
-
-static void
-MyMockProviderAlternativeFreeStringList (EnchantProvider * provider, char **str_list)
-{
-    return MockProviderFreeStringList(provider, str_list);
-}
-
 static EnchantDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
 {
     
@@ -119,7 +104,6 @@ static void DictionarySuggest_ProviderConfiguration (EnchantProvider * me, const
 {
      me->request_dict = MockProviderRequestSuggestMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
-     me->free_string_list = MyMockProviderFreeStringList;
 }
 
 
@@ -148,7 +132,6 @@ static void DictionaryNoSuggest_ProviderConfiguration (EnchantProvider * me, con
 {
      me->request_dict = MockProviderRequestNoSuggestMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
-     me->free_string_list = MyMockProviderFreeStringList;
 }
 
 struct EnchantDictionarySuggestNotImplemented_TestFixture : EnchantDictionarySuggestTestFixtureBase
@@ -158,32 +141,6 @@ struct EnchantDictionarySuggestNotImplemented_TestFixture : EnchantDictionarySug
             EnchantDictionarySuggestTestFixtureBase(DictionaryNoSuggest_ProviderConfiguration)
     { }
 };
-
-
-static EnchantDict* MockProviderRequestAlternativeFreeMockDictionary(EnchantProvider * me, const char *tag)
-{
-    
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
-    dict->suggest = MyMockDictionarySuggest;
-    return dict;
-}
-
-static void DictionaryAlternativeFree_ProviderConfiguration (EnchantProvider * me, const char *)
-{
-     me->request_dict = MockProviderRequestAlternativeFreeMockDictionary;
-     me->dispose_dict = MockProviderDisposeDictionary;
-     me->free_string_list = MyMockProviderAlternativeFreeStringList;
-}
-
-struct EnchantDictionaryFreeNotImplemented_TestFixture : EnchantDictionarySuggestTestFixtureBase
-{
-    //Setup
-    EnchantDictionaryFreeNotImplemented_TestFixture():
-            EnchantDictionarySuggestTestFixtureBase(DictionaryAlternativeFree_ProviderConfiguration)
-    { }
-};
-
-
 
 
 /**
@@ -240,7 +197,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     size_t cSuggs;
     _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggs);
     CHECK(dictSuggestCalled);
-    CHECK(providerFreeStringListCalled);
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
@@ -327,7 +283,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 
     CHECK(!_suggestions);
     CHECK(!dictSuggestCalled);
-    CHECK(!providerFreeStringListCalled);
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
@@ -337,7 +292,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 
     CHECK(!_suggestions);
     CHECK(!dictSuggestCalled);
-    CHECK(!providerFreeStringListCalled);
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
@@ -347,7 +301,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 
     CHECK(!_suggestions);
     CHECK(!dictSuggestCalled);
-    CHECK(!providerFreeStringListCalled);
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
@@ -357,7 +310,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 
     CHECK(!_suggestions);
     CHECK(!dictSuggestCalled);
-    CHECK(!providerFreeStringListCalled);
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
@@ -367,7 +319,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 
     CHECK(!_suggestions);
     CHECK(!dictSuggestCalled);
-    CHECK(!providerFreeStringListCalled);
 }
 
 
@@ -378,43 +329,7 @@ TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
 
     CHECK(!_suggestions);
     CHECK(!dictSuggestCalled);
-    CHECK(!providerFreeStringListCalled);
 }
-
-TEST_FIXTURE(EnchantDictionaryFreeNotImplemented_TestFixture,
-             EnchantDictionaryFreeNotImplemented_Suggestions_FreeNotCalled)
-{
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, NULL);
-
-    CHECK(_suggestions);
-    CHECK(dictSuggestCalled);
-    CHECK(!providerFreeStringListCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_EmptySuggestionList_FreeCalled)
-{
-    suggestBehavior = returnZero;
-    size_t cSuggs;
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggs);
-    CHECK(!_suggestions);
-    CHECK_EQUAL(0, cSuggs);
-    CHECK(dictSuggestCalled);
-    CHECK(providerFreeStringListCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_NullSuggestionList_FreeNotCalled)
-{
-    suggestBehavior = returnNull;
-    size_t cSuggs;
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggs);
-    CHECK(!_suggestions);
-    CHECK_EQUAL(0, cSuggs);
-    CHECK(dictSuggestCalled);
-    CHECK(!providerFreeStringListCalled);
-}
-
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
              EnchantDictionarySuggest_SuggestionListWithInvalidUtf8_InvalidSuggestionIgnored_FreeCalled)
@@ -424,7 +339,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
     CHECK(_suggestions);
     CHECK(dictSuggestCalled);
-    CHECK(providerFreeStringListCalled);
 
     CHECK_EQUAL(3, cSuggestions);
 

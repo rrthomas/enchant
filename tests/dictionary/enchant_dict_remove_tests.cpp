@@ -64,7 +64,6 @@ static void DictionaryAddToExclude_ProviderConfiguration (EnchantProvider * me, 
 {
      me->request_dict = MockProviderRequestAddToExcludeMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
-     me->free_string_list = MockProviderFreeStringList;
 }
 
 struct EnchantDictionaryRemove_TestFixture : EnchantDictionaryTestFixture

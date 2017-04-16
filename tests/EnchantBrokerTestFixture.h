@@ -97,12 +97,6 @@ MockEnGbProviderListDictionaries (EnchantProvider *,
     return out_list;
 }
 
-static void
-MockProviderFreeStringList (EnchantProvider *, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
 typedef void (*SET_CONFIGURE)(ConfigureHook);
 
 struct EnchantBrokerTestFixture : EnchantTestFixture

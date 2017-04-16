@@ -428,10 +428,9 @@ enchant_session_clear_error (EnchantSession * session)
 /********************************************************************************/
 
 static void
-enchant_provider_free_string_list (EnchantProvider * provider, char ** string_list)
+enchant_free_string_list (char ** string_list)
 {
-	if (provider && provider->free_string_list)
-		(*provider->free_string_list) (provider, string_list);
+	g_strfreev (string_list);
 }
 
 void
@@ -597,7 +596,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			if(dict_suggs)
 				{
 					suggsT = enchant_dict_get_good_suggestions(dict, dict_suggs, n_dict_suggs, &n_suggsT);
-					enchant_provider_free_string_list (session->provider, dict_suggs);
+					enchant_free_string_list (dict_suggs);
 					dict_suggs = suggsT;
 					n_dict_suggs = n_suggsT;
 				}
@@ -610,7 +609,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			if(pwl_suggs)
 				{
 					suggsT = enchant_dict_get_good_suggestions(dict, pwl_suggs, n_pwl_suggs, &n_suggsT);
-					enchant_pwl_free_string_list (session->personal, pwl_suggs);
+					enchant_free_string_list (pwl_suggs);
 					pwl_suggs = suggsT;
 					n_pwl_suggs = n_suggsT;
 				}
@@ -1413,7 +1412,7 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 							}
 						}
 
-					enchant_provider_free_string_list (provider, dicts);
+					enchant_free_string_list (dicts);
 				}
 		}
 
@@ -1483,7 +1482,7 @@ enchant_provider_dictionary_exists (EnchantProvider * provider,
 						exists = 1;
 				}
 
-			enchant_provider_free_string_list (provider, dicts);
+			enchant_free_string_list (dicts);
 		}
 	else if (provider->request_dict)
 		{

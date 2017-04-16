@@ -54,7 +54,6 @@ static void DictionarySuggest_ProviderConfiguration (EnchantProvider * me, const
 {
      me->request_dict = MockProviderRequestSuggestMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
-     me->free_string_list = MockProviderFreeStringList;
 }
 
 

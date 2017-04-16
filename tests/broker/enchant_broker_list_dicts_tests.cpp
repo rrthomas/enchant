@@ -45,15 +45,6 @@ void EnchantDictionaryDescribeAssignUserDataToStaticCallback (const char * const
   global_user_data = user_data;
 }
 
-static bool freeStringListCalled;
-static void FreeStringList (EnchantProvider * me, char **str_list)
-{
-   freeStringListCalled = true;
-    
-   return MockProviderFreeStringList(me, str_list);
-}
-
-
 static bool listDictionariesCalled;
 static char** ListDictionaries (EnchantProvider * me, size_t * out_n_dicts)
 {
@@ -69,7 +60,6 @@ struct EnchantBrokerListDictionaries_TestFixtureBase : EnchantBrokerTestFixture
             EnchantBrokerTestFixture(userConfiguration)
     {
         listDictionariesCalled=false; 
-        freeStringListCalled=false;
         global_user_data = NULL;
     }
     std::vector<DictionaryDescription> _dictionaryList;
@@ -78,7 +68,6 @@ struct EnchantBrokerListDictionaries_TestFixtureBase : EnchantBrokerTestFixture
 static void List_Dictionaries_ProviderConfiguration (EnchantProvider * me, const char *)
 {
      me->list_dicts=ListDictionaries;
-     me->free_string_list = FreeStringList;
 }
 
 
@@ -87,20 +76,6 @@ struct EnchantBrokerListDictionaries_TestFixture : EnchantBrokerListDictionaries
     //Setup
     EnchantBrokerListDictionaries_TestFixture():
             EnchantBrokerListDictionaries_TestFixtureBase(List_Dictionaries_ProviderConfiguration)
-    { }
-};
-
-static void List_Dictionaries_ProviderConfigurationAlternativeFreeStringList (EnchantProvider * me, const char *)
-{
-     me->list_dicts=ListDictionaries;
-     me->free_string_list = MockProviderFreeStringList;
-}
-
-struct EnchantBrokerListDictionaries_ProviderAlternativeFreeStringList_TestFixture : EnchantBrokerListDictionaries_TestFixtureBase
-{
-    //Setup
-    EnchantBrokerListDictionaries_ProviderAlternativeFreeStringList_TestFixture():
-            EnchantBrokerListDictionaries_TestFixtureBase(List_Dictionaries_ProviderConfigurationAlternativeFreeStringList)
     { }
 };
 
@@ -119,7 +94,6 @@ InvalidTagEnGbListDictionaries (EnchantProvider *,
 static void List_Dictionaries_InvalidTag_ProviderConfiguration (EnchantProvider * me, const char *)
 {
      me->list_dicts=InvalidTagEnGbListDictionaries;
-     me->free_string_list = FreeStringList;
 }
 
 struct EnchantBrokerListDictionaries_ProviderReturnsInvalidTag_TestFixture : EnchantBrokerListDictionaries_TestFixtureBase
@@ -146,7 +120,6 @@ DuplicateEnGbListDictionaries (EnchantProvider *,
 static void List_Dictionaries_ProviderConfigurationDuplicateTags (EnchantProvider * me, const char *)
 {
      me->list_dicts=DuplicateEnGbListDictionaries;
-     me->free_string_list = MockProviderFreeStringList;
 }
 
 struct EnchantBrokerListDictionaries_ProviderDuplicateTags_TestFixture : EnchantBrokerListDictionaries_TestFixtureBase
@@ -190,13 +163,6 @@ TEST_FIXTURE(EnchantBrokerListDictionaries_TestFixture,
 {
     enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeCallback, &_dictionaryList);
     CHECK(listDictionariesCalled);
-}
-
-TEST_FIXTURE(EnchantBrokerListDictionaries_TestFixture,
-             EnchantBrokerListDictionaries_freeStringListCalledOnProvider)
-{
-    enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeCallback, &_dictionaryList);
-    CHECK(freeStringListCalled);
 }
 
 TEST_FIXTURE(EnchantBrokerListDictionaries_TestFixture,
@@ -252,14 +218,6 @@ TEST_FIXTURE(EnchantBrokerListDictionaries_ProviderDuplicateTags_TestFixture,
     enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeCallback, &_dictionaryList);
     CHECK_EQUAL((unsigned int)1, _dictionaryList.size());
 }
-
-TEST_FIXTURE(EnchantBrokerListDictionaries_ProviderAlternativeFreeStringList_TestFixture,
-             EnchantBrokerListDictionaries_freeStringListCalledOnProvider)
-{
-    enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeCallback, &_dictionaryList);
-    CHECK(!freeStringListCalled);
-}
-
 
 TEST_FIXTURE(EnchantBrokerListDictionaries_ProviderReturnsInvalidTag_TestFixture,
              EnchantBrokerListDictionaries_ProviderReturnsInvalidTag)

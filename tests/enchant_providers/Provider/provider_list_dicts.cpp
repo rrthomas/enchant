@@ -35,8 +35,7 @@ struct ProviderListDicts_TestFixture : Provider_TestFixture
     //Teardown
     ~ProviderListDicts_TestFixture()
     {
-        if (_dicts && _provider->free_string_list)
-		    (*_provider->free_string_list) (_provider, _dicts);
+        g_strfreev (_dicts);
     }
 };
 
