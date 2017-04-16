@@ -146,8 +146,7 @@ char** Zemberek::suggestWord(const char* word, size_t *out_n_suggs)
 
 extern "C" {
 
-ENCHANT_MODULE_EXPORT(EnchantProvider *)
-  init_enchant_provider(void);
+EnchantProvider *init_enchant_provider(void);
 
 static int
 zemberek_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUSED_PARAMETER)

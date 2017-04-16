@@ -25,10 +25,6 @@
 #include <stdio.h>
 #include "mock_provider.h"
 
-#if !defined(_WIN32)
-#include <dlfcn.h>
-#endif
-
 static void
 mock_provider_dispose(EnchantProvider *me)
 {
@@ -52,13 +48,13 @@ static ConfigureHook _hook;
 
 extern "C" {
 
-ENCHANT_MODULE_EXPORT(void)
+void
 set_configure(ConfigureHook hook){
     _hook = hook;
 }
 
 
-ENCHANT_MODULE_EXPORT(EnchantProvider *) 
+EnchantProvider * 
 init_enchant_provider(void)
 {
 #ifndef ENCHANT_TEST_NULL_IDENTIFY
@@ -91,7 +87,7 @@ init_enchant_provider(void)
     return provider;
 }
 
-ENCHANT_MODULE_EXPORT(void)
+void
 configure_enchant_provider(EnchantProvider * me, const char *dir_name)
 {
     if(_hook){

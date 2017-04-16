@@ -49,11 +49,9 @@ typedef struct str_enchant_provider EnchantProvider;
  *
  * The returned string should be free'd with free.
  */
-ENCHANT_MODULE_EXPORT(char *)
-	enchant_get_user_language(void);
+char *enchant_get_user_language(void);
 
-ENCHANT_MODULE_EXPORT (char *)
-	enchant_get_user_config_dir (void);
+char *enchant_get_user_config_dir (void);
 
 /**
  * enchant_get_prefix_dir
@@ -67,8 +65,7 @@ ENCHANT_MODULE_EXPORT (char *)
  * Returns: the prefix dir. Must be free'd.
  *
  */
-ENCHANT_MODULE_EXPORT(char *)
-	enchant_get_prefix_dir(void);
+char *enchant_get_prefix_dir(void);
 
 /**
  * enchant_dict_set_error
@@ -78,8 +75,7 @@ ENCHANT_MODULE_EXPORT(char *)
  * Sets the current runtime error to @err. This API is private to the
  * providers.
  */
-ENCHANT_MODULE_EXPORT(void)
-	enchant_dict_set_error (EnchantDict * dict, const char * const err);
+void enchant_dict_set_error (EnchantDict * dict, const char * const err);
 
 /**
  * enchant_provider_set_error
@@ -89,8 +85,7 @@ ENCHANT_MODULE_EXPORT(void)
  * Sets the current runtime error to @err. This API is private to
  * the providers.
  */
-ENCHANT_MODULE_EXPORT(void)
-	enchant_provider_set_error (EnchantProvider * provider, const char * const err);
+void enchant_provider_set_error (EnchantProvider * provider, const char * const err);
 
 struct str_enchant_dict
 {

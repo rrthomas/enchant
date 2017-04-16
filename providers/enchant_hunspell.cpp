@@ -380,9 +380,6 @@ hunspell_provider_enum_dicts (const char * const directory,
 
 extern "C" {
 
-ENCHANT_MODULE_EXPORT (EnchantProvider *) 
-	     init_enchant_provider (void);
-
 static char ** 
 hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
 			      size_t * out_n_dicts)
