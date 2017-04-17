@@ -448,7 +448,7 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 	session->error = strdup (err);
 }
 
-char *
+const char *
 enchant_dict_get_error (EnchantDict * dict)
 {
 	EnchantSession * session;
@@ -1615,7 +1615,7 @@ enchant_provider_set_error (EnchantProvider * provider, const char * const err)
 	enchant_broker_set_error (broker, err);
 }
 
-char *
+const char *
 enchant_broker_get_error (EnchantBroker * broker)
 {
 	g_return_val_if_fail (broker, NULL);

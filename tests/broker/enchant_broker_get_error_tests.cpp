@@ -42,7 +42,7 @@ TEST_FIXTURE(EnchantBrokerTestFixture,
     std::string errorMessage("something bad happened");
     SetErrorOnMockProvider(errorMessage);
 
-    char * result = enchant_broker_get_error(_broker);
+    const char * result = enchant_broker_get_error(_broker);
     CHECK(result);
     if(result)
     {
