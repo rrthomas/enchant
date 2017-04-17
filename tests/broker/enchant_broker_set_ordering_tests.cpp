@@ -363,13 +363,10 @@ EnchantBrokerFileOrderingMock2ThenMock1_DefaultConfigDirectory)
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
 
-// FIXME: Resurrect these once we have a way to reconfigure user config directory
-#if 0
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 EnchantBrokerFileOrderingMock1ThenMock2_UserOverriddenConfigDirectory)
 {
-	WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
-	SetUserRegistryConfigDir(_tempPath);
+	WriteStringToOrderingFile(GetTempUserEnchantDir(), "en_GB:mock1,mock2");
 	InitializeBroker();
 
 	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
@@ -378,54 +375,11 @@ EnchantBrokerFileOrderingMock1ThenMock2_UserOverriddenConfigDirectory)
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrderingMock2ThenMock1_UserOverriddenConfigDirectory)
 {
-	WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
-	SetUserRegistryConfigDir(_tempPath);
+	WriteStringToOrderingFile(GetTempUserEnchantDir(), "en_GB:mock2,mock1");
 	InitializeBroker();
 
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
 }
-
-TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
- EnchantBrokerFileOrderingMock1ThenMock2_MachineOverriddenConfigDirectory)
-{
-	WriteStringToOrderingFile(_tempPath, "en_GB:mock1,mock2");
-	SetMachineRegistryConfigDir(_tempPath);
-	InitializeBroker();
-	
-	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
-}
-
-TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
- EnchantBrokerFileOrderingMock2ThenMock1_MachineOverriddenConfigDirectory)
-{
-	WriteStringToOrderingFile(_tempPath, "en_GB:mock2,mock1");
-	SetMachineRegistryConfigDir(_tempPath);
-	InitializeBroker();
-	
-	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
-}
-
-// if config registry "" global from share/enchant
-TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
- EnchantBrokerFileOrdering_OverriddenConfigDirectoryIsBlank_UsesSettingsFromDefaultConfigDirectory_Mock1Then2)
-{
-	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock1,mock2");
-	SetMachineRegistryConfigDir("");
-	InitializeBroker();
-	
-	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
-}
-
-TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
- EnchantBrokerFileOrdering_OverriddenConfigDirectoryIsBlank_UsesSettingsFromDefaultConfigDirectory_Mock2Then1)
-{
-	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:mock2,mock1");
-	SetMachineRegistryConfigDir("");
-	InitializeBroker();
-	
-	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));
-}
-#endif
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_ExtraSpacesAndTabs_Mock1Then2)
