@@ -31,8 +31,7 @@
 #define ENCHANT_PROVIDER_H
 
 #include <enchant.h>
-#include <glib.h>
-#include <stdio.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {

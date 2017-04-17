@@ -1,4 +1,3 @@
-/* FIXME: Use current voikko API, not deprecated */
 /* enchant
  * Copyright (C) 2003,2004 Dom Lachowicz
  *               2006-2007 Harri Pitkänen <hatapitk@iki.fi>
@@ -36,7 +35,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <glib.h>
 #include <libvoikko/voikko.h>
 #include "unused-parameter.h"
 
@@ -52,11 +50,7 @@
 static int
 voikko_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUSED_PARAMETER)
 {
-	int result;
-	int voikko_handle;
-
-	voikko_handle = (long) me->user_data;
-	result = voikko_spell_cstr(voikko_handle, word);
+	int result = voikkoSpellCstr((struct VoikkoHandle *)me->user_data, word);
 	if (result == VOIKKO_SPELL_FAILED)
 		return 1;
 	else if (result == VOIKKO_SPELL_OK)
@@ -69,11 +63,7 @@ static char **
 voikko_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len _GL_UNUSED_PARAMETER, size_t * out_n_suggs)
 {
-	char **sugg_arr;
-	int voikko_handle;
-
-	voikko_handle = (long) me->user_data;
-	sugg_arr = voikko_suggest_cstr(voikko_handle, word);
+	char **sugg_arr = voikkoSuggestCstr((struct VoikkoHandle *)me->user_data, word);
 	if (sugg_arr == NULL)
 		return NULL;
 	for (*out_n_suggs = 0; sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
@@ -85,20 +75,20 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	EnchantDict *dict;
 	const char * voikko_error;
-	int voikko_handle;
+	struct VoikkoHandle *voikko_handle;
 
 	/* Only Finnish is supported at the moment */
 	if (strncmp(tag, "fi_FI", 6) != 0 && strncmp(tag, "fi", 3) != 0)
 		return NULL;
 	
-	voikko_error = voikko_init(&voikko_handle, "fi_FI", 0);
-	if (voikko_error) {
+	voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL);
+	if (voikko_handle == NULL) {
 		enchant_provider_set_error(me, voikko_error);
 		return NULL;
 	}
 
-	dict = g_new0 (EnchantDict, 1);
-	dict->user_data = (void *)(long) voikko_handle;
+	dict = calloc (sizeof (EnchantDict), 1);
+	dict->user_data = (void *)voikko_handle;
 	dict->check = voikko_dict_check;
 	dict->suggest = voikko_dict_suggest;
 
@@ -108,23 +98,24 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 static void
 voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
-	voikko_terminate((long) dict->user_data);
-	g_free (dict);
+	voikkoTerminate((struct VoikkoHandle *)dict->user_data);
+	free (dict);
 }
 
 static int
 voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
                                    const char *const tag)
 {
-	int voikko_handle;
+	const char *voikko_error;
+	struct VoikkoHandle *voikko_handle;
 
 	/* Only Finnish is supported */
 	if (strncmp(tag, "fi", 3) != 0)
 		return 0;
 
 	/* Check that a dictionary is actually available */
-	if (voikko_init(&voikko_handle, "fi_FI", 0) == NULL) {
-		voikko_terminate(voikko_handle);
+	if ((voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL))) {
+		voikkoTerminate(voikko_handle);
 		return 1;
 	}
 	else return 0;
@@ -136,14 +127,15 @@ voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 			    size_t * out_n_dicts)
 {
 	char ** out_list = NULL;
-	int voikko_handle;
+	const char *voikko_error;
+	struct VoikkoHandle *voikko_handle;
 	*out_n_dicts = 0;
 
-	if (voikko_init(&voikko_handle, "fi_FI", 0) == NULL) {
-		voikko_terminate(voikko_handle);
+	if ((voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL))) {
+		voikkoTerminate(voikko_handle);
 		*out_n_dicts = 1;
-		out_list = g_new0 (char *, *out_n_dicts + 1);
-		out_list[0] = g_strdup("fi");
+		out_list = calloc (sizeof (char *), *out_n_dicts + 1);
+		out_list[0] = strdup("fi");
 	}
 
 	return out_list;
@@ -153,14 +145,13 @@ static void
 voikko_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER,
 				  char **str_list)
 {
-	/* FIXME: suggestion list should be freed with voikkoFreeCstrArray */
-	g_strfreev (str_list);
+	voikkoFreeCstrArray (str_list);
 }
 
 static void
 voikko_provider_dispose (EnchantProvider * me)
 {
-	g_free (me);
+	free (me);
 }
 
 static const char *
@@ -182,7 +173,7 @@ init_enchant_provider (void)
 {
 	EnchantProvider *provider;
 
-	provider = g_new0 (EnchantProvider, 1);
+	provider = calloc (sizeof (EnchantProvider), 1);
 	provider->dispose = voikko_provider_dispose;
 	provider->request_dict = voikko_provider_request_dict;
 	provider->dispose_dict = voikko_provider_dispose_dict;
