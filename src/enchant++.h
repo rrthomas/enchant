@@ -100,6 +100,8 @@ namespace enchant
 							      utf8word.size(), &n_suggs);
 				
 				if (suggs && n_suggs) {
+					out_suggestions.reserve(n_suggs);
+
 					for (size_t i = 0; i < n_suggs; i++) {
 						out_suggestions.push_back (suggs[i]);
 					}
