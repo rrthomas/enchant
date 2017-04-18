@@ -1,4 +1,3 @@
-// FIXME: Use @autoreleasepool
 /* enchant
  * Copyright (C) 2004 Remi Payette
  * Copyright (C) 2004 Francis James Franklin
@@ -214,157 +213,134 @@ NSString * AppleSpellChecker::requestDictionary (const char * const code)
 
 static char ** appleSpell_dict_suggest (EnchantDict * me, const char * const word, size_t len, size_t * out_n_suggs)
 {
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
+		// NSLog (@"appleSpell_dict_suggest word=\"%s\"", word);
 
-	// NSLog (@"appleSpell_dict_suggest word=\"%s\"", word);
+		if (!me || !word || !len || !out_n_suggs)
+			{
+				return 0;
+			}
 
-	if (!me || !word || !len || !out_n_suggs)
-		{
-			if (pool) [pool release];
-			return 0;
-		}
+		char ** result = 0;
 
-	char ** result = 0;
+		if (AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(me->user_data))
+			{
+				result = ASD->AppleSpell->suggestWord (word, len, out_n_suggs, ASD->DictionaryName);
+			}
 
-	if (AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(me->user_data))
-		{
-			result = ASD->AppleSpell->suggestWord (word, len, out_n_suggs, ASD->DictionaryName);
-		}
+	}
 
-	if (pool) [pool release];
 	return result;
 }
 
 static int appleSpell_dict_check (EnchantDict * me, const char * const word, size_t len)
 {
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
+		// NSLog (@"appleSpell_dict_check");
 
-	// NSLog (@"appleSpell_dict_check");
+		if (!me || !word || !len)
+			{
+				return 0;
+			}
 
-	if (!me || !word || !len)
-		{
-			if (pool) [pool release];
-			return 0;
-		}
+		int result = 0;
 
-	int result = 0;
+		if (AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(me->user_data))
+			{
+				result = ASD->AppleSpell->checkWord (word, len, ASD->DictionaryName);
+			}
+	}
 
-	if (AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(me->user_data))
-		{
-			result = ASD->AppleSpell->checkWord (word, len, ASD->DictionaryName);
-		}
-
-	if (pool) [pool release];
 	return result;
 }
 
 static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, const char * const tag)
 {
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
+		// NSLog (@"appleSpell_provider_request_dict");
+		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
+		EnchantDict * dict = g_new0 (EnchantDict, 1);
 
-	// NSLog (@"appleSpell_provider_request_dict");
+		if (!me || !tag || !checker || !dict)
+			{
+				return 0;
+			}
 
-	if (!me || !tag)
-		{
-			if (pool) [pool release];
-			return 0;
-		}
+		dict->check            = appleSpell_dict_check;
+		dict->suggest          = appleSpell_dict_suggest;
 
-	AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
-	if (!checker)
-		{
-			if (pool) [pool release];
-			return 0;
-		}
+		AppleSpellDictionary * ASD = g_new0 (AppleSpellDictionary, 1);
+		if (!ASD)
+			{
+				g_free (dict);
+				return 0;
+			}
 
-	EnchantDict * dict = g_new0 (EnchantDict, 1);
-	if (!dict)
-		{
-			if (pool) [pool release];
-			return 0;
-		}
+		ASD->AppleSpell     = checker;
+		ASD->DictionaryName = checker->requestDictionary (tag);
 
-	dict->check            = appleSpell_dict_check;
-	dict->suggest          = appleSpell_dict_suggest;
+		if (!ASD->DictionaryName)
+			{
+				g_free (ASD);
+				g_free (dict);
+				return 0;
+			}
 
-	AppleSpellDictionary * ASD = g_new0 (AppleSpellDictionary, 1);
-	if (!ASD)
-		{
-			g_free (dict);
-			if (pool) [pool release];
-			return 0;
-		}
+		[ASD->DictionaryName retain];
+		// NSLog (@"appleSpell_provider_request_dict: providing dictionary \"%@\"", ASD->DictionaryName);
+		dict->user_data = (void *) ASD;
+	}
 
-	ASD->AppleSpell     = checker;
-	ASD->DictionaryName = checker->requestDictionary (tag);
-
-	if (ASD->DictionaryName)
-		{
-			[ASD->DictionaryName retain];
-			// NSLog (@"appleSpell_provider_request_dict: providing dictionary \"%@\"", ASD->DictionaryName);
-			dict->user_data = (void *) ASD;
-		}
-	else
-		{
-			g_free (ASD);
-			g_free (dict);
-			dict = 0;
-		}
-	
-	if (pool) [pool release];
 	return dict;
 }
 
 static void appleSpell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 {
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
+		// NSLog (@"appleSpell_provider_dispose_dict");
 
-	// NSLog (@"appleSpell_provider_dispose_dict");
-
-	if (dict)
-		{
-			AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(dict->user_data);
-			if (ASD)
-				{
-					[ASD->DictionaryName release];
-					g_free (ASD);
-				}
-			g_free (dict);
-		}
-	if (pool) [pool release];
+		if (dict)
+			{
+				AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(dict->user_data);
+				if (ASD)
+					{
+						[ASD->DictionaryName release];
+						g_free (ASD);
+					}
+				g_free (dict);
+			}
+	}
 }
 
 static int appleSpell_provider_dictionary_exists (EnchantProvider * me, const char * const tag)
 {
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
+		// NSLog (@"appleSpell_provider_dictionary_exists: tag=\"%s\"", tag);
 
-	// NSLog (@"appleSpell_provider_dictionary_exists: tag=\"%s\"", tag);
+		int result = 0;
 
-	int result = 0;
+		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
+		if (checker)
+			result = (checker->requestDictionary (tag) ? 1 : 0);
+	}
 
-	AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
-	if (checker)
-		result = (checker->requestDictionary (tag) ? 1 : 0);
-
-	if (pool) [pool release];
 	return result;
 }
 
 static void appleSpell_provider_dispose (EnchantProvider * me)
 {
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+	@autoreleasepool {
+		// NSLog (@"appleSpell_provider_dispose");
 
-	// NSLog (@"appleSpell_provider_dispose");
+		if (me)
+			{
+				AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
+				if (checker)
+					delete checker;
 
-	if (me)
-		{
-			AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
-			if (checker)
-				delete checker;
-
-			g_free (me);
-		}
-	if (pool) [pool release];
+				g_free (me);
+			}
+	}
 }
 
 static const char * appleSpell_provider_identify (EnchantProvider * me)
@@ -377,60 +353,46 @@ static const char * appleSpell_provider_describe (EnchantProvider * me)
 	return "AppleSpell Provider";
 }
 
-static void appleSpell_provider_free_string_list (EnchantProvider * me, char **str_list)
-{
-	NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-	
-	// NSLog (@"appleSpell_provider_free_suggestions");
-	
-	if (str_list)
-		g_strfreev (str_list);
-	
-	if (pool) [pool release];
-}
-
 extern "C" {
 	EnchantProvider *init_enchant_provider (void)
 	{
-		NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+		@autoreleasepool {
+			// NSLog (@"init_enchant_provider");
 
-		// NSLog (@"init_enchant_provider");
+			EnchantProvider * provider = g_new0 (EnchantProvider, 1);
+			if (!provider)
+				{
+					return 0;
+				}
 
-		EnchantProvider * provider = g_new0 (EnchantProvider, 1);
-		if (!provider)
-			{
-				if (pool) [pool release];
-				return 0;
-			}
+			provider->dispose           = appleSpell_provider_dispose;
+			provider->request_dict      = appleSpell_provider_request_dict;
+			provider->dispose_dict      = appleSpell_provider_dispose_dict;
+			provider->dictionary_exists = appleSpell_provider_dictionary_exists;
+			provider->identify          = appleSpell_provider_identify;
+			provider->describe          = appleSpell_provider_describe;
 
-		provider->dispose           = appleSpell_provider_dispose;
-		provider->request_dict      = appleSpell_provider_request_dict;
-		provider->dispose_dict      = appleSpell_provider_dispose_dict;
-		provider->dictionary_exists = appleSpell_provider_dictionary_exists;
-		provider->identify          = appleSpell_provider_identify;
-		provider->describe          = appleSpell_provider_describe;
-		provider->free_string_list  = appleSpell_provider_free_string_list;
+			AppleSpellChecker * checker = 0;
+			try
+				{
+					checker = new AppleSpellChecker;
+				}
+			catch (...)
+				{
+					checker = 0;
+				}
+			if (checker)
+				{
+					provider->user_data = (void *) checker;
+				}
+			else
+				{
+					g_free (provider);
+					provider = 0;
+				}
 
-		AppleSpellChecker * checker = 0;
-		try
-			{
-				checker = new AppleSpellChecker;
-			}
-		catch (...)
-			{
-				checker = 0;
-			}
-		if (checker)
-			{
-				provider->user_data = (void *) checker;
-			}
-		else
-			{
-				g_free (provider);
-				provider = 0;
-			}
+		}
 
-		if (pool) [pool release];
 		return provider;
 	}
 
@@ -438,42 +400,41 @@ extern "C" {
 
 	void configure_enchant_provider (EnchantProvider * me, const char * module_dir)
 	{
-		NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+		@autoreleasepool {
+			// NSLog (@"configure_enchant_provider");
 
-		// NSLog (@"configure_enchant_provider");
+			if (!me || !module_dir)
+				{
+					return;
+				}
 
-		if (!me || !module_dir)
-			{
-				if (pool) [pool release];
-				return;
-			}
+			AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
+			if (checker)
+				{
+					if (s_bReloadSelf)
+						if (gchar * moduleFile = g_build_filename (module_dir, "AppleSpell.so", NULL))
+							{
+								/* ugly hack :-(
+								 * Darwin linker doesn't like unloading Obj-C modules;
+								 * reload once to suppress unloading...
+								 */
+								g_module_open (moduleFile, (GModuleFlags) 0);
 
-		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
-		if (checker)
-			{
-				if (s_bReloadSelf)
-					if (gchar * moduleFile = g_build_filename (module_dir, "AppleSpell.so", NULL))
+								g_free (moduleFile);
+
+								s_bReloadSelf = false;
+							}
+
+					if (gchar * configFile = g_build_filename (module_dir, "AppleSpell.config", NULL))
 						{
-							/* ugly hack :-(
-							 * Darwin linker doesn't like unloading Obj-C modules;
-							 * reload once to suppress unloading...
-							 */
-							g_module_open (moduleFile, (GModuleFlags) 0);
-							
-							g_free (moduleFile);
+							checker->parseConfigFile (configFile);
 
-							s_bReloadSelf = false;
+							g_free (configFile);
 						}
+				}
 
-				if (gchar * configFile = g_build_filename (module_dir, "AppleSpell.config", NULL))
-					{
-						checker->parseConfigFile (configFile);
+		}
 
-						g_free (configFile);
-					}
-			}
-
-		if (pool) [pool release];
 		return;
 	}
 }
