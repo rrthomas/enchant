@@ -22,15 +22,11 @@
 #ifndef __ENCHANTTESTFIXTURE
 #define __ENCHANTTESTFIXTURE
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <shlwapi.h>
-#include <io.h>
-#else
-#include <fcntl.h> /* For creat; should not be needed, but gstdio.h does not include fcntl.h */
-#endif
 #include <assert.h>
+#include <glib.h>
+#ifdef G_OS_UNIX
+#include <fcntl.h> /* For creat; FIXME: should not be needed */
+#endif
 #include <glib/gstdio.h>
 #include <sys/stat.h>
 #include <unistd.h>
