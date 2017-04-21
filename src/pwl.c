@@ -763,12 +763,6 @@ static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher)
 
 }
 
-void enchant_pwl_free_string_list(EnchantPWL *pwl _GL_UNUSED_PARAMETER,
-				  char** string_list)
-{
-	g_strfreev(string_list);
-}
-
 static void enchant_trie_free(EnchantTrie* trie)
 {
 	/* Don't try to free NULL or the EOSTrie pointer */

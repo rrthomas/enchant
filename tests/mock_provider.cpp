@@ -82,7 +82,6 @@ init_enchant_provider(void)
     provider->describe = hasDescribe ? mock_provider_describe : NULL; // this is required or module won't load
     provider->list_dicts = NULL;
     provider->dictionary_exists = NULL;
-    provider->free_string_list = NULL;
 
     return provider;
 }

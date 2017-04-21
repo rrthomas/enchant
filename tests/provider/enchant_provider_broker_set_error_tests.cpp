@@ -33,7 +33,7 @@ struct EnchantBrokerSetErrorTests : EnchantBrokerTestFixture
   }
 
   std::string GetErrorMessage(){
-      char* error = enchant_broker_get_error(_broker);
+      const char* error = enchant_broker_get_error(_broker);
       if(error == NULL){
           return std::string();
       }

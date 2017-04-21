@@ -49,7 +49,6 @@ int enchant_pwl_check(EnchantPWL * me,const char *const word, size_t len);
 char** enchant_pwl_suggest(EnchantPWL *me, const char *const word,
 			   size_t len, char ** suggs, size_t* out_n_suggs);
 void enchant_pwl_free(EnchantPWL* me);
-void enchant_pwl_free_string_list(EnchantPWL* me, char** string_list);
 
 #ifdef __cplusplus
 }

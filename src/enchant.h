@@ -120,8 +120,7 @@ void enchant_broker_set_ordering (EnchantBroker * broker,
  * WARNING: error is transient and is likely cleared as soon as the
  * next broker operation happens
  */
-/* FIXME: mark as const */
-char *enchant_broker_get_error (EnchantBroker * broker);
+const char *enchant_broker_get_error (EnchantBroker * broker);
 
 /**
  * EnchantBrokerDescribeFn
@@ -268,8 +267,7 @@ void enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
  *
  * Returns: an error message
  */
-/* FIXME: mark as const */
-char *enchant_dict_get_error (EnchantDict * dict);
+const char *enchant_dict_get_error (EnchantDict * dict);
 
 /**
  * EnchantDictDescribeFn

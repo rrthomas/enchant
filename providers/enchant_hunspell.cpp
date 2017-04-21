@@ -405,12 +405,6 @@ hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 	return dictionary_list;
 }
 
-static void
-hunspell_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
 static EnchantDict *
 hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED_PARAMETER, const char *const tag)
 {
@@ -497,7 +491,6 @@ init_enchant_provider (void)
 	provider->dictionary_exists = hunspell_provider_dictionary_exists;
 	provider->identify = hunspell_provider_identify;
 	provider->describe = hunspell_provider_describe;
-	provider->free_string_list = hunspell_provider_free_string_list;
 	provider->list_dicts = hunspell_provider_list_dicts;
 
 	return provider;

@@ -216,12 +216,6 @@ zemberek_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 	return "Zemberek Provider";
 }
 
-static void
-zemberek_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
 static char **
 zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 			      size_t * out_n_dicts)
@@ -254,7 +248,6 @@ init_enchant_provider(void)
     provider->identify = zemberek_provider_identify;
     provider->describe = zemberek_provider_describe;
     provider->list_dicts = zemberek_provider_list_dicts;
-    provider->free_string_list = zemberek_provider_free_string_list;
 
     return provider;
 }

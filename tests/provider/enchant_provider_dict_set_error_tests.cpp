@@ -27,7 +27,7 @@ struct EnchantDictionarySetErrorTests : EnchantDictionaryTestFixture
 {
   //Setup
   std::string GetErrorMessage(){
-      char* error = enchant_dict_get_error(_dict);
+      const char* error = enchant_dict_get_error(_dict);
       if(error == NULL){
           return std::string();
       }

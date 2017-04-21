@@ -87,7 +87,6 @@ static void BasicDictionary_ProviderConfiguration (EnchantProvider * me, const c
 {
      me->request_dict = MockProviderRequestBasicMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
-     me->free_string_list = MockProviderFreeStringList;
 }
 
 struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture

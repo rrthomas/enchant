@@ -57,7 +57,6 @@ static char** ListDictionaries (EnchantProvider * me, size_t * out_n_dicts)
 static void List_Dictionaries_ProviderConfiguration (EnchantProvider * me, const char *)
 {
      me->list_dicts=ListDictionaries;
-     me->free_string_list = MockProviderFreeStringList;
 }
 
 struct EnchantBrokerDictExists_ProviderImplementsListDictionaries_TestFixture : EnchantBrokerTestFixture
@@ -111,7 +110,6 @@ static void ProviderConfiguration (EnchantProvider * me, const char *)
      me->request_dict = RequestDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
      me->list_dicts = ListDictionaries;
-     me->free_string_list = MockProviderFreeStringList;
      me->dictionary_exists = DoesDictionaryExist;
 }
 

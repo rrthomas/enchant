@@ -63,10 +63,16 @@ static char **
 voikko_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len _GL_UNUSED_PARAMETER, size_t * out_n_suggs)
 {
-	char **sugg_arr = voikkoSuggestCstr((struct VoikkoHandle *)me->user_data, word);
-	if (sugg_arr == NULL)
+	char **voikko_sugg_arr = voikkoSuggestCstr((struct VoikkoHandle *)me->user_data, word);
+	if (voikko_sugg_arr == NULL)
 		return NULL;
-	for (*out_n_suggs = 0; sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
+	for (*out_n_suggs = 0; voikko_sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
+
+	char **sugg_arr = calloc(sizeof (char *), *out_n_suggs);
+	for (size_t i = 0; i < *out_n_suggs; i++) {
+		sugg_arr[i] = strdup (voikko_sugg_arr[i]);
+	}
+	voikkoFreeCstrArray (voikko_sugg_arr);
 	return sugg_arr;
 }
 
@@ -142,13 +148,6 @@ voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 }
 
 static void
-voikko_provider_free_string_list (EnchantProvider * me _GL_UNUSED_PARAMETER,
-				  char **str_list)
-{
-	voikkoFreeCstrArray (str_list);
-}
-
-static void
 voikko_provider_dispose (EnchantProvider * me)
 {
 	free (me);
@@ -181,7 +180,6 @@ init_enchant_provider (void)
 	provider->identify = voikko_provider_identify;
 	provider->describe = voikko_provider_describe;
 	provider->list_dicts = voikko_provider_list_dicts;
-	provider->free_string_list = voikko_provider_free_string_list;
 
 	return provider;
 }

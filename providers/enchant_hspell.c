@@ -251,12 +251,6 @@ hspell_provider_dictionary_exists (struct str_enchant_provider * me,
 }
 
 static void
-hspell_provider_free_string_list (EnchantProvider * me  _GL_UNUSED_PARAMETER, char **str_list)
-{
-	g_strfreev (str_list);
-}
-
-static void
 hspell_provider_dispose (EnchantProvider * me)
 {
 	g_free (me);
@@ -289,7 +283,6 @@ init_enchant_provider (void)
 	provider->identify = hspell_provider_identify;
 	provider->describe = hspell_provider_describe;
 	provider->list_dicts = hspell_provider_list_dicts;
-	provider->free_string_list = hspell_provider_free_string_list;
 
 	return provider;
 }
