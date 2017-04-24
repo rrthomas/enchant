@@ -76,38 +76,9 @@ struct EnchantBrokerDictExists_ProviderImplementsListDictionaries_TestFixture : 
 #define DictionaryExistsMethodCalled listDictionariesCalled
 #include "enchant_broker_dict_exists_tests.i"
 
-static int requestDictionaryCalled;
-static EnchantDict * RequestDictionary (EnchantProvider *me, const char *tag)
-{
-    requestDictionaryCalled++;
-    return MockEnGbAndQaaProviderRequestDictionary(me, tag);
-}
-
-static void Request_Dictionary_ProviderConfiguration (EnchantProvider * me, const char *)
-{
-     me->request_dict = RequestDictionary;
-     me->dispose_dict = MockProviderDisposeDictionary;
-}
-
-struct EnchantBrokerDictExists_ProviderImplementsRequestDictionary_TestFixture : EnchantBrokerTestFixture
-{
-    //Setup
-    EnchantBrokerDictExists_ProviderImplementsRequestDictionary_TestFixture():
-            EnchantBrokerTestFixture(Request_Dictionary_ProviderConfiguration)
-    { 
-        requestDictionaryCalled = 0;
-    }
-};
-
-#undef EnchantBrokerDictExistsTestFixture
-#define EnchantBrokerDictExistsTestFixture EnchantBrokerDictExists_ProviderImplementsRequestDictionary_TestFixture
-#undef DictionaryExistsMethodCalled
-#define DictionaryExistsMethodCalled requestDictionaryCalled
-#include "enchant_broker_dict_exists_tests.i"
-
 static void ProviderConfiguration (EnchantProvider * me, const char *)
 {
-     me->request_dict = RequestDictionary;
+     me->request_dict = MockEnGbAndQaaProviderRequestDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
      me->list_dicts = ListDictionaries;
      me->dictionary_exists = DoesDictionaryExist;
@@ -120,7 +91,6 @@ struct EnchantBrokerDictExists_ProviderImplementsAll_TestFixture : EnchantBroker
             EnchantBrokerTestFixture(ProviderConfiguration)
     { 
       listDictionariesCalled = 0;
-      requestDictionaryCalled = 0;
       dictionaryExistsCalled = 0;
     }
 };
@@ -129,11 +99,9 @@ TEST_FIXTURE(EnchantBrokerDictExists_ProviderImplementsAll_TestFixture,
              EnchantBrokerDictExists_CalledWhenDictionaryIsInUse_DoesNotCallAnyMethods_GetsCachedResult)
 {
   EnchantDict* dict = enchant_broker_request_dict(_broker, "en-GB");
-  requestDictionaryCalled = 0;
 
   enchant_broker_dict_exists(_broker, "en-GB");
   CHECK_EQUAL(0,listDictionariesCalled);
-  CHECK_EQUAL(0,requestDictionaryCalled);
   CHECK_EQUAL(0,dictionaryExistsCalled);
 
   enchant_broker_free_dict(_broker, dict);

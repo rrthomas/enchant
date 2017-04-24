@@ -896,7 +896,7 @@ enchant_provider_is_valid(EnchantProvider * provider)
 		}
 	else if(!g_utf8_validate((*provider->identify)(provider), -1, NULL))
 		{
-			g_warning ("EnchantProvider's identify method does not return valid utf8.\n");
+			g_warning ("EnchantProvider's identify method does not return valid UTF-8.\n");
 			return 0;
 		}
 
@@ -905,9 +905,24 @@ enchant_provider_is_valid(EnchantProvider * provider)
 			g_warning ("EnchantProvider's describe method cannot be NULL\n");
 			return 0;
 		}
+	if(provider->dispose == NULL)
+		{
+			g_warning ("EnchantProvider's dispose method cannot be NULL\n");
+			return 0;
+		}
+	if(provider->dispose_dict == NULL)
+		{
+			g_warning ("EnchantProvider's dispose_dict method cannot be NULL\n");
+			return 0;
+		}
+	if(provider->dictionary_exists == NULL && provider->list_dicts == NULL)
+		{
+			g_warning ("EnchantProvider's dictionary_exists and list_dicts methods cannot both be NULL\n");
+			return 0;
+		}
 	else if(!g_utf8_validate((*provider->describe)(provider), -1, NULL))
 		{
-			g_warning ("EnchantProvider's describe method does not return valid utf8.\n");
+			g_warning ("EnchantProvider's describe method does not return valid UTF-8.\n");
 			return 0;
 		}
 
@@ -961,9 +976,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 											g_warning ("Error loading plugin: %s's init_enchant_provider returned invalid provider.\n", dir_entry);
 											if(provider)
 												{
-													if(provider->dispose)
-														provider->dispose(provider);
-
+													provider->dispose(provider);
 													provider = NULL;
 												}
 											g_module_close (module);
@@ -997,9 +1010,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 							if (!enchant_provider_is_valid(provider))
 								{
 									g_warning ("Error loading plugin: %s's configure_enchant_provider modified provider and it is now invalid.\n", dir_entry);
-									if(provider->dispose)
-										provider->dispose(provider);
-
+									provider->dispose(provider);
 									provider = NULL;
 									g_module_close (module);
 								}
@@ -1139,7 +1150,7 @@ enchant_dict_destroyed (gpointer data)
 	session = enchant_dict_private_data->session;
 	owner = session->provider;
 
-	if (owner && owner->dispose_dict)
+	if (owner)
 		(*owner->dispose_dict) (owner, dict);
 	else if(session->is_pwl)
 		g_free (dict);
@@ -1159,9 +1170,7 @@ enchant_provider_free (gpointer data)
 
 	provider = (EnchantProvider *) data;
 	module = (GModule *) provider->enchant_private_data;
-
-	if (provider->dispose)
-		(*provider->dispose) (provider);
+	(*provider->dispose) (provider);
 
 	/* close module only after invoking dispose */
 	g_module_close (module);
@@ -1484,28 +1493,14 @@ enchant_provider_dictionary_exists (EnchantProvider * provider,
 
 			enchant_free_string_list (dicts);
 		}
-	else if (provider->request_dict)
-		{
-			EnchantDict *dict;
-
-			dict = (*provider->request_dict) (provider, tag);
-			if (dict)
-				{
-					if (provider->dispose_dict)
-						(*provider->dispose_dict) (provider, dict);
-					exists = 1;
-				}
-		}
 
 	return exists;
 }
 
 static int
 _enchant_broker_dict_exists (EnchantBroker * broker,
-				 const char * const tag)
+			     const char * const tag)
 {
-	GSList * list;
-
 	/* don't query the providers if it is an empty string */
 	if (tag == NULL || *tag == '\0') {
 		return 0;
@@ -1516,7 +1511,7 @@ _enchant_broker_dict_exists (EnchantBroker * broker,
 		return 1;
 	}
 
-	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
+	for (GSList *list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
 			EnchantProvider * provider;
 
