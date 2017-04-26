@@ -216,12 +216,18 @@ s_buildHashNames (std::vector<std::string> & names, const char * dict)
 	g_free(dict_dic);
 }
 
-static bool
-s_hasCorrespondingAffFile(const std::string & dicFile)
+static const std::string
+s_correspondingAffFile(const std::string & dicFile)
 {
-    std::string aff = dicFile;
-    aff.replace(aff.end()-3,aff.end(), "aff");
-    return g_file_test(aff.c_str(), G_FILE_TEST_EXISTS) != 0;
+	std::string aff = dicFile;
+	aff.replace(aff.end()-3,aff.end(), "aff");
+	return aff;
+}
+
+static bool
+s_fileExists(const std::string & file)
+{
+	return g_file_test(file.c_str(), G_FILE_TEST_EXISTS) != 0;
 }
 
 static bool is_plausible_dict_for_tag(const char *dir_entry, const char *tag)
@@ -253,10 +259,9 @@ hunspell_request_dictionary (const char * tag)
 	s_buildHashNames (names, tag);
 
 	for (size_t i = 0; i < names.size (); i++) {
-		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS)) {
-			if(s_hasCorrespondingAffFile(names[i])){
-				return strdup (names[i].c_str());
-			}
+		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS) &&
+		    s_fileExists(s_correspondingAffFile(names[i]))) {
+			return strdup (names[i].c_str());
 		}
 	}
 	
@@ -271,10 +276,10 @@ hunspell_request_dictionary (const char * tag)
 				if (is_plausible_dict_for_tag(dir_entry, tag)) {
 					char *dict = g_build_filename (dirs[i].c_str(), 
 								       dir_entry, nullptr);
-                    if(s_hasCorrespondingAffFile(dict)){
-			                    g_dir_close (dir);
-					    return dict;
-                    }
+					if(s_fileExists(s_correspondingAffFile(dict))) {
+						g_dir_close (dir);
+						return dict;
+					}
 				}
 			}
 
@@ -288,21 +293,16 @@ hunspell_request_dictionary (const char * tag)
 bool
 HunspellChecker::requestDictionary(const char *szLang)
 {
-	char *dic = NULL, *aff = NULL;
-
-	dic = hunspell_request_dictionary (szLang);
+	char *dic = hunspell_request_dictionary (szLang);
 	if (!dic)
 		return false;
 
-	aff = strdup(dic);
-	int len_dic = strlen(dic);
-	strcpy(aff+len_dic-3, "aff");
-	if (g_file_test(aff, G_FILE_TEST_EXISTS))
+	std::string aff(s_correspondingAffFile(dic));
+	if (s_fileExists(aff))
 	{
-		hunspell = new Hunspell(aff, dic);
+		hunspell = new Hunspell(aff.c_str(), dic);
 	}
 	free(dic);
-	free(aff);
 	if(hunspell == NULL){
 		return false;
 	}
@@ -361,14 +361,12 @@ hunspell_provider_enum_dicts (const char * const directory,
 					   and require .aff file to be present*/
 					if(dir_entry.compare (0, 5, "hyph_") != 0)
 					{
-						std::string name(dir_entry.substr (0, hit));
-						std::string affFileName(name + ".aff");
-						char * aff = g_build_filename(directory, affFileName.c_str(), nullptr);
-						if (g_file_test(aff, G_FILE_TEST_EXISTS))
+						char * dic = g_build_filename(directory, dir_entry.c_str(), nullptr);
+						if (s_fileExists(s_correspondingAffFile(dic)))
 						{
 							out_dicts.push_back (dir_entry.substr (0, hit));
 						}
-						g_free(aff);
+						g_free(dic);
 					}
 				}
 			}
@@ -449,12 +447,10 @@ hunspell_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED
 
 	s_buildHashNames (names, tag);
 	for (size_t i = 0; i < names.size(); i++) {
-		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS))
+		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS) &&
+		    s_fileExists(s_correspondingAffFile(names[i])))
 		{
-			std::string aff(names[i]);
-			aff.replace(aff.end() - 3, aff.end(), "aff");
-			if (g_file_test(aff.c_str(), G_FILE_TEST_EXISTS))
-				return 1;
+			return 1;
 		}
 	}
 
