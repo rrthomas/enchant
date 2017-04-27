@@ -212,7 +212,7 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 	*out_n_dicts = 0;
 	dels = aspell_dict_info_list_elements (dlist);
 
-	/* TODO: Use aspell_dict_info_list_size() once it is implemented and returns non-zero. */
+	/* Note: aspell_dict_info_list_size() always returns zero: https://github.com/GNUAspell/aspell/issues/155 */
 	while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0)
 		(*out_n_dicts)++;
 
@@ -224,7 +224,7 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 		
 		for (i = 0; i < *out_n_dicts; i++) {
 			entry = aspell_dict_info_enumeration_next (dels);			
-			/* XXX: should this be entry->code or entry->name ? */
+			/* FIXME: should this be entry->code or entry->name ? */
 			out_list[i] = g_strdup (entry->code);
 		}
 		

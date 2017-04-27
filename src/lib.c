@@ -1384,18 +1384,14 @@ enchant_broker_list_dicts (EnchantBroker * broker,
 
 	for (list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
-			EnchantProvider *provider;
-
-			provider = (EnchantProvider *) list->data;
+			EnchantProvider *provider = (EnchantProvider *) list->data;
 
 			if (provider->list_dicts)
 				{
-					size_t n_dicts, i;
-					char ** dicts;
+					size_t n_dicts;
+					char ** dicts = (*provider->list_dicts) (provider, &n_dicts);
 
-					dicts = (*provider->list_dicts) (provider, &n_dicts);
-
-					for (i = 0; i < n_dicts; i++)
+					for (size_t i = 0; i < n_dicts; i++)
 						{
 							const char * tag;
 
