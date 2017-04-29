@@ -121,7 +121,7 @@ enchant_get_user_config_dir (void)
 	return g_build_filename (g_get_user_config_dir (), "enchant", NULL);
 }
 
-static GSList *
+GSList *
 enchant_get_conf_dirs (void)
 {
 	GSList *conf_dirs = NULL;

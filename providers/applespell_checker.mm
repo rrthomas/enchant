@@ -40,11 +40,15 @@ class AppleSpellChecker
 	char **		suggestWord (const char * const word, size_t len, size_t * nsug, NSString * lang);
 
 	NSString *	requestDictionary (const char * const code);
+	char **		listDictionaries (size_t *ndicts);
  private:
 	NSString *	dictionaryForCode (NSString * code);
+	NSString *	codeForDictionary (NSString * dict);
+	char **		NSArrayToCArray (NSArray<NSString *> *array, size_t *nresult);
 
 	NSSpellChecker *	m_checker;
 	NSMutableDictionary *	m_languages;
+	NSMutableDictionary *	m_dictionaries;
 };
 
 typedef struct
@@ -60,6 +64,7 @@ AppleSpellChecker::AppleSpellChecker()
 	m_checker = [NSSpellChecker sharedSpellChecker];
 
 	m_languages = [[NSMutableDictionary alloc] initWithCapacity:16];
+	m_dictionaries = [[NSMutableDictionary alloc] initWithCapacity:16];
 }
 
 AppleSpellChecker::~AppleSpellChecker()
@@ -71,11 +76,16 @@ AppleSpellChecker::~AppleSpellChecker()
 			[m_languages release];
 			m_languages = 0;
 		}
+	if (m_dictionaries)
+		{
+			[m_dictionaries release];
+			m_dictionaries = 0;
+		}
 }
 
 void AppleSpellChecker::parseConfigFile (const char * configFile)
 {
-	if (!m_languages || !configFile)
+	if (!m_languages || !m_dictionaries || !configFile)
 		return;
 
 	// NSLog (@"AppleSpellChecker::parseConfigFile: file=\"%s\"", configFile);
@@ -98,6 +108,7 @@ void AppleSpellChecker::parseConfigFile (const char * configFile)
 							{
 								// NSLog (@"AppleSpellChecker: %@ -> %@ (%@)", key, value, language);
 								[m_languages setObject:value forKey:key];
+								[m_dictionaries setObject:key forKey:value];
 							}
 
 						if (key)
@@ -111,12 +122,43 @@ void AppleSpellChecker::parseConfigFile (const char * configFile)
 		}
 }
 
+char **AppleSpellChecker::NSArrayToCArray (NSArray<NSString *> *array, size_t *nresult)
+{
+	char ** result = 0;
+
+	if (unsigned int count = [array count])
+		{
+			result = g_new0 (char *, static_cast<size_t>(count) + 1);
+			if (result)
+				{
+					for (unsigned int i = 0; i < count; i++)
+						{
+							NSString *str = [array objectAtIndex:i];
+
+							result[*nresult] = g_strdup ([str UTF8String]);
+
+							if (result[*nresult])
+								*nresult = *nresult + 1;
+						}
+				}
+		}
+	return result;
+}
+
 NSString * AppleSpellChecker::dictionaryForCode (NSString * code)
 {
 	if (!m_languages)
 		return 0;
 
 	return [m_languages objectForKey:code];
+}
+
+NSString * AppleSpellChecker::codeForDictionary (NSString * dict)
+{
+	if (!m_dictionaries)
+		return 0;
+
+	return [m_dictionaries objectForKey:dict];
 }
 
 bool AppleSpellChecker::checkWord (const char * word, size_t len, NSString * lang)
@@ -159,29 +201,11 @@ char ** AppleSpellChecker::suggestWord (const char * const word, size_t len, siz
 	// NSLog (@"AppleSpellChecker::suggestWord: word=\"%@\"", str);
 
 	NSRange range = NSMakeRange(0, [str length]);
-	NSArray<NSString *>* result = [m_checker guessesForWordRange:range:str:lang:0];
+	NSArray<NSString *>* result = [m_checker guessesForWordRange:range inString:str language:lang inSpellDocumentWithTag:0];
 
 	[str release];
 
-	char ** sug = 0;
-
-	if (unsigned int count = [result count])
-		{
-			sug = g_new0 (char *, static_cast<size_t>(count) + 1);
-			if (sug)
-				{
-					for (unsigned int i = 0; i < count; i++)
-						{
-							str = [result objectAtIndex:i];
-
-							sug[*nsug] = g_strdup ([str UTF8String]);
-
-							if (sug[*nsug])
-								*nsug = *nsug + 1;
-						}
-				}
-		}
-	return sug;
+	return NSArrayToCArray(result, nsug);
 }
 
 NSString * AppleSpellChecker::requestDictionary (const char * const code)
@@ -207,6 +231,26 @@ NSString * AppleSpellChecker::requestDictionary (const char * const code)
 	return dictionary;
 }
 
+char **AppleSpellChecker::listDictionaries (size_t *ndict)
+{
+	// NSLog (@"AppleSpellChecker::listDicts");
+
+	if (!m_checker)
+		return 0;
+
+	NSArray<NSString *> *availLanguages = [m_checker availableLanguages];
+	NSMutableArray<NSString *> *availDicts = [NSMutableArray arrayWithCapacity:[availLanguages count]];
+
+	for (NSString *string in availLanguages) {
+		// NSLog (@"available language: %@", string);
+		NSString *code = codeForDictionary(string);
+		if (code)
+			[availDicts addObject:code];
+	}
+
+	return NSArrayToCArray(availDicts, ndict);
+}
+
 /*
  * Enchant
  */
@@ -228,9 +272,8 @@ static char ** appleSpell_dict_suggest (EnchantDict * me, const char * const wor
 				result = ASD->AppleSpell->suggestWord (word, len, out_n_suggs, ASD->DictionaryName);
 			}
 
+		return result;
 	}
-
-	return result;
 }
 
 static int appleSpell_dict_check (EnchantDict * me, const char * const word, size_t len)
@@ -249,9 +292,8 @@ static int appleSpell_dict_check (EnchantDict * me, const char * const word, siz
 			{
 				result = ASD->AppleSpell->checkWord (word, len, ASD->DictionaryName);
 			}
+		return result;
 	}
-
-	return result;
 }
 
 static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, const char * const tag)
@@ -289,9 +331,8 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 		[ASD->DictionaryName retain];
 		// NSLog (@"appleSpell_provider_request_dict: providing dictionary \"%@\"", ASD->DictionaryName);
 		dict->user_data = (void *) ASD;
+		return dict;
 	}
-
-	return dict;
 }
 
 static void appleSpell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
@@ -322,9 +363,24 @@ static int appleSpell_provider_dictionary_exists (EnchantProvider * me, const ch
 		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
 		if (checker)
 			result = (checker->requestDictionary (tag) ? 1 : 0);
-	}
 
-	return result;
+		return result;
+	}
+}
+
+static char **appleSpell_provider_list_dicts (EnchantProvider *me, size_t *n_dicts)
+{
+	@autoreleasepool {
+		// NSLog (@"appleSpell_provider_list_dicts\n");
+
+		char **result = 0;
+
+		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
+		if (checker)
+			result = checker->listDictionaries (n_dicts);
+
+		return result;
+	}
 }
 
 static void appleSpell_provider_dispose (EnchantProvider * me)
@@ -371,6 +427,7 @@ extern "C" {
 			provider->dictionary_exists = appleSpell_provider_dictionary_exists;
 			provider->identify          = appleSpell_provider_identify;
 			provider->describe          = appleSpell_provider_describe;
+			provider->list_dicts        = appleSpell_provider_list_dicts;
 
 			AppleSpellChecker * checker = 0;
 			try
@@ -391,9 +448,8 @@ extern "C" {
 					provider = 0;
 				}
 
+			return provider;
 		}
-
-		return provider;
 	}
 
 	static bool s_bReloadSelf = true;
@@ -412,7 +468,7 @@ extern "C" {
 			if (checker)
 				{
 					if (s_bReloadSelf)
-						if (gchar * moduleFile = g_build_filename (module_dir, "AppleSpell.so", NULL))
+						if (gchar * moduleFile = g_build_filename (module_dir, "enchant_applespell.so", NULL))
 							{
 								/* ugly hack :-(
 								 * Darwin linker doesn't like unloading Obj-C modules;
@@ -425,12 +481,14 @@ extern "C" {
 								s_bReloadSelf = false;
 							}
 
-					if (gchar * configFile = g_build_filename (module_dir, "AppleSpell.config", NULL))
+					for (GSList *iter = enchant_get_conf_dirs (); iter; iter = iter->next)
+					{
+						if (gchar * configFile = g_build_filename ((gchar *)iter->data, "AppleSpell.config", NULL))
 						{
 							checker->parseConfigFile (configFile);
-
 							g_free (configFile);
 						}
+					}
 				}
 
 		}

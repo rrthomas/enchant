@@ -31,6 +31,7 @@
 #define ENCHANT_PROVIDER_H
 
 #include <enchant.h>
+#include <glib.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -51,6 +52,7 @@ typedef struct str_enchant_provider EnchantProvider;
 char *enchant_get_user_language(void);
 
 char *enchant_get_user_config_dir (void);
+GSList *enchant_get_conf_dirs (void);
 
 /**
  * enchant_get_prefix_dir
