@@ -264,7 +264,9 @@ ENCHANT_CHECK_PKG_CONFIG_PROVIDER([hunspell], [HUNSPELL])
 ENCHANT_CHECK_LIB_PROVIDER([aspell], [ASPELL], [get_aspell_dict_info_list])
 ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path],, [-lz])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([voikko], [VOIKKO], [libvoikko])
-if test "$ac_cv_env_OBJCXX_value" != ""; then
+dnl FIXME: The test below assumes GCC(-compatible) ObjC++ compiler, but
+dnl OBJCXX is set even if no compiler is found.
+if test "$ac_cv_objcxx_compiler_gnu" = "yes"; then
   AC_LANG_PUSH([Objective C++])
   ENCHANT_CHECK_LIB_PROVIDER([applespell], [APPLESPELL], [NOLIB],, [-framework Cocoa], [Cocoa/Cocoa.h])
   AC_LANG_POP([Objective C++])

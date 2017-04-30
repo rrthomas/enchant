@@ -39,6 +39,7 @@ enchant_zemberek_la_SOURCES = enchant_zemberek.cpp
 
 if WITH_APPLESPELL
 provider_LTLIBRARIES += enchant_applespell.la
+pkgdata_DATA = AppleSpell.config
 endif
 enchant_applespell_la_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag=CXX
 enchant_applespell_la_OBJCXXFLAGS = $(AM_OBJCXXFLAGS)

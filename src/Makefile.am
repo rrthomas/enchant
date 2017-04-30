@@ -21,15 +21,14 @@ endif
 libenchant_includedir = $(includedir)/enchant
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
 
-orderingdir=$(datadir)/enchant
-ordering_DATA = enchant.ordering
+pkgdata_DATA = enchant.ordering
 
 dist_man_MANS = enchant.1
 
 LDADD = libenchant.la $(ENCHANT_LIBS) $(top_builddir)/lib/libgnu.la
 bin_PROGRAMS = enchant-lsmod enchant
 
-EXTRA_DIST = $(ordering_DATA)
+EXTRA_DIST = $(pkgdata_DATA)
 
 .rc.lo:
 	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --tag=RC --mode=compile $(RC) $(RCFLAGS) $< -o $@
