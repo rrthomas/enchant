@@ -4,15 +4,12 @@ AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 ENCHANT_CONFIG_DIR = config
 
-# FIXME: Duplication of LIBENCHANT_COPY actions
 AM_TESTS_ENVIRONMENT = \
 	export ENCHANT_CONFIG_DIR=$(ENCHANT_CONFIG_DIR); \
 	if test -n "$(VALGRIND)"; then export VALGRIND='$(VALGRIND) --suppressions=$(top_srcdir)/build-aux/relocatable.supp'; fi; \
 	export LIBTOOL=$(top_builddir)/libtool; \
-	rm -rf test.pwl $(libdir_subdir); \
-	mkdir -p $(libdir_subdir)/enchant; \
-	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/; \
-	cp $(top_builddir)/src/libenchant.la $(libdir_subdir)/; \
+	rm -rf test.pwl; \
+	$(MAKE) libenchant-copy; \
 	cp $(top_builddir)/providers/@objdir@/*@shlibext@ $(libdir_subdir)/enchant || :; \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
 	cp $(builddir)/@objdir@/*@shlibext@ .; \
@@ -29,6 +26,9 @@ EXTRA_DIST = test.pwl.orig mock_provider.h run-test
 
 LIBENCHANT_COPY = $(builddir)/$(libdir_subdir)/libenchant.la
 $(LIBENCHANT_COPY): $(top_builddir)/src/libenchant.la
+	$(MAKE) libenchant-copy
+
+libenchant-copy:
 	rm -rf $(libdir_subdir)/
 	$(MKDIR_P) $(libdir_subdir)/enchant
 	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/
