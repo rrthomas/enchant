@@ -28,4 +28,4 @@ ALL_SOURCE_FILES = \
 	providers/*.mm
 
 loc:
-	cloc $(ALL_SOURCE_FILES)
+	cloc --force-lang="Bourne Shell",conf $(ALL_SOURCE_FILES)
