@@ -41,7 +41,6 @@
 #include <string>
 #include <vector>
 
-#include "enchant.h"
 #include "enchant-provider.h"
 #include "unused-parameter.h"
 

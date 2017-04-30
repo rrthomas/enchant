@@ -41,7 +41,6 @@
 #include <glib.h>
 #include <aspell.h>
 
-#include "enchant.h"
 #include "enchant-provider.h"
 #include "unused-parameter.h"
 

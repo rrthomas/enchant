@@ -38,7 +38,6 @@
 #include <libvoikko/voikko.h>
 #include "unused-parameter.h"
 
-#include "enchant.h"
 #include "enchant-provider.h"
 
 /**

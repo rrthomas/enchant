@@ -33,7 +33,6 @@
 #include <dbus/dbus-glib.h>
 #include <glib.h>
 
-#include "enchant.h"
 #include "enchant-provider.h"
 #include "unused-parameter.h"
 
