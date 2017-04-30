@@ -915,9 +915,9 @@ enchant_provider_is_valid(EnchantProvider * provider)
 			g_warning ("EnchantProvider's dispose_dict method cannot be NULL\n");
 			return 0;
 		}
-	if(provider->dictionary_exists == NULL && provider->list_dicts == NULL)
+	if(provider->list_dicts == NULL)
 		{
-			g_warning ("EnchantProvider's dictionary_exists and list_dicts methods cannot both be NULL\n");
+			g_warning ("EnchantProvider's list_dicts methods cannot be NULL\n");
 			return 0;
 		}
 	else if(!g_utf8_validate((*provider->describe)(provider), -1, NULL))
