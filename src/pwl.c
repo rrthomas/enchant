@@ -46,7 +46,7 @@
  *       at the front of the list.  Would need a "soundex" that is
  *       general enough to handle languages other than English.
  *
- *     - iterative deepending to find suggestions, rather than a straight
+ *     - iterative deepening to find suggestions, rather than a straight
  *       search to depth three.
  *
  */
