@@ -69,11 +69,8 @@ libenchant_null_describe_la_CPPFLAGS = $(libenchant_mock_provider_la_CPPFLAGS) -
 libenchant_null_describe_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_describe_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
-check_PROGRAMS = enchant.test enchantxx.test main
+check_PROGRAMS = main
 LOG_COMPILER = $(srcdir)/run-test
-
-enchant_test_SOURCES = enchant.test.c
-enchantxx_test_SOURCES = enchantxx.test.cpp
 
 main_SOURCES = main.cpp \
 	EnchantBrokerTestFixture.h \
