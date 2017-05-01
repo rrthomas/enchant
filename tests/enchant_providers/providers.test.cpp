@@ -35,7 +35,7 @@ int TestProvidersInDirectory(char * dir_name);
 typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
 typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider, const char * module_dir);
 
-// from enchant.c we need this so that providers can set errors.
+// from enchant.c: we need this so that providers can set errors.
 struct str_enchant_broker
 {
 	GSList *provider_list;	/* list of all of the spelling backend providers */
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
     if(argc == 1)
     {
         char* current_dir = g_get_current_dir();
-        TestProvidersInDirectory(current_dir);
+        result = TestProvidersInDirectory(current_dir);
         g_free(current_dir);
     }
 
@@ -115,12 +115,12 @@ int TestProvidersInDirectory(char * dir_name)
 				!strcmp(dir_entry+(entry_len-g_module_suffix_len), G_MODULE_SUFFIX))
 				{
 					filename = g_build_filename (dir_name, dir_entry, NULL);
-                    int resultT = Test(filename);
-                    if(resultT != 0)
-                    {
-                        result = resultT;
-                    }
-	                g_free (filename);
+                                        int resultT = Test(filename);
+                                        if(resultT != 0)
+                                            {
+                                                result = resultT;
+                                            }
+                                        g_free (filename);
 				}
 		}
 	
@@ -181,4 +181,3 @@ int TestProvider(char* filename)
     }
     return result;
 }
-

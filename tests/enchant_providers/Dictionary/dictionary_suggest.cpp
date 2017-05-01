@@ -81,6 +81,8 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
 					    case G_UNICODE_TITLECASE_LETTER:
 					    case G_UNICODE_LOWERCASE_LETTER:
 						    return false;
+					    default:
+						    break;
 				    }
 		    }
 
@@ -109,7 +111,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
 {
     if(_dict && _dict->suggest)
     {
-      std::vector<std::string> suggestions = GetSuggestionsFromWord("fiance");
+      std::vector<std::string> suggestions = GetSuggestionsFromWord("an");
       CHECK(suggestions.size() != 0);
     }
 }

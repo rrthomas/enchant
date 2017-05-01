@@ -55,7 +55,7 @@ TEST_FIXTURE(ProviderListDicts_TestFixture,
 		for (size_t i = 0; i < n_dicts; i++)
 		{
 			CHECK(_dicts[i] != NULL);
-        }
+                }
     }
 }
 

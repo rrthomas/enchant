@@ -21,6 +21,7 @@
 
 #include "enchant.h"
 #include "enchant-provider.h"
+#include <stdlib.h>
 #include <glib.h>
 
 EnchantProvider* GetProviderForTests();
@@ -35,14 +36,20 @@ struct Provider_TestFixture
     { 
         _provider = GetProviderForTests();
     }
-    //Teardown
-    ~Provider_TestFixture()
-    {
-    }
 
     std::string Convert(const std::wstring & ws)
     {
-        gchar* str = g_utf16_to_utf8((gunichar2*)ws.c_str(), (glong)ws.length(), NULL, NULL, NULL);
+        gchar* str;
+        switch (sizeof(wchar_t)) {
+        case 2:
+                str = g_utf16_to_utf8((gunichar2*)ws.c_str(), (glong)ws.length(), NULL, NULL, NULL);
+                break;
+        case 4:
+                str = g_ucs4_to_utf8((gunichar*)ws.c_str(), (glong)ws.length(), NULL, NULL, NULL);
+                break;
+        default:
+                abort();
+        }
         std::string s(str);
         g_free(str);
         return s;
@@ -66,11 +73,8 @@ struct Provider_TestFixture
                 size_t n_dicts;
 
 	    	char ** dicts = (*_provider->list_dicts) (_provider, &n_dicts);
-                for (size_t i = 0; i < n_dicts; i++)
-                {
-                        dict = (*_provider->request_dict) (_provider, dicts[i]);
-                        break;
-                }
+		if (n_dicts > 0)
+			dict = (*_provider->request_dict) (_provider, dicts[0]);
                 g_strfreev (dicts);
         }
         return dict;
