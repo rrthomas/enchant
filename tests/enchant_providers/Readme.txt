@@ -3,7 +3,3 @@ When a provider does not support a particular function, those tests will just pa
 
 Some tests rely on the provider having specific language support:
 fr_FR
-
-The tests try to clean up after themselves but some words may be added to
-the personal dictionary if the provider does not provide a way to remove
-words from the personal dictionary.
