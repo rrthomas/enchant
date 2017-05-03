@@ -23,7 +23,6 @@
 #include "../unittest_enchant_providers.h"
 #include <vector>
 #include <map>
-#include <glib.h>
 #include <assert.h>
 
 struct DictionaryCheck_TestFixture : Provider_TestFixture
@@ -84,7 +83,7 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
             return false;
         }
 
-        if(IsWordInDictionary(dict, word))
+        if(IsWordInDictionary(word))
         {
             return true;
         }
@@ -179,7 +178,6 @@ TEST_FIXTURE(DictionaryCheck_TestFixture,
     {
       if(AddWordToDictionary("Zxyz"))
       {
-
           CHECK( IsWordInDictionary("ZXYZ") );
           CHECK(!IsWordInDictionary("ZXyz") );
           CHECK( IsWordInDictionary("Zxyz") );
