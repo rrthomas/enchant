@@ -46,48 +46,20 @@
 #include "unused-parameter.h"
 
 /**
- * hspell helper functions
- */
-     
-/**
- * is hebrew
- * return TRUE if iso hebrew ( must be null terminated )
- */
-static int is_hebrew (const char *const iso_word, gsize len)
-{
-	gsize i;
-	
-	for ( i = 0; (i < len) && (iso_word[i]); i++ )
-		{
-			/* if not a hebrew alphabet or " ` ' using iso-8859-8 encoding */
-			if ( (iso_word[i] < (char)224 || iso_word[i] > (char)250 ) && /* alef to tav */
-			     (iso_word[i] < (char)146 || iso_word[i] > (char)148 ) && /* ` etc... */
-			     ( iso_word[i] !=(char)34 ) && /* " */
-			     ( iso_word[i] !=(char)39 ) ) /* ' */
-				return FALSE;
-		}
-	
-	return TRUE;
-}
-
-/**
  * convert struct corlist to **char
  * the **char must be g_freed
  */
 static gchar **
 corlist2strv (struct corlist *cl, size_t nb_sugg)
 {
-	size_t i;
-	gsize len;
 	char **sugg_arr = NULL;
-	const char *sugg;
-	
 	if (nb_sugg > 0)
 		{
 			sugg_arr = g_new0 (char *, nb_sugg + 1);
-			for (i = 0; i < nb_sugg; i++)
+			for (size_t i = 0; i < nb_sugg; i++)
 				{
-					sugg = corlist_str (cl, i);
+					gsize len;
+					const char *sugg = corlist_str (cl, i);
 					if (sugg)
 						sugg_arr[i] = g_convert (sugg,
 									 strlen (sugg),
@@ -98,43 +70,23 @@ corlist2strv (struct corlist *cl, size_t nb_sugg)
 	return sugg_arr;
 }
 
-/**
- * end of helper functions
- */
-
 static int
 hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
-	int res;
-	char *iso_word;
-	gsize length;
-	int preflen;
-	struct dict_radix *hspell_dict;
-	
-	hspell_dict = (struct dict_radix *)me->user_data;
+	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
 	
 	/* convert to iso 8859-8 */
-	iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
-	
-	/* check if hebrew ( if not hebrew give it the benefit of a doubt ) */
-	if (iso_word == NULL || !is_hebrew (iso_word, length))
-		{
-			g_free (iso_word);
-			return FALSE;
-		}
+	gsize length;
+	char *iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
 	
 	/* check */
-	res = hspell_check_word (hspell_dict, iso_word, &preflen);
+	int preflen;
+	int res = hspell_check_word (hspell_dict, iso_word, &preflen);
 	
 	/* if not correct try gimatria */
 	if (res != 1)
-		{
-			res = hspell_is_canonic_gimatria (iso_word);
-			if (res != 0)
-				res = 1;
-		}
+		res = hspell_is_canonic_gimatria (iso_word) != 0;
 	
-	/* free the word */
 	g_free (iso_word);
 	
 	return (res != 1);
@@ -144,38 +96,20 @@ static char **
 hspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
-	gsize length;
-	char *iso_word;
-	char **sugg_arr = NULL;
-	struct corlist cl;
-	struct dict_radix *hspell_dict;
-	
-	hspell_dict = (struct dict_radix *)me->user_data;
+	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
 	
 	/* convert to iso 8859-8 */
-	iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
+	gsize length;
+	char *iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
 	
-	/* check if hebrew ( if not hebrew cant do anything ) */
-	if (iso_word == NULL || !is_hebrew (iso_word, length))
-		{
-			g_free (iso_word);
-			return NULL;
-		}
-
 	/* get suggestions */
+	struct corlist cl;
 	corlist_init (&cl);
 	hspell_trycorrect (hspell_dict, iso_word, &cl);
 	
-	/* set size of list */
 	*out_n_suggs = corlist_n (&cl);
-	
-	/* convert suggestion list to strv list */
-	sugg_arr = corlist2strv (&cl, *out_n_suggs);
-	
-	/* free the list */
+	char **sugg_arr = corlist2strv (&cl, *out_n_suggs);
 	corlist_free (&cl);
-	
-	/* free the word */
 	g_free (iso_word);
 	
 	return sugg_arr;	
@@ -184,15 +118,12 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 static EnchantDict *
 hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
-	EnchantDict *dict;
-	int dict_flag = 0;
-	struct dict_radix *hspell_dict = NULL;
-	
 	if(!((strlen(tag) >= 2) && tag[0] == 'h' && tag[1] == 'e'))
 		return NULL;
 	
 	/* try to set a new session */
-	dict_flag = hspell_init (&hspell_dict, HSPELL_OPT_DEFAULT);
+	struct dict_radix *hspell_dict = NULL;
+	int dict_flag = hspell_init (&hspell_dict, HSPELL_OPT_DEFAULT);
 	
 	if (dict_flag != 0 || !hspell_dict)
 		{
@@ -200,7 +131,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 			return NULL;
 		}
 	
-	dict = g_new0 (EnchantDict, 1);
+	EnchantDict *dict = g_new0 (EnchantDict, 1);
 	dict->user_data = (void *) hspell_dict;
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
@@ -211,9 +142,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 static void
 hspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
-	struct dict_radix *hspell_dict;
-	
-	hspell_dict = (struct dict_radix *)dict->user_data;
+	struct dict_radix *hspell_dict = (struct dict_radix *)dict->user_data;
 	hspell_uninit (hspell_dict);
 	g_free (dict);
 }
@@ -224,18 +153,13 @@ static char **
 hspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
 			    size_t * out_n_dicts)
 {
-	const char * dictionary_path;
+	const char * dictionary_path = hspell_get_dictionary_path();
 	char ** out_list = NULL;
 	*out_n_dicts = 0;
-	
-	dictionary_path = hspell_get_dictionary_path();
-	
+
 	if(dictionary_path && *dictionary_path && g_file_test (dictionary_path, G_FILE_TEST_EXISTS)) {
-		*out_n_dicts = 1;
-		
 		out_list = g_new0 (char *, 2);
-		
-		out_list[0] = g_strdup ("he");
+		out_list[(*out_n_dicts)++] = g_strdup ("he");
 	}		
 		
 	return out_list;
@@ -272,9 +196,7 @@ EnchantProvider *init_enchant_provider (void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider;
-	
-	provider = g_new0 (EnchantProvider, 1);
+	EnchantProvider *provider = g_new0 (EnchantProvider, 1);
 	provider->dispose = hspell_provider_dispose;
 	provider->request_dict = hspell_provider_request_dict;
 	provider->dispose_dict = hspell_provider_dispose_dict;
