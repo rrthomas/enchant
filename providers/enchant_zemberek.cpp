@@ -33,29 +33,26 @@
 #include <dbus/dbus-glib.h>
 #include <glib.h>
 
-#include "enchant.h"
 #include "enchant-provider.h"
 #include "unused-parameter.h"
 
 
 static bool zemberek_service_is_running ()
 {
-  DBusGConnection *connection;
-  DBusGProxy *proxy;
   GError *Error = NULL;
 
-  connection = dbus_g_bus_get (DBUS_BUS_SYSTEM,
-                               &Error);
+  DBusGConnection *connection = dbus_g_bus_get (DBUS_BUS_SYSTEM,
+                                                &Error);
   if (connection == NULL) {
       g_error_free (Error);
       return false;
   }
-  proxy = dbus_g_proxy_new_for_name_owner (connection,
-                                     "net.zemberekserver.server.dbus",
-                                     "/net/zemberekserver/server/dbus/ZemberekDbus",
-                                     "net.zemberekserver.server.dbus.ZemberekDbusInterface",
-                                     &Error);
-
+  DBusGProxy *proxy = dbus_g_proxy_new_for_name_owner (connection,
+                                                       "net.zemberekserver.server.dbus",
+                                                       "/net/zemberekserver/server/dbus/ZemberekDbus",
+                                                       "net.zemberekserver.server.dbus.ZemberekDbusInterface",
+                                                       &Error);
+  
   dbus_g_connection_unref (connection);
   if (proxy == NULL) {
     return false;
@@ -120,12 +117,8 @@ int Zemberek::checkWord(const char* word) const
     	g_error_free (Error);
     	return -1;
     }
-    else {
-    	if (result)
-    		return 0;
-    	else
-    		return 1;
-    }
+    else
+        return !result;
 }
 
 
@@ -151,8 +144,7 @@ EnchantProvider *init_enchant_provider(void);
 static int
 zemberek_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUSED_PARAMETER)
 {
-    Zemberek *checker;
-    checker = (Zemberek *) me->user_data;
+    Zemberek *checker = (Zemberek *) me->user_data;
     return checker->checkWord(word);
 }
 
@@ -160,8 +152,7 @@ static char**
 zemberek_dict_suggest (EnchantDict * me, const char *const word,
                        size_t len _GL_UNUSED_PARAMETER, size_t * out_n_suggs)
 {
-    Zemberek *checker;
-    checker = (Zemberek *) me->user_data;
+    Zemberek *checker = (Zemberek *) me->user_data;
     return checker->suggestWord (word, out_n_suggs);
 }
 
@@ -198,8 +189,7 @@ zemberek_provider_request_dict(EnchantProvider *me _GL_UNUSED_PARAMETER, const c
 static void
 zemberek_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
-    Zemberek *checker;
-    checker = (Zemberek *) dict->user_data;
+    Zemberek *checker = (Zemberek *) dict->user_data;
     delete checker;
     g_free (dict);
 }
@@ -227,9 +217,8 @@ zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
     }
   else
     {
-	char ** out_list = NULL;
 	*out_n_dicts = 1;
-	out_list = g_new0 (char *, 2);
+	char ** out_list = g_new0 (char *, 2);
 	out_list[0] = g_strdup ("tr");
 
 	return out_list;
@@ -239,9 +228,7 @@ zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 EnchantProvider *
 init_enchant_provider(void)
 {
-    EnchantProvider *provider;
-
-    provider = g_new0(EnchantProvider, 1);
+    EnchantProvider *provider = g_new0(EnchantProvider, 1);
     provider->dispose = zemberek_provider_dispose;
     provider->request_dict = zemberek_provider_request_dict;
     provider->dispose_dict = zemberek_provider_dispose_dict;

@@ -165,14 +165,14 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 			 EnchantBrokerSetOrdering_WhitespaceAroundProvider)
 {
-	enchant_broker_set_ordering(_broker, "qaa", "\n\f\t\r mock2\n \f\t\r,mock1");
+	enchant_broker_set_ordering(_broker, "qaa", "\n\f\t mock2\n \f\t,mock1");
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 			 EnchantBrokerSetOrdering_WhitespaceAroundProviderAfterComma)
 {
-	enchant_broker_set_ordering(_broker, "qaa", "aspell,\n\f\t \rmock2\n\f \r\t,mock1");
+	enchant_broker_set_ordering(_broker, "qaa", "aspell,\n\f\t mock2\n\f \t,mock1");
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
@@ -217,7 +217,7 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
 			 EnchantBrokerSetOrdering_WhitespaceSurroundingLanguageTag_Removed)
 {
-	enchant_broker_set_ordering(_broker, "\n\r qaa \t\f", "mock2,mock1");
+	enchant_broker_set_ordering(_broker, "\n qaa \t\f", "mock2,mock1");
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
 }
 
@@ -225,7 +225,7 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 	See bug# 59388 http://bugzilla.gnome.org/show_bug.cgi?id=59388
 */
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-			 EnchantBrokerSetOrdering_VerticalTabPreceedingLanguageTag_NotRemoved)
+			 EnchantBrokerSetOrdering_VerticalTabPrecedingLanguageTag_NotRemoved)
 {
   enchant_broker_set_ordering(_broker, "*", "mock1,mock2");
   enchant_broker_set_ordering(_broker, "\vqaa", "mock2,mock1");
@@ -330,16 +330,24 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 	enchant_broker_set_ordering(_broker, "en_GB", "");
 }
 
+// FIXME: This test passes trivially, as the providers mock1 and mock2 are
+// added to the end of the providers list in any case. Change the tests so
+// that we can detect whether they were explicitly called or not. This
+// will allow us to add CHECKs to the foregoing tests as well.
+TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
+ EnchantBrokerFileOrdering_CarriageReturnEndsLine_NotNeitherCalled)
+{
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"en_GB:\rmock1,mock2");
+	InitializeBroker();
+
+	CHECK(ErrorNeitherCalled != GetProviderOrder("en_GB"));
+}
 
 /*
  * Ordering can also be set in enchant.ordering file:
  * Language_Tag : Provider1, Provider2, ProviderN
  *
- * The enchant.ordering file is discovered by first looking in the user's
- * config directory, then in the .enchant directory in the user's home directory.
- * 
- * The user's config directory is located at share/enchant 
- * in the module directory (that libenchant is in).
+ * See enchant(1) for details of how the file is located.
  */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -384,16 +392,16 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  EnchantBrokerFileOrdering_ExtraSpacesAndTabs_Mock1Then2)
 {
-	WriteStringToOrderingFile(GetEnchantConfigDir(),"\t en_GB\f \t:\r\t mock1\t , \tmock2\t ");
+	WriteStringToOrderingFile(GetEnchantConfigDir(),"\t en_GB\f \t:\t mock1\t , \tmock2\t ");
 	InitializeBroker();
-	
+
 	CHECK_EQUAL(Mock1ThenMock2, GetProviderOrder("en_GB"));
 }
 
 TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
- EnchantBrokerFileOrdering_ExtraSpaces_Mock2Then1)
+ EnchantBrokerFileOrdering_ExtraSpacesAndTabs_Mock2Then1)
 {
-	WriteStringToOrderingFile(GetEnchantConfigDir()," \ten_GB\t \f:\r \tmock2 \t,\t mock1 \t");
+	WriteStringToOrderingFile(GetEnchantConfigDir()," \ten_GB\t \f: \tmock2 \t,\t mock1 \t");
 	InitializeBroker();
 	
 	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("en_GB"));

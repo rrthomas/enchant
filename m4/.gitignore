@@ -53,3 +53,5 @@
 /configmake.m4
 /valgrind-tests.m4
 /std-gnu11.m4
+/rawmemchr.m4
+/strchrnul.m4

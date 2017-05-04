@@ -38,7 +38,6 @@
 #include <libvoikko/voikko.h>
 #include "unused-parameter.h"
 
-#include "enchant.h"
 #include "enchant-provider.h"
 
 /**
@@ -79,21 +78,18 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 static EnchantDict *
 voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
-	EnchantDict *dict;
-	const char * voikko_error;
-	struct VoikkoHandle *voikko_handle;
-
 	/* Only Finnish is supported at the moment */
 	if (strncmp(tag, "fi_FI", 6) != 0 && strncmp(tag, "fi", 3) != 0)
 		return NULL;
 	
-	voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL);
+	const char * voikko_error;
+	struct VoikkoHandle *voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL);
 	if (voikko_handle == NULL) {
 		enchant_provider_set_error(me, voikko_error);
 		return NULL;
 	}
 
-	dict = calloc (sizeof (EnchantDict), 1);
+	EnchantDict *dict = calloc (sizeof (EnchantDict), 1);
 	dict->user_data = (void *)voikko_handle;
 	dict->check = voikko_dict_check;
 	dict->suggest = voikko_dict_suggest;
@@ -112,14 +108,13 @@ static int
 voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
                                    const char *const tag)
 {
-	const char *voikko_error;
-	struct VoikkoHandle *voikko_handle;
-
 	/* Only Finnish is supported */
 	if (strncmp(tag, "fi", 3) != 0)
 		return 0;
 
 	/* Check that a dictionary is actually available */
+	const char *voikko_error;
+	struct VoikkoHandle *voikko_handle;
 	if ((voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL))) {
 		voikkoTerminate(voikko_handle);
 		return 1;
@@ -133,10 +128,10 @@ voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 			    size_t * out_n_dicts)
 {
 	char ** out_list = NULL;
-	const char *voikko_error;
-	struct VoikkoHandle *voikko_handle;
 	*out_n_dicts = 0;
 
+	struct VoikkoHandle *voikko_handle;
+	const char *voikko_error;
 	if ((voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL))) {
 		voikkoTerminate(voikko_handle);
 		*out_n_dicts = 1;
@@ -170,9 +165,7 @@ EnchantProvider *init_enchant_provider (void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider;
-
-	provider = calloc (sizeof (EnchantProvider), 1);
+	EnchantProvider *provider = calloc (sizeof (EnchantProvider), 1);
 	provider->dispose = voikko_provider_dispose;
 	provider->request_dict = voikko_provider_request_dict;
 	provider->dispose_dict = voikko_provider_dispose_dict;

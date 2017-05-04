@@ -466,22 +466,7 @@ extern "C" {
 
 			AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
 			if (checker)
-				{
-					if (s_bReloadSelf)
-						if (gchar * moduleFile = g_build_filename (module_dir, "enchant_applespell.so", NULL))
-							{
-								/* ugly hack :-(
-								 * Darwin linker doesn't like unloading Obj-C modules;
-								 * reload once to suppress unloading...
-								 */
-								g_module_open (moduleFile, (GModuleFlags) 0);
-
-								g_free (moduleFile);
-
-								s_bReloadSelf = false;
-							}
-
-					for (GSList *iter = enchant_get_conf_dirs (); iter; iter = iter->next)
+				for (GSList *iter = enchant_get_conf_dirs (); iter; iter = iter->next)
 					{
 						if (gchar * configFile = g_build_filename ((gchar *)iter->data, "AppleSpell.config", NULL))
 						{
@@ -489,7 +474,6 @@ extern "C" {
 							g_free (configFile);
 						}
 					}
-				}
 
 		}
 

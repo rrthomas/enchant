@@ -41,7 +41,6 @@
 #include <string>
 #include <vector>
 
-#include "enchant.h"
 #include "enchant-provider.h"
 #include "unused-parameter.h"
 
@@ -322,18 +321,14 @@ static char **
 hunspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
-	HunspellChecker * checker;
-	
-	checker = static_cast<HunspellChecker *>(me->user_data);
+	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
 	return checker->suggestWord (word, len, out_n_suggs);
 }
 
 static int
 hunspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
-	HunspellChecker * checker;
-	
-	checker = static_cast<HunspellChecker *>(me->user_data);
+	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
 	
 	if (checker->checkWord(word, len))
 		return 0;
@@ -348,7 +343,6 @@ hunspell_provider_enum_dicts (const char * const directory,
 	GDir * dir = g_dir_open (directory, 0, nullptr);
 	if (dir) {
 		const char * entry;
-		
 		while ((entry = g_dir_read_name (dir)) != NULL) {
 			char * utf8_entry = g_filename_to_utf8 (entry, -1, nullptr, nullptr, nullptr);
 			if (utf8_entry) {
@@ -406,10 +400,7 @@ hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 static EnchantDict *
 hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED_PARAMETER, const char *const tag)
 {
-	EnchantDict *dict;
-	HunspellChecker * checker;
-	
-	checker = new HunspellChecker();
+	HunspellChecker * checker = new HunspellChecker();
 	
 	if (!checker)
 		return NULL;
@@ -419,7 +410,7 @@ hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED_PARAMETER, const 
 		return NULL;
 	}
 	
-	dict = g_new0(EnchantDict, 1);
+	EnchantDict *dict = g_new0(EnchantDict, 1);
 	dict->user_data = (void *) checker;
 	dict->check = hunspell_dict_check;
 	dict->suggest = hunspell_dict_suggest;
@@ -431,9 +422,7 @@ hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED_PARAMETER, const 
 static void
 hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
 {
-	HunspellChecker *checker;
-	
-	checker = (HunspellChecker *) dict->user_data;
+	HunspellChecker *checker = (HunspellChecker *) dict->user_data;
 	delete checker;
 	
 	g_free (dict);
@@ -444,7 +433,6 @@ hunspell_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED
 				     const char *const tag)
 {
 	std::vector <std::string> names;
-
 	s_buildHashNames (names, tag);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS) &&
@@ -480,9 +468,7 @@ EnchantProvider *init_enchant_provider (void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider;
-	
-	provider = g_new0(EnchantProvider, 1);
+	EnchantProvider *provider = g_new0(EnchantProvider, 1);
 	provider->dispose = hunspell_provider_dispose;
 	provider->request_dict = hunspell_provider_request_dict;
 	provider->dispose_dict = hunspell_provider_dispose_dict;
