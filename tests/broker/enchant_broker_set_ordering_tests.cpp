@@ -225,7 +225,7 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 	See bug# 59388 http://bugzilla.gnome.org/show_bug.cgi?id=59388
 */
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture, 
-			 EnchantBrokerSetOrdering_VerticalTabPreceedingLanguageTag_NotRemoved)
+			 EnchantBrokerSetOrdering_VerticalTabPrecedingLanguageTag_NotRemoved)
 {
   enchant_broker_set_ordering(_broker, "*", "mock1,mock2");
   enchant_broker_set_ordering(_broker, "\vqaa", "mock2,mock1");
@@ -347,11 +347,7 @@ TEST_FIXTURE(EnchantBrokerFileSetOrdering_TestFixture,
  * Ordering can also be set in enchant.ordering file:
  * Language_Tag : Provider1, Provider2, ProviderN
  *
- * The enchant.ordering file is discovered by first looking in the user's
- * config directory, then in the .enchant directory in the user's home directory.
- * 
- * The user's config directory is located at share/enchant 
- * in the module directory (that libenchant is in).
+ * See enchant(1) for details of how the file is located.
  */
 
 /////////////////////////////////////////////////////////////////////////////
