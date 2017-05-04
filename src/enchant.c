@@ -247,80 +247,6 @@ is_word_char (gunichar uc, size_t n)
 }
 
 
-typedef struct lang_map {
-  const char *ispell;
-  const char *enchant;
-} LangMap;
-
-
-/* Maps ispell language codes to enchant language codes. */
-/* The list is partially taken from src/ispell/ispell_checker.cpp. */
-static const LangMap lingua[] = {
-	{"american",	"en_US"},
-	{"brazilian",	"pt_BR"},
-	{"british",	"en_GB"},
-	{"bulgarian",	"bg"},
-	{"catala",	"ca"},
-	{"catalan",	"ca"},
-	{"danish",	"da"},
-	{"dansk",	"da"},
-	{"deutsch",	"de"},
-	{"dutch",	"nl"},
-	{"ellhnika",	"el"},
-	{"espanol",	"es"},
-	{"esperanto",	"eo"},
-	{"estonian",	"et"},
-	{"faeroese",	"fo"},
-	{"finnish",	"fi"},
-	{"francais",	"fr"},
-	{"french",	"fr"},
-	{"galician",	"gl"},
-	{"german",	"de"},
-	{"hungarian",	"hu"},
-	{"interlingua",	"ia"},
-	{"irish",	"ga"},
-	{"italian",	"it"},
-	{"latin",	"la"},
-	{"lietuviu",	"lt"},
-	{"lithuanian",	"lt"},
-	{"mlatin",	"la"},
-	{"nederlands",	"nl"},
-	{"norsk",	"no"},
-	{"norwegian",	"no"},
-	{"nynorsk",	"nn"},
-	{"polish",	"pl"},
-	{"portugues",	"pt"},
-	{"portuguese",	"pt"},
-	{"russian",	"ru"},
-	{"sardinian",	"sc"},
-	{"slovak",	"sk"},
-	{"slovenian",	"sl"},
-	{"slovensko",	"sl"},
-	{"spanish",	"es"},
-	{"suomi",	"fi"},   /* For Emacs/Voikko/tmispell compatibility. */
-	{"svenska",	"sv"},
-	{"swedish",	"sv"},
-	{"swiss",	"de_CH"},
-	{"ukrainian",	"uk"},
-	{"yiddish-yivo",	"yi"},
-	{NULL,       NULL}    /* Last item must be {NULL, NULL}. */
-};
-
-
-/* Converts ispell language code to enchant language code. */
-static gchar *
-convert_language_code (gchar *code)
-{
-	size_t i;
-	for (i = 0; lingua[i].ispell; i++) {
-	        if (!strcmp(code,lingua[i].ispell)) {
-		        return strdup (lingua[i].enchant);
-		}
-	}
-	return strdup (code);
-}
-
-
 /* Splits a line into a set of (word,word_position) tuples. */
 static GSList *
 tokenize_line (GString * line)
@@ -391,16 +317,15 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 	if (mode == MODE_A)
 		print_version (out);
 
-	if (dictionary) {
-		lang = convert_language_code (dictionary);
-	}
+	if (dictionary)
+		lang = strdup (dictionary);
 	else {
 	        lang = enchant_get_user_language();
 		if(!lang)
 			return 1;
  	}
 
-	/* Enchant will get rid of useless trailing garbage like de_DE@euro or de_DE.ISO-8859-15 */
+	/* Enchant will get rid of trailing information like de_DE@euro or de_DE.ISO-8859-15 */
 	
 	broker = enchant_broker_init ();
 	dict = enchant_broker_request_dict (broker, lang);
