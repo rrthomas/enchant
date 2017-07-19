@@ -67,7 +67,7 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 		return NULL;
 	for (*out_n_suggs = 0; voikko_sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
 
-	char **sugg_arr = calloc(sizeof (char *), *out_n_suggs);
+	char **sugg_arr = calloc(sizeof (char *), *out_n_suggs + 1);
 	for (size_t i = 0; i < *out_n_suggs; i++) {
 		sugg_arr[i] = strdup (voikko_sugg_arr[i]);
 	}
