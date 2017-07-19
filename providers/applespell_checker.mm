@@ -378,6 +378,8 @@ static char **appleSpell_provider_list_dicts (EnchantProvider *me, size_t *n_dic
 		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
 		if (checker)
 			result = checker->listDictionaries (n_dicts);
+		else
+			*n_dicts = 0;
 
 		return result;
 	}
