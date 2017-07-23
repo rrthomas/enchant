@@ -112,7 +112,12 @@ struct str_enchant_dict
 				   const char *const cor, size_t cor_len);
 	
 	void (*add_to_exclude) (struct str_enchant_dict * me,
-				 const char *const word, size_t len);
+				const char *const word, size_t len);
+
+	const char * (*get_extra_word_characters) (struct str_enchant_dict * me);
+
+	int (*is_word_character) (struct str_enchant_dict * me,
+				  uint32_t uc_in, size_t n);
 };
 	
 struct str_enchant_provider
@@ -124,7 +129,7 @@ struct str_enchant_provider
 	void (*dispose) (struct str_enchant_provider * me);
 	
 	EnchantDict *(*request_dict) (struct str_enchant_provider * me,
-					  const char *const tag);
+				      const char *const tag);
 	
 	void (*dispose_dict) (struct str_enchant_provider * me,
 				  EnchantDict * dict);
@@ -138,7 +143,7 @@ struct str_enchant_provider
 	const  char * (*describe) (struct str_enchant_provider * me);
 
 	char ** (*list_dicts) (struct str_enchant_provider * me,
-							   size_t * out_n_dicts);
+			       size_t * out_n_dicts);
 };
 
 #ifdef __cplusplus

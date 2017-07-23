@@ -64,6 +64,7 @@ public:
 
 	bool checkWord (const char *word, size_t len);
 	char **suggestWord (const char* const word, size_t len, size_t *out_n_suggs);
+	const char *getWordchars ();
 
 	bool requestDictionary (const char * szLang);
 
@@ -167,6 +168,12 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 	}
 	else
 		return nullptr;
+}
+
+const char*
+HunspellChecker::getWordchars()
+{
+	return hunspell->get_wordchars();
 }
 
 static void
@@ -336,6 +343,21 @@ hunspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	return 1;
 }
 
+static const char*
+hunspell_dict_get_extra_word_characters (EnchantDict *me)
+{
+	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
+	return checker->getWordchars();
+}
+
+static int
+hunspell_dict_is_word_character (EnchantDict *me, uint32_t uc, size_t n)
+{
+	(void)n;
+	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
+	return g_unichar_isalpha(uc) || g_utf8_strchr(checker->getWordchars(), -1, uc);
+}
+
 static void
 hunspell_provider_enum_dicts (const char * const directory,
 			     std::vector<std::string> & out_dicts)
@@ -415,6 +437,8 @@ hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED_PARAMETER, const 
 	dict->check = hunspell_dict_check;
 	dict->suggest = hunspell_dict_suggest;
 	// don't implement personal, session
+	dict->get_extra_word_characters = hunspell_dict_get_extra_word_characters;
+	dict->is_word_character = hunspell_dict_is_word_character;
 	
 	return dict;
 }

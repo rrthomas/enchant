@@ -1323,6 +1323,74 @@ enchant_broker_dict_exists (EnchantBroker * broker,
 	return exists;
 }
 
+_GL_ATTRIBUTE_PURE const char *
+enchant_dict_get_extra_word_characters (EnchantDict *dict)
+{
+	g_return_val_if_fail (dict, NULL);
+
+	return dict->get_extra_word_characters ? (*dict->get_extra_word_characters) (dict) : "";
+}
+
+_GL_ATTRIBUTE_PURE int
+enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc_in, size_t n)
+{
+	g_return_val_if_fail (n <= 2, 0);
+
+	if (dict && dict->is_word_character)
+		return (*dict->is_word_character) (dict, uc_in, n);
+
+	gunichar uc = (gunichar)uc_in;
+
+	/* Accept quote marks anywhere except at the end of a word */
+	if (uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’")) {
+		return n < 2;
+	}
+
+	GUnicodeType type = g_unichar_type(uc);
+
+	switch (type) {
+	case G_UNICODE_MODIFIER_LETTER:
+	case G_UNICODE_LOWERCASE_LETTER:
+	case G_UNICODE_TITLECASE_LETTER:
+	case G_UNICODE_UPPERCASE_LETTER:
+	case G_UNICODE_OTHER_LETTER:
+	case G_UNICODE_COMBINING_MARK: /* Older name for G_UNICODE_SPACING_MARK; deprecated since glib 2.30 */
+	case G_UNICODE_ENCLOSING_MARK:
+	case G_UNICODE_NON_SPACING_MARK:
+	case G_UNICODE_DECIMAL_NUMBER:
+	case G_UNICODE_LETTER_NUMBER:
+	case G_UNICODE_OTHER_NUMBER:
+	case G_UNICODE_CONNECT_PUNCTUATION:
+		return 1;     /* Enchant 1.3.0 defines word chars like this. */
+
+	case G_UNICODE_DASH_PUNCTUATION:
+		if ((n == 1) && (type == G_UNICODE_DASH_PUNCTUATION)) {
+			return 1; /* hyphens only accepted within a word. */
+		}
+		/* Fallthrough */
+
+	case G_UNICODE_CONTROL:
+	case G_UNICODE_FORMAT:
+	case G_UNICODE_UNASSIGNED:
+	case G_UNICODE_PRIVATE_USE:
+	case G_UNICODE_SURROGATE:
+	case G_UNICODE_CLOSE_PUNCTUATION:
+	case G_UNICODE_FINAL_PUNCTUATION:
+	case G_UNICODE_INITIAL_PUNCTUATION:
+	case G_UNICODE_OTHER_PUNCTUATION:
+	case G_UNICODE_OPEN_PUNCTUATION:
+	case G_UNICODE_CURRENCY_SYMBOL:
+	case G_UNICODE_MODIFIER_SYMBOL:
+	case G_UNICODE_MATH_SYMBOL:
+	case G_UNICODE_OTHER_SYMBOL:
+	case G_UNICODE_LINE_SEPARATOR:
+	case G_UNICODE_PARAGRAPH_SEPARATOR:
+	case G_UNICODE_SPACE_SEPARATOR:
+	default:
+		return 0;
+	}
+}
+
 void
 enchant_broker_set_ordering (EnchantBroker * broker,
 				 const char * const tag,

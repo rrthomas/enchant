@@ -30,6 +30,7 @@
 #ifndef ENCHANT_H
 #define ENCHANT_H
 
+#include <stdint.h> /* for uint32_t */
 #include <sys/types.h> /* for size_t, ssize_t */
 
 
@@ -259,15 +260,51 @@ void enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
 
 /**
  * enchant_dict_get_error
- * @dict: A non-null dictionary
+ * @dict: A non-null #EnchantDict
  *
  * Returns a const char string or NULL describing the last exception in UTF8 encoding.
  * WARNING: error is transient. It will likely be cleared as soon as
- * the next dictionary operation is called
- *
- * Returns: an error message
+ * the next dictionary operation is called.
  */
 const char *enchant_dict_get_error (EnchantDict * dict);
+
+/**
+ * enchant_dict_get_extra_word_characters
+ * @dict: A non-null #EnchantDict
+ *
+ * Returns a const char UTF-8-encoded string containing the non-letter characters
+ * allowed in a word, e.g. "01234567890’-". If dash occurs, it will be last, so that
+ * the string can be appended to a character class used to match word characters.
+ *
+ * Words containing non-letters not in this string will automatically be rejected
+ * by Enchant.
+ *
+ * Note that for some back-ends the result may be a guess, in which case it
+ * may include characters not actually allowed in the given dictionary.
+ */
+const char *enchant_dict_get_extra_word_characters (EnchantDict * dict);
+
+/**
+ * enchant_dict_is_word_character
+ * @dict: An #EnchantDict, or %null
+ * @uc: A unicode code-point
+ * @n: An integer: 0 if the character is at the start of a word, 1 if it is
+ * in the middle, or 2 if at the end.
+ *
+ * Returns a flag specifying whether the given character is valid at the
+ * given position.
+ *
+ * One way to match a complete word is to check that the first character matches
+ * with n == 0, then proceed matching characters with n == 1 until failure, then
+ * proceed backwards until a character matches with n == 2.
+ *
+ * Note that for some back-ends the result may be a guess, in which case it
+ * may allow characters not actually allowed in the given dictionary.
+ *
+ * If @dict is %null, a built-in implementation is used (FIXME: We should document
+ * behavior for this). If @n is not 0, 1 or 2, then a false flag is returned.
+ */
+int enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc, size_t n);
 
 /**
  * EnchantDictDescribeFn

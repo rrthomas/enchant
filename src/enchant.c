@@ -192,64 +192,9 @@ do_mode_l (FILE * out, EnchantDict * dict, GString * word, size_t lineCount)
 }
 
 
-static int
-is_word_char (gunichar uc, size_t n)
-{
-	GUnicodeType type;
-
-	if (uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’")) {
-		return 1;
-	}
-
-	type = g_unichar_type(uc);
-
-	switch (type) {
-	case G_UNICODE_MODIFIER_LETTER:
-	case G_UNICODE_LOWERCASE_LETTER:
-	case G_UNICODE_TITLECASE_LETTER:
-	case G_UNICODE_UPPERCASE_LETTER:
-	case G_UNICODE_OTHER_LETTER:
-	case G_UNICODE_COMBINING_MARK: /* Older name for G_UNICODE_SPACING_MARK; deprecated since glib 2.30 */
-	case G_UNICODE_ENCLOSING_MARK:
-	case G_UNICODE_NON_SPACING_MARK:
-	case G_UNICODE_DECIMAL_NUMBER:
-	case G_UNICODE_LETTER_NUMBER:
-	case G_UNICODE_OTHER_NUMBER:
-	case G_UNICODE_CONNECT_PUNCTUATION:
-                return 1;     /* Enchant 1.3.0 defines word chars like this. */
-
-	case G_UNICODE_DASH_PUNCTUATION:
-		if ((n > 0) && (type == G_UNICODE_DASH_PUNCTUATION)) {
-			return 1; /* hyphens only accepted within a word. */
-		}
-		/* Fallthrough */
-
-	case G_UNICODE_CONTROL:
-	case G_UNICODE_FORMAT:
-	case G_UNICODE_UNASSIGNED:
-	case G_UNICODE_PRIVATE_USE:
-	case G_UNICODE_SURROGATE:
-	case G_UNICODE_CLOSE_PUNCTUATION:
-	case G_UNICODE_FINAL_PUNCTUATION:
-	case G_UNICODE_INITIAL_PUNCTUATION:
-	case G_UNICODE_OTHER_PUNCTUATION:
-	case G_UNICODE_OPEN_PUNCTUATION:
-	case G_UNICODE_CURRENCY_SYMBOL:
-	case G_UNICODE_MODIFIER_SYMBOL:
-	case G_UNICODE_MATH_SYMBOL:
-	case G_UNICODE_OTHER_SYMBOL:
-	case G_UNICODE_LINE_SEPARATOR:
-	case G_UNICODE_PARAGRAPH_SEPARATOR:
-	case G_UNICODE_SPACE_SEPARATOR:
-	default:
-		return 0;
-	}
-}
-
-
 /* Splits a line into a set of (word,word_position) tuples. */
 static GSList *
-tokenize_line (GString * line)
+tokenize_line (EnchantDict * dict, GString * line)
 {
 	GSList * tokens = NULL;
 	char *utf = (char *) line->str;
@@ -267,24 +212,24 @@ tokenize_line (GString * line)
 	        /* Skip non-word characters. */
 		cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		uc = g_utf8_get_char (utf);
-		while (cur_pos < line->len && *utf && !is_word_char(uc,0)) {
+		while (cur_pos < line->len && *utf && !enchant_dict_is_word_character (dict, uc, 0)) {
 		        utf = g_utf8_next_char (utf);
 			uc = g_utf8_get_char (utf);
 			cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		}
 		start_pos = cur_pos;
 
-		/* Skip over word. */
-		while (cur_pos < line->len && *utf && is_word_char(uc,1)) {
+		/* Skip over word characters. */
+		while (cur_pos < line->len && *utf && enchant_dict_is_word_character (dict, uc, 1)) {
 			g_string_append_unichar (word, uc);
 		        utf = g_utf8_next_char (utf);
 			uc = g_utf8_get_char (utf);
 			cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		}
 
-	        /* Do not accept one or more  ' at the end of the word. */
+	        /* Do not accept one or more ' at the end of the word. */
 		i = word->len-1;
-	        while ((i >= 0) && (word->str[i] == '\'')) {
+	        while ((i >= 0) && !enchant_dict_is_word_character(dict, word->str[i], 2)) {
 	                g_string_truncate (word, i);
 			i--;
 		}
@@ -388,16 +333,18 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 				case '`': /* Enter verbose-correction mode */
 					break;
 
-				case '$': /* Save correction for rest of session [aspell extension] */
-					{ /* Syntax: $$ra <MISSPELLED>,<REPLACEMENT> */
-						const gchar *prefix = "$$ra ";
-						if (g_str_has_prefix(str->str, prefix)) {
+				case '$': /* Miscellaneous commands */
+					{
+						const gchar *prefix = "$$ra "; /* Save correction for rest of session [aspell extension] */
+						if (g_str_has_prefix(str->str, prefix)) { /* Syntax: $$ra <MISSPELLED>,<REPLACEMENT> */
 							gchar *comma = g_utf8_strchr(str->str, -1, (gunichar)',');
 							char *mis = str->str + strlen(prefix);
 							char *cor = comma + 1;
 							ssize_t mis_len = comma - mis;
 							ssize_t cor_len = strlen(str->str) - (cor - str->str);
 							enchant_dict_store_replacement(dict, mis, mis_len, cor, cor_len);
+						} else if (g_str_has_prefix(str->str, "$$wc")) { /* Return the extra word chars list */
+							fprintf(out, "%s\n", enchant_dict_get_extra_word_characters(dict));
 						}
 					}
 					break;
@@ -415,7 +362,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 			}
 
 			if (mode != MODE_A || mode_A_no_command) {
-				token_ptr = tokens = tokenize_line (str);
+				token_ptr = tokens = tokenize_line (dict, str);
 				if (tokens == NULL)
 					putc('\n', out);
 				while (tokens != NULL) {
@@ -463,7 +410,7 @@ int main (int argc, char ** argv)
 	FILE * fp = stdin;
 
 	int countLines = 0;
-	gchar *dictionary = 0;  /* -d dictionary */
+	gchar *dictionary = NULL;  /* -d dictionary */
 
 	/* Initialize system locale */
 	setlocale(LC_ALL, "");

@@ -37,7 +37,7 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
     DictionaryCheck_TestFixture():_dict(NULL)
     { 
         _dict = GetFirstAvailableDictionary();
-        /* FIXME: This is a temporary hack; once issue #17 fixed, check that words used match the per-dictionary character class */
+        /* FIXME: hspell does not consider non-Hebrew letters to be valid letters */
         if (_dict) {
           _provider_name = _provider->identify(_provider);
           if (strcmp(_provider_name, "hspell") == 0)
