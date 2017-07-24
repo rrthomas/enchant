@@ -125,6 +125,7 @@ void AppleSpellChecker::parseConfigFile (const char * configFile)
 char **AppleSpellChecker::NSArrayToCArray (NSArray<NSString *> *array, size_t *nresult)
 {
 	char ** result = 0;
+	*nresult = 0;
 
 	if (unsigned int count = [array count])
 		{
