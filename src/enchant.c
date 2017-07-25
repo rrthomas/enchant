@@ -317,6 +317,16 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 						goto empty_word;
 					enchant_dict_add_to_session(dict, str->str + 1, -1);
 					break;
+				case '/': /* Remove from personal word list */
+					if (str->len == 1)
+						goto empty_word;
+					enchant_dict_remove (dict, str->str + 1, -1);
+					break;
+				case '_': /* Remove from this session */
+					if (str->len == 1)
+						goto empty_word;
+					enchant_dict_remove_from_session (dict, str->str + 1, -1);
+					break;
 
 				case '%': /* Exit terse mode */
 					terse_mode = FALSE;
