@@ -10,12 +10,9 @@ AM_TESTS_ENVIRONMENT = \
 	export LIBTOOL=$(top_builddir)/libtool; \
 	rm -rf test.pwl; \
 	$(MAKE) libenchant-copy; \
-	cp $(top_builddir)/providers/@objdir@/*@shlibext@ $(libdir_subdir)/enchant || :; \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
 	cp $(builddir)/@objdir@/*@shlibext@ .; \
 	chmod +w $(builddir)/test.pwl;
-
-main_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
 DISTCLEANFILES = test.pwl *@shlibext@
 
@@ -69,10 +66,10 @@ libenchant_null_describe_la_CPPFLAGS = $(libenchant_mock_provider_la_CPPFLAGS) -
 libenchant_null_describe_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_describe_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
-check_PROGRAMS = main
+check_PROGRAMS = main.test
 LOG_COMPILER = $(srcdir)/run-test
 
-main_SOURCES = main.cpp \
+main_test_SOURCES = main.test.cpp \
 	EnchantBrokerTestFixture.h \
 	EnchantDictionaryTestFixture.h \
 	EnchantTestFixture.h \
@@ -107,10 +104,8 @@ main_SOURCES = main.cpp \
 	provider/enchant_provider_get_user_config_dirs_tests.cpp \
 	provider/enchant_provider_get_user_language_tests.cpp \
 	$(NULL)
-main_DEPENDENCIES = $(LIBENCHANT_COPY)
-main_LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS) $(UNITTESTPP_LIBS)
+main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
+main_test_LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS) $(UNITTESTPP_LIBS)
+main_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
 TESTS = $(check_PROGRAMS)
-
-# Enforce serial running of tests, so they don't contend for test.pwl
-enchantxx.log: enchant.log

@@ -13,6 +13,7 @@ addons:
       - hspell
       - libhunspell-dev
       - libvoikko-dev
+      - voikko-fi
       - aspell-en
       - libunittest++-dev
       - valgrind

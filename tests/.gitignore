@@ -1,9 +1,11 @@
 /test.pwl
-/main
-/main.exe
+main
+main.exe
+main.test
 libenchant_*.so
 libenchant_*.dylib
 *enchant*.dll
+enchant*.so
 /_Noreturn.h
 /arg-nonnull.h
 /c++defs.h

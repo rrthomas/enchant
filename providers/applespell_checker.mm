@@ -125,6 +125,7 @@ void AppleSpellChecker::parseConfigFile (const char * configFile)
 char **AppleSpellChecker::NSArrayToCArray (NSArray<NSString *> *array, size_t *nresult)
 {
 	char ** result = 0;
+	*nresult = 0;
 
 	if (unsigned int count = [array count])
 		{
@@ -378,6 +379,8 @@ static char **appleSpell_provider_list_dicts (EnchantProvider *me, size_t *n_dic
 		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
 		if (checker)
 			result = checker->listDictionaries (n_dicts);
+		else
+			*n_dicts = 0;
 
 		return result;
 	}
