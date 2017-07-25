@@ -227,7 +227,7 @@ tokenize_line (EnchantDict * dict, GString * line)
 			cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		}
 
-	        /* Do not accept one or more ' at the end of the word. */
+	        /* Skip backwards over any characters that can't appear at the end of a word. */
 		i = word->len-1;
 	        while ((i >= 0) && !enchant_dict_is_word_character(dict, word->str[i], 2)) {
 	                g_string_truncate (word, i);
