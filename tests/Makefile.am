@@ -80,8 +80,10 @@ main_test_SOURCES = main.test.cpp \
 	dictionary/enchant_dict_describe_tests.cpp \
 	dictionary/enchant_dict_free_string_list_tests.cpp \
 	dictionary/enchant_dict_get_error_tests.cpp \
+	dictionary/enchant_dict_get_extra_word_characters_tests.cpp \
 	dictionary/enchant_dict_is_added_tests.cpp \
 	dictionary/enchant_dict_is_removed_tests.cpp \
+	dictionary/enchant_dict_is_word_character_tests.cpp \
 	dictionary/enchant_dict_remove_from_session_tests.cpp \
 	dictionary/enchant_dict_remove_tests.cpp \
 	dictionary/enchant_dict_store_replacement_tests.cpp \
