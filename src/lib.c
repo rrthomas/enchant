@@ -1,5 +1,6 @@
 /* enchant
  * Copyright (C) 2003, 2004 Dom Lachowicz
+ * Copyright (C) 2017 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -480,8 +481,7 @@ enchant_dict_get_good_suggestions(EnchantDict * dict, char ** suggs, size_t n_su
 }
 
 char **
-enchant_dict_suggest (EnchantDict * dict, const char *const word,
-			  ssize_t len, size_t * out_n_suggs)
+enchant_dict_suggest (EnchantDict * dict, const char *const word, ssize_t len, size_t * out_n_suggs)
 {
 	g_return_val_if_fail (dict, NULL);
 	g_return_val_if_fail (word, NULL);
@@ -544,8 +544,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word,
 }
 
 void
-enchant_dict_add (EnchantDict * dict, const char *const word,
-			 ssize_t len)
+enchant_dict_add (EnchantDict * dict, const char *const word, ssize_t len)
 {
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
@@ -566,8 +565,7 @@ enchant_dict_add (EnchantDict * dict, const char *const word,
 }
 
 void
-enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
-				 ssize_t len)
+enchant_dict_add_to_session (EnchantDict * dict, const char *const word, ssize_t len)
 {
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
@@ -587,8 +585,7 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word,
 }
 
 int
-enchant_dict_is_added (EnchantDict * dict, const char *const word,
-				ssize_t len)
+enchant_dict_is_added (EnchantDict * dict, const char *const word, ssize_t len)
 {
 	g_return_val_if_fail (dict, 0);
 	g_return_val_if_fail (word, 0);
@@ -606,8 +603,7 @@ enchant_dict_is_added (EnchantDict * dict, const char *const word,
 }
 
 void
-enchant_dict_remove (EnchantDict * dict, const char *const word,
-			 ssize_t len)
+enchant_dict_remove (EnchantDict * dict, const char *const word, ssize_t len)
 {
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
@@ -629,8 +625,7 @@ enchant_dict_remove (EnchantDict * dict, const char *const word,
 }
 
 void
-enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
-			 ssize_t len)
+enchant_dict_remove_from_session (EnchantDict * dict, const char *const word, ssize_t len)
 {
 	g_return_if_fail (dict);
 	g_return_if_fail (word);
@@ -648,8 +643,7 @@ enchant_dict_remove_from_session (EnchantDict * dict, const char *const word,
 }
 
 int
-enchant_dict_is_removed (EnchantDict * dict, const char *const word,
-				ssize_t len)
+enchant_dict_is_removed (EnchantDict * dict, const char *const word, ssize_t len)
 {
 	g_return_val_if_fail (dict, 0);
 	g_return_val_if_fail (word, 0);
@@ -706,9 +700,7 @@ enchant_dict_free_string_list (EnchantDict * dict, char **string_list)
 }
 
 void
-enchant_dict_describe (EnchantDict * dict,
-			   EnchantDictDescribeFn fn,
-			   void * user_data)
+enchant_dict_describe (EnchantDict * dict, EnchantDictDescribeFn fn, void * user_data)
 {
 	g_return_if_fail (dict);
 	g_return_if_fail (fn);
@@ -918,8 +910,7 @@ enchant_load_provider_ordering (EnchantBroker * broker)
 }
 
 static GSList *
-enchant_get_ordered_providers (EnchantBroker * broker,
-				   const char * const tag)
+enchant_get_ordered_providers (EnchantBroker * broker, const char * const tag)
 {
 	char * ordering = (char *)g_hash_table_lookup (broker->provider_ordering, (gpointer)tag);
 	if (!ordering)
@@ -1125,9 +1116,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 }
 
 void
-enchant_broker_describe (EnchantBroker * broker,
-			 EnchantBrokerDescribeFn fn,
-			 void * user_data)
+enchant_broker_describe (EnchantBroker * broker, EnchantBrokerDescribeFn fn, void * user_data)
 {
 	g_return_if_fail (broker);
 	g_return_if_fail (fn);
@@ -1148,9 +1137,7 @@ enchant_broker_describe (EnchantBroker * broker,
 }
 
 void
-enchant_broker_list_dicts (EnchantBroker * broker,
-			   EnchantDictDescribeFn fn,
-			   void * user_data)
+enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, void * user_data)
 {
 	g_return_if_fail (broker);
 	g_return_if_fail (fn);
@@ -1241,8 +1228,7 @@ enchant_broker_free_dict (EnchantBroker * broker, EnchantDict * dict)
 }
 
 static int
-enchant_provider_dictionary_exists (EnchantProvider * provider,
-					 const char * const tag)
+enchant_provider_dictionary_exists (EnchantProvider * provider, const char * const tag)
 {
 	int exists = 0;
 
@@ -1270,8 +1256,7 @@ enchant_provider_dictionary_exists (EnchantProvider * provider,
 }
 
 static int
-_enchant_broker_dict_exists (EnchantBroker * broker,
-			     const char * const tag)
+_enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag)
 {
 	/* don't query the providers if it is an empty string */
 	if (tag == NULL || *tag == '\0')
@@ -1290,8 +1275,7 @@ _enchant_broker_dict_exists (EnchantBroker * broker,
 }
 
 int
-enchant_broker_dict_exists (EnchantBroker * broker,
-				const char * const tag)
+enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag)
 {
 	g_return_val_if_fail (broker, 0);
 	g_return_val_if_fail (tag && strlen(tag), 0);
@@ -1392,9 +1376,7 @@ enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc_in, size_t n)
 }
 
 void
-enchant_broker_set_ordering (EnchantBroker * broker,
-				 const char * const tag,
-				 const char * const ordering)
+enchant_broker_set_ordering (EnchantBroker * broker, const char * const tag, const char * const ordering)
 {
 	g_return_if_fail (broker);
 	g_return_if_fail (tag && strlen(tag));
