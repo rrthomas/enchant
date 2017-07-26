@@ -227,7 +227,7 @@ tokenize_line (EnchantDict * dict, GString * line)
 			cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		}
 
-	        /* Do not accept one or more ' at the end of the word. */
+	        /* Skip backwards over any characters that can't appear at the end of a word. */
 		i = word->len-1;
 	        while ((i >= 0) && !enchant_dict_is_word_character(dict, word->str[i], 2)) {
 	                g_string_truncate (word, i);
@@ -316,6 +316,16 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 					if (str->len == 1)
 						goto empty_word;
 					enchant_dict_add_to_session(dict, str->str + 1, -1);
+					break;
+				case '/': /* Remove from personal word list */
+					if (str->len == 1)
+						goto empty_word;
+					enchant_dict_remove (dict, str->str + 1, -1);
+					break;
+				case '_': /* Remove from this session */
+					if (str->len == 1)
+						goto empty_word;
+					enchant_dict_remove_from_session (dict, str->str + 1, -1);
 					break;
 
 				case '%': /* Exit terse mode */
