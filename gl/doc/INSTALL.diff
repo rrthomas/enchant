@@ -30,7 +30,7 @@
 +
 +For more details of how the relocation support works, including how you can
 +use it in your own program, see doc/relocatable.texi and
-+doc/relocatable-maint.texi.
++gnulib/doc/relocatable-maint.texi.
 +
 +
  Installation Instructions
