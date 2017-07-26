@@ -104,6 +104,15 @@ if test "$gl_gcc_warnings" = yes; then
   dnl Remove a warning being promoted to error: we trigger this and can't turn it off with pragmas.
   gl_WARN_ADD([-Wno-error=format-security])
 
+  dnl # FIXME: Add this permanently for tests only
+  dnl # Note: currently needs ASAN_OPTIONS=detect_leaks=0; fix genuine leaks and add suppressions.
+  dnl dnl Enable address checking
+  dnl gl_WARN_ADD([-fsanitize=address])
+  dnl gl_WARN_ADD([-fsanitize=address], [AM_LDFLAGS])
+  dnl dnl Enable undefined behavior checking
+  dnl gl_WARN_ADD([-fsanitize=undefined])
+  dnl gl_WARN_ADD([-fsanitize=undefined], [AM_LDFLAGS])
+
   # When compiling with GCC, prefer -isystem to -I when including system
   # include files, to avoid generating useless diagnostics for the files.
   ISYSTEM='-isystem '
