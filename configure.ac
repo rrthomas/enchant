@@ -52,9 +52,6 @@ AC_SUBST([objdir])
 LT_SYS_MODULE_EXT
 AC_SUBST([shlibext], [$libltdl_cv_shlibext])
 AC_CONFIG_LIBOBJ_DIR([lib])
-if test $RELOCATABLE != yes; then
-  AC_MSG_ERROR([Enchant must be built with --enable-relocatable])
-fi
 
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
@@ -312,4 +309,7 @@ if test "x$with_zemberek" = "xyes"; then
    echo "
 The Zemberek Turkish spell-checking plugin is enabled. It is known
 to cause crashes with WebKit. Use at your own discretion."
+fi
+if test $RELOCATABLE != yes; then
+  AC_MSG_WARN([Building without --enable-relocatable: the tests will not work!])
 fi

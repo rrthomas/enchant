@@ -1456,7 +1456,11 @@ enchant_get_prefix_dir(void)
 void
 enchant_set_prefix_dir(const char *new_prefix)
 {
+#ifdef ENABLE_RELOCATABLE
 	set_relocation_prefix (INSTALLPREFIX, new_prefix);
+#else
+	(void)new_prefix;
+#endif
 }
 
 const char * _GL_ATTRIBUTE_CONST
