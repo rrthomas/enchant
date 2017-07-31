@@ -124,16 +124,35 @@ enchant_get_user_config_dir (void)
 GSList *
 enchant_get_conf_dirs (void)
 {
-	GSList *conf_dirs = g_slist_append (NULL, enchant_relocate (PKGDATADIR));
+	GSList *conf_dirs = NULL;
+	char *pkgdatadir = NULL;
+	char *sysconfdir = NULL;
+	char *pkgconfdir = NULL;
+	char *user_config_dir = NULL;
 
-	char *sysconfdir = enchant_relocate (SYSCONFDIR);
-	char *pkgconfdir = g_build_filename (sysconfdir, "enchant", NULL);
+	if ((pkgdatadir = enchant_relocate (PKGDATADIR)) == NULL)
+		goto error_exit;
+	conf_dirs = g_slist_append (conf_dirs, pkgdatadir);
+
+	if ((sysconfdir = enchant_relocate (SYSCONFDIR)) == NULL)
+		goto error_exit;
+	if ((pkgconfdir = g_build_filename (sysconfdir, "enchant", NULL)) == NULL)
+		goto error_exit;
 	conf_dirs = g_slist_append (conf_dirs, pkgconfdir);
 	free (sysconfdir);
 
-	conf_dirs = g_slist_append (conf_dirs, enchant_get_user_config_dir ());
+	if ((user_config_dir = enchant_get_user_config_dir ()) == NULL)
+		goto error_exit;
+	conf_dirs = g_slist_append (conf_dirs, user_config_dir);
 
 	return conf_dirs;
+
+ error_exit:
+	free (pkgdatadir);
+	free (sysconfdir);
+	free (pkgconfdir);
+	free (user_config_dir);
+	return NULL;
 }
 
 /********************************************************************************/
@@ -863,7 +882,8 @@ static void
 enchant_load_providers (EnchantBroker * broker)
 {
 	char *module_dir = enchant_relocate (PKGLIBDIR);
-	enchant_load_providers_in_dir (broker, module_dir);
+	if (module_dir)
+		enchant_load_providers_in_dir (broker, module_dir);
 	free (module_dir);
 }
 
