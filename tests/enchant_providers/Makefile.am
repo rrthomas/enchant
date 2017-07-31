@@ -1,10 +1,12 @@
+# FIXME: common up with tests/Makefile.am
+
 AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 ENCHANT_CONFIG_DIR = config
 
 AM_TESTS_ENVIRONMENT = \
 	export ENCHANT_CONFIG_DIR=$(ENCHANT_CONFIG_DIR); \
-	if test -n "$(VALGRIND)"; then export VALGRIND='$(VALGRIND) --suppressions=$(top_srcdir)/build-aux/relocatable.supp'; fi; \
+	if test -n "$(VALGRIND)"; then export VALGRIND='$(VALGRIND) --suppressions=$(top_srcdir)/lib/relocatable.valgrind'; fi; \
 	export LIBTOOL=$(top_builddir)/libtool; \
 	$(MAKE) libenchant-copy; \
 	cp $(top_builddir)/providers/@objdir@/*@shlibext@ $(builddir) || :;

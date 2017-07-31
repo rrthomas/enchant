@@ -8,7 +8,7 @@
 +follow some enchant-specific notes.
 +
 +The usual GNU autotools package instructions apply, except that Enchant must
-+be built with --enable-relocatable.
++be built with --enable-relocatable for the tests to run successfully.
 +
 +To build from git, or without relying on the generated files in a source
 +release, automake, autoconf, libtool, pkg-config and git must be installed.
@@ -30,7 +30,7 @@
 +
 +For more details of how the relocation support works, including how you can
 +use it in your own program, see doc/relocatable.texi and
-+doc/relocatable-maint.texi.
++gnulib/doc/relocatable-maint.texi.
 +
 +
  Installation Instructions

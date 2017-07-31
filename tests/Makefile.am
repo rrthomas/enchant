@@ -6,7 +6,7 @@ ENCHANT_CONFIG_DIR = config
 
 AM_TESTS_ENVIRONMENT = \
 	export ENCHANT_CONFIG_DIR=$(ENCHANT_CONFIG_DIR); \
-	if test -n "$(VALGRIND)"; then export VALGRIND='$(VALGRIND) --suppressions=$(top_srcdir)/build-aux/relocatable.supp'; fi; \
+	if test -n "$(VALGRIND)"; then export VALGRIND='$(VALGRIND) --suppressions=$(top_srcdir)/lib/relocatable.valgrind'; fi; \
 	export LIBTOOL=$(top_builddir)/libtool; \
 	rm -rf test.pwl; \
 	$(MAKE) libenchant-copy; \
