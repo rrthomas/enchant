@@ -224,7 +224,7 @@ vc_ignore=
 
 # Source required external libraries:
 # Set a version string for this script.
-scriptversion=2016-02-28.16; # UTC
+scriptversion=2017-04-19.12; # UTC
 
 # General shell script boiler plate, and helper functions.
 # Written by Gary V. Vaughan, 2004
@@ -427,7 +427,7 @@ test -z "$SED" && {
     rm -f conftest.in conftest.tmp conftest.nl conftest.out
   }
 
-  func_path_progs "sed gsed" func_check_prog_sed $PATH:/usr/xpg4/bin
+  func_path_progs "sed gsed" func_check_prog_sed "$PATH:/usr/xpg4/bin"
   rm -f conftest.sed
   SED=$func_path_progs_result
 }
@@ -463,7 +463,7 @@ test -z "$GREP" && {
     rm -f conftest.in conftest.tmp conftest.nl conftest.out
   }
 
-  func_path_progs "grep ggrep" func_check_prog_grep $PATH:/usr/xpg4/bin
+  func_path_progs "grep ggrep" func_check_prog_grep "$PATH:/usr/xpg4/bin"
   GREP=$func_path_progs_result
 }
 
