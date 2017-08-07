@@ -23,7 +23,7 @@ libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
 
 pkgdata_DATA = enchant.ordering
 
-dist_man_MANS = enchant.1
+dist_man_MANS = enchant.1 enchant-lsmod.1
 
 LDADD = libenchant.la $(ENCHANT_LIBS) $(top_builddir)/lib/libgnu.la
 bin_PROGRAMS = enchant-lsmod enchant
