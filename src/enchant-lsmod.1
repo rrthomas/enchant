@@ -1,0 +1,34 @@
+.TH ENCHANT-LSMOD 1 "August 2017"
+.SH NAME
+Enchant \- list provider and dictionary information
+.SH SYNOPSIS
+.ll +8
+.B enchant-lsmod
+[[\fB\-lang\fR|\fB-word-chars\fR] [\fBlanguage_tag\fR]|\fB\-list-dicts\fR|\fB\-help\fR|\fB\-version\fR]
+.ll -8
+.br
+.SH DESCRIPTION
+.B enchant-lsmod
+gives information about Enchant's spell-checker providers and the dictionaries each offers.
+See \fBenchant\fR(1) for details about how the providers and dictionaries are located.
+If no command-line options are given, the available providers are listed.
+.SS OPTIONS
+.TP
+.B "\-lang"
+Show which provider and dictionary will be used for the given language, or all languages if none is supplied.
+.TP
+.B "\-word\-chars"
+Show the extra word characters for the given language, if available. This is of little interest to most users.
+.TP
+.B "\-list\-dicts"
+List the provider and dictionary for all available languages.
+.TP
+.B "\-help"
+Show brief help.
+.TP
+.B "\-version"
+Prints the program's version.
+.SH "SEE ALSO"
+.BR enchant(1)
+.SH "AUTHOR"
+Written by Dom Lachowicz and Reuben Thomas.
