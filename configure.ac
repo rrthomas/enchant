@@ -86,13 +86,15 @@ if test "$gl_gcc_warnings" = yes; then
     gl_WARN_ADD([$w])
   done
 
-  gl_MANYWARN_ALL_GXX([cxx_warnings])
+  AC_LANG_PUSH([C++])
+  gl_MANYWARN_ALL_GCC([cxx_warnings])
 
   dnl Enable all G++ warnings not in this list.
   gl_MANYWARN_COMPLEMENT([cxx_warnings], [$cxx_warnings], [$nw])
   for w in $cxx_warnings; do
-    gl_CXX_WARN_ADD([$w])
+    gl_WARN_ADD([$w])
   done
+  AC_LANG_POP
 
   dnl Add an extra warning
   gl_WARN_ADD([-Wstrict-overflow=1])
