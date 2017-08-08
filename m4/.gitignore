@@ -55,3 +55,4 @@
 /std-gnu11.m4
 /rawmemchr.m4
 /strchrnul.m4
+/manywarnings-c++.m4

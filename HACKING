@@ -85,3 +85,22 @@ projects.
 
    Cleaning code in libenchant is more important than trying not to break
 existing code.  Code clean-ups are always welcome.
+
+
+Making a release
+----------------
+
+To make a release, you'll need woger:
+
+https://github.com/rrthomas/woger
+
+and github-release, suitably configured:
+
+https://github.com/aktau/github-release
+
+Having tested and pushed all the changes, update the version number in
+configure.ac and write the NEWS entry and push those too.
+
+Then execute:
+
+make release
