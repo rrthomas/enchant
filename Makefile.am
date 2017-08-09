@@ -37,7 +37,6 @@ release: distcheck
 	git push && git push --tags && \
 	woger github \
 		github_user=AbiWord \
-		github_dist_type=source \
 		package=$(PACKAGE) \
 		version=$(VERSION) \
 		dist_type=tar.gz
