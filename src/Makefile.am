@@ -25,10 +25,20 @@ pkgdata_DATA = enchant.ordering
 
 dist_man_MANS = enchant.1 enchant-lsmod.1
 
+edit = sed \
+	-e 's|@datadir[@]|$(datadir)|g'
+
+DISTCLEANFILES = $(dist_man_MANS)
+
+enchant.1: $(srcdir)/enchant.1.in Makefile.am $(top_builddir)/config.status
+	rm -f $@ $@.tmp
+	$(edit) $(abs_srcdir)/enchant.1.in >$@.tmp
+	mv $@.tmp $@
+
 LDADD = libenchant.la $(ENCHANT_LIBS) $(top_builddir)/lib/libgnu.la
 bin_PROGRAMS = enchant-lsmod enchant
 
-EXTRA_DIST = $(pkgdata_DATA)
+EXTRA_DIST = $(pkgdata_DATA) enchant.1.in
 
 .rc.lo:
 	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --tag=RC --mode=compile $(RC) $(RCFLAGS) $< -o $@
