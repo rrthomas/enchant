@@ -31,13 +31,11 @@ loc:
 	cloc --force-lang="Bourne Shell",conf $(ALL_SOURCE_FILES)
 
 release: distcheck
-	echo $(VERSION) | grep -v -e - || ( echo "Current commit $(VERSION) is not at a release tag"; exit 1 )
 	git diff --exit-code && \
 	git tag -a -m "Release tag" "v$(VERSION)" && \
 	git push && git push --tags && \
 	woger github \
 		github_user=AbiWord \
-		github_dist_type=source \
 		package=$(PACKAGE) \
 		version=$(VERSION) \
 		dist_type=tar.gz
