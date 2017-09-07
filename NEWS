@@ -1,3 +1,11 @@
+2.1.1 (September 8, 2017)
+-------------------------
+
+This release changes no code, but makes the soname of libenchant match the
+version number more obviously, as well as changing the way it is calculated
+to better match libtool’s versioning rules.
+
+
 2.1.0 (August 7, 2017)
 ----------------------
 
