@@ -2,6 +2,7 @@
  * Copyright (C) 2003,2004 Dom Lachowicz
  *               2006-2007 Harri Pitkänen <hatapitk@iki.fi>
  *               2006 Anssi Hannula <anssi.hannula@gmail.com>
+ *               2017 Børre Gaup <borre.gaup@uit.no>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,7 +42,7 @@
 #include "enchant-provider.h"
 
 /**
- * Voikko is a Finnish spell checker. More information is available from:
+ * Voikko is a spell checker for VFST and HFST format dictionaries. More information is available from:
  *
  * http://voikko.sourceforge.net/
  */
@@ -75,17 +76,65 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 	return sugg_arr;
 }
 
+static void
+voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
+{
+	voikkoTerminate((struct VoikkoHandle *)dict->user_data);
+	free (dict);
+}
+
+static char **
+voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
+			    size_t * out_n_dicts)
+{
+	size_t i;
+	char ** out_list = NULL;
+	*out_n_dicts = 0;
+	char ** voikko_langs = voikkoListSupportedSpellingLanguages (NULL);
+
+	for (i = 0; voikko_langs[i] != NULL; i++) {
+		(*out_n_dicts)++;
+	}
+
+	if (*out_n_dicts) {
+		out_list = calloc (*out_n_dicts + 1, sizeof (char *));
+		for (i = 0; i < *out_n_dicts; i++) {
+			out_list[i] = strdup (voikko_langs[i]);
+		}
+	}
+	voikkoFreeCstrArray(voikko_langs);
+
+	return out_list;
+}
+
+static int
+voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
+                                   const char *const tag)
+{
+	size_t i, n_dicts;
+	char ** existing_dicts = voikko_provider_list_dicts (NULL, &n_dicts);
+
+	for (i = 0; existing_dicts[i] != NULL; i++) {
+		if (strncmp (tag, existing_dicts[i], strlen (tag)) == 0) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 static EnchantDict *
 voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
-	/* Only Finnish is supported at the moment */
-	if (strncmp(tag, "fi_FI", 6) != 0 && strncmp(tag, "fi", 3) != 0)
-		return NULL;
-	
 	const char * voikko_error;
-	struct VoikkoHandle *voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL);
+
+	if (!voikko_provider_dictionary_exists (NULL, tag)) {
+		return NULL;
+	}
+
+	struct VoikkoHandle *voikko_handle = voikkoInit (&voikko_error, tag, NULL);
 	if (voikko_handle == NULL) {
-		enchant_provider_set_error(me, voikko_error);
+		enchant_provider_set_error (me, voikko_error);
 		return NULL;
 	}
 
@@ -95,51 +144,6 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 	dict->suggest = voikko_dict_suggest;
 
 	return dict;
-}
-
-static void
-voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
-{
-	voikkoTerminate((struct VoikkoHandle *)dict->user_data);
-	free (dict);
-}
-
-static int
-voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
-                                   const char *const tag)
-{
-	/* Only Finnish is supported */
-	if (strncmp(tag, "fi", 3) != 0)
-		return 0;
-
-	/* Check that a dictionary is actually available */
-	const char *voikko_error;
-	struct VoikkoHandle *voikko_handle;
-	if ((voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL))) {
-		voikkoTerminate(voikko_handle);
-		return 1;
-	}
-	else return 0;
-}
-
-
-static char **
-voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
-			    size_t * out_n_dicts)
-{
-	char ** out_list = NULL;
-	*out_n_dicts = 0;
-
-	struct VoikkoHandle *voikko_handle;
-	const char *voikko_error;
-	if ((voikko_handle = voikkoInit(&voikko_error, "fi_FI", NULL))) {
-		voikkoTerminate(voikko_handle);
-		*out_n_dicts = 1;
-		out_list = calloc (sizeof (char *), *out_n_dicts + 1);
-		out_list[0] = strdup("fi");
-	}
-
-	return out_list;
 }
 
 static void
