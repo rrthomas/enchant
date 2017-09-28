@@ -1,4 +1,4 @@
-AC_INIT([enchant],[2.1.1])
+AC_INIT([enchant],[2.1.2])
 AC_CONFIG_SRCDIR(src/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([subdir-objects])
