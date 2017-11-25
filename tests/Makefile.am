@@ -1,6 +1,6 @@
 SUBDIRS = enchant_providers
 
-AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
 
 ENCHANT_CONFIG_DIR = config
 
@@ -21,15 +21,15 @@ distclean-local:
 
 EXTRA_DIST = test.pwl.orig mock_provider.h run-test
 
-LIBENCHANT_COPY = $(builddir)/$(libdir_subdir)/libenchant.la
-$(LIBENCHANT_COPY): $(top_builddir)/src/libenchant.la
+LIBENCHANT_COPY = $(builddir)/$(libdir_subdir)/libenchant-@ENCHANT_MAJOR_VERSION@.la
+$(LIBENCHANT_COPY): $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la
 	$(MAKE) libenchant-copy
 
 libenchant-copy:
 	rm -rf $(libdir_subdir)/
-	$(MKDIR_P) $(libdir_subdir)/enchant
+	$(MKDIR_P) $(libdir_subdir)/enchant-@ENCHANT_MAJOR_VERSION@
 	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/
-	cp $(top_builddir)/src/libenchant.la $(libdir_subdir)/
+	cp $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la $(libdir_subdir)/
 
 LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS)
 LIBADD = $(LIBENCHANT_COPY)
