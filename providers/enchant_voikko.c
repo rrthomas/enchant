@@ -111,16 +111,19 @@ static int
 voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
                                    const char *const tag)
 {
-	size_t i, n_dicts;
-	char ** existing_dicts = voikko_provider_list_dicts (NULL, &n_dicts);
+	size_t i;
+	int exists = 0;
+	char ** voikko_langs = voikkoListSupportedSpellingLanguages (NULL);
 
-	for (i = 0; existing_dicts[i] != NULL; i++) {
-		if (strncmp (tag, existing_dicts[i], strlen (tag)) == 0) {
-			return 1;
+	for (i = 0; voikko_langs[i] != NULL; i++) {
+		if (strncmp (tag, voikko_langs[i], strlen (tag)) == 0) {
+			exists = 1;
+			break;
 		}
 	}
+	voikkoFreeCstrArray(voikko_langs);
 
-	return 0;
+	return exists;
 }
 
 static EnchantDict *
