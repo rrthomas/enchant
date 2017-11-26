@@ -28,7 +28,7 @@ dist_man_MANS = enchant.1 enchant-lsmod.1
 edit = sed \
 	-e 's|@datadir[@]|$(datadir)|g'
 
-DISTCLEANFILES = $(dist_man_MANS)
+DISTCLEANFILES = enchant.1
 
 enchant.1: $(srcdir)/enchant.1.in Makefile.am $(top_builddir)/config.status
 	rm -f $@ $@.tmp
