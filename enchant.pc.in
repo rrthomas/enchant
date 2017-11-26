@@ -7,5 +7,5 @@ Name: libenchant
 Description: A spell checking library
 Version: @VERSION@
 Requires.private: glib-2.0 gmodule-no-export-2.0
-Libs: -L${libdir} -lenchant
-Cflags: -I${includedir}/enchant
+Libs: -L${libdir} -lenchant-@ENCHANT_MAJOR_VERSION@
+Cflags: -I${includedir}/enchant-@ENCHANT_MAJOR_VERSION@

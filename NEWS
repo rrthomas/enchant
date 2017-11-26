@@ -1,3 +1,11 @@
+2.1.3 (November 26, 2017)
+--------------------------
+
+This release adds support for parallel installation with other major
+versions of Enchant, and fixes a crash in the Voikko provider when it has no
+supported languages.
+
+
 2.1.2 (September 28, 2017)
 --------------------------
 
