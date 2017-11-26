@@ -1,6 +1,6 @@
-/enchant
+/enchant-[0-9]
 /enchant.1
-/enchant.exe
-/enchant-lsmod
-/enchant-lsmod.exe
+/enchant-[0-9].exe
+/enchant-lsmod-[0-9]
+/enchant-lsmod-[0-9].exe
 /libenchant.rc

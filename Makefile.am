@@ -3,9 +3,12 @@ AM_DISTCHECK_CONFIGURE_FLAGS = --enable-relocatable
 
 SUBDIRS = lib src providers tests
 
+# Note that the template file is called library.pc.in, but generates a
+# versioned .pc file using some magic in AC_CONFIG_FILES.
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = enchant.pc
+pkgconfig_DATA = enchant-$(ENCHANT_MAJOR_VERSION).pc
 
+DISTCLEANFILES = $(pkgconfig_DATA)
 EXTRA_DIST =		\
 	enchant.pc.in	\
 	README 		\

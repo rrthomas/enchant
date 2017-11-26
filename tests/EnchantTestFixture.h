@@ -56,7 +56,7 @@ struct EnchantTestFixture
     void CleanUpFiles()
     {
         DeleteDirAndFiles(GetTempUserEnchantDir());
-        DeleteDirAndFiles(AddToPath(LIBDIR_SUBDIR, "enchant"));
+        DeleteDirAndFiles(AddToPath(LIBDIR_SUBDIR, "enchant-" ENCHANT_MAJOR_VERSION));
         DeleteDirAndFiles("share");
     }
 

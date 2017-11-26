@@ -881,7 +881,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 static void
 enchant_load_providers (EnchantBroker * broker)
 {
-	char *module_dir = enchant_relocate (PKGLIBDIR);
+	char *module_dir = enchant_relocate (PKGLIBDIR "-" ENCHANT_MAJOR_VERSION);
 	if (module_dir)
 		enchant_load_providers_in_dir (broker, module_dir);
 	free (module_dir);

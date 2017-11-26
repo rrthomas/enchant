@@ -290,14 +290,15 @@ dnl ============================================================================
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 Makefile
-enchant.pc
+enchant-$ENCHANT_MAJOR_VERSION.pc:enchant.pc.in
 lib/Makefile
 src/libenchant.rc
 src/Makefile
 providers/Makefile
 tests/Makefile
 tests/enchant_providers/Makefile
-])
+], [],
+[ENCHANT_MAJOR_VERSION="$ENCHANT_MAJOR_VERSION"])
 AC_OUTPUT
 
 dnl ===========================================================================================
