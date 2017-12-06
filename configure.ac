@@ -294,6 +294,8 @@ enchant-$ENCHANT_MAJOR_VERSION.pc:enchant.pc.in
 lib/Makefile
 src/libenchant.rc
 src/Makefile
+src/enchant.1
+src/enchant-lsmod.1
 providers/Makefile
 tests/Makefile
 tests/enchant_providers/Makefile
