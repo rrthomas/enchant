@@ -1,9 +1,9 @@
-.TH ENCHANT 1
+.TH ENCHANT-@ENCHANT_MAJOR_VERSION@ 1
 .SH NAME
 Enchant \- a spellchecker
 .SH SYNOPSIS
 .ll +8
-.B enchant
+.B enchant-@ENCHANT_MAJOR_VERSION@
 [\fB\-a\fR] [\fB\-d dict\fR] [\fB\-h\fR] [\fB\-l\fR] [\fB\-L\fR] [\fB\-v\fR]
 .ll -8
 .br
@@ -35,7 +35,7 @@ to decide which spelling provider to use for particular languages.
 The per-user file takes precedence.
 .PP
 The ordering file takes the form language_tag:<comma-separated list of spelling
-providers>. To see what providers are available, run \fIenchant-lsmod\fR. '*' is
+providers>. To see what providers are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. '*' is
 used to mean "use this ordering for all languages, unless instructed otherwise." For example:
 .PP
 *:aspell,hunspell
@@ -69,6 +69,6 @@ dictionaries; the hunspell provider can be configured to do so at build
 time.
 .SH "SEE ALSO"
 .BR aspell (1),
-.BR enchant-lsmod (1)
+.BR enchant-lsmod-@ENCHANT_MAJOR_VERSION@ (1)
 .SH "AUTHOR"
 Written by Dom Lachowicz and Reuben Thomas.

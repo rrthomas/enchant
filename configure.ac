@@ -1,4 +1,4 @@
-AC_INIT([enchant],[2.1.3])
+AC_INIT([enchant],[2.1.4])
 AC_CONFIG_SRCDIR(src/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([subdir-objects])
@@ -294,6 +294,8 @@ enchant-$ENCHANT_MAJOR_VERSION.pc:enchant.pc.in
 lib/Makefile
 src/libenchant.rc
 src/Makefile
+src/enchant.1
+src/enchant-lsmod.1
 providers/Makefile
 tests/Makefile
 tests/enchant_providers/Makefile

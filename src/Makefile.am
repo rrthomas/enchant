@@ -23,16 +23,21 @@ libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
 
 pkgdata_DATA = enchant.ordering
 
-dist_man_MANS = enchant.1 enchant-lsmod.1
+dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1
 
 edit = sed \
 	-e 's|@datadir[@]|$(datadir)|g'
 
-DISTCLEANFILES = enchant.1
+DISTCLEANFILES = $(dist_man_MANS)
 
-enchant.1: $(srcdir)/enchant.1.in Makefile.am $(top_builddir)/config.status
+enchant-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant.1 Makefile.am $(top_builddir)/config.status
 	rm -f $@ $@.tmp
-	$(edit) $(abs_srcdir)/enchant.1.in >$@.tmp
+	$(edit) $(abs_builddir)/enchant.1 >$@.tmp
+	mv $@.tmp $@
+
+enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant-lsmod.1 Makefile.am $(top_builddir)/config.status
+	rm -f $@ $@.tmp
+	$(edit) $(abs_builddir)/enchant-lsmod.1 >$@.tmp
 	mv $@.tmp $@
 
 LDADD = libenchant-@ENCHANT_MAJOR_VERSION@.la $(ENCHANT_LIBS) $(top_builddir)/lib/libgnu.la

@@ -1,6 +1,6 @@
 --- gnulib/doc/INSTALL	2017-02-23 15:26:15.296354123 +0000
-+++ gl/doc/INSTALL	2017-04-06 14:15:43.472889000 +0100
-@@ -1,3 +1,35 @@
++++ INSTALL	2017-12-06 22:07:35.788935745 +0000
+@@ -1,3 +1,38 @@
 +Building and installing libenchant
 +**********************************
 +
@@ -9,6 +9,9 @@
 +
 +The usual GNU autotools package instructions apply, except that Enchant must
 +be built with --enable-relocatable for the tests to run successfully.
++
++Note that for Enchant to find system-installed dictionaries, you may need
++the relevant --with-foo-dir option (see ./configure --help).
 +
 +To build from git, or without relying on the generated files in a source
 +release, automake, autoconf, libtool, pkg-config and git must be installed.
