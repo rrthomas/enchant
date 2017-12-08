@@ -1,9 +1,10 @@
-2.1.4 (December 6, 2017)
+2.1.4 (December 9, 2017)
 ------------------------
 
 This release improves support for parallel installation with other major
 versions of Enchant (specifically for man pages), and makes minor
-documentation improvements.
+documentation improvements and fixes a potential crash in the hspell
+back-end.
 
 
 2.1.3 (November 26, 2017)
