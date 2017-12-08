@@ -102,6 +102,13 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	gsize length;
 	char *iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
 	
+	/* check we got a result */
+	if (iso_word == NULL)
+		{
+			g_free (iso_word);
+			return NULL;
+		}
+
 	/* get suggestions */
 	struct corlist cl;
 	corlist_init (&cl);
