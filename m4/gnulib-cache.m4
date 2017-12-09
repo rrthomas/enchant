@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this file.  If not, see <http://www.gnu.org/licenses/>.
+# along with this file.  If not, see <https://www.gnu.org/licenses/>.
 #
 # As a special exception to the GNU General Public License,
 # this file may be distributed as part of a program that
@@ -27,7 +27,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --local-dir=gl --local-dir=gl-mod/bootstrap --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --no-conditional-dependencies --libtool --macro-prefix=gl alloca bootstrap c99 configmake flock manywarnings relocatable-lib-lgpl snippet/unused-parameter ssize_t strchrnul strdup-posix valgrind-tests
+#   gnulib-tool --import --local-dir=gl --local-dir=gl-mod/bootstrap --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --makefile-name=Makefile.gnulib --no-conditional-dependencies --libtool --macro-prefix=gl alloca bootstrap c99 configmake flock manywarnings relocatable-lib-lgpl snippet/unused-parameter ssize_t strchrnul strdup-posix valgrind-tests
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([gl:gl-mod/bootstrap])
@@ -53,7 +53,7 @@ gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests])
 gl_LIB([libgnu])
 gl_LGPL
-gl_MAKEFILE_NAME([])
+gl_MAKEFILE_NAME([Makefile.gnulib])
 gl_LIBTOOL
 gl_MACRO_PREFIX([gl])
 gl_PO_DOMAIN([])

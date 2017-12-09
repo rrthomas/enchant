@@ -21,7 +21,6 @@ Makefile.in
 /enchant-*.pc
 /gnulib
 /install-sh
-/lib
 /libtool
 /ltmain.sh
 /missing
