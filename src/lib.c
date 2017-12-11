@@ -93,7 +93,7 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 
 /* Relocate a path and ensure the result is allocated on the heap */
-static char *
+char *
 enchant_relocate (const char *path)
 {
 	char *newpath = (char *) relocate (path);

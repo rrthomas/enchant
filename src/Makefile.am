@@ -1,5 +1,4 @@
 AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(ENCHANT_CFLAGS) $(WARN_CFLAGS)
-DEFS = -DENABLE_COSTLY_RELOCATABLE -DIN_LIBRARY -DINSTALLDIR=\"$(libdir)\"
 
 lib_LTLIBRARIES = libenchant-@ENCHANT_MAJOR_VERSION@.la
 

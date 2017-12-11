@@ -199,7 +199,7 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs)
 		}
 
 #ifdef ENCHANT_HUNSPELL_DICT_DIR
-	dirs.push_back (g_strdup (ENCHANT_HUNSPELL_DICT_DIR));
+	dirs.push_back (enchant_relocate (ENCHANT_HUNSPELL_DICT_DIR));
 #endif
 }
 

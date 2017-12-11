@@ -19,7 +19,6 @@
  * THE SOFTWARE.
  */
 
-#define NOMINMAX //don't want windows to collide with std::min
 #include <UnitTest++.h>
 #include <enchant.h>
 #include <vector>

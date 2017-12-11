@@ -69,6 +69,16 @@ GSList *enchant_get_conf_dirs (void);
 char *enchant_get_prefix_dir(void);
 
 /**
+ * enchant_relocate
+ *
+ * Returns a string giving the relocated path according to the location of the
+ * base directory of the enchant installation.
+ *
+ * Returns: the relocated path. Must be free'd.
+ */
+char *enchant_relocate (const char *path);
+
+/**
  * enchant_dict_set_error
  * @dict: A non-null dictionary
  * @err: A non-null error message
