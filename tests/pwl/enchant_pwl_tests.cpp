@@ -20,7 +20,6 @@
  */
 
 #include <unistd.h>
-#define NOMINMAX //don't want windows to collide with std::min
 #include <UnitTest++.h>
 #include <stdio.h>
 #include <enchant.h>
