@@ -104,10 +104,7 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	
 	/* check we got a result */
 	if (iso_word == NULL)
-		{
-			g_free (iso_word);
-			return NULL;
-		}
+		return NULL;
 
 	/* get suggestions */
 	struct corlist cl;
