@@ -236,7 +236,7 @@ AC_DEFUN([ENCHANT_CHECK_PKG_CONFIG_PROVIDER],
       [PKG_CHECK_MODULES([$2], [m4_default([$3], [$1])],
          [$2[]_CFLAGS="$[]$2[]_CFLAGS -DENCHANT_[]$2[]_DICT_DIR='\"$[]$1_dir\"'"
          with_$1=yes
-         build_providers+=" $1"],
+         build_providers="$build_providers $1"],
          [if test "x$with_$1" != xcheck; then
             AC_MSG_FAILURE([--with-[]$1 was given, but test(s) for $1 failed])
           fi
@@ -260,7 +260,7 @@ AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
          with_[]$1=no
       else
          with_[]$1=yes
-         build_providers+=" $1"
+         build_providers="$build_providers $1"
          LIBS="$LIBS $5"
       fi])
    AM_CONDITIONAL(WITH_[]$2, test "x$with_[]$1" = xyes)])
