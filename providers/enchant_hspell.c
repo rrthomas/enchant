@@ -70,14 +70,23 @@ corlist2strv (struct corlist *cl, size_t nb_sugg)
 	return sugg_arr;
 }
 
+static char *
+hspell_convert_to_iso8859_8 (EnchantDict *me, const char *const word, size_t len)
+{
+	/* convert to iso 8859-8 */
+	gsize length;
+	char *iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
+	if (iso_word == NULL)
+		enchant_dict_set_error (me, "word not valid Hebrew (could not be converted to ISO-8859-8)");
+	return iso_word;
+}
+
 static int
 hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
-	
-	/* convert to iso 8859-8 */
-	gsize length;
-	char *iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
+	char *iso_word = hspell_convert_to_iso8859_8 (me, word, len);
+	g_return_val_if_fail (iso_word, -1);
 	
 	/* check */
 	int preflen;
@@ -97,14 +106,8 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
-	
-	/* convert to iso 8859-8 */
-	gsize length;
-	char *iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
-	
-	/* check we got a result */
-	if (iso_word == NULL)
-		return NULL;
+	char *iso_word = hspell_convert_to_iso8859_8 (me, word, len);
+	g_return_val_if_fail (iso_word, NULL);
 
 	/* get suggestions */
 	struct corlist cl;
