@@ -44,7 +44,7 @@ bin_PROGRAMS = enchant-@ENCHANT_MAJOR_VERSION@ enchant-lsmod-@ENCHANT_MAJOR_VERS
 enchant_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant.c
 enchant_lsmod_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant-lsmod.c
 
-EXTRA_DIST = $(pkgdata_DATA) enchant.1.in
+EXTRA_DIST = $(pkgdata_DATA) enchant.1.in enchant-lsmod.1.in
 
 .rc.lo:
 	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --tag=RC --mode=compile $(RC) $(RCFLAGS) $< -o $@
