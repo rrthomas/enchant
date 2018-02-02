@@ -1,5 +1,12 @@
 SUBDIRS = enchant_providers
 
+# Get libdir suffix
+if !GNU_MAKE
+libdir_subdir=$(shell echo "$(libdir)" | sed -e 's|^$(exec_prefix)/||' | sed -e 's|^/||')
+else
+libdir_subdir=lib
+endif
+
 AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
 
 ENCHANT_CONFIG_DIR = config
