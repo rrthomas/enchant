@@ -27,7 +27,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --local-dir=gl --local-dir=gl-mod/bootstrap --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --makefile-name=Makefile.gnulib --no-conditional-dependencies --libtool --macro-prefix=gl bootstrap c99 configmake flock manywarnings relocatable-lib-lgpl snippet/unused-parameter ssize_t strchrnul strdup-posix valgrind-tests
+#   gnulib-tool --import --local-dir=gl --local-dir=gl-mod/bootstrap --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --lgpl --makefile-name=Makefile.gnulib --no-conditional-dependencies --libtool --macro-prefix=gl bootstrap c99 configmake flock gnu-make manywarnings relocatable-lib-lgpl snippet/unused-parameter ssize_t strchrnul strdup-posix valgrind-tests
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([gl:gl-mod/bootstrap])
@@ -36,6 +36,7 @@ gl_MODULES([
   c99
   configmake
   flock
+  gnu-make
   manywarnings
   relocatable-lib-lgpl
   snippet/unused-parameter

@@ -56,3 +56,4 @@
 /rawmemchr.m4
 /strchrnul.m4
 /manywarnings-c++.m4
+/gnu-make.m4

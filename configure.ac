@@ -1,4 +1,4 @@
-AC_INIT([enchant],[2.2.1])
+AC_INIT([enchant],[2.2.2])
 AC_CONFIG_SRCDIR(src/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([subdir-objects])
@@ -119,9 +119,6 @@ else
   ISYSTEM='-I'
 fi
 AC_SUBST([ISYSTEM])
-
-libdir_subdir=`echo "$libdir" | sed -e 's|^${exec_prefix}/||'`
-AC_SUBST([libdir_subdir])
 
 # FIXME: Use just GLIB_CFLAGS, GLIB_LIBS
 ENCHANT_CFLAGS=$GLIB_CFLAGS

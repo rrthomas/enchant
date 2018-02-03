@@ -1,5 +1,12 @@
 # FIXME: common up with tests/Makefile.am
 
+# Get libdir suffix
+if GNU_MAKE
+libdir_subdir=$(shell echo "$(libdir)" | sed -e 's|^$(exec_prefix)/||' | sed -e 's|^/||')
+else
+Tests require GNU Make!
+endif
+
 AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
 
 ENCHANT_CONFIG_DIR = config
