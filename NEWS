@@ -1,3 +1,16 @@
+2.2.3 (February 4, 2018)
+------------------------
+
+Fix the previous release’s fix. Sigh.
+
+
+2.2.2 (February 3, 2018)
+------------------------
+
+Fix a bug in the build system where the test harness would try to delete
+files under root, typically the system libraries.
+
+
 2.2.1 (January 3, 2018)
 -----------------------
 
