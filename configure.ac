@@ -1,4 +1,4 @@
-AC_INIT([enchant],[2.2.2])
+AC_INIT([enchant],[2.2.3])
 AC_CONFIG_SRCDIR(src/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([subdir-objects])
@@ -109,7 +109,7 @@ if test "$gl_gcc_warnings" = yes; then
   dnl gl_WARN_ADD([-fsanitize=address])
   dnl gl_WARN_ADD([-fsanitize=address], [AM_LDFLAGS])
   dnl dnl Enable undefined behavior checking
-  dnl gl_WARN_ADD([-fsanitize=undefined])
+p  dnl gl_WARN_ADD([-fsanitize=undefined])
   dnl gl_WARN_ADD([-fsanitize=undefined], [AM_LDFLAGS])
 
   # When compiling with GCC, prefer -isystem to -I when including system
