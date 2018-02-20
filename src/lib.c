@@ -359,8 +359,8 @@ enchant_session_exclude (EnchantSession * session, const char * const word, size
 	gboolean result = !g_hash_table_lookup (session->session_include, utf) &&
 		(g_hash_table_lookup (session->session_exclude, utf) ||
 		 (normalize_case ?
-			enchant_pwl_check (session->exclude, word, len) == 0) :
-			enchant_pwl_contains (session->exclude, word, len) == 0);
+			(enchant_pwl_check (session->exclude, word, len) == 0) :
+			(enchant_pwl_contains (session->exclude, word, len) == 0));
 	g_free (utf);
 
 	return result;
