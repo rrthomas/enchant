@@ -164,6 +164,20 @@ void enchant_broker_describe (EnchantBroker * broker,
 int enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len);
 
 /**
+ * enchant_dict_check
+ * @dict: A non-null #EnchantDict
+ * @word: The non-null word you wish to check, in UTF-8 encoding
+ * @len: The byte length of @word, or -1 for strlen (@word)
+ *
+ * Will return an "incorrect" value if any of those pre-conditions
+ * are not met.
+ * Does not attempt to search for titlecase/lowercase variations of @word.
+ *
+ * Returns: 0 if the word is correctly spelled, positive if not, negative if error
+ */
+int enchant_dict_check_case_sensitive (EnchantDict * dict, const char *const word, ssize_t len)
+
+/**
  * enchant_dict_suggest
  * @dict: A non-null #EnchantDict
  * @word: The non-null word you wish to find suggestions for, in UTF-8 encoding

@@ -352,24 +352,30 @@ enchant_session_remove_exclude (EnchantSession * session, const char * const wor
  *  AND the word has not been added to the session include list
  */
 static gboolean
-enchant_session_exclude (EnchantSession * session, const char * const word, size_t len)
+enchant_session_exclude (EnchantSession * session, const char * const word, size_t len, gboolean normalize_case)
 {
 	char * utf = g_strndup (word, len);
+	/* TODO: enchant_pwl_contains does not refresh the file */
 	gboolean result = !g_hash_table_lookup (session->session_include, utf) &&
 		(g_hash_table_lookup (session->session_exclude, utf) ||
-		 enchant_pwl_check (session->exclude, word, len) == 0);
+		 (normalize_case ?
+			enchant_pwl_check (session->exclude, word, len) == 0) :
+			enchant_pwl_contains (session->exclude, word, len) == 0);
 	g_free (utf);
 
 	return result;
 }
 
 static gboolean
-enchant_session_contains (EnchantSession * session, const char * const word, size_t len)
+enchant_session_contains (EnchantSession * session, const char * const word, size_t len, gboolean normalize_case)
 {
 	char * utf = g_strndup (word, len);
 	gboolean result = g_hash_table_lookup (session->session_include, utf) ||
-		(enchant_pwl_check (session->personal, word, len) == 0 &&
-		 (!enchant_pwl_check (session->exclude, word, len)) == 0);
+		(normalize_case ?
+			(enchant_pwl_check (session->personal, word, len) == 0 &&
+			 (!enchant_pwl_check (session->exclude, word, len)) == 0) :
+			(enchant_pwl_contains (session->personal, word, len) == 0 &&
+			 (!enchant_pwl_contains (session->exclude, word, len)) == 0));
 	g_free (utf);
 
 	return result;
@@ -418,6 +424,18 @@ enchant_dict_get_error (EnchantDict * dict)
 int
 enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 {
+	return enchant_dict_contains (dict, word, len, TRUE);
+}
+
+int
+enchant_dict_check_case_sensitive (EnchantDict * dict, const char *const word, ssize_t len)
+{
+	return enchant_dict_contains (dict, word, len, FALSE);
+}
+
+int
+enchant_dict_contains (EnchantDict * dict, const char *const word, ssize_t len, gboolean normalize_case)
+{
 	g_return_val_if_fail (dict, -1);
 	g_return_val_if_fail (word, -1);
 
@@ -431,11 +449,11 @@ enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
 	enchant_session_clear_error (session);
 
 	/* first, see if it's to be excluded*/
-	if (enchant_session_exclude (session, word, len))
+	if (enchant_session_exclude (session, word, len, normalize_case))
 		return 1;
 
 	/* then, see if it's in our pwl or session*/
-	if (enchant_session_contains(session, word, len))
+	if (enchant_session_contains(session, word, len, normalize_case))
 		return 0;
 
 	if (dict->check)
@@ -489,7 +507,7 @@ enchant_dict_get_good_suggestions(EnchantDict * dict, char ** suggs, size_t n_su
 				continue;
 
 			if (g_utf8_validate(suggs[i], sugg_len, NULL) &&
-			    !enchant_session_exclude(session, suggs[i], sugg_len))
+			    !enchant_session_exclude(session, suggs[i], sugg_len, TRUE))
 				filtered_suggs[n_filtered_suggs++] = strdup (suggs[i]);
 		}
 
@@ -618,7 +636,7 @@ enchant_dict_is_added (EnchantDict * dict, const char *const word, ssize_t len)
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
-	return enchant_session_contains (session, word, len);
+	return enchant_session_contains (session, word, len, TRUE);
 }
 
 void
@@ -676,7 +694,7 @@ enchant_dict_is_removed (EnchantDict * dict, const char *const word, ssize_t len
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
-	return enchant_session_exclude (session, word, len);
+	return enchant_session_exclude (session, word, len, TRUE);
 }
 
 void
