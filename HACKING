@@ -4,7 +4,17 @@
 Building from git
 -----------------
 
-See INSTALL.
+To build from git, or without relying on the generated files in a source
+release, automake, autoconf, libtool, pkg-config and git must be installed.
+Run
+
+./bootstrap && ./configure --enable-relocatable
+
+to set up and configure the source tree; optional configure arguments can be
+supplied as normal.
+
+See INSTALL (which is created by bootstrap) for instructions from this point
+on.
 
 
 Working in libenchant
