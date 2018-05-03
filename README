@@ -28,7 +28,7 @@ Enchant is written in C and C++, and its only external dependency is glib.
 Enchant bindings are supplied for C and C++; there are third-party bindings
 for:
 
-Python: http://pythonhosted.org/pyenchant/
+Python: hhttps://github.com/rfk/pyenchant/
 Ruby: https://github.com/pennyapp/ruby-enchant
 Go: http://pythonhosted.org/pyenchant/
 
