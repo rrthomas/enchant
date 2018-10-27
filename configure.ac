@@ -109,7 +109,7 @@ if test "$gl_gcc_warnings" = yes; then
   dnl gl_WARN_ADD([-fsanitize=address])
   dnl gl_WARN_ADD([-fsanitize=address], [AM_LDFLAGS])
   dnl dnl Enable undefined behavior checking
-p  dnl gl_WARN_ADD([-fsanitize=undefined])
+  dnl gl_WARN_ADD([-fsanitize=undefined])
   dnl gl_WARN_ADD([-fsanitize=undefined], [AM_LDFLAGS])
 
   # When compiling with GCC, prefer -isystem to -I when including system
