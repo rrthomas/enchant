@@ -19,7 +19,6 @@ Makefile.in
 /depcomp
 /doc
 /enchant-*.pc
-/gnulib
 /install-sh
 /libtool
 /ltmain.sh
