@@ -33,7 +33,7 @@ $(LIBENCHANT_COPY): $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la
 	$(MAKE) libenchant-copy
 
 libenchant-copy:
-	rm -rf $(libdir_subdir)/
+	rm -rf $(libdir_subdir)
 	$(MKDIR_P) $(libdir_subdir)/enchant-@ENCHANT_MAJOR_VERSION@
 	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/
 	cp $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la $(libdir_subdir)/
