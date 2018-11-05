@@ -36,7 +36,7 @@ libenchant-copy:
 APPLESPELL_CONFIG = config/AppleSpell.config
 $(APPLESPELL_CONFIG): $(top_srcdir)/providers/AppleSpell.config
 	$(MKDIR_P) config
-	cp $< config/
+	cp $(top_srcdir)/providers/AppleSpell.config config/
 
 LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS)
 LIBADD = $(LIBENCHANT_COPY)
