@@ -1,6 +1,6 @@
 [submodule "gnulib"]
 	path = gnulib
-	url = git://git.sv.gnu.org/gnulib
+	url = git://git.sv.gnu.org/gnulib.git
 [submodule "gl-mod/bootstrap"]
 	path = gl-mod/bootstrap
 	url = https://github.com/gnulib-modules/bootstrap.git
