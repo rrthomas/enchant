@@ -77,6 +77,7 @@ if test "$gl_gcc_warnings" = yes; then
   nw="$nw -Wstrict-overflow"  # Use a lower level (see below).
   nw="$nw -Wconversion"       # These warnings usually don’t point to mistakes.
   nw="$nw -Wsign-conversion"  # Likewise.
+  nw="$nw -Wimplicit-fallthrough=5" # We want to allow "fallthrough" comments.
 
   gl_MANYWARN_ALL_GCC([warnings])
 
