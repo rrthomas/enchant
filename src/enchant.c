@@ -197,17 +197,13 @@ static GSList *
 tokenize_line (EnchantDict * dict, GString * line)
 {
 	GSList * tokens = NULL;
-	char *utf = (char *) line->str;
-
-	GString * word;
-	
-	gunichar uc;
+	gchar *utf = (char *) line->str;
 	size_t cur_pos = 0;
 	size_t start_pos = 0;
-	word = g_string_new (NULL);
+	GString * word = g_string_new (NULL);
 
 	while (cur_pos < line->len && *utf) {
-		int i;
+		gunichar uc;
 
 	        /* Skip non-word characters. */
 		cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
@@ -228,10 +224,12 @@ tokenize_line (EnchantDict * dict, GString * line)
 		}
 
 	        /* Skip backwards over any characters that can't appear at the end of a word. */
-		i = word->len-1;
-	        while ((i >= 0) && !enchant_dict_is_word_character(dict, word->str[i], 2)) {
-	                g_string_truncate (word, i);
-			i--;
+	        for (gchar *i_utf = word->str + word->len;
+		     (i_utf = g_utf8_find_prev_char (word->str, i_utf)) != NULL;
+		     g_string_truncate (word, i_utf - word->str)) {
+			uc = g_utf8_get_char (i_utf);
+			if (enchant_dict_is_word_character(dict, uc, 2))
+				break;
 		}
 
 		/* Save (word, position) tuple. */
