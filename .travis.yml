@@ -43,7 +43,10 @@ matrix:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib aspell hspell hunspell libvoikko unittest-cpp ; fi
+  # Note: aspell should work on macOS, but has been removed from the next
+  # line because one of the tests fails; see
+  # https://github.com/Homebrew/homebrew-core/issues/40976
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib hspell hunspell libvoikko unittest-cpp ; fi
 
 script:
   - ./bootstrap
