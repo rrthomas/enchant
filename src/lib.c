@@ -150,7 +150,7 @@ enchant_get_conf_dirs (void)
  error_exit:
 	free (pkgdatadir);
 	free (sysconfdir);
-	free (pkgconfdir);
+	g_free (pkgconfdir);
 	free (user_config_dir);
 	return NULL;
 }
