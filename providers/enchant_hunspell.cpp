@@ -181,25 +181,34 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs)
 {
 	dirs.clear ();
 
+	gchar * tmp;
 	char * config_dir = enchant_get_user_config_dir ();
-	dirs.push_back (g_build_filename (config_dir, "hunspell", nullptr));
+	tmp = g_build_filename (config_dir, "hunspell", nullptr);
+	dirs.push_back (tmp);
 	free (config_dir);
+	g_free(tmp);
 
 	for (const gchar* const * iter = g_get_system_data_dirs (); *iter; iter++)
 		{
-			dirs.push_back (g_build_filename (*iter, "hunspell", nullptr));
+			tmp = g_build_filename (*iter, "hunspell", nullptr);
+			dirs.push_back (tmp);
+			g_free(tmp);
 		}
 
 	/* Dynamically locate library and search for modules relative to it. */
 	char * enchant_prefix = enchant_get_prefix_dir();
 	if(enchant_prefix)
 		{
-			dirs.push_back (g_build_filename(enchant_prefix, "share", "enchant", "hunspell", nullptr));
+			tmp = g_build_filename(enchant_prefix, "share", "enchant", "hunspell", nullptr);
+			dirs.push_back (tmp);
 			g_free(enchant_prefix);
+			g_free(tmp);
 		}
 
 #ifdef ENCHANT_HUNSPELL_DICT_DIR
-	dirs.push_back (enchant_relocate (ENCHANT_HUNSPELL_DICT_DIR));
+	config_dir = enchant_relocate (ENCHANT_HUNSPELL_DICT_DIR);
+	dirs.push_back (config_dir);
+	free(config_dir);
 #endif
 }
 
@@ -286,6 +295,7 @@ hunspell_request_dictionary (const char * tag)
 						g_dir_close (dir);
 						return dict;
 					}
+					g_free(dict);
 				}
 			}
 
