@@ -1,3 +1,16 @@
+2.2.5 (June 30, 2019)
+---------------------
+
+Fix a memory leak in the hunspell provider.
+
+
+2.2.4 (June 17, 2019)
+---------------------
+
+Fix a bug in the enchant program, where words ending in non-ASCII characters
+were truncated during tokenization.
+
+
 2.2.3 (February 4, 2018)
 ------------------------
 
