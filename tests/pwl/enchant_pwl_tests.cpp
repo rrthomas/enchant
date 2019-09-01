@@ -160,9 +160,6 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 
   for(std::vector<std::string>::const_iterator itWord = sNewWords.begin(); itWord != sNewWords.end(); ++itWord){
     CHECK( IsWordInDictionary(*itWord) );
-    if(!IsWordInDictionary(*itWord)){
-         testResults_.OnTestFailure(UnitTest::TestDetails(m_details, __LINE__), itWord->c_str());
-    }
   }
 }
 
