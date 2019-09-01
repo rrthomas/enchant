@@ -248,10 +248,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 			if(line_number == 1 && BOM == g_utf8_get_char(line))
 				line = g_utf8_next_char(line);
 
-			size_t l = strlen(line)-1;
-			if (line[l]=='\n') 
-				line[l] = '\0';
-			else if(!feof(f)) /* ignore lines longer than BUFSIZ. */ 
+			if(line[strlen(line)-1] != '\n' && !feof(f)) /* ignore lines longer than BUFSIZ. */ 
 				{
 					g_warning ("Line too long (ignored) in %s at line:%zu\n", pwl->filename, line_number);
 					while (NULL != (fgets (buffer, sizeof (buffer), f)))
@@ -261,7 +258,8 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 						}
 					continue;
 				}
-						
+
+			g_strchomp(line);
 			if( line[0] && line[0] != '#')
 				{
 					if(g_utf8_validate(line, -1, NULL))
