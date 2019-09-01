@@ -6,6 +6,10 @@ Building from git
 
 To build from git, or without relying on the generated files in a source
 release, automake, autoconf, libtool, pkg-config and git must be installed.
+
+(Note, the exact packages needed for certain distros may be found in
+.travis.yml and appveyor.yml.)
+
 Run
 
 ./bootstrap && ./configure --enable-relocatable

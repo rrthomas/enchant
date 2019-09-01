@@ -3,3 +3,4 @@
 /enchant_*.dylib
 /enchant*.dll
 /providers.test
+/providers.test.exe

@@ -207,7 +207,7 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file)
 {
 	g_return_val_if_fail (file != NULL, NULL);
 
-	FILE* fd = g_fopen(file, "a+b");
+	FILE* fd = g_fopen(file, "a+");
 	if(fd == NULL)
 		return NULL;
 	fclose(fd);
@@ -232,7 +232,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	g_hash_table_destroy (pwl->words_in_trie);
 	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	FILE *f = g_fopen(pwl->filename, "rb");
+	FILE *f = g_fopen(pwl->filename, "r");
 	if (!f) 
 		return;
 
@@ -248,10 +248,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 			if(line_number == 1 && BOM == g_utf8_get_char(line))
 				line = g_utf8_next_char(line);
 
-			size_t l = strlen(line)-1;
-			if (line[l]=='\n') 
-				line[l] = '\0';
-			else if(!feof(f)) /* ignore lines longer than BUFSIZ. */ 
+			if(line[strlen(line)-1] != '\n' && !feof(f)) /* ignore lines longer than BUFSIZ. */ 
 				{
 					g_warning ("Line too long (ignored) in %s at line:%zu\n", pwl->filename, line_number);
 					while (NULL != (fgets (buffer, sizeof (buffer), f)))
@@ -261,7 +258,8 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 						}
 					continue;
 				}
-						
+
+			g_strchomp(line);
 			if( line[0] && line[0] != '#')
 				{
 					if(g_utf8_validate(line, -1, NULL))
@@ -323,7 +321,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 
 	if (pwl->filename != NULL)
 	{
-		FILE *f = g_fopen(pwl->filename, "a+b");
+		FILE *f = g_fopen(pwl->filename, "a+");
 		if (f)
 			{
 				/* Since this function does not signal I/O

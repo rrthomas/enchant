@@ -1,6 +1,6 @@
 #! /bin/sh
 ## DO NOT EDIT - This file generated from build-aux/bootstrap.in
-##               by inline-source v2016-02-21.11
+##               by inline-source v2019-02-19.15
 
 # Bootstrap an Autotooled package from checked-out sources.
 # Written by Gary V. Vaughan, 2010
@@ -9,7 +9,7 @@
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2017 Bootstrap Authors
+# Copyright (C) 2010-2019 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/license/MIT>, and GPL version 3 or later
@@ -160,6 +160,9 @@ gnulib_non_module_files="
 gnulib_path=
 gnulib_url=
 
+# Date from which to clone github, to avoid a full clone.
+gnulib_clone_since=
+
 # Additional gnulib-tool options to use.
 gnulib_tool_options="
         --no-changelog
@@ -224,7 +227,7 @@ vc_ignore=
 
 # Source required external libraries:
 # Set a version string for this script.
-scriptversion=2017-04-19.12; # UTC
+scriptversion=2019-02-19.15; # UTC
 
 # General shell script boiler plate, and helper functions.
 # Written by Gary V. Vaughan, 2004
@@ -232,7 +235,7 @@ scriptversion=2017-04-19.12; # UTC
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2004-2017 Bootstrap Authors
+# Copyright (C) 2004-2019 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/license/MIT>, and GPL version 3 or later
@@ -1657,7 +1660,7 @@ func_lt_ver ()
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2017 Bootstrap Authors
+# Copyright (C) 2010-2019 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/license/MIT>, and GPL version 3 or later
@@ -1670,7 +1673,7 @@ func_lt_ver ()
 # <https://github.com/gnulib-modules/bootstrap/issues>
 
 # Set a version string for this script.
-scriptversion=2016-03-06.01; # UTC
+scriptversion=2019-02-19.15; # UTC
 
 
 ## ------ ##
@@ -2331,7 +2334,7 @@ func_version ()
 # mode: shell-script
 # sh-indentation: 2
 # eval: (add-hook 'before-save-hook 'time-stamp)
-# time-stamp-pattern: "10/scriptversion=%:y-%02m-%02d.%02H; # UTC"
+# time-stamp-pattern: "30/scriptversion=%:y-%02m-%02d.%02H; # UTC"
 # time-stamp-time-zone: "UTC"
 # End:
 #! /bin/sh
@@ -2342,7 +2345,7 @@ func_version ()
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2017 Bootstrap Authors
+# Copyright (C) 2010-2019 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/license/MIT>, and GPL version 3 or later
@@ -2359,7 +2362,7 @@ test -z "$progpath" && . `echo "$0" |${SED-sed} 's|[^/]*$||'`/funclib.sh
 test extract-trace = "$progname" && . `echo "$0" |${SED-sed} 's|[^/]*$||'`/options-parser
 
 # Set a version string.
-scriptversion=2016-02-22.14; # UTC
+scriptversion=2019-02-19.15; # UTC
 
 
 ## ------ ##
@@ -2817,12 +2820,12 @@ test extract-trace = "$progname" && func_main "$@"
 # mode: shell-script
 # sh-indentation: 2
 # eval: (add-hook 'before-save-hook 'time-stamp)
-# time-stamp-pattern: "20/scriptversion=%:y-%02m-%02d.%02H; # UTC"
+# time-stamp-pattern: "50/scriptversion=%:y-%02m-%02d.%02H; # UTC"
 # time-stamp-time-zone: "UTC"
 # End:
 
 # Set a version string for *this* script.
-scriptversion=2017-01-09.18; # UTC
+scriptversion=2019-03-22.11; # UTC
 
 
 ## ------------------- ##
@@ -4217,8 +4220,9 @@ func_require_gnulib_submodule ()
         trap func_cleanup_gnulib 1 2 13 15
 
         shallow=
-        $GIT clone -h 2>&1 |func_grep_q -- --depth \
-            && shallow='--depth 365'
+        test -n "$gnulib_clone_since" && \
+            $GIT clone -h 2>&1 |func_grep_q -- --shallow-since \
+            && shallow="--shallow-since=$gnulib_clone_since"
 
         func_show_eval "$GIT clone $shallow '$gnulib_url' '$gnulib_path'" \
           func_cleanup_gnulib
