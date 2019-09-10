@@ -156,44 +156,9 @@ glib_DEFUN([GLIB_LC_MESSAGES],
 
 GLIB_LC_MESSAGES
 
-
-dnl ===========================================================================
-dnl Very hackish.
-dnl Ubuntu / Debian ship older version of unittest++ with their own pkg-config
-dnl and include
-dnl ===========================================================================
 AC_LANG_PUSH([C++])
 PKG_CHECK_EXISTS([UnitTest++],
-    [PKG_CHECK_MODULES(UNITTESTPP, [UnitTest++])
-dnl and because of the above, we need to tweak the include until we stop
-dnl supporting this old version.
-        PKG_CHECK_VAR(UNITTESTPP_INCLUDE, [UnitTest++], [includedir])
-        if test "x$UNITTESTPP_INCLUDE" != "x"; then
-            UNITTESTPP_CFLAGS="$UNITTESTPP_CFLAGS -I$UNITTESTPP_INCLUDE/UnitTest++"
-        fi
-    ],
-    [PKG_CHECK_EXISTS([unittest++], [
-        PKG_CHECK_MODULES(UNITTESTPP, [unittest++])
-            dnl Arch ships a broken custom pkgconfig file, try to fix includedir
-            dnl https://bugs.archlinux.org/task/44516
-            AC_LANG_PUSH([C++])
-            CACHED_CXXFLAGS="$CXXFLAGS"
-            CXXFLAGS="$CXXFLAGS $UNITTESTPP_CFLAGS"
-            AC_CHECK_HEADERS([UnitTest++.h], [], [
-                PKG_CHECK_VAR(UNITTESTPP_INCLUDE, [unittest++], [includedir])
-                UNITTESTPP_CFLAGS="$UNITTESTPP_CFLAGS -I$UNITTESTPP_INCLUDE/UnitTest++"
-
-                CXXFLAGS="$CACHED_CXXFLAGS $UNITTESTPP_CFLAGS"
-                unset ac_cv_header_UnitTestpp_h
-                AC_CHECK_HEADERS([UnitTest++.h], [], [
-                    AC_MSG_WARN([Failed to include UnitTest++.h])
-                ])
-            ])
-            CXXFLAGS="$CACHED_CXXFLAGS"
-            AC_LANG_POP
-        ]
-    )]
-)
+    [PKG_CHECK_MODULES(UNITTESTPP, [UnitTest++])])
 AC_SUBST(UNITTESTPP_CFLAGS)
 AC_SUBST(UNITTESTPP_LIBS)
 AC_LANG_POP([C++])

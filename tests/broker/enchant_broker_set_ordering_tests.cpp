@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-#include <UnitTest++.h>
+#include <UnitTest++/UnitTest++.h>
 #include <enchant.h>
 #include <fstream>
 #include "EnchantBrokerTestFixture.h"

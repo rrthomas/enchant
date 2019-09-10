@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-#include <UnitTest++.h>
+#include <UnitTest++/UnitTest++.h>
 #include "EnchantBrokerTestFixture.h"
 EnchantProvider * EnchantBrokerTestFixture::mock_provider=NULL;
 ConfigureHook EnchantBrokerTestFixture::userMockProviderConfiguration=NULL;
