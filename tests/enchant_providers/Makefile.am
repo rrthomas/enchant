@@ -16,7 +16,8 @@ AM_TESTS_ENVIRONMENT = \
 	if test -n "$(VALGRIND)"; then export VALGRIND='$(VALGRIND) --suppressions=$(top_srcdir)/lib/relocatable.valgrind'; fi; \
 	export LIBTOOL=$(top_builddir)/libtool; \
 	$(MAKE) libenchant-copy; \
-	cp $(top_builddir)/providers/@objdir@/*@shlibext@ $(builddir) || :;
+	cp $(top_builddir)/providers/@objdir@/*@shlibext@ $(builddir) || :; \
+	export LSAN_OPTIONS=suppressions=$(top_srcdir)/tests/asan-suppressions.txt;
 
 DISTCLEANFILES = *@shlibext@
 

@@ -19,7 +19,8 @@ AM_TESTS_ENVIRONMENT = \
 	$(MAKE) libenchant-copy; \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
 	cp $(builddir)/@objdir@/*@shlibext@ .; \
-	chmod +w $(builddir)/test.pwl;
+	chmod +w $(builddir)/test.pwl; \
+	export LSAN_OPTIONS=suppressions=$(srcdir)/asan-suppressions.txt;
 
 DISTCLEANFILES = test.pwl *@shlibext@
 
