@@ -143,6 +143,7 @@ aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, const c
 	
 	if (aspell_error_number (spell_error) != 0)
 		{
+			delete_aspell_can_have_error(spell_error);
 			return NULL;
 		}
 	
@@ -182,6 +183,7 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 	const AspellDictInfo * entry;
 	while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0)
 		(*out_n_dicts)++;
+	delete_aspell_dict_info_enumeration (dels);
 
 	char ** out_list = NULL;
 
