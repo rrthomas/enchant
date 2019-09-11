@@ -22,6 +22,8 @@ env:
 matrix:
   include:
     - os: linux
+      env:
+        - CONFIGURE_ARGS=("CFLAGS=\"-g3 -fsanitize=address -fsanitize=undefined\"" "LDFLAGS=\"-fsanitize=address -fsanitize=undefined\"")
     - os: osx
       osx_image: xcode9.2
 
@@ -34,6 +36,6 @@ before_install:
 
 script:
   - ./bootstrap
-  - ./configure --enable-relocatable --with-zemberek=check
+  - ./configure --enable-relocatable --with-zemberek=check "${CONFIGURE_ARGS[@]}"
   - make
   - make distcheck
