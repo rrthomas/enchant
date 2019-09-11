@@ -1,3 +1,10 @@
+2.2.7 (September 9, 2019)
+-------------------------
+
+Fix some memory leaks in the hunspell and aspell providers, thanks to an
+improvement to the build system to use ASAN for the tests.
+
+
 2.2.6 (September 5, 2019)
 -------------------------
 
