@@ -5,9 +5,7 @@ sudo: required
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages: &default_deps
+    packages:
       - libglib2.0-dev
       - libaspell-dev
       - hspell
@@ -16,7 +14,6 @@ addons:
       - voikko-fi
       - aspell-en
       - libunittest++-dev
-      - g++-5
 
 env:
   global:
@@ -25,20 +22,8 @@ env:
 matrix:
   include:
     - os: linux
-      env:
-        - COMPILER=g++-5
     - os: osx
       osx_image: xcode9.2
-    - compiler: gcc
-      env:
-        - COMPILER=g++-6
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_deps
-            - [g++-6]
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
@@ -49,6 +34,6 @@ before_install:
 
 script:
   - ./bootstrap
-  - ./configure --enable-relocatable --with-zemberek=check CXX=$COMPILER
+  - ./configure --enable-relocatable --with-zemberek=check
   - make
   - make distcheck
