@@ -40,8 +40,10 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
         /* FIXME: hspell does not consider non-Hebrew letters to be valid letters */
         if (_dict) {
           _provider_name = _provider->identify(_provider);
-          if (strcmp(_provider_name, "hspell") == 0)
+          if (strcmp(_provider_name, "hspell") == 0) {
+            ReleaseDictionary(_dict);
             _dict = NULL;
+          }
         }
     }
 

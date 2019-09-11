@@ -44,7 +44,6 @@ struct EnchantTestFixture
     //Setup
     EnchantTestFixture()
     {
-        enchant_set_prefix_dir(".");
         CleanUpFiles(); //just in case we stopped the process in the middle.
         CreateDirectory(GetTempUserEnchantDir());
     }
