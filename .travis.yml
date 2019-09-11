@@ -16,7 +16,6 @@ addons:
       - voikko-fi
       - aspell-en
       - libunittest++-dev
-      - valgrind
       - g++-5
 
 env:
