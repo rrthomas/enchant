@@ -1,3 +1,3 @@
 #!/bin/sh
 # Run the given binary via a libtool wrapper script
-$LIBTOOL --mode=execute $VALGRIND "$@"
+$LIBTOOL --mode=execute "$@"
