@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <UnitTest++.h>
+#include <UnitTest++/UnitTest++.h>
 
 #include "../unittest_enchant_providers.h"
 #include <vector>
@@ -40,8 +40,10 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
         /* FIXME: hspell does not consider non-Hebrew letters to be valid letters */
         if (_dict) {
           _provider_name = _provider->identify(_provider);
-          if (strcmp(_provider_name, "hspell") == 0)
+          if (strcmp(_provider_name, "hspell") == 0) {
+            ReleaseDictionary(_dict);
             _dict = NULL;
+          }
         }
     }
 

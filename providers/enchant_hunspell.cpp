@@ -181,9 +181,8 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs)
 {
 	dirs.clear ();
 
-	gchar * tmp;
 	char * config_dir = enchant_get_user_config_dir ();
-	tmp = g_build_filename (config_dir, "hunspell", nullptr);
+	gchar * tmp = g_build_filename (config_dir, "hunspell", nullptr);
 	dirs.push_back (tmp);
 	free (config_dir);
 	g_free(tmp);
@@ -201,7 +200,7 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs)
 		{
 			tmp = g_build_filename(enchant_prefix, "share", "enchant", "hunspell", nullptr);
 			dirs.push_back (tmp);
-			g_free(enchant_prefix);
+			free(enchant_prefix);
 			g_free(tmp);
 		}
 
@@ -316,6 +315,8 @@ HunspellChecker::requestDictionary(const char *szLang)
 	std::string aff(s_correspondingAffFile(dic));
 	if (s_fileExists(aff))
 	{
+		if (hunspell)
+			delete hunspell;
 		hunspell = new Hunspell(aff.c_str(), dic);
 	}
 	free(dic);

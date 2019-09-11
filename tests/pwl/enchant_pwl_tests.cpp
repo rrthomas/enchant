@@ -20,7 +20,7 @@
  */
 
 #include <unistd.h>
-#include <UnitTest++.h>
+#include <UnitTest++/UnitTest++.h>
 #include <stdio.h>
 #include <enchant.h>
 #include <enchant-provider.h>

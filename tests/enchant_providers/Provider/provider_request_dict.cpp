@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-#include <UnitTest++.h>
+#include <UnitTest++/UnitTest++.h>
 #include <enchant-provider.h>
 
 #include "../unittest_enchant_providers.h"

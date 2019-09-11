@@ -104,15 +104,6 @@ if test "$gl_gcc_warnings" = yes; then
   dnl Remove a warning being promoted to error: we trigger this and can't turn it off with pragmas.
   gl_WARN_ADD([-Wno-error=format-security])
 
-  dnl # FIXME: Add this permanently for tests only
-  dnl # Note: currently needs ASAN_OPTIONS=detect_leaks=0; fix genuine leaks and add suppressions.
-  dnl dnl Enable address checking
-  dnl gl_WARN_ADD([-fsanitize=address])
-  dnl gl_WARN_ADD([-fsanitize=address], [AM_LDFLAGS])
-  dnl dnl Enable undefined behavior checking
-  dnl gl_WARN_ADD([-fsanitize=undefined])
-  dnl gl_WARN_ADD([-fsanitize=undefined], [AM_LDFLAGS])
-
   # When compiling with GCC, prefer -isystem to -I when including system
   # include files, to avoid generating useless diagnostics for the files.
   ISYSTEM='-isystem '
@@ -156,58 +147,9 @@ glib_DEFUN([GLIB_LC_MESSAGES],
 
 GLIB_LC_MESSAGES
 
-
-dnl ===========================================================================
-dnl Travis runs Ubuntu 14.04 LTS, which doesn't include the following macro
-dnl added to pkg-config in January 2013.
-dnl ===========================================================================
-m4_ifndef([PKG_CHECK_VAR], [
-AC_DEFUN([PKG_CHECK_VAR],
-  [AC_REQUIRE([PKG_PROG_PKG_CONFIG])dnl
-     AC_ARG_VAR([$1], [value of $3 for $2, overriding pkg-config])dnl
-     _PKG_CONFIG([$1], [variable="][$3]["], [$2])
-     AS_VAR_COPY([$1], [pkg_cv_][$1])
-     AS_VAR_IF([$1], [""], [$5], [$4])dnl
-  ])# PKG_CHECK_VAR
-])
-
-dnl ===========================================================================
-dnl Very hackish.
-dnl Ubuntu / Debian ship older version of unittest++ with their own pkg-config
-dnl and include
-dnl ===========================================================================
 AC_LANG_PUSH([C++])
 PKG_CHECK_EXISTS([UnitTest++],
-    [PKG_CHECK_MODULES(UNITTESTPP, [UnitTest++])
-dnl and because of the above, we need to tweak the include until we stop
-dnl supporting this old version.
-        PKG_CHECK_VAR(UNITTESTPP_INCLUDE, [UnitTest++], [includedir])
-        if test "x$UNITTESTPP_INCLUDE" != "x"; then
-            UNITTESTPP_CFLAGS="$UNITTESTPP_CFLAGS -I$UNITTESTPP_INCLUDE/UnitTest++"
-        fi
-    ],
-    [PKG_CHECK_EXISTS([unittest++], [
-        PKG_CHECK_MODULES(UNITTESTPP, [unittest++])
-            dnl Arch ships a broken custom pkgconfig file, try to fix includedir
-            dnl https://bugs.archlinux.org/task/44516
-            AC_LANG_PUSH([C++])
-            CACHED_CXXFLAGS="$CXXFLAGS"
-            CXXFLAGS="$CXXFLAGS $UNITTESTPP_CFLAGS"
-            AC_CHECK_HEADERS([UnitTest++.h], [], [
-                PKG_CHECK_VAR(UNITTESTPP_INCLUDE, [unittest++], [includedir])
-                UNITTESTPP_CFLAGS="$UNITTESTPP_CFLAGS -I$UNITTESTPP_INCLUDE/UnitTest++"
-
-                CXXFLAGS="$CACHED_CXXFLAGS $UNITTESTPP_CFLAGS"
-                unset ac_cv_header_UnitTestpp_h
-                AC_CHECK_HEADERS([UnitTest++.h], [], [
-                    AC_MSG_WARN([Failed to include UnitTest++.h])
-                ])
-            ])
-            CXXFLAGS="$CACHED_CXXFLAGS"
-            AC_LANG_POP
-        ]
-    )]
-)
+    [PKG_CHECK_MODULES(UNITTESTPP, [UnitTest++])])
 AC_SUBST(UNITTESTPP_CFLAGS)
 AC_SUBST(UNITTESTPP_LIBS)
 AC_LANG_POP([C++])

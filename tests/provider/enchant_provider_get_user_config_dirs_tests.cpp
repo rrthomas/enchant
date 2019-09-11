@@ -20,7 +20,7 @@
  */
 
 #include "EnchantTestFixture.h"
-#include <UnitTest++.h>
+#include <UnitTest++/UnitTest++.h>
 #include <enchant-provider.h>
 #include <string.h>
 

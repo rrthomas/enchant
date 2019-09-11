@@ -19,13 +19,16 @@
  * THE SOFTWARE.
  */
 
-#include <UnitTest++.h>
+#include <UnitTest++/UnitTest++.h>
 #include "EnchantBrokerTestFixture.h"
+#include "enchant.h"
+
 EnchantProvider * EnchantBrokerTestFixture::mock_provider=NULL;
 ConfigureHook EnchantBrokerTestFixture::userMockProviderConfiguration=NULL;
 ConfigureHook EnchantBrokerTestFixture::userMockProvider2Configuration=NULL;
 
 
 int main(){
+  enchant_set_prefix_dir(".");
   return UnitTest::RunAllTests();
 }

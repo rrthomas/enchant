@@ -13,13 +13,13 @@ ENCHANT_CONFIG_DIR = config
 
 AM_TESTS_ENVIRONMENT = \
 	export ENCHANT_CONFIG_DIR=$(ENCHANT_CONFIG_DIR); \
-	if test -n "$(VALGRIND)"; then export VALGRIND='$(VALGRIND) --suppressions=$(top_srcdir)/lib/relocatable.valgrind'; fi; \
 	export LIBTOOL=$(top_builddir)/libtool; \
 	rm -f test.pwl; \
 	$(MAKE) libenchant-copy; \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
 	cp $(builddir)/@objdir@/*@shlibext@ .; \
-	chmod +w $(builddir)/test.pwl;
+	chmod +w $(builddir)/test.pwl; \
+	export LSAN_OPTIONS=suppressions=$(srcdir)/asan-suppressions.txt;
 
 DISTCLEANFILES = test.pwl *@shlibext@
 
