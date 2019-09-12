@@ -181,8 +181,8 @@ static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num);
 
 static int edit_dist(const char* word1, const char* word2);
 
-#define enchant_lock_file(f) flock (fileno (f), LOCK_EX)
-#define enchant_unlock_file(f) flock (fileno (f), LOCK_UN)
+#define enchant_lock_file(fd) flock (fd, LOCK_EX)
+#define enchant_unlock_file(fd) flock (fd, LOCK_UN)
 
 /**
  * enchant_pwl_init
@@ -232,45 +232,40 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	g_hash_table_destroy (pwl->words_in_trie);
 	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
-	FILE *f = g_fopen(pwl->filename, "r");
-	if (!f) 
+	GIOChannel *channel = g_io_channel_new_file (pwl->filename, "r", NULL);
+	if (!channel)
 		return;
+	g_io_channel_set_encoding (channel, NULL, NULL); /* Set binary encoding */
 
 	pwl->file_changed = stats.st_mtime;
 
-	enchant_lock_file (f);
+	enchant_lock_file (g_io_channel_unix_get_fd (channel));
 	
-	char buffer[BUFSIZ + 1];
 	size_t line_number = 1;
-	for (; NULL != (fgets (buffer, sizeof (buffer), f)); ++line_number)
+	gchar *line;
+	gsize length;
+	for (GIOStatus status = G_IO_STATUS_NORMAL;
+	     (status = g_io_channel_read_line (channel, &line, &length, NULL, NULL)) == G_IO_STATUS_NORMAL;
+	     ++line_number)
 		{
-			char *line = buffer;
-			if(line_number == 1 && BOM == g_utf8_get_char(line))
-				line = g_utf8_next_char(line);
-
-			if(line[strlen(line)-1] != '\n' && !feof(f)) /* ignore lines longer than BUFSIZ. */ 
+			if (length > BUFSIZ) /* ignore lines longer than BUFSIZ. */
+				g_warning ("Line too long (ignored) in %s at line:%zu\n", pwl->filename, line_number);
+			else if (length > 0 && line[0] != '#')
 				{
-					g_warning ("Line too long (ignored) in %s at line:%zu\n", pwl->filename, line_number);
-					while (NULL != (fgets (buffer, sizeof (buffer), f)))
-						{
-							if (line[strlen(buffer)-1]=='\n') 
-								break;
-						}
-					continue;
-				}
-
-			g_strchomp(line);
-			if( line[0] && line[0] != '#')
-				{
-					if(g_utf8_validate(line, -1, NULL))
-						enchant_pwl_add_to_trie(pwl, line, strlen(line));
+					gchar *word = g_strchomp(line);
+					if (line_number == 1 && BOM == g_utf8_get_char (word))
+						word = g_utf8_next_char(line);
+					if (g_utf8_validate (word, -1, NULL))
+						enchant_pwl_add_to_trie (pwl, word, strlen(word));
 					else
 						g_warning ("Bad UTF-8 sequence in %s at line:%zu\n", pwl->filename, line_number);
 				}
+			g_free(line);
 		}
-	
-	enchant_unlock_file (f);
-	fclose (f);
+
+	enchant_unlock_file (g_io_channel_unix_get_fd (channel));
+	g_io_channel_shutdown (channel, FALSE, NULL);
+	g_io_channel_unref (channel);
 }
 
 void enchant_pwl_free(EnchantPWL *pwl)
@@ -321,33 +316,34 @@ void enchant_pwl_add(EnchantPWL *pwl,
 
 	if (pwl->filename != NULL)
 	{
-		FILE *f = g_fopen(pwl->filename, "a+");
-		if (f)
+		GIOChannel *channel = g_io_channel_new_file (pwl->filename, "a+", NULL);
+		if (channel)
 			{
 				/* Since this function does not signal I/O
 				   errors, only use return values to avoid
 				   doing things that seem futile. */
 
-				enchant_lock_file (f);
+				enchant_lock_file (g_io_channel_unix_get_fd (channel));
 				GStatBuf stats;
 				if(g_stat(pwl->filename, &stats)==0)
 					pwl->file_changed = stats.st_mtime;
 
 				/* Add a newline if the file doesn't end with one. */
-				if (fseek (f, -1, SEEK_END) == 0)
+				if (g_io_channel_seek_position (channel, -1, G_SEEK_END, NULL) == G_IO_STATUS_NORMAL)
 					{
-						int c = getc (f);
-						fseek (f, 0L, SEEK_CUR); /* ISO C requires positioning between read and write. */
-						if (c != '\n')
-							putc ('\n', f);
+						gchar c;
+						gsize bytes_read;
+						g_io_channel_read_chars (channel, &c, 1, &bytes_read, NULL);
+						g_io_channel_seek_position (channel, 0L, G_SEEK_CUR, NULL);
+						if (bytes_read == 1 && c != '\n')
+							g_io_channel_write_chars (channel, "\n", 1, NULL, NULL);
 					}
 
-				if (fwrite (word, sizeof(char), len, f) == len)
-					{
-						putc ('\n', f);
-					}
-				enchant_unlock_file (f);
-				fclose (f);
+				if (g_io_channel_write_chars (channel, word, len, NULL, NULL) == G_IO_STATUS_NORMAL)
+					g_io_channel_write_chars (channel, "\n", 1, NULL, NULL);
+				enchant_unlock_file (g_io_channel_unix_get_fd (channel));
+				g_io_channel_shutdown (channel, TRUE, NULL);
+				g_io_channel_unref (channel);
 			}	
 	}
 }
@@ -373,7 +369,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 			FILE *f = g_fopen(pwl->filename, "wb"); /*binary because g_file_get_contents reads binary*/
 			if (f)
 				{
-					enchant_lock_file (f);
+					enchant_lock_file (fileno (f));
 					char *key = g_strndup(word, len);
 
 					char *filestart;
@@ -418,7 +414,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 					if(g_stat(pwl->filename, &stats)==0)
 						pwl->file_changed = stats.st_mtime;
 
-					enchant_unlock_file (f);
+					enchant_unlock_file (fileno (f));
 
 					fclose (f);
 				}	
