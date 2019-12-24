@@ -107,8 +107,8 @@ HunspellChecker::checkWord(const char *utf8Word, size_t len)
 	char *in = normalizedWord;
 	char word8[MAXWORDLEN + 1];
 	char *out = word8;
-	size_t len_in = strlen(in);
-	size_t len_out = sizeof( word8 ) - 1;
+	gsize len_in = strlen(in);
+	gsize len_out = sizeof( word8 ) - 1;
 	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
 	g_free(normalizedWord);
 	if (static_cast<size_t>(-1) == result)
@@ -133,8 +133,8 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 	char *in = normalizedWord;
 	char word8[MAXWORDLEN + 1];
 	char *out = word8;
-	size_t len_in = strlen(in);
-	size_t len_out = sizeof(word8) - 1;
+	gsize len_in = strlen(in);
+	gsize len_out = sizeof(word8) - 1;
 	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
 	g_free(normalizedWord);
 	if (static_cast<size_t>(-1) == result)
