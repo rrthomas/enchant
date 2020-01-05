@@ -37,13 +37,13 @@ The ordering file takes the form language_tag:<comma-separated list of spelling
 providers>. To see what providers are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. '*' is
 used to mean "use this ordering for all languages, unless instructed otherwise." For example:
 .PP
-*:aspell,hunspell
+*:aspell,hunspell,nuspell
 .br
-en:aspell,hunspell
+en:aspell,hunspell,nuspell
 .br
-en_GB:hunspell,aspell
+en_GB:hunspell,nuspell,aspell
 .br
-fr:hunspell,aspell
+fr:hunspell,nuspell,aspell
 .SH FILES AND DIRECTORIES
 Enchant looks in the following places for files, in decreasing order of precedence:
 .TP

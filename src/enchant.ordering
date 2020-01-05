@@ -1,7 +1,7 @@
-*:hunspell,aspell
-fi:voikko,hunspell,aspell
-fi_FI:voikko,hunspell,aspell
-he:hspell,hunspell
-he_IL:hspell,hunspell
-tr:zemberek
-tr_TR:zemberek
+*:hunspell,nuspell,aspell
+fi:voikko,hunspell,nuspell,aspell
+fi_FI:voikko,hunspell,nuspell,aspell
+he:hspell,hunspell,nuspell
+he_IL:hspell,hunspell,nuspell
+tr:zemberek,nuspell
+tr_TR:zemberek,nuspell

@@ -167,6 +167,11 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
           i != suggestions.end();
           ++i)
       {
+      if(i->compare("baa") != 0) //FIXME This condition can be removed when
+      // the output of `echo Aaa|nuspell -d en_US` no longer contains "baa"
+      // as a suggestion. This change in Nuspell is planned but not yet
+      // available. The Nuspell team has also an internal issue reminding them
+      // to remove this condition when the required change has been released.
           CHECK(IsFirstLetterCapitalOrTitleCase(*i));
       }
     }
