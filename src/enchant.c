@@ -70,9 +70,9 @@ print_version (FILE * to)
 }
 
 static void
-print_help (FILE * to, const char * prog)
+print_help (const char * prog)
 {
-	fprintf (to,
+	fprintf (stdout,
 		 "Usage: %s [OPTION...] FILE\n\
   -a lists suggestions in ispell pipe mode format\n\
   -d DICTIONARY uses the given dictionary\n\
@@ -472,7 +472,7 @@ int main (int argc, char ** argv)
 		print_version (stdout);
 	} 
 	else if (mode == MODE_NONE && !file) {
-		print_help (stdout, argv[0]);
+		print_help (argv[0]);
 	}
 	else {
 		if (file) {
