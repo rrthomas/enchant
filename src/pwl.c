@@ -964,7 +964,7 @@ static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 	EnchantTrieMatcher* matcher = g_new(EnchantTrieMatcher,1);
 	matcher->num_errors = 0;
 	matcher->max_errors = maxerrs;
-	matcher->word = g_new0(char,len+maxerrs+1); // Ensure matcher does not overrun buffer
+	matcher->word = g_new0(char,len+maxerrs+2); // Ensure matcher does not overrun buffer: +2 for transpose check
 	strcpy(matcher->word, pattern);
 	g_free(pattern);
 	matcher->word_pos = 0;
