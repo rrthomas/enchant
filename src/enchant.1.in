@@ -4,31 +4,30 @@ Enchant \- a spellchecker
 .SH SYNOPSIS
 .ll +8
 .B enchant-@ENCHANT_MAJOR_VERSION@
-[\fB\-a\fR] [\fB\-d dict\fR] [\fB\-h\fR] [\fB\-l\fR] [\fB\-L\fR] [\fB\-v\fR]
+\fB\-a\fR|\fB\-l\fR|\fB\-h\fR|\fB\-v\fR [\fB\-L\fR] [\fB\-d\fR \fIDICTIONARY\fR] [\fIFILE\fR]
 .ll -8
 .br
 .SH DESCRIPTION
 .B Enchant
 is an ispell-compatible spellchecker.
-.SS OPTIONS
+.TP
+\fB\-d \fIDICTIONARY\fR
+use the given dictionary
 .TP
 .B "\-a"
-List suggestions in ispell pipe mode format.
-.TP
-.B "\-d DICTIONARY"
-Use the given dictionary.
-.TP
-.B "\-h"
-Show short help.
+list suggestions in ispell pipe mode format
 .TP
 .B "\-l"
-List only the misspellings.
+list only the misspellings
 .TP
 .B "\-L"
-Include the line number in the output.
+display line numbers
+.TP
+.B "\-h"
+display help and exit
 .TP
 .B "\-v"
-Prints the program's version.
+display version information and exit
 .SH ENCHANT ORDERING FILE
 Enchant uses global and per-user ordering files named \fIenchant.ordering\fR
 to decide which spelling provider to use for particular languages.

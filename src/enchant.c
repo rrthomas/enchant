@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
+#include <getopt.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 #ifdef _WIN32
@@ -57,7 +58,6 @@ static const char *charset;
 typedef enum 
 	{
 		MODE_NONE,
-		MODE_VERSION,
 		MODE_A,
 		MODE_L
 	} IspellMode_t;
@@ -72,14 +72,14 @@ print_version (FILE * to)
 static void
 print_help (const char * prog)
 {
-	fprintf (stdout,
-		 "Usage: %s [OPTION...] FILE\n\
-  -a lists suggestions in ispell pipe mode format\n\
-  -d DICTIONARY uses the given dictionary\n\
-  -h Show this help message\n\
-  -l lists misspellings\n\
-  -L displays line numbers\n\
-  -v displays program version.\n", prog);
+	fprintf (stderr,
+		 "Usage: %s -a|-l|-h|-v [-L] [-d DICTIONARY] [FILE]\n\
+  -d DICTIONARY  use the given dictionary\n\
+  -a             list suggestions in ispell pipe mode format\n\
+  -l             list only the misspellings\n\
+  -L             display line numbers\n\
+  -h             display help and exit\n\
+  -v             display version information and exit\n", prog);
 }
 
 static gboolean
@@ -117,23 +117,23 @@ consume_line (FILE * in, GString * str)
 }
 
 static void
-print_utf (FILE * out, const char * str)
+print_utf (const char * str)
 {
 	gsize bytes_read, bytes_written;
 	gchar * native;
 
 	native = g_locale_from_utf8 (str, -1, &bytes_read, &bytes_written, NULL);
 	if (native) {
-		fwrite (native, 1, bytes_written, out);
+		fwrite (native, 1, bytes_written, stdout);
 		g_free (native);
 	} else {
-		/* We'll assume that it's already utf8 and glib is just being stupid. */
-		fwrite (str, 1, strlen (str), out);
+		/* Assume that it's already utf8 and glib is just being stupid. */
+		printf ("%s", str);
 	}
 }
 
 static void
-do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, size_t lineCount, gboolean terse_mode)
+do_mode_a (EnchantDict * dict, GString * word, size_t start_pos, size_t lineCount, gboolean terse_mode)
 {
 	size_t n_suggs;
 	char ** suggs;	
@@ -141,38 +141,38 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, siz
 	if (word->len <= MIN_WORD_LENGTH || enchant_dict_check (dict, word->str, word->len) == 0) {
 		if (!terse_mode) {
 			if (lineCount)
-				fprintf (out, "* %u\n", (unsigned int)lineCount);
+				printf ("* %u\n", (unsigned int)lineCount);
 			else
-				fwrite ("*\n", 1, 2, out);
+				printf ("*\n");
 		}
 	}
 	else {
 		suggs = enchant_dict_suggest (dict, word->str, 
 					      word->len, &n_suggs);
 		if (!n_suggs || !suggs) {
-			fwrite ("# ", 1, 2, out);
+			printf ("# ");
 			if (lineCount)
-				fprintf (out, "%u ", (unsigned int)lineCount);
-			print_utf (out, word->str);
-			fprintf (out, " %u\n", (unsigned int)start_pos);
+				printf ("%u ", (unsigned int)lineCount);
+			print_utf (word->str);
+			printf (" %u\n", (unsigned int)start_pos);
 		}
 		else {
 			size_t i = 0;
 			
-			fwrite ("& ", 1, 2, out);
+			printf ("& ");
 			if (lineCount)
-				fprintf (out, "%u ", (unsigned int)lineCount);
-			print_utf (out, word->str);
-			fprintf (out, " %u %u:", (unsigned int)n_suggs, (unsigned int)start_pos);
+				printf ("%u ", (unsigned int)lineCount);
+			print_utf (word->str);
+			printf (" %u %u:", (unsigned int)n_suggs, (unsigned int)start_pos);
 			
 			for (i = 0; i < n_suggs; i++) {
-				fprintf (out, " ");
-				print_utf (out, suggs[i]);
+				putchar (' ');
+				print_utf (suggs[i]);
 
 				if (i != (n_suggs - 1))
-					fwrite (",", 1, 1, out);
+					putchar(',');
 				else
-					fwrite ("\n", 1, 1, out);
+					putchar('\n');
 			}
 
 			enchant_dict_free_string_list (dict, suggs);
@@ -181,13 +181,13 @@ do_mode_a (FILE * out, EnchantDict * dict, GString * word, size_t start_pos, siz
 }
 
 static void
-do_mode_l (FILE * out, EnchantDict * dict, GString * word, size_t lineCount)
+do_mode_l (EnchantDict * dict, GString * word, size_t lineCount)
 {
 	if (enchant_dict_check (dict, word->str, word->len) != 0) {
 		if (lineCount)
-			fprintf (out, "%u ", (unsigned int)lineCount);
-		print_utf (out, word->str);
-		fwrite ("\n", 1, 1, out);
+			printf ("%u ", (unsigned int)lineCount);
+		print_utf (word->str);
+		putchar ('\n');
 	}
 }
 
@@ -245,7 +245,7 @@ tokenize_line (EnchantDict * dict, GString * line)
 }
 
 static int
-parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dictionary)
+parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary)
 {
 	EnchantBroker * broker;
 	EnchantDict * dict;
@@ -258,7 +258,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 	gboolean was_last_line = FALSE, corrected_something = FALSE, terse_mode = FALSE;
 
 	if (mode == MODE_A)
-		print_version (out);
+		print_version (stdout);
 
 	if (dictionary)
 		lang = strdup (dictionary);
@@ -352,7 +352,7 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 							ssize_t cor_len = strlen(str->str) - (cor - str->str);
 							enchant_dict_store_replacement(dict, mis, mis_len, cor, cor_len);
 						} else if (g_str_has_prefix(str->str, "$$wc")) { /* Return the extra word chars list */
-							fprintf(out, "%s\n", enchant_dict_get_extra_word_characters(dict));
+							printf("%s\n", enchant_dict_get_extra_word_characters(dict));
 						}
 					}
 					break;
@@ -365,14 +365,14 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 					break;
 
 				empty_word:
-					fprintf (out, "Error: The word \"\" is invalid. Empty string.\n");
+					printf ("Error: The word \"\" is invalid. Empty string.\n");
 				}
 			}
 
 			if (mode != MODE_A || mode_A_no_command) {
 				token_ptr = tokens = tokenize_line (dict, str);
 				if (tokens == NULL)
-					putc('\n', out);
+					putchar('\n');
 				while (tokens != NULL) {
 					corrected_something = TRUE;
 
@@ -382,9 +382,9 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 					tokens = tokens->next;
 
 					if (mode == MODE_A)
-						do_mode_a (out, dict, word, pos, lineCount, terse_mode);
+						do_mode_a (dict, word, pos, lineCount, terse_mode);
 					else if (mode == MODE_L)
-						do_mode_l (out, dict, word, lineCount);
+						do_mode_l (dict, word, lineCount);
 
 					g_string_free(word, TRUE);
 				}
@@ -394,10 +394,10 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 		} 
 		
 		if (mode == MODE_A && corrected_something) {
-			fwrite ("\n", 1, 1, out);
+			putchar('\n');
 		}
 		g_string_truncate (str, 0);
-		fflush (out);
+		fflush (stdout);
 	}
 
 	enchant_broker_free_dict (broker, dict);
@@ -411,13 +411,10 @@ parse_file (FILE * in, FILE * out, IspellMode_t mode, int countLines, gchar *dic
 int main (int argc, char ** argv)
 {
 	IspellMode_t mode = MODE_NONE;
-	
 	char * file = NULL;
-	int i, rval = 0;
-	
+	int rval = 0;
 	FILE * fp = stdin;
-
-	int countLines = 0;
+	gboolean countLines = FALSE;
 	gchar *dictionary = NULL;  /* -d dictionary */
 
 	/* Initialize system locale */
@@ -431,63 +428,65 @@ int main (int argc, char ** argv)
 	}
 #endif
 
-	for (i = 1; i < argc; i++) {
-		char * arg = argv[i];
-		if (arg[0] == '-') {
-			if (strlen (arg) == 2) {
-				/* It seems that the first one of these that is specified gets precedence. */
-				if (arg[1] == 'a' && MODE_NONE == mode)
-					mode = MODE_A;
-				else if (arg[1] == 'l' && MODE_NONE == mode)
-					mode = MODE_L;
-				else if (arg[1] == 'v' && MODE_NONE == mode)
-					mode = MODE_VERSION;
-				else if (arg[1] == 'L' && MODE_NONE == mode)
-					countLines = 1;
-				else if (arg[1] == 'm')
-				     	; /* Ignore. Emacs calls ispell with '-m'. */
-				else if (arg[1] == 'd') {
-				     	i++;
-					dictionary = argv[i];  /* Emacs calls ispell with '-d dictionary'. */
-				}
-			} 
-			else if ((strlen (arg) == 3) && (arg[1] == 'v') && (arg[2] == 'v')) {
-				mode = MODE_VERSION;   /* Emacs calls ispell with '-vv'. */
-			}
-			else if (arg[1] == 'd') {
-			        dictionary = arg + 2;  /* Accept "-ddictionary", i.e. no space between -d and dictionary. */
-			}
-			else if (strlen (arg) > 2) {
-				fprintf (stderr, "-%c does not take any parameters.\n", arg[1]);
-				exit(1);
-			} 
-			else
-				file = arg;
-		} 
-		else
-			file = arg;
-	}
-	
-	if (mode == MODE_VERSION) {
-		print_version (stdout);
-	} 
-	else if (mode == MODE_NONE && !file) {
-		print_help (argv[0]);
-	}
-	else {
-		if (file) {
-			fp = g_fopen (file, "rb");
-			if (!fp) {
-				fprintf (stderr, "Error: Could not open the file \"%s\" for reading.\n", file);
-				exit (1);
-			}
+	int optchar;
+	while ((optchar = getopt (argc, argv, ":d:alvLm")) != -1) {
+		switch (optchar) {
+		case 'd':
+			dictionary = optarg;  /* Emacs calls ispell with '-d dictionary'. */
+			break;
+		/* The first mode specified takes precedence. */
+		case 'a':
+			if (mode == MODE_NONE)
+				mode = MODE_A;
+			break;
+		case 'l':
+			if (mode == MODE_NONE)
+				mode = MODE_L;
+			break;
+		case 'L':
+			countLines = TRUE;
+			break;
+		case 'v':
+			print_version (stderr);
+			exit (0);
+		case 'm':
+			/* Ignore: Emacs calls ispell with '-m'. */
+			break;
+		case 'h':
+			print_help (argv[0]);
+			exit (0);
+		case ':':
+			fprintf (stderr, "missing argument to option\n");
+			/* FALLTHROUGH */
+		case '?':
+			print_help (argv[0]);
+			exit (1);
 		}
-		
-		rval = parse_file (fp, stdout, mode, countLines, dictionary);
-		
-		if (file)
-			fclose (fp);
 	}
+
+	/* Get file argument if given. */
+	if (optind < argc) {
+		file = argv[optind++];
+	}
+
+	/* Exit with usage if either no mode is set, or if there are excess
+	   non-option arguments. */
+	if (mode == MODE_NONE || optind < argc) {
+		print_help (argv[0]);
+		exit (1);
+	}
+
+	/* Process the file or standard input. */
+	if (file) {
+		fp = g_fopen (file, "rb");
+		if (!fp) {
+			fprintf (stderr, "Error: Could not open the file \"%s\" for reading.\n", file);
+			exit (1);
+		}
+	}
+	rval = parse_file (fp, mode, countLines, dictionary);
+	if (file)
+		fclose (fp);
 	
 	return rval;
 }
