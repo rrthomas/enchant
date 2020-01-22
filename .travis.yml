@@ -40,3 +40,4 @@ script:
   - ./configure --enable-relocatable --with-zemberek=check "${CONFIGURE_ARGS[@]}"
   - make
   - make distcheck
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo locale-gen fr_FR.UTF-8; env LANG=fr_FR.UTF-8 make check ; fi
