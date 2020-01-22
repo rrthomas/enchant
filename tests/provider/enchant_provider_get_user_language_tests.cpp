@@ -25,6 +25,31 @@
 #include <string.h>
 
 /////////////////////////////////////////////////////////////////////////////
+// Utility functions
+std::string origLangEnv;
+bool hasLangEnv;
+
+static void SaveLangEnv()
+{
+    hasLangEnv = (g_getenv("LANG") != NULL);
+    if(hasLangEnv)
+    {
+        origLangEnv = std::string(g_getenv("LANG"));
+    }
+}
+
+static void RestoreLangEnv()
+{
+    if(hasLangEnv)
+    {
+        g_setenv("LANG", origLangEnv.c_str(), TRUE);
+    }
+    else{
+        g_unsetenv("LANG");
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST(EnchantGetUserLanguage)
 {
@@ -35,12 +60,7 @@ TEST(EnchantGetUserLanguage)
 
 TEST(EnchantGetUserLanguage_FromLangEnvironmentVariable)
 {
-    std::string origLangEnv;
-    bool hasLangEnv = (g_getenv("LANG") != NULL);
-    if(hasLangEnv)
-    {
-        origLangEnv = std::string(g_getenv("LANG"));
-    }
+    SaveLangEnv();
 
     g_setenv("LANG", "qaa", TRUE);
     char* userLanguage = enchant_get_user_language();
@@ -49,17 +69,14 @@ TEST(EnchantGetUserLanguage_FromLangEnvironmentVariable)
 
     g_free(userLanguage);
 
-    if(hasLangEnv)
-    {
-        g_setenv("LANG", origLangEnv.c_str(), TRUE);
-    }
-    else{
-        g_unsetenv("LANG");
-    }
+    RestoreLangEnv();
 }
 
 static void SetLocaleAndCheckLanguage(const char *locale, const char *language)
 {
+    SaveLangEnv();
+    g_unsetenv("LANG"); // Ensure LANG does not override locale for enchant_get_user_language
+
     std::string origLocale(setlocale (LC_ALL, NULL));
 
     setlocale (LC_ALL, locale);
@@ -76,6 +93,8 @@ static void SetLocaleAndCheckLanguage(const char *locale, const char *language)
     g_free(userLanguage);
 
     setlocale (LC_ALL, origLocale.c_str());
+
+    RestoreLangEnv();
 }
 
 TEST(EnchantGetUserLanguage_LocaleIsC_LocalIsEn)
