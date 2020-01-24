@@ -32,7 +32,7 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
     //Setup
     DictionarySuggest_TestFixture():_dict(NULL)
     { 
-        _dict = GetFirstAvailableDictionary();
+        _dict = GetDefaultDictionary();
     }
 
     //Teardown
