@@ -33,3 +33,13 @@
 /string.h
 /sys/
 /unistd.h
+/getopt-cdefs.in.h
+/getopt-core.h
+/getopt-ext.h
+/getopt-pfx-core.h
+/getopt-pfx-ext.h
+/getopt.c
+/getopt.in.h
+/getopt1.c
+/getopt_int.h
+/gettext.h
