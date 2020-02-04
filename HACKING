@@ -101,6 +101,16 @@ projects.
 existing code.  Code clean-ups are always welcome.
 
 
+API documentation
+-----------------
+
+To generate API documentation, simply run
+
+doxygen
+
+and see doxygen/html/index.html in a web browser.
+
+
 Making a release
 ----------------
 
