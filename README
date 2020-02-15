@@ -30,7 +30,7 @@ for:
 
 Python: https://github.com/rfk/pyenchant/
 Ruby: https://github.com/pennyapp/ruby-enchant
-Go: http://pythonhosted.org/pyenchant/
+Go: https://github.com/hermanschaaf/enchant
 Common Lisp: https://github.com/tlikonen/cl-enchant
 
 
