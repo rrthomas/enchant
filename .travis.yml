@@ -5,6 +5,8 @@ sudo: required
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:nuspell/ppa'
     packages:
       - libglib2.0-dev
       - libaspell-dev
@@ -15,6 +17,7 @@ addons:
       - aspell-en
       - libunittest++-dev
       - hunspell-fr
+      - libnuspell-dev
 
 env:
   global:
