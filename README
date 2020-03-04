@@ -31,6 +31,7 @@ for:
 
 Python: https://github.com/rfk/pyenchant/
 Ruby: https://github.com/pennyapp/ruby-enchant
+Rust: https://crates.io/crates/enchant
 Go: https://github.com/hermanschaaf/enchant
 Common Lisp: https://github.com/tlikonen/cl-enchant
 
