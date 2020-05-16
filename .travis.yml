@@ -1,7 +1,6 @@
 language: cpp
 
 dist: bionic
-sudo: required
 
 addons:
   apt:
@@ -29,14 +28,12 @@ matrix:
       env:
         - CONFIGURE_ARGS=("CFLAGS=\"-g3 -fsanitize=address -fsanitize=undefined\"" "LDFLAGS=\"-fsanitize=address -fsanitize=undefined\"")
     - os: osx
-      osx_image: xcode9.2
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
   # Note: aspell should work on macOS, but has been removed from the next
   # line because one of the tests fails; see
   # https://github.com/Homebrew/homebrew-core/issues/40976
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install glib dbus-glib hspell hunspell libvoikko unittest-cpp ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install dbus-glib hspell hunspell libvoikko unittest-cpp ; fi
 
 script:
   - ./bootstrap
