@@ -74,8 +74,9 @@ NuspellChecker::checkWord(const char *utf8Word, size_t len)
 {
 	// the 8-bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
-
-	return nuspell.spell(string(normalizedWord));
+	string s(normalizedWord);
+	g_free(normalizedWord);
+	return nuspell.spell(s);
 }
 
 char**
@@ -83,8 +84,10 @@ NuspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 {
 	// the 8-bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
+	string s(normalizedWord);
+	g_free(normalizedWord);
 	auto suggestions = vector<string>();
-	nuspell.suggest(string(normalizedWord), suggestions);
+	nuspell.suggest(s, suggestions);
 	if (suggestions.empty())
 		return nullptr;
 	*nsug = suggestions.size();
@@ -254,6 +257,7 @@ NuspellChecker::requestDictionary(const char *szLang)
 	if (!s_fileExists(aff))
 		return false;
 	auto path = string(dic);
+	free(dic);
 	if (path.size() >= 4 && path.compare(path.size() - 4, 4, ".dic") == 0)
 		path.erase(path.size() - 4);
 	else
