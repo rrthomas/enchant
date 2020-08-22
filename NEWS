@@ -1,3 +1,9 @@
+2.2.9 (July 29, 2020)
+---------------------
+
+Fix a couple of space leaks in the Nuspell back end (thanks, ASAN).
+
+
 2.2.8 (February 27, 2020)
 -------------------------
 

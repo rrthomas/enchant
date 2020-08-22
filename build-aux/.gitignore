@@ -1,0 +1,15 @@
+/bootstrap.in
+/compile
+/config.guess
+/config.sub
+/depcomp
+/extract-trace
+/funclib.sh
+/inline-source
+/install-sh
+/ltmain.sh
+/mdate-sh
+/missing
+/options-parser
+/test-driver
+/texinfo.tex
