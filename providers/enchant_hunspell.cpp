@@ -115,7 +115,7 @@ HunspellChecker::checkWord(const char *utf8Word, size_t len)
 	if (static_cast<size_t>(-1) == result)
 		return false;
 	*out = '\0';
-	if (hunspell->spell(word8))
+	if (hunspell->spell(std::string(word8)))
 		return true;
 	else
 		return false;
@@ -142,29 +142,23 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 		return nullptr;
 
 	*out = '\0';
-	char **sugMS;
-	*nsug = hunspell->suggest(&sugMS, word8);
+	std::vector<std::string> sugMS = hunspell->suggest(word8);
+	*nsug = sugMS.size();
 	if (*nsug > 0) {
 		char **sug = g_new0 (char *, *nsug + 1);
 		for (size_t i=0; i<*nsug; i++) {
-			in = sugMS[i];
+			in = const_cast<char *>(sugMS[i].c_str());
 			len_in = strlen(in);
 			len_out = MAXWORDLEN;
 			char *word = g_new0(char, len_out + 1);
 			out = word;
 			if (static_cast<size_t>(-1) == g_iconv(m_translate_out, &in, &len_in, &out, &len_out)) {
-				for (size_t j = i; j < *nsug; j++)
-					free(sugMS[j]);
-				free(sugMS);
-
 				*nsug = i;
-				return sug;
+				break;
 			}
-			*(out) = 0;
+			*out = '\0';
 			sug[i] = word;
-			free(sugMS[i]);
 		}
-		free(sugMS);
 		return sug;
 	}
 	else
