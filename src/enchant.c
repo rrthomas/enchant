@@ -1,7 +1,7 @@
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
  *               2007 Hannu Väisänen
- *               2016-2017 Reuben Thomas
+ *               2016-2020 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -135,9 +135,6 @@ print_utf (const char * str)
 static void
 do_mode_a (EnchantDict * dict, GString * word, size_t start_pos, size_t lineCount, gboolean terse_mode)
 {
-	size_t n_suggs;
-	char ** suggs;	
-
 	if (word->len <= MIN_WORD_LENGTH || enchant_dict_check (dict, word->str, word->len) == 0) {
 		if (!terse_mode) {
 			if (lineCount)
@@ -145,27 +142,23 @@ do_mode_a (EnchantDict * dict, GString * word, size_t start_pos, size_t lineCoun
 			else
 				printf ("*\n");
 		}
-	}
-	else {
-		suggs = enchant_dict_suggest (dict, word->str, 
-					      word->len, &n_suggs);
+	} else {
+		size_t n_suggs;
+		char ** suggs = enchant_dict_suggest (dict, word->str, word->len, &n_suggs);
 		if (!n_suggs || !suggs) {
 			printf ("# ");
 			if (lineCount)
 				printf ("%u ", (unsigned int)lineCount);
 			print_utf (word->str);
 			printf (" %u\n", (unsigned int)start_pos);
-		}
-		else {
-			size_t i = 0;
-			
+		} else {
 			printf ("& ");
 			if (lineCount)
 				printf ("%u ", (unsigned int)lineCount);
 			print_utf (word->str);
 			printf (" %u %u:", (unsigned int)n_suggs, (unsigned int)start_pos);
 			
-			for (i = 0; i < n_suggs; i++) {
+			for (size_t i = 0; i < n_suggs; i++) {
 				putchar (' ');
 				print_utf (suggs[i]);
 

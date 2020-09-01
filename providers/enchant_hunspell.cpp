@@ -65,6 +65,7 @@ public:
 	bool checkWord (const char *word, size_t len);
 	char **suggestWord (const char* const word, size_t len, size_t *out_n_suggs);
 	const char *getWordchars ();
+	bool apostropheIsWordChar;
 
 	bool requestDictionary (const char * szLang);
 
@@ -83,7 +84,7 @@ g_iconv_is_valid(GIConv i)
 }
 
 HunspellChecker::HunspellChecker()
-: m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr)
+: apostropheIsWordChar(false), m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr)
 {
 }
 
@@ -114,7 +115,7 @@ HunspellChecker::checkWord(const char *utf8Word, size_t len)
 	if (static_cast<size_t>(-1) == result)
 		return false;
 	*out = '\0';
-	if (hunspell->spell(word8))
+	if (hunspell->spell(std::string(word8)))
 		return true;
 	else
 		return false;
@@ -141,29 +142,23 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 		return nullptr;
 
 	*out = '\0';
-	char **sugMS;
-	*nsug = hunspell->suggest(&sugMS, word8);
+	std::vector<std::string> sugMS = hunspell->suggest(word8);
+	*nsug = sugMS.size();
 	if (*nsug > 0) {
 		char **sug = g_new0 (char *, *nsug + 1);
 		for (size_t i=0; i<*nsug; i++) {
-			in = sugMS[i];
+			in = const_cast<char *>(sugMS[i].c_str());
 			len_in = strlen(in);
 			len_out = MAXWORDLEN;
 			char *word = g_new0(char, len_out + 1);
 			out = word;
 			if (static_cast<size_t>(-1) == g_iconv(m_translate_out, &in, &len_in, &out, &len_out)) {
-				for (size_t j = i; j < *nsug; j++)
-					free(sugMS[j]);
-				free(sugMS);
-
 				*nsug = i;
-				return sug;
+				break;
 			}
-			*(out) = 0;
+			*out = '\0';
 			sug[i] = word;
-			free(sugMS[i]);
 		}
-		free(sugMS);
 		return sug;
 	}
 	else
@@ -328,6 +323,10 @@ HunspellChecker::requestDictionary(const char *szLang)
 	m_translate_in = g_iconv_open(enc, "UTF-8");
 	m_translate_out = g_iconv_open("UTF-8", enc);
 
+	const char *word_chars = hunspell->get_wordchars();
+	apostropheIsWordChar = g_utf8_strchr(word_chars, -1, g_utf8_get_char("'")) ||
+		g_utf8_strchr(word_chars, -1, g_utf8_get_char("’"));
+
 	return true;
 }
 
@@ -364,8 +363,12 @@ hunspell_dict_get_extra_word_characters (EnchantDict *me)
 static int
 hunspell_dict_is_word_character (EnchantDict *me, uint32_t uc, size_t n)
 {
-	(void)n;
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
+	/* Accept quote marks anywhere except at the end of a word, as per
+	   hunspell's textparser.cxx/TextParser::next_token */
+	if ((uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’")) && checker->apostropheIsWordChar) {
+		return n < 2;
+	}
 	return g_unichar_isalpha(uc) || g_utf8_strchr(checker->getWordchars(), -1, uc);
 }
 

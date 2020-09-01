@@ -1358,7 +1358,7 @@ enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc_in, size_t n)
 	case G_UNICODE_TITLECASE_LETTER:
 	case G_UNICODE_UPPERCASE_LETTER:
 	case G_UNICODE_OTHER_LETTER:
-	case G_UNICODE_COMBINING_MARK: /* Older name for G_UNICODE_SPACING_MARK; deprecated since glib 2.30 */
+	case G_UNICODE_SPACING_MARK:
 	case G_UNICODE_ENCLOSING_MARK:
 	case G_UNICODE_NON_SPACING_MARK:
 	case G_UNICODE_DECIMAL_NUMBER:
