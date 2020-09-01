@@ -461,7 +461,7 @@ static int enchant_is_all_caps(const char*const word, size_t len)
 				case G_UNICODE_SURROGATE:
 				case G_UNICODE_MODIFIER_LETTER:
 				case G_UNICODE_OTHER_LETTER:
-				case G_UNICODE_COMBINING_MARK:
+				case G_UNICODE_SPACING_MARK:
 				case G_UNICODE_ENCLOSING_MARK:
 				case G_UNICODE_NON_SPACING_MARK:
 				case G_UNICODE_DECIMAL_NUMBER:
