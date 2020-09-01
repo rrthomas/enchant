@@ -95,36 +95,29 @@ int Test(char* path)
 
 int TestProvidersInDirectory(char * dir_name)
 {
-    GDir *dir;
-	G_CONST_RETURN char *dir_entry;
-	size_t entry_len, g_module_suffix_len;
+    GDir *dir = g_dir_open (dir_name, 0, NULL);
+    if (!dir) 
+        return 0;
 	
-	char * filename;
-    int result = 0;
-	
-	dir = g_dir_open (dir_name, 0, NULL);
-	if (!dir) 
-		return 0;
-	
-	g_module_suffix_len = strlen (G_MODULE_SUFFIX);
+    size_t g_module_suffix_len = strlen (G_MODULE_SUFFIX);
 
-	while ((dir_entry = g_dir_read_name (dir)) != NULL)
-		{
-			entry_len = strlen (dir_entry);
-			if ((entry_len > g_module_suffix_len) && 
-				!strcmp(dir_entry+(entry_len-g_module_suffix_len), G_MODULE_SUFFIX))
-				{
-					filename = g_build_filename (dir_name, dir_entry, NULL);
-                                        int resultT = Test(filename);
-                                        if(resultT != 0)
-                                            {
-                                                result = resultT;
-                                            }
-                                        g_free (filename);
-				}
-		}
-	
-	g_dir_close (dir);
+    int result = 0;
+    const char *dir_entry;
+    while ((dir_entry = g_dir_read_name (dir)) != NULL)
+        {
+            size_t entry_len = strlen (dir_entry);
+            if ((entry_len > g_module_suffix_len) && 
+                !strcmp(dir_entry + (entry_len - g_module_suffix_len), G_MODULE_SUFFIX))
+                {
+                    char *filename = g_build_filename (dir_name, dir_entry, NULL);
+                    int resultT = Test(filename);
+                    if(resultT != 0)
+                        result = resultT;
+                    g_free (filename);
+                }
+        }
+    
+    g_dir_close (dir);
     return result;
 }
 
