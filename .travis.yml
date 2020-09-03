@@ -22,6 +22,9 @@ env:
   global:
     - VERBOSE=1 # Get test logs in Travis logs
 
+arch:
+  - ppc64le
+
 matrix:
   include:
     - os: linux
