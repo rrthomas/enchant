@@ -99,8 +99,6 @@ if test "$gl_gcc_warnings" = yes; then
 
   dnl Add an extra warning
   gl_WARN_ADD([-Wstrict-overflow=1])
-  dnl Add some more safety measures
-  gl_WARN_ADD([-D_FORTIFY_SOURCE=2])
   dnl Remove a warning being promoted to error: we trigger this and can't turn it off with pragmas.
   gl_WARN_ADD([-Wno-error=format-security])
 
