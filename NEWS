@@ -1,3 +1,16 @@
+2.2.11 (September 7, 2020)
+--------------------------
+
+Make enchant silently ignore -B flag, for better Emacs compatibility.
+
+Make enchant_broker_list_dicts sort the tags, so that enchant-lsmod’s output
+is sorted.
+
+Minor build system improvement: don’t use -D_FORTIFY_SOURCE, which can cause
+problems on Windows, and should be configured by the compiler vendor if
+desired.
+
+
 2.2.10 (September 1, 2020)
 --------------------------
 

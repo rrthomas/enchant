@@ -1156,13 +1156,19 @@ enchant_broker_describe (EnchantBroker * broker, EnchantBrokerDescribeFn fn, voi
 		}
 }
 
+static gint
+_gfunc_strcmp(gconstpointer item1, gconstpointer item2)
+{
+	return strcmp (item1, item2);
+}
+
 void
 enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, void * user_data)
 {
 	g_return_if_fail (broker);
 	g_return_if_fail (fn);
 
-	GHashTable *tags = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
+	GHashTable *tag_map = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	enchant_broker_clear_error (broker);
 
@@ -1177,25 +1183,17 @@ enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, voi
 
 					for (size_t i = 0; i < n_dicts; i++)
 						{
-							const char * tag;
-
-							tag = dicts[i];
+							const char * tag = dicts[i];
 							if (enchant_is_valid_dictionary_tag (tag)) {
-								gpointer ptr;
-								GSList *providers;
-								gint this_priority;
-
-								providers = enchant_get_ordered_providers (broker, tag);
-								this_priority = g_slist_index (providers, provider);
+								GSList *providers = enchant_get_ordered_providers (broker, tag);
+								gint this_priority = g_slist_index (providers, provider);
 								if (this_priority != -1) {
-									gint min_priority;
-
-									min_priority = this_priority + 1;
-									ptr = g_hash_table_lookup (tags, tag);
+									gint min_priority = this_priority + 1;
+									gpointer ptr = g_hash_table_lookup (tag_map, tag);
 									if (ptr != NULL)
 										min_priority = g_slist_index (providers, ptr);
 									if (this_priority < min_priority)
-										g_hash_table_insert (tags, strdup (tag), provider);
+										g_hash_table_insert (tag_map, strdup (tag), provider);
 								}
 								g_slist_free (providers);
 							}
@@ -1205,25 +1203,26 @@ enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, voi
 				}
 		}
 
+	GSList *tags = NULL;
 	GHashTableIter iter;
+	g_hash_table_iter_init (&iter, tag_map);
 	gpointer key, value;
-	g_hash_table_iter_init (&iter, tags);
 	while (g_hash_table_iter_next (&iter, &key, &value))
-		{
-			const char * tag, * name, * desc, * file;
-			EnchantProvider * provider;
-			GModule *module;
+		tags = g_slist_insert_sorted (tags, (char *) key, _gfunc_strcmp);
 
-			tag = (const char *) key;
-			provider = (EnchantProvider *) value;
-			module = (GModule *) provider->enchant_private_data;
-			name = (*provider->identify) (provider);
-			desc = (*provider->describe) (provider);
-			file = g_module_name (module);
+	for (GSList *ptr = tags; ptr != NULL; ptr = g_slist_next (ptr))
+		{
+			const char *tag = (const char *) ptr->data;
+			EnchantProvider *provider = (EnchantProvider *) g_hash_table_lookup (tag_map, tag);
+			GModule *module = (GModule *) provider->enchant_private_data;
+			const char *name = (*provider->identify) (provider);
+			const char *desc = (*provider->describe) (provider);
+			const char *file = g_module_name (module);
 			(*fn) (tag, name, desc, file, user_data);
 		}
 
-	g_hash_table_destroy (tags);
+	g_slist_free (tags);
+	g_hash_table_destroy (tag_map);
 }
 
 void
