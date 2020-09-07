@@ -422,7 +422,7 @@ int main (int argc, char ** argv)
 #endif
 
 	int optchar;
-	while ((optchar = getopt (argc, argv, ":d:alvLm")) != -1) {
+	while ((optchar = getopt (argc, argv, ":d:alvLmB")) != -1) {
 		switch (optchar) {
 		case 'd':
 			dictionary = optarg;  /* Emacs calls ispell with '-d dictionary'. */
@@ -443,7 +443,8 @@ int main (int argc, char ** argv)
 			print_version (stderr);
 			exit (0);
 		case 'm':
-			/* Ignore: Emacs calls ispell with '-m'. */
+		case 'B':
+			/* Ignore: Emacs calls ispell with '-m' and '-B'. */
 			break;
 		case 'h':
 			print_help (argv[0]);
