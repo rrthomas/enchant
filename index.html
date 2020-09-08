@@ -75,13 +75,23 @@ and GNOME applications.</p>
 
 <p>Backends for additional spell-checking systems are welcomed.</p>
 
-<h2>System compatibility</h2>
+<h2>Compatibility and bindings</h2>
 
 <p>Enchant is written in plain C99 and C++11, and should therefore work on
 most modern operating systems; other than the standard libraries, it
 requires only <a href="https://wiki.gnome.org/Projects/GLib">GLib</a>. The
 build system uses GNU Autotools, and therefore works with most compilers,
 including Microsoft Visual C and XCode.</p>
+
+<p>Bindings are available to many other languages:</p>
+
+<p>
+  <li>Python: https://github.com/rfk/pyenchant/</li>
+  <li>Ruby: https://github.com/pennyapp/ruby-enchant</li>
+  <li>Rust: https://crates.io/crates/enchant</li>
+  <li>Go: https://github.com/hermanschaaf/enchant</li>
+  <li>Common Lisp: https://github.com/tlikonen/cl-enchant</li>
+</p>
 
 <p>All inputs and outputs are in UTF-8 encoding. Language tags use
 the familiar ISO standards, and take the form of "xx_YY"

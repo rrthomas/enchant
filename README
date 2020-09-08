@@ -1,5 +1,6 @@
 libenchant -- Generic spell checking library
-Original author: Dom Lachowicz
+Maintainer: Reuben Thomas
+Home page: https://abiword.github.io/enchant/
 
 libenchant is licensed under the terms of the GNU LGPL (see the file
 COPYING.LIB), with a special exception allowing the use of proprietary
@@ -27,13 +28,7 @@ Enchant currently works with the following spell-checkers:
 Enchant is written in C and C++, and its only external dependency is glib.
 
 Enchant bindings are supplied for C and C++; there are third-party bindings
-for:
-
-Python: https://github.com/rfk/pyenchant/
-Ruby: https://github.com/pennyapp/ruby-enchant
-Rust: https://crates.io/crates/enchant
-Go: https://github.com/hermanschaaf/enchant
-Common Lisp: https://github.com/tlikonen/cl-enchant
+for various languages (see the home page).
 
 
 Sharing personal word lists between spell-checkers
@@ -77,16 +72,5 @@ Bug reports and development
 To report libenchant bugs or request features, please visit
 https://github.com/AbiWord/enchant
 
-If you can't use GitHub, you can use the (low-traffic) AbiWord-devel list.
-To subscribe send a mail to:
-
-	abiword-dev-request@abisource.com
-
-and in the body of the message write "subscribe"
-
-An archive of the mailing lists is available at:
-
-	http://www.abisource.com/mailinglists/abiword-dev/
-
-
-Enchant has taken insight from GNU Aspell: http://aspell.net
+If you can't use GitHub do get in touch with the maintainer, Reuben Thomas:
+<rrt@sc3d.org>.
