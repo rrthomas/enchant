@@ -22,12 +22,12 @@ env:
   global:
     - VERBOSE=1 # Get test logs in Travis logs
 
-arch:
-  - ppc64le
-
 matrix:
   include:
     - os: linux
+      arch:
+        - ppc64le
+        - amd64
       env:
         - CONFIGURE_ARGS=("CFLAGS=\"-g3 -fsanitize=address -fsanitize=undefined\"" "LDFLAGS=\"-fsanitize=address -fsanitize=undefined\"")
     - os: osx
