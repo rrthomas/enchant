@@ -17,6 +17,7 @@ addons:
       - libunittest++-dev
       - hunspell-fr
       - libhunspell-dev
+      - libltdl-dev
 
 env:
   global:
