@@ -16,7 +16,7 @@ addons:
       - aspell-en
       - libunittest++-dev
       - hunspell-fr
-      - libhuspell-dev
+      - libhunspell-dev
 
 env:
   global:
