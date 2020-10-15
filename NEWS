@@ -1,3 +1,12 @@
+2.2.12 (October 15, 2020)
+-------------------------
+
+Fix a bug in the Voikko and Zemberek back-ends that could cause spell
+checking and suggestion to fail. (For programmers: enchant_dict_check and
+enchant_dict_suggest allow counted strings, but those two backends were
+assuming the strings were NUL-terminated.)
+
+
 2.2.11 (September 7, 2020)
 --------------------------
 
