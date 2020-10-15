@@ -142,18 +142,24 @@ extern "C" {
 EnchantProvider *init_enchant_provider(void);
 
 static int
-zemberek_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUSED_PARAMETER)
+zemberek_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
     Zemberek *checker = (Zemberek *) me->user_data;
-    return checker->checkWord(word);
+    char *word_nul = g_strndup(word, len);
+    int result = checker->checkWord(word_nul);
+    free(word_nul);
+    return result;
 }
 
 static char**
 zemberek_dict_suggest (EnchantDict * me, const char *const word,
-                       size_t len _GL_UNUSED_PARAMETER, size_t * out_n_suggs)
+                       size_t len, size_t * out_n_suggs)
 {
     Zemberek *checker = (Zemberek *) me->user_data;
-    return checker->suggestWord (word, out_n_suggs);
+    char *word_nul = g_strndup(word, len);
+    char **result = checker->suggestWord(word_nul, out_n_suggs);
+    free(word_nul);
+    return result;
 }
 
 static void

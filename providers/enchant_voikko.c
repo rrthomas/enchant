@@ -48,9 +48,11 @@
  */
 
 static int
-voikko_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUSED_PARAMETER)
+voikko_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
-	int result = voikkoSpellCstr((struct VoikkoHandle *)me->user_data, word);
+	char *word_nul = strndup(word, len);
+	int result = voikkoSpellCstr((struct VoikkoHandle *)me->user_data, word_nul);
+	free(word_nul);
 	if (result == VOIKKO_SPELL_FAILED)
 		return 1;
 	else if (result == VOIKKO_SPELL_OK)
@@ -61,9 +63,11 @@ voikko_dict_check (EnchantDict * me, const char *const word, size_t len _GL_UNUS
 
 static char **
 voikko_dict_suggest (EnchantDict * me, const char *const word,
-		     size_t len _GL_UNUSED_PARAMETER, size_t * out_n_suggs)
+		     size_t len, size_t * out_n_suggs)
 {
-	char **voikko_sugg_arr = voikkoSuggestCstr((struct VoikkoHandle *)me->user_data, word);
+	char *word_nul = strndup(word, len);
+	char **voikko_sugg_arr = voikkoSuggestCstr((struct VoikkoHandle *)me->user_data, word_nul);
+	free(word_nul);
 	if (voikko_sugg_arr == NULL)
 		return NULL;
 	for (*out_n_suggs = 0; voikko_sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
