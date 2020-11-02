@@ -440,7 +440,7 @@ int main (int argc, char ** argv)
 			countLines = TRUE;
 			break;
 		case 'v':
-			print_version (stderr);
+			print_version (stdout);
 			exit (0);
 		case 'm':
 		case 'B':

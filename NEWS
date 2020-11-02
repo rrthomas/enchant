@@ -1,3 +1,10 @@
+2.2.13 (November 2, 2020)
+-------------------------
+
+Make the enchant program output its version to standard output, not standard
+error. This may help some programs that use this output.
+
+
 2.2.12 (October 15, 2020)
 -------------------------
 
