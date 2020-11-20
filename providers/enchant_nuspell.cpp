@@ -74,9 +74,9 @@ NuspellChecker::checkWord(const char *utf8Word, size_t len)
 {
 	// the 8-bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
-	string s(normalizedWord);
+	auto ret = nuspell.spell(normalizedWord);
 	g_free(normalizedWord);
-	return nuspell.spell(s);
+	return ret;
 }
 
 char**
@@ -84,10 +84,9 @@ NuspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug
 {
 	// the 8-bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
-	string s(normalizedWord);
-	g_free(normalizedWord);
 	auto suggestions = vector<string>();
-	nuspell.suggest(s, suggestions);
+	nuspell.suggest(normalizedWord, suggestions);
+	g_free(normalizedWord);
 	if (suggestions.empty())
 		return nullptr;
 	*nsug = suggestions.size();
@@ -119,19 +118,14 @@ s_buildDictionaryDirs (vector<string> & dirs)
 
 	/* Dynamically retrieved from Nuspell dictionary finder:
 	 * 2. personal overrides for Hunspell
-	 *    ~/.local/share/hunspell
+	 *    $XDG_DATA_HOME/hunspell
+	 *    $XDG_DATA_HOME by default is $HOME/.local/share/
 	 * 3. system installed for Hunspell
-	 *    /usr/local/share/hunspell
-	 *    /usr/share/hunspell
-	 * 4. personal or system installations for
-	 *    Mozilla (such as Firefox and Thunderbird),
-	 *    LibreOffice and Apache OpenOffice
+	 *    $XDG_DATA_DIRS/hunspell
+	 *    $XDG_DATA_DIRS/myspell (needed for Fedora)
+	 *    $XDG_DATA_DIRS by default are /usr/local/share and /usr/share
 	 */
-	auto nuspell_finder = nuspell::Finder::search_all_dirs_for_dicts();
-	for (auto& path : nuspell_finder.get_dir_paths()) {
-		if (path.compare(".") != 0)
-			dirs.push_back (path.c_str());
-	}
+	nuspell::append_default_dir_paths(dirs);
 
 	/* 5. system installations by Enchant
 	 *    /usr/local/share/enchant/nuspell
