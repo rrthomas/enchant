@@ -31,6 +31,15 @@ Enchant bindings are supplied for C and C++; there are third-party bindings
 for various languages (see the home page).
 
 
+Installation
+------------
+
+Users should install from a release tarball. See the file INSTALL for
+instructions.
+
+Developers or others wishing to install from a git repository, see HACKING.
+
+
 Sharing personal word lists between spell-checkers
 --------------------------------------------------
 
