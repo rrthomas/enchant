@@ -1,3 +1,12 @@
+2.2.14 (December 10, 2020)
+--------------------------
+
+Improve installation instructions: in particular, add a note about where to
+find them to README.
+
+The nuspell backend is updated for newer versions.
+
+
 2.2.13 (November 2, 2020)
 -------------------------
 
