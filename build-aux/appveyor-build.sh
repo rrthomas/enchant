@@ -8,9 +8,9 @@ set -e
 ./bootstrap
 CONFIGURE_ARGS=(--enable-relocatable --with-zemberek=check)
 if [[ "$ASAN" == "yes" ]]; then
-    CONFIGURE_ARGS+=(CFLAGS="-g3 -fsanitize=address -fsanitize=undefined" LDFLAGS="-fsanitize=address -fsanitize=undefined")
+    CONFIGURE_ARGS+=(CFLAGS="-g3 -fsanitize=address -fsanitize=undefined" CXXFLAGS="-g3 -fsanitize=address -fsanitize=undefined" LDFLAGS="-fsanitize=address -fsanitize=undefined")
 fi
-./configure --enable-silent-rules "${CONFIGURE_ARGS[@]}"
+./configure "${CONFIGURE_ARGS[@]}"
 make
 make distcheck
 
