@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build on Travis
+# Build on AppVeyor
 # Written by Reuben Thomas 2020.
 # This file is in the public domain.
 
@@ -14,4 +14,4 @@ fi
 make
 make distcheck
 
-if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo locale-gen fr_FR.UTF-8; env LANG=fr_FR.UTF-8 make check ; fi
+if [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu" ]]; then sudo locale-gen fr_FR.UTF-8; env LANG=fr_FR.UTF-8 make check ; fi

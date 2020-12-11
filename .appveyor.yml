@@ -1,0 +1,58 @@
+version: "{build}"
+
+environment:
+  global:
+    # Only need one flavour of dictionary
+    CONFIGURE_FLAGS: --with-hunspell-dir=/mingw64/share/hunspell
+    VERBOSE: 1 # Get test logs in output
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      ASAN: 'yes'
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos
+    # MSYS does not have hunspell packages
+    # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    #   MSYSTEM: MSYS
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      MSYSTEM: MINGW64
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      MSYSTEM: MINGW32
+
+for:
+-
+  matrix:
+    only:
+      - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+  init:
+    - sudo add-apt-repository -y ppa:nuspell/ppa
+    - sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr libnuspell-dev
+  build_script:
+    - ./build-aux/appveyor-build.sh
+-
+  matrix:
+    only:
+      - APPVEYOR_BUILD_WORKER_IMAGE: macos
+  init:
+    # Note: aspell should work on macOS, but has been removed because one of
+    # the tests fails; see https://github.com/GNUAspell/aspell/issues/555
+    - brew install glib dbus-glib hspell hunspell libvoikko unittest-cpp
+  environment:
+    LDFLAGS: "-L/usr/local/opt/flex/lib -L/usr/local/opt/texinfo/lib"
+    CPPFLAGS: "-I/usr/local/opt/flex/include"
+    PYTHON: /usr/local/bin/python3
+  build_script:
+    # Prepend optional brew binary directories to PATH
+    # Also prepend /usr/local/bin to work around https://github.com/appveyor/ci/issues/3326
+    - export PATH="/usr/local/opt/flex/bin:/usr/local/opt/texinfo/bin:/usr/local/opt/gettext/bin:/usr/local/opt/cython/bin:/usr/local/bin:$PATH"
+    - ./build-aux/appveyor-build.sh
+-
+  matrix:
+    only:
+      - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+  init:
+    - git config --global core.autocrlf input
+  install:
+    - C:\msys64\usr\bin\bash.exe -l c:/projects/enchant/build-aux/appveyor-install.sh
+  # FIXME: add all available providers (just aspell?)
+  build_script:
+    - C:\msys64\usr\bin\bash.exe -lc "cd c:/projects/enchant && ./bootstrap && ./configure --enable-relocatable %CONFIGURE_FLAGS% && make && make DISTCHECK_CONFIGURE_FLAGS=\"--enable-relocatable %CONFIGURE_FLAGS%\" distcheck"
