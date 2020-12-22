@@ -171,7 +171,7 @@ AC_DEFUN([ENCHANT_CHECK_PROVIDER_SETUP],
 AC_DEFUN([ENCHANT_CHECK_PKG_CONFIG_PROVIDER],
   [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
    AS_IF([test "x$with_[]$1" != xno],
-      [PKG_CHECK_MODULES([$2], [m4_default([$3], [$1])],
+         [PKG_CHECK_MODULES([$2], [m4_default([$3], [$1])],
          [$2[]_CFLAGS="$[]$2[]_CFLAGS -DENCHANT_[]$2[]_DICT_DIR='\"$[]$1_dir\"'"
          with_$1=yes
          build_providers="$build_providers $1"],
@@ -209,7 +209,7 @@ build_providers=
 
 dnl Standard providers
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([hunspell], [HUNSPELL])
-ENCHANT_CHECK_PKG_CONFIG_PROVIDER([nuspell], [NUSPELL])
+ENCHANT_CHECK_PKG_CONFIG_PROVIDER([nuspell], [NUSPELL], [nuspell >= 4.1.0])
 ENCHANT_CHECK_LIB_PROVIDER([aspell], [ASPELL], [get_aspell_dict_info_list])
 ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path],, [-lz])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([voikko], [VOIKKO], [libvoikko])
