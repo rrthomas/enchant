@@ -1,3 +1,11 @@
+2.2.15 (December 22, 2020)
+--------------------------
+
+Specify that nuspell >= 4.1.0 is required.
+
+Fix some space leaks in the tests.
+
+
 2.2.14 (December 10, 2020)
 --------------------------
 

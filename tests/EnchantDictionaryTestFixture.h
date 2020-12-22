@@ -214,6 +214,14 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         }
     }
 
+    void FreePwlStringList(char** list)
+    {
+        if(list)
+        {
+            enchant_dict_free_string_list(_pwl, list);
+        }
+    }
+
     bool IsWordInSession(const std::string& word){
         return enchant_dict_is_added(_dict, word.c_str(), word.size())!=0;
     }
@@ -309,7 +317,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         std::vector<std::string> result;
         if(expectedSuggestions != NULL && begin < cSuggestions){
             result.insert(result.begin(), expectedSuggestions+begin, expectedSuggestions+cSuggestions);
-            FreeStringList(expectedSuggestions);
+            g_strfreev(expectedSuggestions);
         }
 
         return result;

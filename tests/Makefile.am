@@ -19,7 +19,7 @@ AM_TESTS_ENVIRONMENT = \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
 	cp $(builddir)/@objdir@/*@shlibext@ .; \
 	chmod +w $(builddir)/test.pwl; \
-	export LSAN_OPTIONS=suppressions=$(srcdir)/asan-suppressions.txt;
+	export LSAN_OPTIONS=suppressions=$(srcdir)/asan-suppressions.txt:fast_unwind_on_malloc=0;
 
 DISTCLEANFILES = test.pwl *@shlibext@
 

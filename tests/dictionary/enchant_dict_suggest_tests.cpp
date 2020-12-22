@@ -45,6 +45,7 @@ struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
     { 
         dictSuggestCalled = false;
         _suggestions = NULL;
+        _pwl_suggestions = NULL;
         suggestWord = std::string();
         suggestBehavior = returnFour;
     }
@@ -52,9 +53,11 @@ struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
     ~EnchantDictionarySuggestTestFixtureBase()
     {
         FreeStringList(_suggestions);
+        FreePwlStringList(_pwl_suggestions);
     }
 
     char** _suggestions;
+    char** _pwl_suggestions;
 };
 
 static char **
@@ -210,8 +213,8 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
              EnchantDictionarySuggest_InBrokerPwlSession)
 {
     enchant_dict_add(_pwl, "hello", -1);
-    _suggestions = enchant_dict_suggest(_pwl, "helo", -1, NULL);
-    CHECK(_suggestions);
+    _pwl_suggestions = enchant_dict_suggest(_pwl, "helo", -1, NULL);
+    CHECK(_pwl_suggestions);
     CHECK(!dictSuggestCalled);
 }
 
