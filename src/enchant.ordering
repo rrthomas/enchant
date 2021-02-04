@@ -1,4 +1,9 @@
 *:hunspell,nuspell,aspell
+en:aspell,hunspell,nuspell
+en_AU:aspell,hunspell,nuspell
+en_CA:aspell,hunspell,nuspell
+en_GB:aspell,hunspell,nuspell
+en_US:aspell,hunspell,nuspell
 fi:voikko,hunspell,nuspell,aspell
 fi_FI:voikko,hunspell,nuspell,aspell
 he:hspell,hunspell,nuspell
