@@ -51,30 +51,53 @@ typedef struct str_enchant_provider EnchantProvider;
  */
 char *enchant_get_user_language(void);
 
+/**
+ * enchant_get_user_config_dir
+ *
+ * Returns a string giving the location of the user's Enchant configuration
+ * directory, or NULL on error, or if none exists. Defaults to the value of
+ * the environment variable ENCHANT_CONFIG_DIR; if that is not set, then
+ * glib's g_get_user_config_dir() is called to get the user's configuration
+ * directory, and the sub-directory "enchant" is appended.
+ *
+ * The returned string must be free'd.
+ */
 char *enchant_get_user_config_dir (void);
+
+/**
+  * enchant_get_conf_dirs
+  *
+  * Returns a list (GSList *) of configuration directories, in the order in
+  * which they are used, or NULL on error.
+  *
+  * The following directories are in the list:
+  *
+  *  + Enchant's internal configuration directory (pkgdatadir)
+  *  + The system configuration directory (sysconfdir/enchant)
+  *  + The user configuration directory, as returned by
+  *     enchant_get_user_config_dir(), if it exists.
+  */
 GSList *enchant_get_conf_dirs (void);
 
 /**
  * enchant_get_prefix_dir
  *
- * Returns a string giving the location of the base directory
- * of the enchant installation.  This corresponds roughly to
- * the --prefix option given to ./configure when enchant is
- * compiled, except it is determined at runtime based on the location
- * of the enchant library.
+ * Returns a string giving the location of the base directory of the enchant
+ * installation. This corresponds roughly to the --prefix option given to
+ * ./configure when enchant is compiled, except it is determined at runtime
+ * based on the location of the enchant library.
  *
- * Returns: the prefix dir. Must be free'd.
- *
+ * The return value must be free'd.
  */
 char *enchant_get_prefix_dir(void);
 
 /**
  * enchant_relocate
  *
- * Returns a string giving the relocated path according to the location of the
- * base directory of the enchant installation.
+ * Returns a string giving the relocated path according to the location of
+ * the base directory of the enchant installation.
  *
- * Returns: the relocated path. Must be free'd.
+ * The return value must be free'd.
  */
 char *enchant_relocate (const char *path);
 
@@ -93,8 +116,8 @@ void enchant_dict_set_error (EnchantDict * dict, const char * const err);
  * @provider: A non-null provider
  * @err: A non-null error message
  *
- * Sets the current runtime error to @err. This API is private to
- * the providers.
+ * Sets the current runtime error to @err. This API is private to the
+ * providers.
  */
 void enchant_provider_set_error (EnchantProvider * provider, const char * const err);
 
@@ -160,4 +183,4 @@ struct str_enchant_provider
 }
 #endif
 
-#endif /* ENCHANT_H */
+#endif /* ENCHANT_PROVIDER_H */
