@@ -14,6 +14,9 @@ is an ispell-compatible spellchecker.
 \fB\-d \fIDICTIONARY\fR
 use the given dictionary
 .TP
+\fB\-p \fIWORDLIST\fR
+use the given personal wordlist
+.TP
 .B "\-a"
 list suggestions in ispell pipe mode format
 .TP

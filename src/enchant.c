@@ -1,7 +1,7 @@
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
  *               2007 Hannu Väisänen
- *               2016-2020 Reuben Thomas
+ *               2016-2021 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,6 +47,7 @@
 #endif
 
 #include "enchant.h"
+#include "pwl.h"
 #include "enchant-provider.h"
 
 
@@ -75,6 +76,7 @@ print_help (const char * prog)
 	fprintf (stderr,
 		 "Usage: %s -a|-l|-h|-v [-L] [-d DICTIONARY] [FILE]\n\
   -d DICTIONARY  use the given dictionary\n\
+  -p FILE        use the given personal word list\n\
   -a             list suggestions in ispell pipe mode format\n\
   -l             list only the misspellings\n\
   -L             display line numbers\n\
@@ -132,10 +134,20 @@ print_utf (const char * str)
 	}
 }
 
-static void
-do_mode_a (EnchantDict * dict, GString * word, size_t start_pos, size_t lineCount, gboolean terse_mode)
+static int
+check_word (EnchantDict * dict, EnchantPWL * pwl, GString * word)
 {
-	if (word->len <= MIN_WORD_LENGTH || enchant_dict_check (dict, word->str, word->len) == 0) {
+	int ok = word->len <= MIN_WORD_LENGTH ||
+		enchant_dict_check (dict, word->str, word->len) == 0;
+	if (!ok && pwl)
+		ok = enchant_pwl_check (pwl, word->str, word->len) == 0;
+	return ok;
+}
+
+static void
+do_mode_a (EnchantDict * dict, EnchantPWL * pwl, GString * word, size_t start_pos, size_t lineCount, gboolean terse_mode)
+{
+	if (check_word (dict, pwl, word)) {
 		if (!terse_mode) {
 			if (lineCount)
 				printf ("* %u\n", (unsigned int)lineCount);
@@ -145,6 +157,8 @@ do_mode_a (EnchantDict * dict, GString * word, size_t start_pos, size_t lineCoun
 	} else {
 		size_t n_suggs;
 		char ** suggs = enchant_dict_suggest (dict, word->str, word->len, &n_suggs);
+		if (pwl)
+			suggs = enchant_pwl_suggest (pwl, word->str, word->len, suggs, &n_suggs);
 		if (!n_suggs || !suggs) {
 			printf ("# ");
 			if (lineCount)
@@ -174,9 +188,9 @@ do_mode_a (EnchantDict * dict, GString * word, size_t start_pos, size_t lineCoun
 }
 
 static void
-do_mode_l (EnchantDict * dict, GString * word, size_t lineCount)
+do_mode_l (EnchantDict * dict, EnchantPWL * pwl, GString * word, size_t lineCount)
 {
-	if (enchant_dict_check (dict, word->str, word->len) != 0) {
+	if (!check_word (dict, pwl, word)) {
 		if (lineCount)
 			printf ("%u ", (unsigned int)lineCount);
 		print_utf (word->str);
@@ -238,7 +252,7 @@ tokenize_line (EnchantDict * dict, GString * line)
 }
 
 static int
-parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary)
+parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary, EnchantPWL *pwl)
 {
 	EnchantBroker * broker;
 	EnchantDict * dict;
@@ -301,7 +315,10 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 				case '*': /* Insert in personal word list */
 					if (str->len == 1)
 						goto empty_word;
-					enchant_dict_add(dict, str->str + 1, -1);
+					if (pwl)
+						enchant_pwl_add (pwl, str->str + 1, -1);
+					else
+						enchant_dict_add (dict, str->str + 1, -1);
 					break;
 				case '@': /* Accept for this session */
 					if (str->len == 1)
@@ -311,7 +328,10 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 				case '/': /* Remove from personal word list */
 					if (str->len == 1)
 						goto empty_word;
-					enchant_dict_remove (dict, str->str + 1, -1);
+					if (pwl)
+						enchant_pwl_remove (pwl, str->str + 1, -1);
+					else
+						enchant_dict_remove (dict, str->str + 1, -1);
 					break;
 				case '_': /* Remove from this session */
 					if (str->len == 1)
@@ -375,9 +395,9 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 					tokens = tokens->next;
 
 					if (mode == MODE_A)
-						do_mode_a (dict, word, pos, lineCount, terse_mode);
+						do_mode_a (dict, pwl, word, pos, lineCount, terse_mode);
 					else if (mode == MODE_L)
-						do_mode_l (dict, word, lineCount);
+						do_mode_l (dict, pwl, word, lineCount);
 
 					g_string_free(word, TRUE);
 				}
@@ -409,6 +429,7 @@ int main (int argc, char ** argv)
 	FILE * fp = stdin;
 	gboolean countLines = FALSE;
 	gchar *dictionary = NULL;  /* -d dictionary */
+	gchar *perslist = NULL ; /* -p personal_word_list */
 
 	/* Initialize system locale */
 	setlocale(LC_ALL, "");
@@ -422,10 +443,13 @@ int main (int argc, char ** argv)
 #endif
 
 	int optchar;
-	while ((optchar = getopt (argc, argv, ":d:alvLmB")) != -1) {
+	while ((optchar = getopt (argc, argv, ":d:p:alvLmB")) != -1) {
 		switch (optchar) {
 		case 'd':
 			dictionary = optarg;  /* Emacs calls ispell with '-d dictionary'. */
+			break;
+		case 'p':
+			perslist = optarg;
 			break;
 		/* The first mode specified takes precedence. */
 		case 'a':
@@ -478,7 +502,17 @@ int main (int argc, char ** argv)
 			exit (1);
 		}
 	}
-	rval = parse_file (fp, mode, countLines, dictionary);
+	EnchantPWL *pwl = NULL;
+	if (perslist) {
+		pwl = enchant_pwl_init_with_file (perslist);
+		if (!pwl) {
+			fprintf (stderr, "Error: Could not read the personal word list \"%s\"", perslist);
+			exit (1);
+		}
+	}
+	rval = parse_file (fp, mode, countLines, dictionary, pwl);
+	if (pwl)
+		enchant_pwl_free (pwl);
 	if (file)
 		fclose (fp);
 	
