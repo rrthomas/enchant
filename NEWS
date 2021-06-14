@@ -1,3 +1,20 @@
+2.3.0 (June 14, 2021)
+---------------------
+
+Add -p flag to enchant.
+
+Allow personal wordlist APIs (enchant_pwl_*) to take -1 as the length of the
+word, as the enchant_dict_* APIs already allowed.
+
+Add documentation to enchant_provider.h.
+
+Make Aspell the default backend for English locales it supports, as it is
+much quicker than Hunspell in this case and achieves slightly better
+results.
+
+Require nuspell version 4.1.0 or later.
+
+
 2.2.15 (December 22, 2020)
 --------------------------
 
