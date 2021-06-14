@@ -313,8 +313,11 @@ static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
 }
 
 void enchant_pwl_add(EnchantPWL *pwl,
-			 const char *const word, size_t len)
+			 const char *const word, ssize_t len)
 {
+	if (len < 0)
+		len = strlen (word);
+
 	enchant_pwl_refresh_from_file(pwl);
 
 	enchant_pwl_add_to_trie(pwl, word, len);
@@ -342,7 +345,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 							putc ('\n', f);
 					}
 
-				if (fwrite (word, sizeof(char), len, f) == len)
+				if (fwrite (word, sizeof(char), len, f) == (size_t)len)
 					{
 						putc ('\n', f);
 					}
@@ -353,8 +356,11 @@ void enchant_pwl_add(EnchantPWL *pwl,
 }
 
 void enchant_pwl_remove(EnchantPWL *pwl,
-			 const char *const word, size_t len)
+			 const char *const word, ssize_t len)
 {
+	if (len < 0)
+		len = strlen (word);
+
 	if(enchant_pwl_check(pwl, word, len) == 1)
 		return;
 
@@ -525,8 +531,11 @@ static gchar* enchant_utf8_strtitle(const gchar*str, gssize len)
 	return result;
 }
 
-int enchant_pwl_check(EnchantPWL *pwl, const char *const word, size_t len)
+int enchant_pwl_check(EnchantPWL *pwl, const char *const word, ssize_t len)
 {
+	if (len < 0)
+		len = strlen (word);
+
 	enchant_pwl_refresh_from_file(pwl);
 
 	int exists = enchant_pwl_contains(pwl, word, len);
@@ -609,8 +618,11 @@ static int best_distance(char** suggs, const char *const word, size_t len)
 /* gives the best set of suggestions from pwl that are at least as good as the 
  * given suggs (if suggs == NULL just best from pwl) */
 char** enchant_pwl_suggest(EnchantPWL *pwl, const char *const word,
-			   size_t len, char** suggs, size_t* out_n_suggs)
+			   ssize_t len, char** suggs, size_t* out_n_suggs)
 {
+	if (len < 0)
+		len = strlen (word);
+
 	int max_dist = suggs ? best_distance(suggs, word, len) : ENCHANT_PWL_MAX_ERRORS;
 	max_dist = MIN (max_dist, ENCHANT_PWL_MAX_ERRORS);
 
