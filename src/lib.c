@@ -808,6 +808,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 
 			size_t entry_len = strlen (dir_entry);
 			if ((entry_len > g_module_suffix_len) &&
+				dir_entry[0] != '.' && /* Skip hidden files */
 				!strcmp(dir_entry+(entry_len-g_module_suffix_len), G_MODULE_SUFFIX))
 				{
 #ifdef _WIN32
