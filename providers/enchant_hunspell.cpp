@@ -46,6 +46,8 @@
 #include "unused-parameter.h"
 
 #include <hunspell/hunspell.hxx>
+// hunspell itself uses this definition (which only supports the BMP)
+#define MAXWORDUTF8LEN (MAXWORDLEN * 3)
 
 #include <glib.h>
 
@@ -99,16 +101,16 @@ HunspellChecker::~HunspellChecker()
 bool
 HunspellChecker::checkWord(const char *utf8Word, size_t len)
 {
-	if (len > MAXWORDLEN || !g_iconv_is_valid(m_translate_in))
+	if (len > MAXWORDUTF8LEN || !g_iconv_is_valid(m_translate_in))
 		return false;
 
 	// the 8bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
 	char *in = normalizedWord;
-	char word8[MAXWORDLEN + 1];
+	char word8[MAXWORDUTF8LEN + 1];
 	char *out = word8;
 	size_t len_in = strlen(in);
-	size_t len_out = sizeof( word8 ) - 1;
+	size_t len_out = sizeof(word8) - 1;
 	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
 	g_free(normalizedWord);
 	if (static_cast<size_t>(-1) == result)
@@ -120,7 +122,7 @@ HunspellChecker::checkWord(const char *utf8Word, size_t len)
 char**
 HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug)
 {
-	if (len > MAXWORDLEN 
+	if (len > MAXWORDUTF8LEN
 		|| !g_iconv_is_valid(m_translate_in)
 		|| !g_iconv_is_valid(m_translate_out))
 		return nullptr;
@@ -128,7 +130,7 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 	// the 8bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
 	char *in = normalizedWord;
-	char word8[MAXWORDLEN + 1];
+	char word8[MAXWORDUTF8LEN + 1];
 	char *out = word8;
 	size_t len_in = strlen(in);
 	size_t len_out = sizeof(word8) - 1;
@@ -145,7 +147,7 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 		for (size_t i=0; i<*nsug; i++) {
 			in = const_cast<char *>(sugMS[i].c_str());
 			len_in = strlen(in);
-			len_out = MAXWORDLEN;
+			len_out = sizeof(word8) - 1;
 			char *word = g_new0(char, len_out + 1);
 			out = word;
 			if (static_cast<size_t>(-1) == g_iconv(m_translate_out, &in, &len_in, &out, &len_out)) {
@@ -324,11 +326,11 @@ HunspellChecker::requestDictionary(const char *szLang)
 	char *native_wordchars = strdup(hunspell->get_wordchars());
 	if (native_wordchars == NULL)
 		return false;
-	char word8[MAXWORDLEN + 1];
+	char word8[MAXWORDUTF8LEN + 1];
 	char *in = native_wordchars;
 	char *out = word8;
 	size_t len_in = strlen(in);
-	size_t len_out = sizeof( word8 ) - 1;
+	size_t len_out = sizeof(word8) - 1;
 	size_t result = g_iconv(m_translate_out, &in, &len_in, &out, &len_out);
 	if (static_cast<size_t>(-1) != result) {
 		*out = '\0';
