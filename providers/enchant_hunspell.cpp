@@ -1,5 +1,6 @@
 /* enchant
  * Copyright (C) 2003-2004 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
+ * Copyright (C) 2016-2021 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,8 +17,8 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  *
- * In addition, as a special exception, Dom Lachowicz
- * gives permission to link the code of this program with
+ * In addition, as a special exception, the copyright holders
+ * give permission to link the code of this program with
  * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
  * the two.  You must obey the GNU General Public License in all
@@ -50,6 +51,8 @@
 
 /***************************************************************************/
 
+static char *empty_string = "";
+
 class HunspellChecker
 {
 public:
@@ -67,6 +70,7 @@ private:
 	GIConv  m_translate_in; /* Selected translation from/to Unicode */
 	GIConv  m_translate_out;
 	Hunspell *hunspell;
+	char *wordchars; /* Value returned by getWordChars() */
 };
 
 /***************************************************************************/
@@ -78,7 +82,7 @@ g_iconv_is_valid(GIConv i)
 }
 
 HunspellChecker::HunspellChecker()
-: apostropheIsWordChar(false), m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr)
+: apostropheIsWordChar(false), m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr), wordchars(nullptr)
 {
 }
 
@@ -89,6 +93,7 @@ HunspellChecker::~HunspellChecker()
 		g_iconv_close(m_translate_in);
 	if (g_iconv_is_valid(m_translate_out))
 		g_iconv_close(m_translate_out);
+	free(wordchars);
 }
 
 bool
@@ -109,10 +114,7 @@ HunspellChecker::checkWord(const char *utf8Word, size_t len)
 	if (static_cast<size_t>(-1) == result)
 		return false;
 	*out = '\0';
-	if (hunspell->spell(std::string(word8)))
-		return true;
-	else
-		return false;
+	return hunspell->spell(std::string(word8)) != 0;
 }
 
 char**
@@ -155,14 +157,13 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 		}
 		return sug;
 	}
-	else
-		return nullptr;
+	return nullptr;
 }
 
-const char*
+_GL_ATTRIBUTE_PURE const char*
 HunspellChecker::getWordchars()
 {
-	return hunspell->get_wordchars();
+	return static_cast<const char *>(wordchars);
 }
 
 static void
@@ -304,8 +305,11 @@ HunspellChecker::requestDictionary(const char *szLang)
 	std::string aff(s_correspondingAffFile(dic));
 	if (s_fileExists(aff))
 	{
-		if (hunspell)
+		if (hunspell) {
 			delete hunspell;
+			free(wordchars);
+			wordchars = NULL;
+		}
 		hunspell = new Hunspell(aff.c_str(), dic);
 	}
 	free(dic);
@@ -317,9 +321,28 @@ HunspellChecker::requestDictionary(const char *szLang)
 	m_translate_in = g_iconv_open(enc, "UTF-8");
 	m_translate_out = g_iconv_open("UTF-8", enc);
 
-	const char *word_chars = hunspell->get_wordchars();
-	apostropheIsWordChar = g_utf8_strchr(word_chars, -1, g_utf8_get_char("'")) ||
-		g_utf8_strchr(word_chars, -1, g_utf8_get_char("’"));
+	char *native_wordchars = strdup(hunspell->get_wordchars());
+	if (native_wordchars == NULL)
+		return false;
+	char word8[MAXWORDLEN + 1];
+	char *in = native_wordchars;
+	char *out = word8;
+	size_t len_in = strlen(in);
+	size_t len_out = sizeof( word8 ) - 1;
+	size_t result = g_iconv(m_translate_out, &in, &len_in, &out, &len_out);
+	if (static_cast<size_t>(-1) != result) {
+		*out = '\0';
+		wordchars = strdup(word8);
+		if (wordchars == NULL)
+			return false;
+	}
+	free(native_wordchars);
+	if (wordchars == NULL)
+		wordchars = strdup(empty_string);
+	if (wordchars == NULL)
+		return false;
+	apostropheIsWordChar = g_utf8_strchr(wordchars, -1, g_utf8_get_char("'")) ||
+		g_utf8_strchr(wordchars, -1, g_utf8_get_char("’"));
 
 	return true;
 }
