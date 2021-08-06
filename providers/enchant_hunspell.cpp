@@ -29,7 +29,7 @@
 
 /*
  * This is the Hunspell Enchant Backend.
- * Hunspell is by László Németh. See: http://hunspell.github.io/
+ * Hunspell is by László Németh. See: https://hunspell.github.io/
  */
 
 #include "config.h"
