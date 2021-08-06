@@ -29,7 +29,7 @@
 
 /*
  * This is the Hunspell Enchant Backend.
- * Hunspell is by László Németh. See: http://hunspell.github.io/
+ * Hunspell is by László Németh. See: https://hunspell.github.io/
  */
 
 #include "config.h"
@@ -45,12 +45,6 @@
 #include "unused-parameter.h"
 
 #include <hunspell/hunspell.hxx>
-
-/* Some versions of hunspell (1.4.x) don't have this defined. */
-/* This is the defined value at that point */
-#ifndef MAXWORDLEN
-#define MAXWORDLEN 176
-#endif
 
 #include <glib.h>
 
