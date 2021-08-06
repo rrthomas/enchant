@@ -19,8 +19,8 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  *
- * In addition, as a special exception, Dom Lachowicz
- * gives permission to link the code of this program with
+ * In addition, as a special exception, the copyright holders
+ * give permission to link the code of this program with
  * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
  * the two.  You must obey the GNU Lesser General Public License in all
