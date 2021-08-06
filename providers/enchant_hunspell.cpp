@@ -53,7 +53,21 @@
 
 /***************************************************************************/
 
-static char *empty_string = "";
+static const char *empty_string = "";
+
+static char *do_iconv(GIConv conv, const char *word) {
+	// g_iconv() does not declare its 'in' parameter const, but iconv() does.
+	char *in = const_cast<char *>(word);
+	size_t len_in = strlen(in);
+	size_t len_out = len_in * 3;
+	char *out_buf = g_new0(char, len_out + 1);
+	char *out = out_buf;
+	size_t result = g_iconv(conv, &in, &len_in, &out, &len_out);
+	if (static_cast<size_t>(-1) == result)
+		return nullptr;
+	*out = '\0';
+	return out_buf;
+}
 
 class HunspellChecker
 {
@@ -106,17 +120,13 @@ HunspellChecker::checkWord(const char *utf8Word, size_t len)
 
 	// the 8bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
-	char *in = normalizedWord;
-	char word8[MAXWORDUTF8LEN + 1];
-	char *out = word8;
-	size_t len_in = strlen(in);
-	size_t len_out = sizeof(word8) - 1;
-	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
+	char *out = do_iconv(m_translate_in, normalizedWord);
 	g_free(normalizedWord);
-	if (static_cast<size_t>(-1) == result)
+	if (out == NULL)
 		return false;
-	*out = '\0';
-	return hunspell->spell(std::string(word8)) != 0;
+	bool result = hunspell->spell(std::string(out)) != 0;
+	free(out);
+	return result;
 }
 
 char**
@@ -129,33 +139,21 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 
 	// the 8bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
-	char *in = normalizedWord;
-	char word8[MAXWORDUTF8LEN + 1];
-	char *out = word8;
-	size_t len_in = strlen(in);
-	size_t len_out = sizeof(word8) - 1;
-	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
+	char *out = do_iconv(m_translate_in, normalizedWord);
 	g_free(normalizedWord);
-	if (static_cast<size_t>(-1) == result)
+	if (out == NULL)
 		return nullptr;
 
-	*out = '\0';
-	std::vector<std::string> sugMS = hunspell->suggest(word8);
+	std::vector<std::string> sugMS = hunspell->suggest(out);
+	g_free(out);
 	*nsug = sugMS.size();
 	if (*nsug > 0) {
 		char **sug = g_new0 (char *, *nsug + 1);
-		for (size_t i=0; i<*nsug; i++) {
-			in = const_cast<char *>(sugMS[i].c_str());
-			len_in = strlen(in);
-			len_out = sizeof(word8) - 1;
-			char *word = g_new0(char, len_out + 1);
-			out = word;
-			if (static_cast<size_t>(-1) == g_iconv(m_translate_out, &in, &len_in, &out, &len_out)) {
-				*nsug = i;
-				break;
-			}
-			*out = '\0';
-			sug[i] = word;
+		for (size_t i=0, j=0; i<*nsug; i++) {
+			const char *in = sugMS[i].c_str();
+			out = do_iconv(m_translate_out, in);
+			if (out != NULL)
+				sug[j++] = out;
 		}
 		return sug;
 	}
@@ -323,22 +321,7 @@ HunspellChecker::requestDictionary(const char *szLang)
 	m_translate_in = g_iconv_open(enc, "UTF-8");
 	m_translate_out = g_iconv_open("UTF-8", enc);
 
-	char *native_wordchars = strdup(hunspell->get_wordchars());
-	if (native_wordchars == NULL)
-		return false;
-	char word8[MAXWORDUTF8LEN + 1];
-	char *in = native_wordchars;
-	char *out = word8;
-	size_t len_in = strlen(in);
-	size_t len_out = sizeof(word8) - 1;
-	size_t result = g_iconv(m_translate_out, &in, &len_in, &out, &len_out);
-	if (static_cast<size_t>(-1) != result) {
-		*out = '\0';
-		wordchars = strdup(word8);
-		if (wordchars == NULL)
-			return false;
-	}
-	free(native_wordchars);
+	wordchars = do_iconv(m_translate_out, hunspell->get_wordchars());
 	if (wordchars == NULL)
 		wordchars = strdup(empty_string);
 	if (wordchars == NULL)
