@@ -1,5 +1,6 @@
 /* enchant
  * Copyright (C) 2003-2004 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
+ * Copyright (C) 2016-2021 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,8 +17,8 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  *
- * In addition, as a special exception, Dom Lachowicz
- * gives permission to link the code of this program with
+ * In addition, as a special exception, the copyright holders
+ * give permission to link the code of this program with
  * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
  * the two.  You must obey the GNU General Public License in all
@@ -45,10 +46,28 @@
 #include "unused-parameter.h"
 
 #include <hunspell/hunspell.hxx>
+// hunspell itself uses this definition (which only supports the BMP)
+#define MAXWORDUTF8LEN (MAXWORDLEN * 3)
 
 #include <glib.h>
 
 /***************************************************************************/
+
+static const char *empty_string = "";
+
+static char *do_iconv(GIConv conv, const char *word) {
+	// g_iconv() does not declare its 'in' parameter const, but iconv() does.
+	char *in = const_cast<char *>(word);
+	size_t len_in = strlen(in);
+	size_t len_out = len_in * 3;
+	char *out_buf = g_new0(char, len_out + 1);
+	char *out = out_buf;
+	size_t result = g_iconv(conv, &in, &len_in, &out, &len_out);
+	if (static_cast<size_t>(-1) == result)
+		return nullptr;
+	*out = '\0';
+	return out_buf;
+}
 
 class HunspellChecker
 {
@@ -67,6 +86,7 @@ private:
 	GIConv  m_translate_in; /* Selected translation from/to Unicode */
 	GIConv  m_translate_out;
 	Hunspell *hunspell;
+	char *wordchars; /* Value returned by getWordChars() */
 };
 
 /***************************************************************************/
@@ -78,7 +98,7 @@ g_iconv_is_valid(GIConv i)
 }
 
 HunspellChecker::HunspellChecker()
-: apostropheIsWordChar(false), m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr)
+: apostropheIsWordChar(false), m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr), wordchars(nullptr)
 {
 }
 
@@ -89,80 +109,61 @@ HunspellChecker::~HunspellChecker()
 		g_iconv_close(m_translate_in);
 	if (g_iconv_is_valid(m_translate_out))
 		g_iconv_close(m_translate_out);
+	free(wordchars);
 }
 
 bool
 HunspellChecker::checkWord(const char *utf8Word, size_t len)
 {
-	if (len > MAXWORDLEN || !g_iconv_is_valid(m_translate_in))
+	if (len > MAXWORDUTF8LEN || !g_iconv_is_valid(m_translate_in))
 		return false;
 
 	// the 8bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
-	char *in = normalizedWord;
-	char word8[MAXWORDLEN + 1];
-	char *out = word8;
-	size_t len_in = strlen(in);
-	size_t len_out = sizeof( word8 ) - 1;
-	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
+	char *out = do_iconv(m_translate_in, normalizedWord);
 	g_free(normalizedWord);
-	if (static_cast<size_t>(-1) == result)
+	if (out == NULL)
 		return false;
-	*out = '\0';
-	if (hunspell->spell(std::string(word8)))
-		return true;
-	else
-		return false;
+	bool result = hunspell->spell(std::string(out)) != 0;
+	free(out);
+	return result;
 }
 
 char**
 HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug)
 {
-	if (len > MAXWORDLEN 
+	if (len > MAXWORDUTF8LEN
 		|| !g_iconv_is_valid(m_translate_in)
 		|| !g_iconv_is_valid(m_translate_out))
 		return nullptr;
 
 	// the 8bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
-	char *in = normalizedWord;
-	char word8[MAXWORDLEN + 1];
-	char *out = word8;
-	size_t len_in = strlen(in);
-	size_t len_out = sizeof(word8) - 1;
-	size_t result = g_iconv(m_translate_in, &in, &len_in, &out, &len_out);
+	char *out = do_iconv(m_translate_in, normalizedWord);
 	g_free(normalizedWord);
-	if (static_cast<size_t>(-1) == result)
+	if (out == NULL)
 		return nullptr;
 
-	*out = '\0';
-	std::vector<std::string> sugMS = hunspell->suggest(word8);
+	std::vector<std::string> sugMS = hunspell->suggest(out);
+	g_free(out);
 	*nsug = sugMS.size();
 	if (*nsug > 0) {
 		char **sug = g_new0 (char *, *nsug + 1);
-		for (size_t i=0; i<*nsug; i++) {
-			in = const_cast<char *>(sugMS[i].c_str());
-			len_in = strlen(in);
-			len_out = MAXWORDLEN;
-			char *word = g_new0(char, len_out + 1);
-			out = word;
-			if (static_cast<size_t>(-1) == g_iconv(m_translate_out, &in, &len_in, &out, &len_out)) {
-				*nsug = i;
-				break;
-			}
-			*out = '\0';
-			sug[i] = word;
+		for (size_t i=0, j=0; i<*nsug; i++) {
+			const char *in = sugMS[i].c_str();
+			out = do_iconv(m_translate_out, in);
+			if (out != NULL)
+				sug[j++] = out;
 		}
 		return sug;
 	}
-	else
-		return nullptr;
+	return nullptr;
 }
 
-const char*
+_GL_ATTRIBUTE_PURE const char*
 HunspellChecker::getWordchars()
 {
-	return hunspell->get_wordchars();
+	return static_cast<const char *>(wordchars);
 }
 
 static void
@@ -304,8 +305,11 @@ HunspellChecker::requestDictionary(const char *szLang)
 	std::string aff(s_correspondingAffFile(dic));
 	if (s_fileExists(aff))
 	{
-		if (hunspell)
+		if (hunspell) {
 			delete hunspell;
+			free(wordchars);
+			wordchars = NULL;
+		}
 		hunspell = new Hunspell(aff.c_str(), dic);
 	}
 	free(dic);
@@ -317,9 +321,13 @@ HunspellChecker::requestDictionary(const char *szLang)
 	m_translate_in = g_iconv_open(enc, "UTF-8");
 	m_translate_out = g_iconv_open("UTF-8", enc);
 
-	const char *word_chars = hunspell->get_wordchars();
-	apostropheIsWordChar = g_utf8_strchr(word_chars, -1, g_utf8_get_char("'")) ||
-		g_utf8_strchr(word_chars, -1, g_utf8_get_char("’"));
+	wordchars = do_iconv(m_translate_out, hunspell->get_wordchars());
+	if (wordchars == NULL)
+		wordchars = strdup(empty_string);
+	if (wordchars == NULL)
+		return false;
+	apostropheIsWordChar = g_utf8_strchr(wordchars, -1, g_utf8_get_char("'")) ||
+		g_utf8_strchr(wordchars, -1, g_utf8_get_char("’"));
 
 	return true;
 }
