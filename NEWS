@@ -1,3 +1,17 @@
+2.3.1 (August 9, 2021)
+----------------------
+
+Hunspell: fix enchant_dict_get_extra_word_characters API so it always
+returns UTF-8. Use the same limit on word length as Hunspell uses (it is
+different for UTF-8). Drop support for Hunspell 1.4.
+
+Ignore hidden files when loading provider modules.
+
+In a slight update to a change introduced in 2.3.0, in the default
+enchant.ordering file, do not prefer aspell for all “en” locales, only for
+the specific “en” locales that it supports.
+
+
 2.3.0 (June 14, 2021)
 ---------------------
 
