@@ -28,7 +28,7 @@ for:
     - cd .. && wget https://github.com/nuspell/nuspell/archive/refs/tags/v5.0.0.tar.gz -O - | tar -xz
     - cmake -S nuspell-* -B nuspell-*/build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0
     - cmake --build nuspell-*/build
-    - cmake --install nuspell-*/build
+    - sudo cmake --install nuspell-*/build
     - cd -
   build_script:
     - export ASAN
@@ -38,10 +38,11 @@ for:
     only:
       - APPVEYOR_BUILD_WORKER_IMAGE: macos
   init:
-    - brew tap nuspell/nuspell
     # Note: aspell should work on macOS, but has been removed because one of
     # the tests fails; see https://github.com/GNUAspell/aspell/issues/555
-    - brew install glib dbus-glib hspell hunspell libvoikko unittest-cpp nuspell
+    - brew install glib dbus-glib hspell hunspell libvoikko unittest-cpp
+    - brew install cmake && brew link --force cmake
+    - brew tap nuspell/nuspell && brew install nuspell
   environment:
     LDFLAGS: "-L/usr/local/opt/flex/lib -L/usr/local/opt/texinfo/lib"
     CPPFLAGS: "-I/usr/local/opt/flex/include"
