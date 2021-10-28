@@ -41,8 +41,6 @@ for:
     # Note: aspell should work on macOS, but has been removed because one of
     # the tests fails; see https://github.com/GNUAspell/aspell/issues/555
     - brew install glib dbus-glib hspell hunspell libvoikko unittest-cpp
-    - brew uninstall --cask --zap cmake
-    - brew tap nuspell/nuspell && brew install nuspell
   environment:
     LDFLAGS: "-L/usr/local/opt/flex/lib -L/usr/local/opt/texinfo/lib"
     CPPFLAGS: "-I/usr/local/opt/flex/include"
