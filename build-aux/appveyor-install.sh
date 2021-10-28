@@ -14,7 +14,7 @@ case $MSYSTEM in
 esac
 
 # GLib
-pacman --noconfirm -S mingw-w64-$MINGW_ARCH-glib2 glib2-devel mingw-w64-$MINGW_ARCH-hunspell mingw-w64-$MINGW_ARCH-hunspell-en
+pacman --noconfirm -S mingw-w64-$MINGW_ARCH-glib2 glib2-devel mingw-w64-$MINGW_ARCH-hunspell mingw-w64-$MINGW_ARCH-hunspell-en mingw-w64-$MINGW_ARCH-nuspell
 
 # UnitTest++ is not packaged in mingw
 wget https://github.com/unittest-cpp/unittest-cpp/releases/download/v1.6.1/unittest-cpp-1.6.1.tar.gz
