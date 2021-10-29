@@ -1,5 +1,6 @@
 version: "{build}"
 
+
 environment:
   global:
     # Only need one flavour of dictionary
