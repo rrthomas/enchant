@@ -49,7 +49,7 @@ for:
   build_script:
     # Prepend optional brew binary directories to PATH
     # Also prepend /usr/local/bin to work around https://github.com/appveyor/ci/issues/3326
-    - export PATH="/usr/local/opt/flex/bin:/usr/local/opt/texinfo/bin:/usr/local/opt/gettext/bin:/usr/local/opt/cython/bin:/usr/local/bin:$PATH"
+    - export PATH="/usr/local/opt/flex/bin:/usr/local/opt/m4/bin:/usr/local/opt/texinfo/bin:/usr/local/opt/gettext/bin:/usr/local/opt/cython/bin:/usr/local/bin:$PATH"
     - ./build-aux/appveyor-build.sh
 -
   matrix:
