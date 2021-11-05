@@ -6,9 +6,9 @@ environment:
     CONFIGURE_FLAGS: --with-hunspell-dir=/mingw64/share/hunspell
     VERBOSE: 1 # Get test logs in output
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       ASAN: 'yes'
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
     - APPVEYOR_BUILD_WORKER_IMAGE: macos
     # MSYS does not have hunspell packages
     # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -22,9 +22,10 @@ for:
 -
   matrix:
     only:
-      - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
   init:
     - sudo add-apt-repository -y ppa:nuspell/ppa
+    - sudo apt-get -y update && sudo apt-get -y upgrade
     - sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr libnuspell-dev
   build_script:
     - export ASAN
