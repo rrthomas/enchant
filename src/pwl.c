@@ -1,5 +1,6 @@
 /* enchant
  * Copyright (C) 2003, 2004 Dom Lachowicz
+ * Copyright (C) 2016-2021 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
