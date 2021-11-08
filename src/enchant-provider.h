@@ -128,22 +128,22 @@ struct str_enchant_dict
 
 	int (*check) (struct str_enchant_dict * me, const char *const word,
 			  size_t len);
-	
+
 	/* returns utf8*/
 	char **(*suggest) (struct str_enchant_dict * me,
 			   const char *const word, size_t len,
 			   size_t * out_n_suggs);
-	
+
 	void (*add_to_personal) (struct str_enchant_dict * me,
 				 const char *const word, size_t len);
-	
+
 	void (*add_to_session) (struct str_enchant_dict * me,
 				const char *const word, size_t len);
-	
+
 	void (*store_replacement) (struct str_enchant_dict * me,
 				   const char *const mis, size_t mis_len,
 				   const char *const cor, size_t cor_len);
-	
+
 	void (*add_to_exclude) (struct str_enchant_dict * me,
 				const char *const word, size_t len);
 
@@ -152,21 +152,21 @@ struct str_enchant_dict
 	int (*is_word_character) (struct str_enchant_dict * me,
 				  uint32_t uc_in, size_t n);
 };
-	
+
 struct str_enchant_provider
 {
 	void *user_data;
 	void *enchant_private_data;
 	EnchantBroker * owner;
-	
+
 	void (*dispose) (struct str_enchant_provider * me);
-	
+
 	EnchantDict *(*request_dict) (struct str_enchant_provider * me,
 				      const char *const tag);
-	
+
 	void (*dispose_dict) (struct str_enchant_provider * me,
 				  EnchantDict * dict);
-	
+
 	int (*dictionary_exists) (struct str_enchant_provider * me,
 				  const char *const tag);
 
