@@ -113,7 +113,7 @@ voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 
 static int
 voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED_PARAMETER,
-                                   const char *const tag)
+				   const char *const tag)
 {
 	size_t i;
 	int exists = 0;
