@@ -1177,31 +1177,28 @@ enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, voi
 		{
 			EnchantProvider *provider = (EnchantProvider *) list->data;
 
-			if (provider->list_dicts)
+			size_t n_dicts;
+			char ** dicts = (*provider->list_dicts) (provider, &n_dicts);
+
+			for (size_t i = 0; i < n_dicts; i++)
 				{
-					size_t n_dicts;
-					char ** dicts = (*provider->list_dicts) (provider, &n_dicts);
-
-					for (size_t i = 0; i < n_dicts; i++)
-						{
-							const char * tag = dicts[i];
-							if (enchant_is_valid_dictionary_tag (tag)) {
-								GSList *providers = enchant_get_ordered_providers (broker, tag);
-								gint this_priority = g_slist_index (providers, provider);
-								if (this_priority != -1) {
-									gint min_priority = this_priority + 1;
-									gpointer ptr = g_hash_table_lookup (tag_map, tag);
-									if (ptr != NULL)
-										min_priority = g_slist_index (providers, ptr);
-									if (this_priority < min_priority)
-										g_hash_table_insert (tag_map, strdup (tag), provider);
-								}
-								g_slist_free (providers);
-							}
+					const char * tag = dicts[i];
+					if (enchant_is_valid_dictionary_tag (tag)) {
+						GSList *providers = enchant_get_ordered_providers (broker, tag);
+						gint this_priority = g_slist_index (providers, provider);
+						if (this_priority != -1) {
+							gint min_priority = this_priority + 1;
+							gpointer ptr = g_hash_table_lookup (tag_map, tag);
+							if (ptr != NULL)
+								min_priority = g_slist_index (providers, ptr);
+							if (this_priority < min_priority)
+								g_hash_table_insert (tag_map, strdup (tag), provider);
 						}
-
-					enchant_free_string_list (dicts);
+						g_slist_free (providers);
+					}
 				}
+
+			enchant_free_string_list (dicts);
 		}
 
 	GSList *tags = NULL;
@@ -1256,7 +1253,7 @@ enchant_provider_dictionary_exists (EnchantProvider * provider, const char * con
 		{
 			exists = (*provider->dictionary_exists) (provider, tag);
 		}
-	else if (provider->list_dicts)
+	else
 		{
 			size_t n_dicts;
 			char ** dicts = (*provider->list_dicts) (provider, &n_dicts);
