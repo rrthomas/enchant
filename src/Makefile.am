@@ -25,7 +25,7 @@ pkgdata_DATA = enchant.ordering
 dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1
 
 edit = sed \
-	-e 's|@datadir[@]|$(datadir)|g'
+	-e 's|DATADIR|$(datadir)|g'
 
 DISTCLEANFILES = $(dist_man_MANS)
 
@@ -35,9 +35,7 @@ enchant-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant.1 Makefile.am $(top_build
 	mv $@.tmp $@
 
 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant-lsmod.1 Makefile.am $(top_builddir)/config.status
-	rm -f $@ $@.tmp
-	$(edit) $(abs_builddir)/enchant-lsmod.1 >$@.tmp
-	mv $@.tmp $@
+	cp $(abs_builddir)/enchant-lsmod.1 $@
 
 LDADD = libenchant-@ENCHANT_MAJOR_VERSION@.la $(ENCHANT_LIBS) $(top_builddir)/lib/libgnu.la
 bin_PROGRAMS = enchant-@ENCHANT_MAJOR_VERSION@ enchant-lsmod-@ENCHANT_MAJOR_VERSION@
