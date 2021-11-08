@@ -773,17 +773,19 @@ enchant_provider_is_valid(EnchantProvider * provider)
 	else if (provider->identify == NULL)
 		g_warning ("EnchantProvider's identify method cannot be NULL\n");
 	else if (!g_utf8_validate((*provider->identify)(provider), -1, NULL))
-		g_warning ("EnchantProvider's identify method does not return valid UTF-8.\n");
+		g_warning ("EnchantProvider's identify method does not return valid UTF-8\n");
 	else if (provider->describe == NULL)
 		g_warning ("EnchantProvider's describe method cannot be NULL\n");
 	else if (!g_utf8_validate((*provider->describe)(provider), -1, NULL))
-		g_warning ("EnchantProvider's describe method does not return valid UTF-8.\n");
+		g_warning ("EnchantProvider's describe method does not return valid UTF-8\n");
 	else if (provider->dispose == NULL)
 		g_warning ("EnchantProvider's dispose method cannot be NULL\n");
 	else if (provider->dispose_dict == NULL)
 		g_warning ("EnchantProvider's dispose_dict method cannot be NULL\n");
 	else if (provider->list_dicts == NULL)
 		g_warning ("EnchantProvider's list_dicts method cannot be NULL\n");
+	else if (provider->request_dict == NULL)
+		g_warning ("EnchantProvider's request_dict method cannot be NULL\n");
 	else
 		return 1;
 
@@ -1078,21 +1080,17 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 		{
 			EnchantProvider * provider = (EnchantProvider *) listIter->data;
 
-			if (provider->request_dict)
+			dict = (*provider->request_dict) (provider, tag);
+
+			if (dict)
 				{
-					dict = (*provider->request_dict) (provider, tag);
-
-					if (dict)
-						{
-
-							EnchantSession *session = enchant_session_new (provider, tag);
-							EnchantDictPrivateData *enchant_dict_private_data = g_new0 (EnchantDictPrivateData, 1);
-							enchant_dict_private_data->reference_count = 1;
-							enchant_dict_private_data->session = session;
-							dict->enchant_private_data = (void *)enchant_dict_private_data;
-							g_hash_table_insert (broker->dict_map, (gpointer)strdup (tag), dict);
-							break;
-						}
+					EnchantSession *session = enchant_session_new (provider, tag);
+					EnchantDictPrivateData *enchant_dict_private_data = g_new0 (EnchantDictPrivateData, 1);
+					enchant_dict_private_data->reference_count = 1;
+					enchant_dict_private_data->session = session;
+					dict->enchant_private_data = (void *)enchant_dict_private_data;
+					g_hash_table_insert (broker->dict_map, (gpointer)strdup (tag), dict);
+					break;
 				}
 		}
 	g_slist_free (list);
