@@ -128,10 +128,9 @@ print_utf (const char * str)
 	if (native) {
 		fwrite (native, 1, bytes_written, stdout);
 		g_free (native);
-	} else {
+	} else
 		/* Assume that it's already utf8 and glib is just being stupid. */
 		printf ("%s", str);
-	}
 }
 
 static int
@@ -364,9 +363,9 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 							ssize_t mis_len = comma - mis;
 							ssize_t cor_len = strlen(str->str) - (cor - str->str);
 							enchant_dict_store_replacement(dict, mis, mis_len, cor, cor_len);
-						} else if (g_str_has_prefix(str->str, "$$wc")) { /* Return the extra word chars list */
+						} else if (g_str_has_prefix(str->str, "$$wc"))
+							/* Return the extra word chars list */
 							printf("%s\n", enchant_dict_get_extra_word_characters(dict));
-						}
 					}
 					break;
 
@@ -406,9 +405,8 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 			}
 		} 
 		
-		if (mode == MODE_A && corrected_something) {
+		if (mode == MODE_A && corrected_something)
 			putchar('\n');
-		}
 		g_string_truncate (str, 0);
 		fflush (stdout);
 	}
@@ -437,9 +435,8 @@ int main (int argc, char ** argv)
 	g_get_charset(&charset);
 #ifdef _WIN32
 	/* If reading from stdin, its CP may not be the system CP (which glib's locale gives us) */
-	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) == FILE_TYPE_CHAR) {
+	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) == FILE_TYPE_CHAR)
 		charset = g_strdup_printf("CP%u", GetConsoleCP());
-	}
 #endif
 
 	int optchar;

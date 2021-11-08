@@ -166,10 +166,8 @@ enchant_is_valid_dictionary_tag(const char * const tag)
 {
 	const char * it;
 	for (it = tag; *it; ++it)
-		{
-			if(!g_ascii_isalnum(*it) && *it != '_')
-				return 0;
-		}
+		if(!g_ascii_isalnum(*it) && *it != '_')
+			return 0;
 
 	return it != tag; /*empty tag invalid*/
 }
@@ -836,14 +834,10 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 										}
 								}
 							else
-								{
-									g_module_close (module);
-								}
+								g_module_close (module);
 						}
 					else
-						{
-							g_warning ("Error loading plugin: %s\n", g_module_error());
-						}
+						g_warning ("Error loading plugin: %s\n", g_module_error());
 
 					g_free (filename);
 #ifdef _WIN32
@@ -961,10 +955,8 @@ enchant_get_ordered_providers (EnchantBroker * broker, const char * const tag)
 
 	/* append providers not in the list, or from an unordered list */
 	for (GSList * iter = broker->provider_list; iter != NULL; iter = g_slist_next (iter))
-		{
-			if (!g_slist_find (list, iter->data))
-				list = g_slist_append (list, iter->data);
-		}
+		if (!g_slist_find (list, iter->data))
+			list = g_slist_append (list, iter->data);
 
 	return list;
 }
@@ -1084,9 +1076,7 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	GSList * list = enchant_get_ordered_providers (broker, tag);
 	for (GSList *listIter = list; listIter != NULL; listIter = g_slist_next (listIter))
 		{
-			EnchantProvider * provider;
-
-			provider = (EnchantProvider *) listIter->data;
+			EnchantProvider * provider = (EnchantProvider *) listIter->data;
 
 			if (provider->request_dict)
 				{
@@ -1122,9 +1112,7 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 
 	char * normalized_tag = enchant_normalize_dictionary_tag (tag);
 	if(!enchant_is_valid_dictionary_tag(normalized_tag))
-		{
-			enchant_broker_set_error (broker, "invalid tag character found");
-		}
+		enchant_broker_set_error (broker, "invalid tag character found");
 	else if ((dict = _enchant_broker_request_dict (broker, normalized_tag)) == NULL)
 		{
 			char * iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
@@ -1250,20 +1238,16 @@ enchant_provider_dictionary_exists (EnchantProvider * provider, const char * con
 	int exists = 0;
 
 	if (provider->dictionary_exists)
-		{
-			exists = (*provider->dictionary_exists) (provider, tag);
-		}
+		exists = (*provider->dictionary_exists) (provider, tag);
 	else
 		{
 			size_t n_dicts;
 			char ** dicts = (*provider->list_dicts) (provider, &n_dicts);
 
 			for (size_t i = 0; i < n_dicts; i++)
-				{
-					if (!strcmp(dicts[i], tag)) {
-						exists = 1;
-						break;
-					}
+				if (!strcmp(dicts[i], tag)) {
+					exists = 1;
+					break;
 				}
 
 			enchant_free_string_list (dicts);
@@ -1283,10 +1267,9 @@ _enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag)
 	if (g_hash_table_lookup (broker->dict_map, (gpointer) tag) != NULL)
 		return 1;
 
-	for (GSList *list = broker->provider_list; list != NULL; list = g_slist_next (list)) {
+	for (GSList *list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		if (enchant_provider_dictionary_exists ((EnchantProvider *) list->data, tag))
 			return 1;
-	}
 
 	return 0;
 }
@@ -1303,19 +1286,13 @@ enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag)
 	int exists = 0;
 
 	if(!enchant_is_valid_dictionary_tag(normalized_tag))
-		{
-			enchant_broker_set_error (broker, "invalid tag character found");
-		}
+		enchant_broker_set_error (broker, "invalid tag character found");
 	else if ((exists = _enchant_broker_dict_exists (broker, normalized_tag)) == 0)
 		{
-			char * iso_639_only_tag;
-
-			iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
+			char * iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
 
 			if (strcmp (normalized_tag, iso_639_only_tag) != 0)
-				{
-					exists = _enchant_broker_dict_exists (broker, iso_639_only_tag);
-				}
+				exists = _enchant_broker_dict_exists (broker, iso_639_only_tag);
 
 			free (iso_639_only_tag);
 		}
@@ -1343,9 +1320,8 @@ enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc_in, size_t n)
 	gunichar uc = (gunichar)uc_in;
 
 	/* Accept quote marks anywhere except at the end of a word */
-	if (uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’")) {
+	if (uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’"))
 		return n < 2;
-	}
 
 	GUnicodeType type = g_unichar_type(uc);
 
@@ -1365,9 +1341,8 @@ enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc_in, size_t n)
 		return 1;     /* Enchant 1.3.0 defines word chars like this. */
 
 	case G_UNICODE_DASH_PUNCTUATION:
-		if ((n == 1) && (type == G_UNICODE_DASH_PUNCTUATION)) {
+		if ((n == 1) && (type == G_UNICODE_DASH_PUNCTUATION))
 			return 1; /* hyphens only accepted within a word. */
-		}
 		/* Fallthrough */
 
 	case G_UNICODE_CONTROL:
