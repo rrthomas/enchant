@@ -770,6 +770,12 @@ enchant_provider_is_valid(EnchantProvider * provider)
 {
 	if (provider == NULL)
 		g_warning ("EnchantProvider cannot be NULL\n");
+	else if (provider->dispose == NULL)
+		g_warning ("EnchantProvider's dispose method cannot be NULL\n");
+	else if (provider->request_dict == NULL)
+		g_warning ("EnchantProvider's request_dict method cannot be NULL\n");
+	else if (provider->dispose_dict == NULL)
+		g_warning ("EnchantProvider's dispose_dict method cannot be NULL\n");
 	else if (provider->identify == NULL)
 		g_warning ("EnchantProvider's identify method cannot be NULL\n");
 	else if (!g_utf8_validate((*provider->identify)(provider), -1, NULL))
@@ -778,14 +784,8 @@ enchant_provider_is_valid(EnchantProvider * provider)
 		g_warning ("EnchantProvider's describe method cannot be NULL\n");
 	else if (!g_utf8_validate((*provider->describe)(provider), -1, NULL))
 		g_warning ("EnchantProvider's describe method does not return valid UTF-8\n");
-	else if (provider->dispose == NULL)
-		g_warning ("EnchantProvider's dispose method cannot be NULL\n");
-	else if (provider->dispose_dict == NULL)
-		g_warning ("EnchantProvider's dispose_dict method cannot be NULL\n");
 	else if (provider->list_dicts == NULL)
 		g_warning ("EnchantProvider's list_dicts method cannot be NULL\n");
-	else if (provider->request_dict == NULL)
-		g_warning ("EnchantProvider's request_dict method cannot be NULL\n");
 	else
 		return 1;
 
