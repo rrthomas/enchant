@@ -66,7 +66,7 @@ corlist2strv (struct corlist *cl, size_t nb_sugg)
 									 "utf-8", "iso8859-8", NULL, &len, NULL);
 				}
 		}
-	
+
 	return sugg_arr;
 }
 
@@ -87,17 +87,17 @@ hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
 	char *iso_word = hspell_convert_to_iso8859_8 (me, word, len);
 	g_return_val_if_fail (iso_word, -1);
-	
+
 	/* check */
 	int preflen;
 	int res = hspell_check_word (hspell_dict, iso_word, &preflen);
-	
+
 	/* if not correct try gimatria */
 	if (res != 1)
 		res = hspell_is_canonic_gimatria (iso_word) != 0;
-	
+
 	g_free (iso_word);
-	
+
 	return (res != 1);
 }
 
@@ -113,13 +113,13 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 	struct corlist cl;
 	corlist_init (&cl);
 	hspell_trycorrect (hspell_dict, iso_word, &cl);
-	
+
 	*out_n_suggs = corlist_n (&cl);
 	char **sugg_arr = corlist2strv (&cl, *out_n_suggs);
 	corlist_free (&cl);
 	g_free (iso_word);
-	
-	return sugg_arr;	
+
+	return sugg_arr;
 }
 
 static EnchantDict *
@@ -127,22 +127,22 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	if(!((strlen(tag) >= 2) && tag[0] == 'h' && tag[1] == 'e'))
 		return NULL;
-	
+
 	/* try to set a new session */
 	struct dict_radix *hspell_dict = NULL;
 	int dict_flag = hspell_init (&hspell_dict, HSPELL_OPT_DEFAULT);
-	
+
 	if (dict_flag != 0 || !hspell_dict)
 		{
 			enchant_provider_set_error (me, "can't create new dict.");
 			return NULL;
 		}
-	
+
 	EnchantDict *dict = g_new0 (EnchantDict, 1);
 	dict->user_data = (void *) hspell_dict;
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
-	
+
 	return dict;
 }
 
@@ -156,8 +156,8 @@ hspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, Enchant
 
 /* test for the existence of, then return $prefix/share/hspell/hebrew.wgz */
 
-static char ** 
-hspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
+static char **
+hspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 			    size_t * out_n_dicts)
 {
 	const char * dictionary_path = hspell_get_dictionary_path();
@@ -167,8 +167,8 @@ hspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 	if(dictionary_path && *dictionary_path && g_file_test (dictionary_path, G_FILE_TEST_EXISTS)) {
 		out_list = g_new0 (char *, 2);
 		out_list[(*out_n_dicts)++] = g_strdup ("he");
-	}		
-		
+	}
+
 	return out_list;
 }
 

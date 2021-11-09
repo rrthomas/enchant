@@ -111,7 +111,7 @@ int enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag);
  * language that does not explictly declare an ordering.
  */
 void enchant_broker_set_ordering (EnchantBroker * broker,
-                                  const char * const tag,
+				  const char * const tag,
 				  const char * const ordering);
 /**
  * enchant_broker_get_error
@@ -136,7 +136,7 @@ typedef void (*EnchantBrokerDescribeFn) (const char * const provider_name,
 					 const char * const provider_desc,
 					 const char * const provider_dll_file,
 					 void * user_data);
-	
+
 /**
  * enchant_broker_describe
  * @broker: A non-null #EnchantBroker
@@ -176,7 +176,7 @@ int enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
  * Returns: A %null terminated list of UTF-8 encoded suggestions, or %null
  */
 char **enchant_dict_suggest (EnchantDict * dict, const char *const word,
-                             ssize_t len, size_t * out_n_suggs);
+			     ssize_t len, size_t * out_n_suggs);
 
 /**
  * enchant_dict_add

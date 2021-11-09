@@ -59,11 +59,11 @@ Default: \fI~/.config/enchant\fR
 \fICSIDL_LOCAL_APPDATA\\enchant\fR (Windows systems)
 Default: \fIC:\\Documents and Settings\\\fRusername\fI\\Local Settings\\Application Data\\enchant
 .TP
-\fI@datadir@/enchant\fR
+\fIDATADIR/enchant\fR
 (Or the equivalent location relative to the enchant library for a relocatable build.)
 .PP
 Dictionaries are looked for in a subdirectory with the same name as the
-provider; for example, \fI@datadir@/enchant/hunspell\fR and
+provider; for example, \fIDATADIR/enchant/hunspell\fR and
 \fI~/.config/enchant/hunspell\fR.
 .PP
 Some providers may also look in a standard system directory for their

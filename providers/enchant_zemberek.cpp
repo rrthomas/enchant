@@ -1,6 +1,6 @@
 /* Copyright (C) 2006 Barış Metin <baris@pardus.org.tr>
  * Copyright (C) 2007 Serkan Kaba <serkan_kaba@yahoo.com>
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -52,7 +52,7 @@ static bool zemberek_service_is_running ()
                                                        "/net/zemberekserver/server/dbus/ZemberekDbus",
                                                        "net.zemberekserver.server.dbus.ZemberekDbusInterface",
                                                        &Error);
-  
+
   dbus_g_connection_unref (connection);
   if (proxy == NULL) {
     return false;
@@ -67,7 +67,7 @@ class Zemberek
 public:
     Zemberek();
     ~Zemberek();
-    
+
     int checkWord(const char* word) const;
     char** suggestWord(const char* word, size_t *out_n_suggs);
 
@@ -101,9 +101,9 @@ Zemberek::Zemberek()
 Zemberek::~Zemberek()
 {
     if(proxy)
-	    g_object_unref (proxy);
+            g_object_unref (proxy);
     if(connection)
-	    dbus_g_connection_unref (connection);
+            dbus_g_connection_unref (connection);
 }
 
 
@@ -112,10 +112,10 @@ int Zemberek::checkWord(const char* word) const
     gboolean result;
     GError *Error = NULL;
     if (!dbus_g_proxy_call (proxy, "kelimeDenetle", &Error,
-    	G_TYPE_STRING,word,G_TYPE_INVALID,
-    	G_TYPE_BOOLEAN, &result, G_TYPE_INVALID)) {
-    	g_error_free (Error);
-    	return -1;
+        G_TYPE_STRING,word,G_TYPE_INVALID,
+        G_TYPE_BOOLEAN, &result, G_TYPE_INVALID)) {
+        g_error_free (Error);
+        return -1;
     }
     else
         return !result;
@@ -127,10 +127,10 @@ char** Zemberek::suggestWord(const char* word, size_t *out_n_suggs)
     char** suggs;
     GError *Error = NULL;
     if (!dbus_g_proxy_call (proxy, "oner", &Error,
-    	G_TYPE_STRING,word,G_TYPE_INVALID,
-    	G_TYPE_STRV, &suggs,G_TYPE_INVALID)) {
-    	g_error_free (Error);
-    	return NULL;
+        G_TYPE_STRING,word,G_TYPE_INVALID,
+        G_TYPE_STRV, &suggs,G_TYPE_INVALID)) {
+        g_error_free (Error);
+        return NULL;
     }
     *out_n_suggs = g_strv_length(suggs);
     return suggs;
@@ -172,23 +172,23 @@ static EnchantDict*
 zemberek_provider_request_dict(EnchantProvider *me _GL_UNUSED_PARAMETER, const char *tag)
 {
     if (!((strcmp(tag, "tr") == 0) || (strncmp(tag, "tr_", 3) == 0)))
-	return NULL; // only handle turkish
+        return NULL; // only handle turkish
 
     try
       {
-	Zemberek* checker = new Zemberek();
+        Zemberek* checker = new Zemberek();
 
-	EnchantDict* dict = g_new0(EnchantDict, 1);
-	dict->user_data = (void *) checker;
-	dict->check = zemberek_dict_check;
-	dict->suggest = zemberek_dict_suggest;
+        EnchantDict* dict = g_new0(EnchantDict, 1);
+        dict->user_data = (void *) checker;
+        dict->check = zemberek_dict_check;
+        dict->suggest = zemberek_dict_suggest;
 
-	return dict;
+        return dict;
       }
     catch(...)
       {
-	// will fail if zemberek service isn't running
-	return NULL;
+        // will fail if zemberek service isn't running
+        return NULL;
       }
 }
 
@@ -203,31 +203,31 @@ zemberek_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, Encha
 static const char *
 zemberek_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
-	return "zemberek";
+        return "zemberek";
 }
 
 static const char *
 zemberek_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
 {
-	return "Zemberek Provider";
+        return "Zemberek Provider";
 }
 
 static char **
 zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
-			      size_t * out_n_dicts)
+                              size_t * out_n_dicts)
 {
   if (!zemberek_service_is_running ())
     {
-	*out_n_dicts = 0;
-	return NULL;
+        *out_n_dicts = 0;
+        return NULL;
     }
   else
     {
-	*out_n_dicts = 1;
-	char ** out_list = g_new0 (char *, 2);
-	out_list[0] = g_strdup ("tr");
+        *out_n_dicts = 1;
+        char ** out_list = g_new0 (char *, 2);
+        out_list[0] = g_strdup ("tr");
 
-	return out_list;
+        return out_list;
     }
 }
 

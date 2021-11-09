@@ -56,14 +56,14 @@
 
 static const char *charset;
 
-typedef enum 
+typedef enum
 	{
 		MODE_NONE,
 		MODE_A,
 		MODE_L
 	} IspellMode_t;
 
-static void 
+static void
 print_version (FILE * to)
 {
 	fprintf (to, "@(#) International Ispell Version 3.1.20 (but really Enchant %s)\n", PACKAGE_VERSION);
@@ -110,8 +110,8 @@ consume_line (FILE * in, GString * str)
 		if (utf) {
 			g_string_assign (str, utf);
 			g_free (utf);
-		} 
-		/* Else str->str stays the same. we'll assume that it's 
+		}
+		/* Else str->str stays the same. we'll assume that it's
 		   already utf8 and glib is just being stupid. */
 	}
 
@@ -128,10 +128,9 @@ print_utf (const char * str)
 	if (native) {
 		fwrite (native, 1, bytes_written, stdout);
 		g_free (native);
-	} else {
+	} else
 		/* Assume that it's already utf8 and glib is just being stupid. */
 		printf ("%s", str);
-	}
 }
 
 static int
@@ -171,7 +170,7 @@ do_mode_a (EnchantDict * dict, EnchantPWL * pwl, GString * word, size_t start_po
 				printf ("%u ", (unsigned int)lineCount);
 			print_utf (word->str);
 			printf (" %u %u:", (unsigned int)n_suggs, (unsigned int)start_pos);
-			
+
 			for (size_t i = 0; i < n_suggs; i++) {
 				putchar (' ');
 				print_utf (suggs[i]);
@@ -212,11 +211,11 @@ tokenize_line (EnchantDict * dict, GString * line)
 	while (cur_pos < line->len && *utf) {
 		gunichar uc;
 
-	        /* Skip non-word characters. */
+		/* Skip non-word characters. */
 		cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		uc = g_utf8_get_char (utf);
 		while (cur_pos < line->len && *utf && !enchant_dict_is_word_character (dict, uc, 0)) {
-		        utf = g_utf8_next_char (utf);
+			utf = g_utf8_next_char (utf);
 			uc = g_utf8_get_char (utf);
 			cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		}
@@ -225,13 +224,13 @@ tokenize_line (EnchantDict * dict, GString * line)
 		/* Skip over word characters. */
 		while (cur_pos < line->len && *utf && enchant_dict_is_word_character (dict, uc, 1)) {
 			g_string_append_unichar (word, uc);
-		        utf = g_utf8_next_char (utf);
+			utf = g_utf8_next_char (utf);
 			uc = g_utf8_get_char (utf);
 			cur_pos = g_utf8_pointer_to_offset ((const char*)line->str, utf);
 		}
 
-	        /* Skip backwards over any characters that can't appear at the end of a word. */
-	        for (gchar *i_utf = word->str + word->len;
+		/* Skip backwards over any characters that can't appear at the end of a word. */
+		for (gchar *i_utf = word->str + word->len;
 		     (i_utf = g_utf8_find_prev_char (word->str, i_utf)) != NULL;
 		     g_string_truncate (word, i_utf - word->str)) {
 			uc = g_utf8_get_char (i_utf);
@@ -240,8 +239,8 @@ tokenize_line (EnchantDict * dict, GString * line)
 		}
 
 		/* Save (word, position) tuple. */
-                if (word->len) {
-		        tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
+		if (word->len) {
+			tokens = g_slist_append (tokens, g_string_new_len (word->str, word->len));
 			tokens = g_slist_append (tokens, GINT_TO_POINTER(start_pos));
 			g_string_truncate (word, 0);
 		}
@@ -256,7 +255,7 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 {
 	EnchantBroker * broker;
 	EnchantDict * dict;
-	
+
 	GString * str, * word = NULL;
 	GSList * tokens, *token_ptr;
 	gchar * lang;
@@ -270,13 +269,13 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 	if (dictionary)
 		lang = strdup (dictionary);
 	else {
-	        lang = enchant_get_user_language();
+		lang = enchant_get_user_language();
 		if(!lang)
 			return 1;
- 	}
+	}
 
 	/* Enchant will get rid of trailing information like de_DE@euro or de_DE.ISO-8859-15 */
-	
+
 	broker = enchant_broker_init ();
 	dict = enchant_broker_request_dict (broker, lang);
 
@@ -290,7 +289,7 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 	free (lang);
 
 	str = g_string_new (NULL);
-	
+
 	while (!was_last_line) {
 		gboolean mode_A_no_command = FALSE;
 		was_last_line = consume_line (in, str);
@@ -364,9 +363,9 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 							ssize_t mis_len = comma - mis;
 							ssize_t cor_len = strlen(str->str) - (cor - str->str);
 							enchant_dict_store_replacement(dict, mis, mis_len, cor, cor_len);
-						} else if (g_str_has_prefix(str->str, "$$wc")) { /* Return the extra word chars list */
+						} else if (g_str_has_prefix(str->str, "$$wc"))
+							/* Return the extra word chars list */
 							printf("%s\n", enchant_dict_get_extra_word_characters(dict));
-						}
 					}
 					break;
 
@@ -404,11 +403,10 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 				if (token_ptr)
 					g_slist_free (token_ptr);
 			}
-		} 
-		
-		if (mode == MODE_A && corrected_something) {
-			putchar('\n');
 		}
+
+		if (mode == MODE_A && corrected_something)
+			putchar('\n');
 		g_string_truncate (str, 0);
 		fflush (stdout);
 	}
@@ -437,9 +435,8 @@ int main (int argc, char ** argv)
 	g_get_charset(&charset);
 #ifdef _WIN32
 	/* If reading from stdin, its CP may not be the system CP (which glib's locale gives us) */
-	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) == FILE_TYPE_CHAR) {
+	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) == FILE_TYPE_CHAR)
 		charset = g_strdup_printf("CP%u", GetConsoleCP());
-	}
 #endif
 
 	int optchar;
@@ -515,6 +512,6 @@ int main (int argc, char ** argv)
 		enchant_pwl_free (pwl);
 	if (file)
 		fclose (fp);
-	
+
 	return rval;
 }

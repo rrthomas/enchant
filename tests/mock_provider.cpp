@@ -31,6 +31,12 @@ mock_provider_dispose(EnchantProvider *me)
     g_free(me);
 }
 
+static EnchantDict *
+mock_provider_request_dict(EnchantProvider *, const char *const)
+{
+    return NULL;
+}
+
 static void
 mock_provider_dispose_dict(EnchantProvider *me, EnchantDict *dict)
 {
@@ -88,7 +94,7 @@ init_enchant_provider(void)
 	
     provider = g_new0(EnchantProvider, 1);
     provider->dispose = mock_provider_dispose; //although this is technically optional, it will result in a memory leak 
-    provider->request_dict = NULL;
+    provider->request_dict = mock_provider_request_dict; // this is required or module won't load
     provider->dispose_dict = mock_provider_dispose_dict;
     provider->identify = hasIdentify ? mock_provider_identify : NULL; // this is required or module won't load
     provider->describe = hasDescribe ? mock_provider_describe : NULL; // this is required or module won't load

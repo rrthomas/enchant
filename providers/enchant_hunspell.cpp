@@ -37,7 +37,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> 
+#include <string.h>
 
 #include <string>
 #include <vector>
@@ -242,16 +242,16 @@ static bool is_plausible_dict_for_tag(const char *dir_entry, const char *tag)
     size_t tag_len = strlen(tag);
 
     if (dir_entry_len - dic_suffix_len < tag_len)
-        return false;
+	return false;
     if (strcmp(dir_entry+dir_entry_len-dic_suffix_len, dic_suffix) != 0)
-        return false;
+	return false;
     if (strncmp (dir_entry, tag, tag_len) != 0)
-        return false;
+	return false;
     //e.g. requested dict for "fi",
     //reject "fil_PH.dic"
     //allow "fi-FOO.dic", "fi_FOO.dic", "fi.dic", etc.
     if (!ispunct(dir_entry[tag_len]))
-        return false;
+	return false;
     return true;
 }
 
@@ -268,7 +268,7 @@ hunspell_request_dictionary (const char * tag)
 			return strdup (names[i].c_str());
 		}
 	}
-	
+
 	std::vector<std::string> dirs;
 	s_buildDictionaryDirs (dirs);
 
@@ -278,7 +278,7 @@ hunspell_request_dictionary (const char * tag)
 			const char *dir_entry;
 			while ((dir_entry = g_dir_read_name (dir)) != NULL) {
 				if (is_plausible_dict_for_tag(dir_entry, tag)) {
-					char *dict = g_build_filename (dirs[i].c_str(), 
+					char *dict = g_build_filename (dirs[i].c_str(),
 								       dir_entry, nullptr);
 					if(s_fileExists(s_correspondingAffFile(dict))) {
 						g_dir_close (dir);
@@ -348,10 +348,10 @@ static int
 hunspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
-	
+
 	if (checker->checkWord(word, len))
 		return 0;
-	
+
 	return 1;
 }
 
@@ -410,8 +410,8 @@ hunspell_provider_enum_dicts (const char * const directory,
 
 extern "C" {
 
-static char ** 
-hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER, 
+static char **
+hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
 			      size_t * out_n_dicts)
 {
 	std::vector<std::string> dict_dirs, dicts;
@@ -439,15 +439,15 @@ static EnchantDict *
 hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED_PARAMETER, const char *const tag)
 {
 	HunspellChecker * checker = new HunspellChecker();
-	
+
 	if (!checker)
 		return NULL;
-	
+
 	if (!checker->requestDictionary(tag)) {
 		delete checker;
 		return NULL;
 	}
-	
+
 	EnchantDict *dict = g_new0(EnchantDict, 1);
 	dict->user_data = (void *) checker;
 	dict->check = hunspell_dict_check;
@@ -455,7 +455,7 @@ hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED_PARAMETER, const 
 	// don't implement personal, session
 	dict->get_extra_word_characters = hunspell_dict_get_extra_word_characters;
 	dict->is_word_character = hunspell_dict_is_word_character;
-	
+
 	return dict;
 }
 
@@ -464,7 +464,7 @@ hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, Encha
 {
 	HunspellChecker *checker = (HunspellChecker *) dict->user_data;
 	delete checker;
-	
+
 	g_free (dict);
 }
 
