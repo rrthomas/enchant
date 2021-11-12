@@ -62,19 +62,17 @@ TEST_FIXTURE(ProviderListDicts_TestFixture,
 TEST_FIXTURE(ProviderListDicts_TestFixture, 
              ProviderListDicts_ForEachReturned_RequestDictSucceeds)
 {
-    if(_provider->list_dicts && _provider->request_dict)
+    if(_provider->list_dicts)
     {
-		size_t n_dicts;
+        size_t n_dicts;
 
-		_dicts = (*_provider->list_dicts) (_provider, &n_dicts);
-		for (size_t i = 0; i < n_dicts; i++)
-		{
-   			EnchantDict* dict = (*_provider->request_dict) (_provider, _dicts[i]);
-			CHECK(dict != NULL);
-	        if (dict && _provider->dispose_dict)
-		    {
+        _dicts = (*_provider->list_dicts) (_provider, &n_dicts);
+        for (size_t i = 0; i < n_dicts; i++)
+        {
+            EnchantDict* dict = (*_provider->request_dict) (_provider, _dicts[i]);
+            CHECK(dict != NULL);
+            if (dict)
                 _provider->dispose_dict(_provider, dict);
-		    }
         }
     }
 }

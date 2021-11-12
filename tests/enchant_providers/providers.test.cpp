@@ -26,6 +26,7 @@
 #include <gmodule.h>
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 #include "unittest_enchant_providers.h"
 
 int Test(char* path);
@@ -167,6 +168,7 @@ int TestProvider(char* filename)
 			g_provider->dispose(g_provider);
 
         g_provider = NULL;
+        free(broker.error);
 	}
 
     if(module){
