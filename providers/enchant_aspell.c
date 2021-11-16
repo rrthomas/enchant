@@ -143,6 +143,7 @@ aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, const c
 
 	if (aspell_error_number (spell_error) != 0)
 		{
+			enchant_provider_set_error (me, aspell_error_message (spell_error));
 			delete_aspell_can_have_error(spell_error);
 			return NULL;
 		}

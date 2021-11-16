@@ -46,6 +46,7 @@
 
 #include "enchant.h"
 #include "enchant-provider.h"
+#include "debug.h"
 #include "pwl.h"
 #include "unused-parameter.h"
 #include "relocatable.h"

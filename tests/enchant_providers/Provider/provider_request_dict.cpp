@@ -34,10 +34,8 @@ struct ProviderRequestDictionary_TestFixture : Provider_TestFixture
     //Teardown
     ~ProviderRequestDictionary_TestFixture()
     {
-	    if (_dict && _provider->dispose_dict)
-		    {
-                _provider->dispose_dict(_provider, _dict);
-		    }
+        if (_dict)
+            _provider->dispose_dict(_provider, _dict);
     }
 };
 
@@ -49,19 +47,6 @@ struct ProviderRequestDictionary_TestFixture : Provider_TestFixture
 TEST_FIXTURE(ProviderRequestDictionary_TestFixture, 
              ProviderRequestDictionary_ProviderDoesNotHave_ReturnsNull)
 {
-	if (_provider->request_dict)
-		{
-			_dict = (*_provider->request_dict) (_provider, "zxx"); /*zxx is no linguistic content*/
-			CHECK_EQUAL((void*)NULL, _dict);
-		}
-}
-
-TEST_FIXTURE(ProviderRequestDictionary_TestFixture, 
-             ProviderRequestDictionary_ProviderDoesNotHave_ProviderDoesNotSetError)
-{
-	if (_provider->request_dict)
-		{
-			_dict = (*_provider->request_dict) (_provider, "zxx"); /*zxx is no linguistic content*/
-			CHECK_EQUAL((void*)NULL, GetErrorMessage(_provider));
-		}
+    _dict = (*_provider->request_dict) (_provider, "zxx"); /*zxx is no linguistic content*/
+    CHECK_EQUAL((void*)NULL, _dict);
 }

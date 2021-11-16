@@ -103,7 +103,11 @@ main (int argc, char **argv)
 			} else {
 				EnchantDict *dict = enchant_broker_request_dict (broker, lang_tag);
 				if (!dict) {
-					fprintf (stderr, "No dictionary available for '%s'\n", lang_tag);
+					fprintf (stderr, "No dictionary available for '%s'", lang_tag);
+					const char *errmsg = enchant_broker_get_error (broker);
+					if (errmsg != NULL)
+						fprintf (stderr, ": %s", errmsg);
+					putc('\n', stderr);
 					retcode = 1;
 				} else {
 					enchant_dict_describe (dict,

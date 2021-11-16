@@ -19,6 +19,7 @@ endif
 
 libenchant_includedir = $(pkgincludedir)-@ENCHANT_MAJOR_VERSION@
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
+noinst_HEADERS = debug.h
 
 pkgdata_DATA = enchant.ordering
 
