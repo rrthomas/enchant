@@ -1,3 +1,17 @@
+2.3.2 (November 16, 2021)
+-------------------------
+
+Fix the generation of man pages, so that installation-dependent paths are
+correctly inserted.
+
+Improve error reporting when enchant-lsmod cannot open a dictionary for a
+given language, in particular with the Aspell backend.
+
+Fix compilation on MingW.
+
+Some minor code cleanup.
+
+
 2.3.1 (August 9, 2021)
 ----------------------
 
