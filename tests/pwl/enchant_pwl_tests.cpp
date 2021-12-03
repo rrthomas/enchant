@@ -309,6 +309,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
   AddWordsToDictionary(sNoiseWords);
 
   std::vector<std::string> suggestions = GetSuggestionsFromWord("saskep");
+  CHECK(suggestions.size() > 0);
   // FIXME: The string in the next line was originally "hasten", but the
   // test failed. Is this now correct?
   CHECK(suggestions[0] != "hastens");
