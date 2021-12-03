@@ -36,8 +36,9 @@ Enchant uses global and per-user ordering files named \fIenchant.ordering\fR
 to decide which spelling provider to use for particular languages.
 The per-user file takes precedence.
 .PP
-The ordering file takes the form language_tag:<comma-separated list of spelling
-providers>. To see what providers are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. '*' is
+The ordering file takes the form \fIlanguage_tag:<comma-separated list of spelling
+providers>\fR. The language tag is an IETF BCP 47 language tag, typically of the form \fICOUNTRY_LANGUAGE\fR.
+To see what dictionaries are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. '*' is
 used to mean "use this ordering for all languages, unless instructed otherwise." For example:
 .PP
 *:aspell,hunspell,nuspell
