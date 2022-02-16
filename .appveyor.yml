@@ -57,6 +57,7 @@ for:
       - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
   init:
     - git config --global core.autocrlf input
+    - C:\msys64\usr\bin\bash.exe -lc "pacman --noconfirm -S libtool autoconf automake"
   install:
     - C:\msys64\usr\bin\bash.exe -l c:/projects/enchant/build-aux/appveyor-install.sh
   # FIXME: add all available providers (just aspell?)
