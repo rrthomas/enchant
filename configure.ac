@@ -78,6 +78,8 @@ if test "$gl_gcc_warnings" = yes; then
   nw="$nw -Wconversion"       # These warnings usually don’t point to mistakes.
   nw="$nw -Wsign-conversion"  # Likewise.
   nw="$nw -Wimplicit-fallthrough=5" # We want to allow "fallthrough" comments.
+  nw="$nw -Wold-style-cast"   # Warning from glib macros like g_new0
+  nw="$nw -Wuseless-cast"     # Likewise
 
   gl_MANYWARN_ALL_GCC([warnings])
 
