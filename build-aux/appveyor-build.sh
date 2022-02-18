@@ -11,7 +11,7 @@ if [[ "$ASAN" == "yes" ]]; then
     CONFIGURE_ARGS+=(CFLAGS="-g3 -fsanitize=address -fsanitize=undefined" CXXFLAGS="-g3 -fsanitize=address -fsanitize=undefined" LDFLAGS="-fsanitize=address -fsanitize=undefined")
 fi
 ./configure "${CONFIGURE_ARGS[@]}"
-make
+make --jobs=`nproc`
 make distcheck
 
 if [[ "$APPVEYOR_BUILD_WORKER_IMAGE" == "Ubuntu" ]]; then sudo locale-gen fr_FR.UTF-8; env LANG=fr_FR.UTF-8 make check ; fi

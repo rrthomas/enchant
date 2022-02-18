@@ -24,7 +24,6 @@ for:
     only:
       - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
   init:
-    - sudo apt-get -y update && sudo apt-get -y upgrade
     - sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr libicu-dev ninja-build
     - wget https://github.com/nuspell/nuspell/archive/refs/tags/v5.1.0.tar.gz -O - | tar -xz
     - cmake -S nuspell-* -B nuspell-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0
@@ -62,4 +61,4 @@ for:
     - C:\msys64\usr\bin\bash.exe -l c:/projects/enchant/build-aux/appveyor-install.sh
   # FIXME: add all available providers (just aspell?)
   build_script:
-    - C:\msys64\usr\bin\bash.exe -lc "cd c:/projects/enchant && ./bootstrap && ./configure --enable-relocatable %CONFIGURE_FLAGS% && make && make DISTCHECK_CONFIGURE_FLAGS=\"--enable-relocatable %CONFIGURE_FLAGS%\" distcheck"
+    - C:\msys64\usr\bin\bash.exe -lc "cd c:/projects/enchant && ./bootstrap && ./configure --enable-relocatable %CONFIGURE_FLAGS% && make --jobs=`nproc` && make DISTCHECK_CONFIGURE_FLAGS=\"--enable-relocatable %CONFIGURE_FLAGS%\" distcheck"
