@@ -24,6 +24,7 @@ for:
     only:
       - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
   init:
+    - sudo apt-get -y update
     - sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr libicu-dev ninja-build
     - wget https://github.com/nuspell/nuspell/archive/refs/tags/v5.1.0.tar.gz -O - | tar -xz
     - cmake -S nuspell-* -B nuspell-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0
