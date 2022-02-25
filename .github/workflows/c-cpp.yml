@@ -1,0 +1,39 @@
+name: C/C++ CI
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      ASAN_FLAGS: "-fsanitize=address -fsanitize=undefined"
+
+    steps:
+    - uses: actions/checkout@v2
+      with: { submodules: true }
+    - name: Install dependencies
+      run: sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr
+    - name: Install nuspell
+      run: |
+        sudo apt-get -y install libicu-dev ninja-build
+        wget https://github.com/nuspell/nuspell/archive/refs/tags/v5.1.0.tar.gz -O - | tar -xz
+        cmake -S nuspell-* -B nuspell-build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=0
+        cmake --build nuspell-build
+        sudo cmake --install nuspell-build
+        rm -rf nuspell-*
+    - name: Bootstrap (gnulib and autoreconf)
+      run: ./bootstrap
+    - name: configure
+      run: ./configure --enable-relocatable
+      env:
+        CFLAGS: -g ${{ env.ASAN_FLAGS }}
+        CXXFLAGS: -g ${{ env.ASAN_FLAGS }}
+        LDFLAGS: ${{ env.ASAN_FLAGS }}
+    - name: make
+      run: make --jobs=`nproc`
+    - name: make check
+      run: make check --jobs=`nproc`
+    - name: make distcheck
+      # normal build is with ASAN, distcheck is without ASAN. Both are covered.
+      run: make distcheck --jobs=`nproc`
