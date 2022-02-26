@@ -6,7 +6,6 @@ environment:
     CONFIGURE_FLAGS: --with-hunspell-dir=/mingw64/share/hunspell
     VERBOSE: 1 # Get test logs in output
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: macos
     # MSYS does not have hunspell packages
     # - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     #   MSYSTEM: MSYS
@@ -16,23 +15,6 @@ environment:
       MSYSTEM: MINGW32
 
 for:
--
-  matrix:
-    only:
-      - APPVEYOR_BUILD_WORKER_IMAGE: macos
-  init:
-    # Note: aspell should work on macOS, but has been removed because one of
-    # the tests fails; see https://github.com/GNUAspell/aspell/issues/555
-    - brew install glib dbus-glib hspell hunspell libvoikko unittest-cpp
-  environment:
-    LDFLAGS: "-L/usr/local/opt/flex/lib -L/usr/local/opt/texinfo/lib"
-    CPPFLAGS: "-I/usr/local/opt/flex/include"
-    PYTHON: /usr/local/bin/python3
-  build_script:
-    # Prepend optional brew binary directories to PATH
-    # Also prepend /usr/local/bin to work around https://github.com/appveyor/ci/issues/3326
-    - export PATH="/usr/local/opt/flex/bin:/usr/local/opt/m4/bin:/usr/local/opt/texinfo/bin:/usr/local/opt/gettext/bin:/usr/local/opt/cython/bin:/usr/local/bin:$PATH"
-    - ./build-aux/appveyor-build.sh
 -
   matrix:
     only:
