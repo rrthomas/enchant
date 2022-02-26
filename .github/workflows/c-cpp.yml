@@ -59,3 +59,40 @@ jobs:
       run: make check --jobs=`nproc`
     - name: make distcheck
       run: make distcheck --jobs=`nproc` DISTCHECK_CONFIGURE_FLAGS="--without-aspell"
+      
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    strategy:
+      matrix:
+        include:
+        - { sys: mingw64, env: x86_64 }
+        - { sys: mingw32, env: i686 }
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        release: false
+        msystem: ${{matrix.sys}}
+        install: >-
+          patch git
+          mingw-w64-${{matrix.env}}-autotools
+          mingw-w64-${{matrix.env}}-gcc
+          mingw-w64-${{matrix.env}}-glib2
+          mingw-w64-${{matrix.env}}-hunspell
+          mingw-w64-${{matrix.env}}-hunspell-en
+          mingw-w64-${{matrix.env}}-nuspell
+          mingw-w64-${{matrix.env}}-unittest-cpp
+    - uses: actions/checkout@v2
+      with: { submodules: true }
+    - name: Bootstrap (gnulib and autoreconf)
+      run: ./bootstrap
+    - name: configure
+      run: ./configure --enable-relocatable
+    - name: make
+      run: make --jobs=`nproc`
+    - name: make check
+      run: make check --jobs=`nproc`
+    - name: make distcheck
+      run: make distcheck --jobs=`nproc`
