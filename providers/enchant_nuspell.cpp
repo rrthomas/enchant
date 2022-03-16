@@ -39,7 +39,6 @@
 #include <memory>
 
 #include "enchant-provider.h"
-#include "unused-parameter.h"
 
 #include <nuspell/dictionary.hxx>
 #include <nuspell/finder.hxx>
@@ -87,7 +86,7 @@ static char** nuspell_dict_suggest(EnchantDict* me, const char* const word,
 static void nuspell_provider_dispose(EnchantProvider* me) { g_free(me); }
 
 static EnchantDict*
-nuspell_provider_request_dict([[maybe_unused]] EnchantProvider* me,
+nuspell_provider_request_dict(_GL_UNUSED EnchantProvider* me,
                               const char* const tag)
 {
 	auto dirs = vector<filesystem::path>();
@@ -111,7 +110,7 @@ nuspell_provider_request_dict([[maybe_unused]] EnchantProvider* me,
 	return dict;
 }
 
-static void nuspell_provider_dispose_dict([[maybe_unused]] EnchantProvider* me,
+static void nuspell_provider_dispose_dict(_GL_UNUSED EnchantProvider* me,
                                           EnchantDict* dict)
 {
 	auto dict_cpp = static_cast<nuspell::Dictionary*>(dict->user_data);
@@ -120,7 +119,7 @@ static void nuspell_provider_dispose_dict([[maybe_unused]] EnchantProvider* me,
 }
 
 static int
-nuspell_provider_dictionary_exists([[maybe_unused]] EnchantProvider* me,
+nuspell_provider_dictionary_exists(_GL_UNUSED EnchantProvider* me,
                                    const char* const tag)
 {
 	auto dirs = vector<filesystem::path>();
@@ -130,19 +129,19 @@ nuspell_provider_dictionary_exists([[maybe_unused]] EnchantProvider* me,
 }
 
 static const char*
-nuspell_provider_identify([[maybe_unused]] EnchantProvider* me)
+nuspell_provider_identify(_GL_UNUSED EnchantProvider* me)
 {
 	return "nuspell";
 }
 
 static const char*
-nuspell_provider_describe([[maybe_unused]] EnchantProvider* me)
+nuspell_provider_describe(_GL_UNUSED EnchantProvider* me)
 {
 	return "Nuspell Provider";
 }
 
 static char**
-nuspell_provider_list_dicts(EnchantProvider* me _GL_UNUSED_PARAMETER,
+nuspell_provider_list_dicts(_GL_UNUSED EnchantProvider* me,
                             size_t* out_n_dicts)
 {
 	auto dicts = nuspell::search_default_dirs_for_dicts();
