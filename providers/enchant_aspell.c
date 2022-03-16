@@ -131,7 +131,7 @@ aspell_dict_store_replacement (EnchantDict * me,
 }
 
 static EnchantDict *
-aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED, const char *const tag)
+aspell_provider_request_dict (EnchantProvider * me G_GNUC_UNUSED, const char *const tag)
 {
 	AspellConfig *spell_config = new_aspell_config ();
 	aspell_config_replace (spell_config, "language-tag", tag);
@@ -161,7 +161,7 @@ aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED, const char *const
 }
 
 static void
-aspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+aspell_provider_dispose_dict (EnchantProvider * me G_GNUC_UNUSED, EnchantDict * dict)
 {
 	AspellSpeller *manager = (AspellSpeller *) dict->user_data;
 	delete_aspell_speller (manager);
@@ -170,7 +170,7 @@ aspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dic
 }
 
 static char **
-aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
+aspell_provider_list_dicts (EnchantProvider * me G_GNUC_UNUSED,
 			    size_t * out_n_dicts)
 {
 	AspellConfig * spell_config = new_aspell_config ();
@@ -212,13 +212,13 @@ aspell_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-aspell_provider_identify (EnchantProvider * me _GL_UNUSED)
+aspell_provider_identify (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "aspell";
 }
 
 static const char *
-aspell_provider_describe (EnchantProvider * me _GL_UNUSED)
+aspell_provider_describe (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "Aspell Provider";
 }

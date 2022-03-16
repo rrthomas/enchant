@@ -80,14 +80,14 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 static void
-voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+voikko_provider_dispose_dict (EnchantProvider * me G_GNUC_UNUSED, EnchantDict * dict)
 {
 	voikkoTerminate((struct VoikkoHandle *)dict->user_data);
 	free (dict);
 }
 
 static char **
-voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
+voikko_provider_list_dicts (EnchantProvider * me G_GNUC_UNUSED,
 			    size_t * out_n_dicts)
 {
 	size_t i;
@@ -111,7 +111,7 @@ voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 }
 
 static int
-voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED,
+voikko_provider_dictionary_exists (struct str_enchant_provider * me G_GNUC_UNUSED,
 				   const char *const tag)
 {
 	size_t i;
@@ -159,13 +159,13 @@ voikko_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-voikko_provider_identify (EnchantProvider * me _GL_UNUSED)
+voikko_provider_identify (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "voikko";
 }
 
 static const char *
-voikko_provider_describe (EnchantProvider * me _GL_UNUSED)
+voikko_provider_describe (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "Voikko Provider";
 }

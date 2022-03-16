@@ -1453,7 +1453,7 @@ enchant_set_prefix_dir(const char *new_prefix)
 #endif
 }
 
-const char * _GL_ATTRIBUTE_CONST
+G_GNUC_CONST const char *
 enchant_get_version (void) {
 	return ENCHANT_VERSION_STRING;
 }

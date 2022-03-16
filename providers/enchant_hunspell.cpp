@@ -159,7 +159,7 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 	return nullptr;
 }
 
-_GL_ATTRIBUTE_PURE const char*
+G_GNUC_PURE const char*
 HunspellChecker::getWordchars()
 {
 	return static_cast<const char *>(wordchars);
@@ -410,7 +410,7 @@ hunspell_provider_enum_dicts (const char * const directory,
 extern "C" {
 
 static char **
-hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
+hunspell_provider_list_dicts (EnchantProvider * me G_GNUC_UNUSED,
 			      size_t * out_n_dicts)
 {
 	std::vector<std::string> dict_dirs, dicts;
@@ -435,7 +435,7 @@ hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 }
 
 static EnchantDict *
-hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED, const char *const tag)
+hunspell_provider_request_dict(EnchantProvider * me G_GNUC_UNUSED, const char *const tag)
 {
 	HunspellChecker * checker = new HunspellChecker();
 
@@ -459,7 +459,7 @@ hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED, const char *cons
 }
 
 static void
-hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+hunspell_provider_dispose_dict (EnchantProvider * me G_GNUC_UNUSED, EnchantDict * dict)
 {
 	HunspellChecker *checker = (HunspellChecker *) dict->user_data;
 	delete checker;
@@ -468,7 +468,7 @@ hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * d
 }
 
 static int
-hunspell_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED,
+hunspell_provider_dictionary_exists (struct str_enchant_provider * me G_GNUC_UNUSED,
 				     const char *const tag)
 {
 	std::vector <std::string> names;
@@ -491,13 +491,13 @@ hunspell_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-hunspell_provider_identify (EnchantProvider * me _GL_UNUSED)
+hunspell_provider_identify (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "hunspell";
 }
 
 static const char *
-hunspell_provider_describe (EnchantProvider * me _GL_UNUSED)
+hunspell_provider_describe (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "Hunspell Provider";
 }

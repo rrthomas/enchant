@@ -707,9 +707,9 @@ static void enchant_trie_free(EnchantTrie* trie)
 	g_free(trie);
 }
 
-static void enchant_trie_free_cb(void* key _GL_UNUSED,
+static void enchant_trie_free_cb(void* key G_GNUC_UNUSED,
 				 void* value,
-				 void* data _GL_UNUSED)
+				 void* data G_GNUC_UNUSED)
 {
 	enchant_trie_free((EnchantTrie*) value);
 }

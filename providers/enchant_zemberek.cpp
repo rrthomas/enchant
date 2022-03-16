@@ -168,7 +168,7 @@ zemberek_provider_dispose(EnchantProvider *me)
 }
 
 static EnchantDict*
-zemberek_provider_request_dict(EnchantProvider *me _GL_UNUSED, const char *tag)
+zemberek_provider_request_dict(EnchantProvider *me G_GNUC_UNUSED, const char *tag)
 {
     if (!((strcmp(tag, "tr") == 0) || (strncmp(tag, "tr_", 3) == 0)))
         return NULL; // only handle turkish
@@ -192,7 +192,7 @@ zemberek_provider_request_dict(EnchantProvider *me _GL_UNUSED, const char *tag)
 }
 
 static void
-zemberek_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+zemberek_provider_dispose_dict (EnchantProvider * me G_GNUC_UNUSED, EnchantDict * dict)
 {
     Zemberek *checker = (Zemberek *) dict->user_data;
     delete checker;
@@ -200,19 +200,19 @@ zemberek_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * d
 }
 
 static const char *
-zemberek_provider_identify (EnchantProvider * me _GL_UNUSED)
+zemberek_provider_identify (EnchantProvider * me G_GNUC_UNUSED)
 {
         return "zemberek";
 }
 
 static const char *
-zemberek_provider_describe (EnchantProvider * me _GL_UNUSED)
+zemberek_provider_describe (EnchantProvider * me G_GNUC_UNUSED)
 {
         return "Zemberek Provider";
 }
 
 static char **
-zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
+zemberek_provider_list_dicts (EnchantProvider * me G_GNUC_UNUSED,
                               size_t * out_n_dicts)
 {
   if (!zemberek_service_is_running ())
