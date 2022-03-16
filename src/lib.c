@@ -48,7 +48,6 @@
 #include "enchant-provider.h"
 #include "debug.h"
 #include "pwl.h"
-#include "unused-parameter.h"
 #include "relocatable.h"
 #include "configmake.h"
 
@@ -162,7 +161,7 @@ enchant_get_conf_dirs (void)
 /* returns TRUE if tag is valid
  * for requires alphanumeric ASCII or underscore
  */
-static _GL_ATTRIBUTE_PURE int
+static G_GNUC_PURE int
 enchant_is_valid_dictionary_tag(const char * const tag)
 {
 	const char * it;
@@ -179,10 +178,14 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	char * new_tag = g_strstrip (strdup (dict_tag));
 
 	/* strip off en_GB@euro */
-	*strchrnul (new_tag, '@') = '\0';
+	char* pos = strchr(new_tag, '@');
+	if (pos)
+		*pos = '\0';
 
 	/* strip off en_GB.UTF-8 */
-	*strchrnul (new_tag, '.') = '\0';
+	pos = strchr(new_tag, '.');
+	if (pos)
+		*pos = '\0';
 
 	/* turn en-GB into en_GB */
 	char * needle;
@@ -190,7 +193,9 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 		*needle = '_';
 
 	/* everything before first '_' is converted to lower case */
-	needle = strchrnul (new_tag, '_');
+	needle = strchr(new_tag, '_');
+	if (needle == NULL)
+		needle = new_tag + strlen(new_tag);
 	for (gchar *it = new_tag; it != needle; ++it)
 		*it = g_ascii_tolower (*it);
 	/* everything after first '_' is converted to upper case */
@@ -1300,7 +1305,7 @@ enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag)
 	return exists;
 }
 
-_GL_ATTRIBUTE_PURE const char *
+G_GNUC_PURE const char *
 enchant_dict_get_extra_word_characters (EnchantDict *dict)
 {
 	g_return_val_if_fail (dict, NULL);
@@ -1308,7 +1313,7 @@ enchant_dict_get_extra_word_characters (EnchantDict *dict)
 	return dict->get_extra_word_characters ? (*dict->get_extra_word_characters) (dict) : "";
 }
 
-_GL_ATTRIBUTE_PURE int
+G_GNUC_PURE int
 enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc_in, size_t n)
 {
 	g_return_val_if_fail (n <= 2, 0);

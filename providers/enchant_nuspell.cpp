@@ -39,7 +39,6 @@
 #include <memory>
 
 #include "enchant-provider.h"
-#include "unused-parameter.h"
 
 #include <nuspell/dictionary.hxx>
 #include <nuspell/finder.hxx>
@@ -142,7 +141,7 @@ nuspell_provider_describe([[maybe_unused]] EnchantProvider* me)
 }
 
 static char**
-nuspell_provider_list_dicts(EnchantProvider* me _GL_UNUSED_PARAMETER,
+nuspell_provider_list_dicts([[maybe_unused]] EnchantProvider* me,
                             size_t* out_n_dicts)
 {
 	auto dicts = nuspell::search_default_dirs_for_dicts();

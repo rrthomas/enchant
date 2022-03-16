@@ -42,7 +42,6 @@
 #include <aspell.h>
 
 #include "enchant-provider.h"
-#include "unused-parameter.h"
 
 
 EnchantProvider *init_enchant_provider (void);
@@ -132,7 +131,7 @@ aspell_dict_store_replacement (EnchantDict * me,
 }
 
 static EnchantDict *
-aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, const char *const tag)
+aspell_provider_request_dict (EnchantProvider * me G_GNUC_UNUSED, const char *const tag)
 {
 	AspellConfig *spell_config = new_aspell_config ();
 	aspell_config_replace (spell_config, "language-tag", tag);
@@ -162,7 +161,7 @@ aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, const c
 }
 
 static void
-aspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
+aspell_provider_dispose_dict (EnchantProvider * me G_GNUC_UNUSED, EnchantDict * dict)
 {
 	AspellSpeller *manager = (AspellSpeller *) dict->user_data;
 	delete_aspell_speller (manager);
@@ -171,7 +170,7 @@ aspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, Enchant
 }
 
 static char **
-aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
+aspell_provider_list_dicts (EnchantProvider * me G_GNUC_UNUSED,
 			    size_t * out_n_dicts)
 {
 	AspellConfig * spell_config = new_aspell_config ();
@@ -213,13 +212,13 @@ aspell_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-aspell_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
+aspell_provider_identify (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "aspell";
 }
 
 static const char *
-aspell_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
+aspell_provider_describe (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "Aspell Provider";
 }

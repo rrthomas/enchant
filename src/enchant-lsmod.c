@@ -34,7 +34,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "unused-parameter.h"
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -42,18 +41,18 @@
 static void
 describe_dict (const char * const lang_tag,
 	       const char * const provider_name,
-	       const char * const provider_desc _GL_UNUSED_PARAMETER,
-	       const char * const provider_file _GL_UNUSED_PARAMETER,
-	       void * user_data _GL_UNUSED_PARAMETER)
+	       const char * const provider_desc G_GNUC_UNUSED,
+	       const char * const provider_file G_GNUC_UNUSED,
+	       void * user_data G_GNUC_UNUSED)
 {
 	printf ("%s (%s)\n", lang_tag, provider_name);
 }
 
 static void
-describe_word_chars (const char * const lang_tag _GL_UNUSED_PARAMETER,
-		     const char * const provider_name _GL_UNUSED_PARAMETER,
-		     const char * const provider_desc _GL_UNUSED_PARAMETER,
-		     const char * const provider_file _GL_UNUSED_PARAMETER,
+describe_word_chars (const char * const lang_tag G_GNUC_UNUSED,
+		     const char * const provider_name G_GNUC_UNUSED,
+		     const char * const provider_desc G_GNUC_UNUSED,
+		     const char * const provider_file G_GNUC_UNUSED,
 		     void * user_data)
 {
 	EnchantDict *dict = (EnchantDict *)user_data;
@@ -66,8 +65,8 @@ describe_word_chars (const char * const lang_tag _GL_UNUSED_PARAMETER,
 static void
 describe_provider (const char * name,
 		   const char * desc,
-		   const char * file _GL_UNUSED_PARAMETER,
-		   void * user_data _GL_UNUSED_PARAMETER)
+		   const char * file G_GNUC_UNUSED,
+		   void * user_data G_GNUC_UNUSED)
 {
 	printf ("%s (%s)\n", name, desc);
 }

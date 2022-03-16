@@ -43,7 +43,6 @@
 #include <hspell.h>
 
 #include "enchant-provider.h"
-#include "unused-parameter.h"
 
 /**
  * convert struct corlist to **char
@@ -147,7 +146,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 }
 
 static void
-hspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, EnchantDict * dict)
+hspell_provider_dispose_dict (EnchantProvider * me G_GNUC_UNUSED, EnchantDict * dict)
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)dict->user_data;
 	hspell_uninit (hspell_dict);
@@ -157,7 +156,7 @@ hspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED_PARAMETER, Enchant
 /* test for the existence of, then return $prefix/share/hspell/hebrew.wgz */
 
 static char **
-hspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED_PARAMETER,
+hspell_provider_list_dicts (EnchantProvider * me G_GNUC_UNUSED,
 			    size_t * out_n_dicts)
 {
 	const char * dictionary_path = hspell_get_dictionary_path();
@@ -187,13 +186,13 @@ hspell_provider_dispose (EnchantProvider * me)
 }
 
 static const char *
-hspell_provider_identify (EnchantProvider * me _GL_UNUSED_PARAMETER)
+hspell_provider_identify (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "hspell";
 }
 
 static const char *
-hspell_provider_describe (EnchantProvider * me _GL_UNUSED_PARAMETER)
+hspell_provider_describe (EnchantProvider * me G_GNUC_UNUSED)
 {
 	return "Hspell Provider";
 }
