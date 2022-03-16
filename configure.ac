@@ -36,7 +36,9 @@ AC_SUBST(ENCHANT_MINOR_VERSION)
 AC_SUBST(ENCHANT_MICRO_VERSION)
 
 dnl Checks for programs.
-AC_PROG_CC
+AC_PROG_CC_C99
+AS_IF([test "$ac_cv_prog_cc_c99" = no],
+  AC_MSG_ERROR([A C99 or later compiler is required]))
 gl_EARLY
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX(11)

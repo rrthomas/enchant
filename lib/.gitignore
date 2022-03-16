@@ -43,3 +43,4 @@
 /getopt1.c
 /getopt_int.h
 /gettext.h
+/dummy.c

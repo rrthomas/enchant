@@ -48,7 +48,6 @@
 #include "enchant-provider.h"
 #include "debug.h"
 #include "pwl.h"
-#include "unused-parameter.h"
 #include "relocatable.h"
 #include "configmake.h"
 
@@ -162,7 +161,7 @@ enchant_get_conf_dirs (void)
 /* returns TRUE if tag is valid
  * for requires alphanumeric ASCII or underscore
  */
-static _GL_ATTRIBUTE_PURE int
+static G_GNUC_PURE int
 enchant_is_valid_dictionary_tag(const char * const tag)
 {
 	const char * it;
@@ -1300,7 +1299,7 @@ enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag)
 	return exists;
 }
 
-_GL_ATTRIBUTE_PURE const char *
+G_GNUC_PURE const char *
 enchant_dict_get_extra_word_characters (EnchantDict *dict)
 {
 	g_return_val_if_fail (dict, NULL);
@@ -1308,7 +1307,7 @@ enchant_dict_get_extra_word_characters (EnchantDict *dict)
 	return dict->get_extra_word_characters ? (*dict->get_extra_word_characters) (dict) : "";
 }
 
-_GL_ATTRIBUTE_PURE int
+G_GNUC_PURE int
 enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc_in, size_t n)
 {
 	g_return_val_if_fail (n <= 2, 0);

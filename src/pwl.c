@@ -65,7 +65,6 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include "enchant-provider.h"
-#include "unused-parameter.h"
 
 #include "pwl.h"
 
@@ -494,7 +493,7 @@ static int enchant_is_all_caps(const char*const word, size_t len)
 	return hasCap;
 }
 
-static _GL_ATTRIBUTE_PURE int enchant_is_title_case(const char * const word, size_t len)
+static G_GNUC_PURE int enchant_is_title_case(const char * const word, size_t len)
 {
 	g_return_val_if_fail (word && *word, 0);
 
@@ -708,9 +707,9 @@ static void enchant_trie_free(EnchantTrie* trie)
 	g_free(trie);
 }
 
-static void enchant_trie_free_cb(void* key _GL_UNUSED_PARAMETER,
+static void enchant_trie_free_cb(void* key _GL_UNUSED,
 				 void* value,
-				 void* data _GL_UNUSED_PARAMETER)
+				 void* data _GL_UNUSED)
 {
 	enchant_trie_free((EnchantTrie*) value);
 }
