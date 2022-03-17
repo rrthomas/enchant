@@ -57,62 +57,6 @@ AC_CONFIG_LIBOBJ_DIR([lib])
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
 
-dnl Extra warnings with GCC and compatible compilers
-AC_ARG_ENABLE([gcc-warnings],
-  [AS_HELP_STRING([--disable-gcc-warnings],
-                  [turn off lots of GCC warnings])],
-  [case $enableval in
-     yes|no) ;;
-     *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
-   esac
-   gl_gcc_warnings=$enableval],
-  [gl_gcc_warnings=yes]
-)
-if test "$gl_gcc_warnings" = yes; then
-  dnl Set up the list of undesired warnings.
-  nw=
-  nw="$nw -Wsystem-headers"   # Don’t let system headers trigger warnings
-  nw="$nw -Wundef"            # All compiler preprocessors support #if UNDEF
-  nw="$nw -Wtraditional"      # All compilers nowadays support ANSI C
-  nw="$nw -Wdeclaration-after-statement" # We require C99.
-  nw="$nw -Wstrict-overflow"  # Use a lower level (see below).
-  nw="$nw -Wconversion"       # These warnings usually don’t point to mistakes.
-  nw="$nw -Wsign-conversion"  # Likewise.
-  nw="$nw -Wimplicit-fallthrough=5" # We want to allow "fallthrough" comments.
-  nw="$nw -Wold-style-cast"   # Warning from glib macros like g_new0
-  nw="$nw -Wuseless-cast"     # Likewise
-
-  gl_MANYWARN_ALL_GCC([warnings])
-
-  dnl Enable all GCC warnings not in this list.
-  gl_MANYWARN_COMPLEMENT([warnings], [$warnings], [$nw])
-  for w in $warnings; do
-    gl_WARN_ADD([$w])
-  done
-
-  AC_LANG_PUSH([C++])
-  gl_MANYWARN_ALL_GCC([cxx_warnings])
-
-  dnl Enable all G++ warnings not in this list.
-  gl_MANYWARN_COMPLEMENT([cxx_warnings], [$cxx_warnings], [$nw])
-  for w in $cxx_warnings; do
-    gl_WARN_ADD([$w])
-  done
-  AC_LANG_POP
-
-  dnl Add an extra warning
-  gl_WARN_ADD([-Wstrict-overflow=1])
-  dnl Remove a warning being promoted to error: we trigger this and can't turn it off with pragmas.
-  gl_WARN_ADD([-Wno-error=format-security])
-
-  # When compiling with GCC, prefer -isystem to -I when including system
-  # include files, to avoid generating useless diagnostics for the files.
-  ISYSTEM='-isystem '
-else
-  ISYSTEM='-I'
-fi
-AC_SUBST([ISYSTEM])
-
 # FIXME: Use just GLIB_CFLAGS, GLIB_LIBS
 ENCHANT_CFLAGS=$GLIB_CFLAGS
 ENCHANT_LIBS=$GLIB_LIBS

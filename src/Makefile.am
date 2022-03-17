@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(ENCHANT_CFLAGS) $(WARN_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)/lib -I$(top_srcdir)/lib $(ENCHANT_CFLAGS)
 
 lib_LTLIBRARIES = libenchant-@ENCHANT_MAJOR_VERSION@.la
 
