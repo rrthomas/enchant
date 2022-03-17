@@ -49,6 +49,7 @@ LT_INIT([win32-dll])
 LT_LANG([Windows Resource])
 gl_INIT
 gl_GNU_MAKE
+gl_RELOCATABLE_LIBRARY
 AC_SUBST([objdir])
 LT_SYS_MODULE_EXT
 AC_SUBST([shlibext], [$libltdl_cv_shlibext])

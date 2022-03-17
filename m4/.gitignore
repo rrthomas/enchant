@@ -46,7 +46,6 @@
 /errno_h.m4
 /error.m4
 /getprogname.m4
-/relocatable-lib.m4
 /stdbool.m4
 /stdio_h.m4
 /strerror.m4
