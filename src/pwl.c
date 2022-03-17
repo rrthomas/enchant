@@ -62,6 +62,13 @@
 #include <sys/file.h>
 #include <fcntl.h>
 
+#if _WIN32
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <io.h>
+#include <windows.h>
+#endif
+
 #include <glib.h>
 #include <glib/gstdio.h>
 #include "enchant-provider.h"
@@ -181,8 +188,37 @@ static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num);
 
 static int edit_dist(const char* word1, const char* word2);
 
-#define enchant_lock_file(f) flock (fileno (f), LOCK_EX)
-#define enchant_unlock_file(f) flock (fileno (f), LOCK_UN)
+static void
+enchant_lock_file (FILE * f)
+{
+#ifdef _WIN32
+	OVERLAPPED overlapped;
+
+	overlapped.Offset = 0;
+	overlapped.OffsetHigh = 0;
+	overlapped.hEvent = NULL;
+	if (!LockFileEx ((HANDLE) _get_osfhandle (fileno (f)), LOCKFILE_EXCLUSIVE_LOCK, 0, 0, 0x80000000, &overlapped))
+		g_warning ("Could not lock file\n");
+#else
+	flock (fileno (f), LOCK_EX);
+#endif
+}
+
+static void
+enchant_unlock_file (FILE * f)
+{
+#ifdef _WIN32
+	OVERLAPPED overlapped;
+
+	overlapped.Offset = 0;
+	overlapped.OffsetHigh = 0;
+	overlapped.hEvent = NULL;
+	if (!UnlockFileEx ((HANDLE) _get_osfhandle (fileno (f)), 0, 0, 0x80000000, &overlapped))
+		g_warning ("Could not unlock file\n");
+#else
+	flock (fileno (f), LOCK_UN);
+#endif
+}
 
 /**
  * enchant_pwl_init
