@@ -1,5 +1,21 @@
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)/lib -I$(top_srcdir)/lib $(ENCHANT_CFLAGS)
 
+configmake.h: Makefile
+	$(AM_V_GEN)rm -f $@-t && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  echo '#if HAVE_WINSOCK2_H'; \
+	  echo '# include <winsock2.h> /* avoid mingw pollution on DATADIR */'; \
+	  echo '#endif'; \
+	  echo '#define DATADIR "$(datadir)"'; \
+	  echo '#define SYSCONFDIR "$(sysconfdir)"'; \
+	  echo '#define PKGDATADIR "$(pkgdatadir)"'; \
+	  echo '#define PKGLIBDIR "$(pkglibdir)"'; \
+	} | sed '/""/d' > $@-t && \
+	mv -f $@-t $@
+
+BUILT_SOURCES = configmake.h
+CLEANFILES = configmake.h configmake.h-t
+
 lib_LTLIBRARIES = libenchant-@ENCHANT_MAJOR_VERSION@.la
 
 # Set compilation flags needed for relocatable.c used by relocatable-lib-lgpl
