@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_DISTCHECK_CONFIGURE_FLAGS = --enable-relocatable
 
-SUBDIRS = lib src providers tests
+SUBDIRS = src providers tests
 
 # Note that the template file is called library.pc.in, but generates a
 # versioned .pc file using some magic in AC_CONFIG_FILES.
@@ -16,8 +16,7 @@ EXTRA_DIST =		\
 	NEWS 		\
 	ChangeLog 	\
 	AUTHORS 	\
-	COPYING.LIB	\
-	m4/gnulib-cache.m4
+	COPYING.LIB
 
 ALL_SOURCE_FILES = \
 	bootstrap.conf \

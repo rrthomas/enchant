@@ -1,6 +1,0 @@
-[submodule "gnulib"]
-	path = gnulib
-	url = https://git.savannah.gnu.org/git/gnulib.git
-[submodule "gl-mod/bootstrap"]
-	path = gl-mod/bootstrap
-	url = https://github.com/gnulib-modules/bootstrap.git

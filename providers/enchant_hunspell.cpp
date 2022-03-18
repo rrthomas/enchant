@@ -159,7 +159,7 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 	return nullptr;
 }
 
-_GL_ATTRIBUTE_PURE const char*
+G_GNUC_PURE const char*
 HunspellChecker::getWordchars()
 {
 	return static_cast<const char *>(wordchars);

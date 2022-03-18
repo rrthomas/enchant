@@ -11,7 +11,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with: { submodules: true }
     - name: Install dependencies
       run: sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr
     - name: Install nuspell
@@ -22,8 +21,8 @@ jobs:
         cmake --build nuspell-build
         sudo cmake --install nuspell-build
         rm -rf nuspell-*
-    - name: Bootstrap (gnulib and autoreconf)
-      run: ./bootstrap
+    - name: Autoreconf
+      run: autoreconf -vfi
     - name: configure
       run: ./configure --enable-relocatable
       env:
@@ -42,13 +41,12 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
-      with: { submodules: true }
     - name: Install dependencies
       run: |
         brew tap nuspell/nuspell
         brew install automake dbus-glib hspell hunspell libvoikko unittest-cpp nuspell coreutils
-    - name: Bootstrap (gnulib and autoreconf)
-      run: PATH="$(brew --prefix)/opt/m4/bin:${PATH}" ./bootstrap
+    - name: Autoreconf
+      run: PATH="$(brew --prefix)/opt/m4/bin:${PATH}" autoreconf -vfi
     - name: configure
       # Note: aspell should work on macOS, but has been removed because one of
       # the tests fails; see https://github.com/GNUAspell/aspell/issues/555
@@ -85,9 +83,8 @@ jobs:
           mingw-w64-${{matrix.env}}-nuspell
           mingw-w64-${{matrix.env}}-unittest-cpp
     - uses: actions/checkout@v2
-      with: { submodules: true }
-    - name: Bootstrap (gnulib and autoreconf)
-      run: ./bootstrap
+    - name: Autoreconf
+      run: autoreconf -vfi
     - name: configure
       run: ./configure --enable-relocatable
     - name: make

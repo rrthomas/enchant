@@ -7,7 +7,7 @@ providerdir = $(pkglibdir)-@ENCHANT_MAJOR_VERSION@
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)/lib -I$(top_srcdir)/lib -I$(top_srcdir)/src $(ENCHANT_CFLAGS)  -D_ENCHANT_BUILD=1
 # AM_CFLAGS =
 # AM_CXXFLAGS =
-AM_LDFLAGS = -module -avoid-version -no-undefined $(ENCHANT_LIBS) $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la $(top_builddir)/lib/libgnu.la
+AM_LDFLAGS = -module -avoid-version -no-undefined $(ENCHANT_LIBS) $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la
 
 if WITH_ASPELL
 provider_LTLIBRARIES += enchant_aspell.la

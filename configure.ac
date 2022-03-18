@@ -37,7 +37,6 @@ AC_SUBST(ENCHANT_MICRO_VERSION)
 
 dnl Checks for programs.
 AC_PROG_CC
-gl_EARLY
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX(11)
 AC_PROG_OBJCXX
@@ -47,13 +46,11 @@ AC_PROG_MKDIR_P
 AC_HEADER_STDC
 LT_INIT([win32-dll])
 LT_LANG([Windows Resource])
-gl_INIT
 gl_GNU_MAKE
 gl_RELOCATABLE_LIBRARY
 AC_SUBST([objdir])
 LT_SYS_MODULE_EXT
 AC_SUBST([shlibext], [$libltdl_cv_shlibext])
-AC_CONFIG_LIBOBJ_DIR([lib])
 
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
@@ -180,7 +177,6 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 Makefile
 enchant-$ENCHANT_MAJOR_VERSION.pc:enchant.pc.in
-lib/Makefile
 src/libenchant.rc
 src/Makefile
 src/enchant.1
