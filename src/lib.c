@@ -178,22 +178,27 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	char * new_tag = g_strstrip (strdup (dict_tag));
 
 	/* strip off en_GB@euro */
-	*strchrnul (new_tag, '@') = '\0';
+	char * needle = strchr(new_tag, '@');
+	if (needle)
+		*needle = '\0';
 
 	/* strip off en_GB.UTF-8 */
-	*strchrnul (new_tag, '.') = '\0';
+	needle = strchr(new_tag, '.');
+	if (needle)
+		*needle = '\0';
 
 	/* turn en-GB into en_GB */
-	char * needle;
-	if ((needle = strchr (new_tag, '-')) != NULL)
+	needle = strchr (new_tag, '-');
+	if (needle)
 		*needle = '_';
 
 	/* everything before first '_' is converted to lower case */
-	needle = strchrnul (new_tag, '_');
-	for (gchar *it = new_tag; it != needle; ++it)
+	gchar * it = new_tag;
+	for (; *it && *it != '_'; ++it)
 		*it = g_ascii_tolower (*it);
+
 	/* everything after first '_' is converted to upper case */
-	for (gchar *it = needle; *it; ++it)
+	for (; *it; ++it)
 		*it = g_ascii_toupper (*it);
 
 	return new_tag;
