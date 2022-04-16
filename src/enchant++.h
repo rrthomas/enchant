@@ -126,9 +126,9 @@ namespace enchant
 							     utf8word.size());
 			}
 
-			void is_added (const std::string & utf8word) {
-				enchant_dict_is_added (m_dict, utf8word.c_str(),
-							     utf8word.size());
+			bool is_added (const std::string & utf8word) {
+				return enchant_dict_is_added (m_dict, utf8word.c_str(),
+							      utf8word.size());
 			}
 
 			void remove (const std::string & utf8word) {
