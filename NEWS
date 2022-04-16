@@ -1,3 +1,15 @@
+2.3.3 (April 16, 2022)
+----------------------
+
+Update Nuspell provider, requiring Nuspell 5.1.0. The new provider takes
+advantage of recently-added Nuspell APIs to be smaller and simpler.
+
+Fix the C++ API is_added() method to return a boolean rather than void.
+
+Require C99 and POSIX 2008, and as a result use fewer gnulib modules,
+which gives a modest build time reduction.
+
+
 2.3.2 (November 16, 2021)
 -------------------------
 
