@@ -263,3 +263,6 @@ fi
 if test $RELOCATABLE != yes; then
   AC_MSG_WARN([Building without --enable-relocatable: the tests will not work!])
 fi
+if test "$datadir" != '${datarootdir}'; then
+  AC_MSG_WARN([--datadir set: the tests will not work!])
+fi
