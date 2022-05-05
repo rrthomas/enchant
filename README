@@ -40,17 +40,24 @@ instructions.
 Developers or others wishing to install from a git repository, see HACKING.
 
 
+Personal word lists
+-------------------
+
+Personal word lists are simple plain text files with one word per line.
+Lines starting with a hash sign (#) are ignored.
+
+
 Sharing personal word lists between spell-checkers
 --------------------------------------------------
 
 It is possible, and usually safe, to share Enchant’s personal word lists
-with other spelling checkers that use the same format (a simple plain text
-file with one word per line). The spell-checkers known to be compatible are
-Hunspell, Nuspell and Ispell. (Although Enchant does not support Ispell as a
-back-end, it’s still fine to share word lists with it.) Other spell-checkers
-supported by Enchant are either incompatible, or have no personal word list
-mechanism. There may well be yet other spell-checkers, unknown to Enchant,
-that use the same format.
+with other spelling checkers that use the same format (note that other
+spell-checkers may not support comments!). The spell-checkers known to be
+compatible are Hunspell, Nuspell and Ispell. (Although Enchant does not
+support Ispell as a back-end, it’s still fine to share word lists with it.)
+Other spell-checkers supported by Enchant are either incompatible, or have
+no personal word list mechanism. There may well be yet other spell-checkers,
+unknown to Enchant, that use the same format.
 
 Some applications use Hunspell or Nuspell, but store the personal word list
 under another name or in another location. Firefox is one example. Firefox
