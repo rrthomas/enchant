@@ -24,11 +24,18 @@ noinst_HEADERS = debug.h
 pkgdata_DATA = enchant.ordering
 
 dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1 enchant.5
+nodist_doc_DATA = enchant-@ENCHANT_MAJOR_VERSION@.html enchant-lsmod-@ENCHANT_MAJOR_VERSION@.html enchant.html
 
 edit = sed \
 	-e 's|DATADIR|$(datadir)|g'
 
-DISTCLEANFILES = $(dist_man_MANS)
+DISTCLEANFILES = $(dist_man_MANS) $(nodist_doc_DATA)
+
+.1.html:
+	groff -mandoc -Thtml $< > $@
+
+enchant.html: enchant.5
+	groff -mandoc -Thtml $< > $@
 
 enchant-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant.1 Makefile.am $(top_builddir)/config.status
 	rm -f $@ $@.tmp

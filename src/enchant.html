@@ -1,0 +1,184 @@
+<!-- Creator     : groff version 1.22.4 -->
+<!-- CreationDate: Sun Sep 25 10:09:39 2022 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="Content-Style" content="text/css">
+<style type="text/css">
+       p       { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       pre     { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       table   { margin-top: 0; margin-bottom: 0; vertical-align: top }
+       h1      { text-align: center }
+</style>
+<title>ENCHANT</title>
+
+</head>
+<body>
+
+<h1 align="center">ENCHANT</h1>
+
+<a href="#NAME">NAME</a><br>
+<a href="#ORDERING FILE">ORDERING FILE</a><br>
+<a href="#PERSONAL WORD LISTS">PERSONAL WORD LISTS</a><br>
+<a href="#FILES AND DIRECTORIES">FILES AND DIRECTORIES</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+<a href="#AUTHOR">AUTHOR</a><br>
+
+<hr>
+
+
+<h2>NAME
+<a name="NAME"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Enchant -
+enchant ordering files and personal word lists</p>
+
+<h2>ORDERING FILE
+<a name="ORDERING FILE"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Enchant uses
+global and per-user ordering files named
+<i>enchant.ordering</i> to decide which spelling provider to
+use for particular languages. The per-user file takes
+precedence.</p>
+
+<p style="margin-left:11%; margin-top: 1em">The ordering
+file takes the form <i>language_tag:&lt;comma-separated list
+of spelling providers&gt;</i>. The language tag is an IETF
+BCP 47 language tag, typically of the form
+<i>COUNTRY_LANGUAGE</i>. To see what dictionaries are
+available, run <i>enchant-lsmod-2</i>. &rsquo;*&rsquo; is
+used to mean &ldquo;use this ordering for all languages,
+unless instructed otherwise.&rdquo; For example:</p>
+
+
+<p style="margin-left:22%; margin-top: 1em">*:aspell,hunspell,nuspell
+<br>
+en:aspell,hunspell,nuspell <br>
+en_GB:hunspell,nuspell,aspell <br>
+fr:hunspell,nuspell,aspell</p>
+
+<h2>PERSONAL WORD LISTS
+<a name="PERSONAL WORD LISTS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Personal word
+lists are simple plain text files with one word per line.
+Lines starting with a hash sign &rsquo;#&rsquo; are
+ignored.</p>
+
+<p style="margin-left:11%; margin-top: 1em"><b>SHARING
+PERSONAL WORD LISTS BETWEEN SPELL-CHECKERS</b> <br>
+It is possible, and usually safe, to share Enchant&rsquo;s
+personal word lists with other spelling checkers that use
+the same format (note that other spell-checkers may not
+support comments!). The spell-checkers known to be
+compatible are Hunspell, Nuspell and Ispell. (Although
+Enchant does not support Ispell as a back-end, it&rsquo;s
+still fine to share word lists with it.) Other
+spell-checkers supported by Enchant are either incompatible,
+or have no personal word list mechanism. There may well be
+yet other spell-checkers, unknown to Enchant, that use the
+same format.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Some
+applications use Hunspell or Nuspell, but store the personal
+word list under another name or in another location. Firefox
+is one example. Firefox also seems to reorder its word list
+when updating it; again, this is OK, as the result is still
+in the same format. Anonther example is Thunderbird.</p>
+
+<p style="margin-left:11%; margin-top: 1em">To share word
+lists with Enchant, find the other spelling checker&rsquo;s
+word list file, e.g. <i>~/.hunspell_fr_FR</i> or
+<i>~/.config/nuspell/fr_FR</i>, and merge it with the
+corresponding Enchant file, in this case
+<i>~/.config/enchant/fr_FR.dic</i>. Use the following
+command, replacing <i>ENCHANT-DICT</i> and <i>OTHER-DICT</i>
+with the corresponding dictionary file names:</p>
+
+<p style="margin-left:22%; margin-top: 1em">cat
+ENCHANT-DICT OTHER-DICT | sort -u &gt; merged.txt</p>
+
+<p style="margin-left:11%; margin-top: 1em">Take a look at
+merged.txt to check the merge has worked, then</p>
+
+<p style="margin-left:22%; margin-top: 1em">mv merged.txt
+ENCHANT-DICT <br>
+rm OTHER-DICT <br>
+ln -s OTHER-DICT ENCHANT-DICT</p>
+
+<p style="margin-left:11%; margin-top: 1em">to replace the
+other dictionary file with a link to the Enchant dictionary,
+again filling in the name of the dictionary files.</p>
+
+<h2>FILES AND DIRECTORIES
+<a name="FILES AND DIRECTORIES"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Enchant looks
+in the following places for files, in decreasing order of
+precedence: <i><br>
+ENCHANT_CONFIG_DIR</i></p>
+
+<p style="margin-left:22%;">(If the environment variable is
+set.)</p>
+
+<p style="margin-left:11%;"><i>XDG_CONFIG_HOME/enchant</i>
+(non-Windows systems)</p>
+
+<p style="margin-left:22%;">Default:
+<i>~/.config/enchant</i></p>
+
+
+<p style="margin-left:11%;"><i>CSIDL_LOCAL_APPDATA\enchant</i>
+(Windows systems)</p>
+
+<p style="margin-left:22%;">Default: <i>C:\Documents and
+Settings\</i>username<i>\Local Settings\Application
+Data\enchant</i></p>
+
+<p style="margin-left:11%;"><i>DATADIR/enchant</i></p>
+
+<p style="margin-left:22%;">(Or the equivalent location
+relative to the enchant library for a relocatable
+build.)</p>
+
+<p style="margin-left:11%; margin-top: 1em">Dictionaries
+are looked for in a subdirectory with the same name as the
+provider; for example, <i>DATADIR/enchant/hunspell</i> and
+<i>~/.config/enchant/hunspell</i>.</p>
+
+<p style="margin-left:11%; margin-top: 1em">Some providers
+may also look in a standard system directory for their
+dictionaries; the hunspell provider can be configured to do
+so at build time.</p>
+
+<h2>SEE ALSO
+<a name="SEE ALSO"></a>
+</h2>
+
+
+
+<p style="margin-left:11%; margin-top: 1em"><b>enchant-2</b>(1),
+<b>enchant-lsmod-2</b>(1)</p>
+
+<h2>AUTHOR
+<a name="AUTHOR"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Written by Dom
+Lachowicz and Reuben Thomas.</p>
+<hr>
+</body>
+</html>
