@@ -23,7 +23,7 @@ noinst_HEADERS = debug.h
 
 pkgdata_DATA = enchant.ordering
 
-dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1
+dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1 enchant.5
 
 edit = sed \
 	-e 's|DATADIR|$(datadir)|g'

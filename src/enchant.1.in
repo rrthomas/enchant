@@ -31,46 +31,12 @@ display help and exit
 .TP
 .B "\-v"
 display version information and exit
-.SH ENCHANT ORDERING FILE
-Enchant uses global and per-user ordering files named \fIenchant.ordering\fR
-to decide which spelling provider to use for particular languages.
-The per-user file takes precedence.
-.PP
-The ordering file takes the form \fIlanguage_tag:<comma-separated list of spelling
-providers>\fR. The language tag is an IETF BCP 47 language tag, typically of the form \fICOUNTRY_LANGUAGE\fR.
-To see what dictionaries are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. '*' is
-used to mean "use this ordering for all languages, unless instructed otherwise." For example:
-.PP
-*:aspell,hunspell,nuspell
-.br
-en:aspell,hunspell,nuspell
-.br
-en_GB:hunspell,nuspell,aspell
-.br
-fr:hunspell,nuspell,aspell
 .SH FILES AND DIRECTORIES
-Enchant looks in the following places for files, in decreasing order of precedence:
-.TP
-\fIENCHANT_CONFIG_DIR\fR
-(If the environment variable is set.)
-.TP
-\fIXDG_CONFIG_HOME/enchant\fR (non-Windows systems)
-Default: \fI~/.config/enchant\fR
-.TP
-\fICSIDL_LOCAL_APPDATA\\enchant\fR (Windows systems)
-Default: \fIC:\\Documents and Settings\\\fRusername\fI\\Local Settings\\Application Data\\enchant
-.TP
-\fIDATADIR/enchant\fR
-(Or the equivalent location relative to the enchant library for a relocatable build.)
-.PP
-Dictionaries are looked for in a subdirectory with the same name as the
-provider; for example, \fIDATADIR/enchant/hunspell\fR and
-\fI~/.config/enchant/hunspell\fR.
-.PP
-Some providers may also look in a standard system directory for their
-dictionaries; the hunspell provider can be configured to do so at build
-time.
+See
+.BR enchant (5)
+for details of configuration files and personal word lists.
 .SH "SEE ALSO"
+.BR enchant-@ENCHANT_MAJOR_VERSION@ (5),
 .BR aspell (1),
 .BR enchant-lsmod-@ENCHANT_MAJOR_VERSION@ (1)
 .SH "AUTHOR"

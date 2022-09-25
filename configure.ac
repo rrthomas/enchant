@@ -241,6 +241,7 @@ src/libenchant.rc
 src/Makefile
 src/enchant.1
 src/enchant-lsmod.1
+src/enchant.5
 providers/Makefile
 tests/Makefile
 tests/enchant_providers/Makefile

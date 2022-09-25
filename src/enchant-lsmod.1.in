@@ -1,6 +1,6 @@
 .TH ENCHANT-LSMOD-@ENCHANT_MAJOR_VERSION@ 1 "August 2017"
 .SH NAME
-Enchant \- list provider and dictionary information
+enchant-lsmod \- list provider and dictionary information
 .SH SYNOPSIS
 .ll +8
 .B enchant-lsmod-@ENCHANT_MAJOR_VERSION@

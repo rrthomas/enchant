@@ -40,46 +40,15 @@ instructions.
 Developers or others wishing to install from a git repository, see HACKING.
 
 
-Personal word lists
--------------------
+Usage
+-----
 
-Personal word lists are simple plain text files with one word per line.
-Lines starting with a hash sign (#) are ignored.
+See the man pages for information on how to use Enchant. In particular,
+information about how to configure which spelling checker to use for each
+language and how to work with personal word lists is in the man page
+enchant(5). To see this man page, in a terminal, give the command:
 
-
-Sharing personal word lists between spell-checkers
---------------------------------------------------
-
-It is possible, and usually safe, to share Enchant’s personal word lists
-with other spelling checkers that use the same format (note that other
-spell-checkers may not support comments!). The spell-checkers known to be
-compatible are Hunspell, Nuspell and Ispell. (Although Enchant does not
-support Ispell as a back-end, it’s still fine to share word lists with it.)
-Other spell-checkers supported by Enchant are either incompatible, or have
-no personal word list mechanism. There may well be yet other spell-checkers,
-unknown to Enchant, that use the same format.
-
-Some applications use Hunspell or Nuspell, but store the personal word list
-under another name or in another location. Firefox is one example. Firefox
-also seems to reorder its word list when updating it; again, this is OK, as
-the result is still in the same format. Anonther example is Thunderbird.
-
-To share word lists with Enchant, find the other spelling checker’s word
-list file, e.g. ~/.hunspell_fr_FR or ~/.config/nuspell/fr_FR, and merge it
-with the corresponding Enchant file, in this case ~/.config/enchant/fr_FR.dic
-(on a GNU or BSD system). Use the following command, replacing ENCHANT-DICT
-and OTHER-DICT with the corresponding dictionary file names:
-
-cat ENCHANT-DICT OTHER-DICT | sort -u > merged.txt
-
-Take a look at merged.txt to check the merge has worked, then
-
-mv merged.txt ENCHANT-DICT
-rm OTHER-DICT
-ln -s OTHER-DICT ENCHANT-DICT
-
-to replace the other dictionary file with a link to the Enchant dictionary,
-again filling in the name of the dictionary files.
+    man 5 enchant
 
 
 Bug reports and development
