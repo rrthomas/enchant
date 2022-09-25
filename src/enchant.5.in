@@ -8,9 +8,9 @@ The per-user file takes precedence.
 .PP
 The ordering file takes the form \fIlanguage_tag:<comma-separated list of spelling
 providers>\fR. The language tag is an IETF BCP 47 language tag, typically of the form \fICOUNTRY_LANGUAGE\fR.
-To see what dictionaries are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. '*' is
-used to mean "use this ordering for all languages, unless instructed otherwise." For example:
-.PP
+To see what dictionaries are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. \(oq*\(cq is
+used to mean \(lquse this ordering for all languages, unless instructed otherwise.\(rq For example:
+.IP
 *:aspell,hunspell,nuspell
 .br
 en:aspell,hunspell,nuspell
@@ -20,13 +20,13 @@ en_GB:hunspell,nuspell,aspell
 fr:hunspell,nuspell,aspell
 .SH PERSONAL WORD LISTS
 Personal word lists are simple plain text files with one word per line.
-Lines starting with a hash sign '#' are ignored.
+Lines starting with a hash sign \(oq#\(cq are ignored.
 .SS SHARING PERSONAL WORD LISTS BETWEEN SPELL-CHECKERS
-It is possible, and usually safe, to share Enchant's personal word lists
+It is possible, and usually safe, to share Enchant\(cqs personal word lists
 with other spelling checkers that use the same format (note that other
 spell-checkers may not support comments!). The spell-checkers known to be
 compatible are Hunspell, Nuspell and Ispell. (Although Enchant does not
-support Ispell as a back-end, it's still fine to share word lists with it.)
+support Ispell as a back-end, it\(cqs still fine to share word lists with it.)
 Other spell-checkers supported by Enchant are either incompatible, or have
 no personal word list mechanism. There may well be yet other spell-checkers,
 unknown to Enchant, that use the same format.
@@ -36,17 +36,17 @@ under another name or in another location. Firefox is one example. Firefox
 also seems to reorder its word list when updating it; again, this is OK, as
 the result is still in the same format. Anonther example is Thunderbird.
 .PP
-To share word lists with Enchant, find the other spelling checker's word
+To share word lists with Enchant, find the other spelling checker\(cqs word
 list file, e.g. \fI~/.hunspell_fr_FR\fR or \fI~/.config/nuspell/fr_FR\fR,
 and merge it with the corresponding Enchant file, in this case
 \fI~/.config/enchant/fr_FR.dic\fR. Use the following command, replacing
 \fIENCHANT-DICT\fR and \fIOTHER-DICT\fR with the corresponding dictionary
 file names:
-.PP
+.IP
 cat ENCHANT-DICT OTHER-DICT | sort -u > merged.txt
 .PP
 Take a look at merged.txt to check the merge has worked, then
-.PP
+.IP
 mv merged.txt ENCHANT-DICT
 .br
 rm OTHER-DICT
