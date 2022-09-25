@@ -44,3 +44,9 @@
 /getopt_int.h
 /gettext.h
 /dummy.c
+/assert.in.h
+/limits.in.h
+/stdalign.in.h
+/stdint.in.h
+/verify.h
+/limits.h
