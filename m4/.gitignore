@@ -61,3 +61,5 @@
 /getopt.m4
 /pid_t.m4
 /zzgnulib.m4
+/assert_h.m4
+/stdalign.m4
