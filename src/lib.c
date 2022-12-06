@@ -140,6 +140,7 @@ enchant_get_conf_dirs (void)
 		goto error_exit;
 	conf_dirs = g_slist_append (conf_dirs, pkgconfdir);
 	free (sysconfdir);
+	sysconfdir = NULL;
 
 	if ((user_config_dir = enchant_get_user_config_dir ()) == NULL)
 		goto error_exit;
