@@ -170,8 +170,8 @@ int enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
  * @len: The byte length of @word, or -1 for strlen (@word)
  * @out_n_suggs: The location to store the # of suggestions returned, or %null
  *
- * Will return an %null value if any of those pre-conditions
- * are not met.
+ * Will return a %null value if any of those pre-conditions
+ * is not met.
  *
  * Returns: A %null terminated list of UTF-8 encoded suggestions, or %null
  */

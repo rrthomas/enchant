@@ -548,8 +548,11 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word, ssize_t len, s
 	if (n_suggs > 0)
 		{
 			suggs = g_new0 (char *, n_suggs + 1);
-			n_suggs = enchant_dict_merge_suggestions(suggs, 0, dict_suggs, n_dict_suggs);
-			n_suggs = enchant_dict_merge_suggestions(suggs, n_suggs, pwl_suggs, n_pwl_suggs);
+			n_suggs = 0;
+			if (dict_suggs != NULL)
+				n_suggs = enchant_dict_merge_suggestions(suggs, n_suggs, dict_suggs, n_dict_suggs);
+			if (pwl_suggs != NULL)
+				n_suggs = enchant_dict_merge_suggestions(suggs, n_suggs, pwl_suggs, n_pwl_suggs);
 		}
 
 	g_strfreev(dict_suggs);
