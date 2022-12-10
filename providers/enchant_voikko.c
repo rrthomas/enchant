@@ -72,6 +72,8 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 	for (*out_n_suggs = 0; voikko_sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
 
 	char **sugg_arr = calloc(sizeof (char *), *out_n_suggs + 1);
+	if (sugg_arr == NULL)
+		return NULL;
 	for (size_t i = 0; i < *out_n_suggs; i++) {
 		sugg_arr[i] = strdup (voikko_sugg_arr[i]);
 	}
@@ -101,9 +103,10 @@ voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 
 	if (*out_n_dicts) {
 		out_list = calloc (*out_n_dicts + 1, sizeof (char *));
-		for (i = 0; i < *out_n_dicts; i++) {
-			out_list[i] = strdup (voikko_langs[i]);
-		}
+		if (out_list != NULL)
+			for (i = 0; i < *out_n_dicts; i++) {
+				out_list[i] = strdup (voikko_langs[i]);
+			}
 	}
 	voikkoFreeCstrArray(voikko_langs);
 
@@ -145,6 +148,8 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 	}
 
 	EnchantDict *dict = calloc (sizeof (EnchantDict), 1);
+	if (dict == NULL)
+		return NULL;
 	dict->user_data = (void *)voikko_handle;
 	dict->check = voikko_dict_check;
 	dict->suggest = voikko_dict_suggest;
@@ -176,6 +181,8 @@ EnchantProvider *
 init_enchant_provider (void)
 {
 	EnchantProvider *provider = calloc (sizeof (EnchantProvider), 1);
+	if (provider == NULL)
+		return NULL;
 	provider->dispose = voikko_provider_dispose;
 	provider->request_dict = voikko_provider_request_dict;
 	provider->dispose_dict = voikko_provider_dispose_dict;
