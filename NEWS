@@ -1,3 +1,16 @@
+2.3.4 (December 14, 2022)
+-------------------------
+
+Document the personal wordlist format.
+
+Improve the man pages in various ways, and make online versions, now linked
+from the web site.
+
+Fix some potential crashes (double-free and NULL dereferences).
+
+Update the build system to use autoconf 2.71.
+
+
 2.3.3 (April 16, 2022)
 ----------------------
 
