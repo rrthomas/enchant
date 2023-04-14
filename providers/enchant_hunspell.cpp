@@ -262,8 +262,7 @@ hunspell_request_dictionary (const char * tag)
 	s_buildHashNames (names, tag);
 
 	for (size_t i = 0; i < names.size (); i++) {
-		if (g_file_test(names[i].c_str(), G_FILE_TEST_EXISTS) &&
-		    s_fileExists(s_correspondingAffFile(names[i]))) {
+		if (s_fileExists(names[i]) && s_fileExists(s_correspondingAffFile(names[i]))) {
 			return strdup (names[i].c_str());
 		}
 	}
@@ -474,8 +473,7 @@ hunspell_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED
 	std::vector <std::string> names;
 	s_buildHashNames (names, tag);
 	for (size_t i = 0; i < names.size(); i++) {
-		if (g_file_test (names[i].c_str(), G_FILE_TEST_EXISTS) &&
-		    s_fileExists(s_correspondingAffFile(names[i])))
+		if (s_fileExists(names[i]) && s_fileExists(s_correspondingAffFile(names[i])))
 		{
 			return 1;
 		}
