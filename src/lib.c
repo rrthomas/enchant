@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2017-2021 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2017-2023 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -323,30 +323,6 @@ enchant_session_remove (EnchantSession * session, const char * const word, size_
 	g_hash_table_insert (session->session_exclude, key, GINT_TO_POINTER(TRUE));
 }
 
-static void
-enchant_session_add_personal (EnchantSession * session, const char * const word, size_t len)
-{
-	enchant_pwl_add(session->personal, word, len);
-}
-
-static void
-enchant_session_remove_personal (EnchantSession * session, const char * const word, size_t len)
-{
-	enchant_pwl_remove(session->personal, word, len);
-}
-
-static void
-enchant_session_add_exclude (EnchantSession * session, const char * const word, size_t len)
-{
-	enchant_pwl_add(session->exclude, word, len);
-}
-
-static void
-enchant_session_remove_exclude (EnchantSession * session, const char * const word, size_t len)
-{
-	enchant_pwl_remove(session->exclude, word, len);
-}
-
 /* a word is excluded if it is in the exclude dictionary or in the session exclude list
  *  AND the word has not been added to the session include list
  */
@@ -578,8 +554,8 @@ enchant_dict_add (EnchantDict * dict, const char *const word, ssize_t len)
 
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
-	enchant_session_add_personal (session, word, len);
-	enchant_session_remove_exclude (session, word, len);
+	enchant_pwl_add(session->personal, word, len);
+	enchant_pwl_remove(session->exclude, word, len);
 
 	if (dict->add_to_personal)
 		(*dict->add_to_personal) (dict, word, len);
@@ -638,8 +614,8 @@ enchant_dict_remove (EnchantDict * dict, const char *const word, ssize_t len)
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
-	enchant_session_remove_personal (session, word, len);
-	enchant_session_add_exclude(session, word, len);
+	enchant_pwl_remove(session->personal, word, len);
+	enchant_pwl_add(session->exclude, word, len);
 
 	if (dict->add_to_exclude)
 		(*dict->add_to_exclude) (dict, word, len);
