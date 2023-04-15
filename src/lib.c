@@ -112,7 +112,7 @@ enchant_ensure_dir_exists (const char* dir)
 		}
 }
 
-char *
+_GL_ATTRIBUTE_MALLOC char *
 enchant_get_user_config_dir (void)
 {
 	const gchar * env = g_getenv("ENCHANT_CONFIG_DIR");
@@ -1392,7 +1392,7 @@ enchant_broker_get_error (EnchantBroker * broker)
 	return broker->error;
 }
 
-char *
+_GL_ATTRIBUTE_MALLOC char *
 enchant_get_user_language(void)
 {
 #if defined(G_OS_WIN32)
