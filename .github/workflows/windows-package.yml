@@ -1,0 +1,47 @@
+name: windows packaging
+
+on: [ push, pull_request ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    strategy:
+      matrix:
+        include:
+        - { sys: mingw64, env: x86_64 }
+        - { sys: mingw32, env: i686 }
+    steps:
+    - uses: msys2/setup-msys2@v2
+      with:
+        release: false
+        msystem: ${{matrix.sys}}
+        install: >-
+          patch git groff
+          mingw-w64-${{matrix.env}}-autotools
+          mingw-w64-${{matrix.env}}-gcc
+          mingw-w64-${{matrix.env}}-glib2
+          mingw-w64-${{matrix.env}}-hunspell
+          mingw-w64-${{matrix.env}}-hunspell-en
+          mingw-w64-${{matrix.env}}-nuspell
+          mingw-w64-${{matrix.env}}-unittest-cpp
+    - uses: actions/checkout@v2
+      with: { submodules: true }
+    - name: Bootstrap (gnulib and autoreconf)
+      run: ./bootstrap
+    - name: configure
+      run: ./configure --enable-relocatable --disable-gcc-warnings --with-hunspell-dir=/${{matrix.sys}}/share/hunspell
+    - name: make
+      run: make --jobs=`nproc`
+    - name: install
+      run:
+        - make install DESTDIR=$(pwd)/dist
+        - cp -v /${{matrix.sys}}/bin/*.dll dist/${{matrix.sys}}/bin/
+        - cp -v /${{matrix.sys}}/share/hunspell/*  dist/${{matrix.sys}}/share/enchant/hunspell
+     - name: Archive Release
+       uses: thedoctor0/zip-release@0.7.1
+       with:
+         filename: 'enchant.zip'
+         directory: dist
