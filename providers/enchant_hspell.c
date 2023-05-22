@@ -1,6 +1,7 @@
 /* enchant
  * Copyright (C) 2003 Yaacov Zamir
  * Copyright (C) 2004 Dom Lachowicz
+ * Copyright (C) 2017-2023 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +18,7 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  *
- * In addition, as a special exception, Dom Lachowicz and Yaacov Zamir
+ * In addition, as a special exception, the copyright holders
  * give permission to link the code of this program with
  * non-LGPL Spelling Provider libraries (eg: a MSFT Office
  * spell checker backend) and distribute linked combinations including
