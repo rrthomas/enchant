@@ -1,3 +1,15 @@
+2.4.0 (May 22, 2023)
+--------------------
+
+This version contains no user-visible changes.
+
+Add a new API enchant_broker_request_dict_with_pwl, so that it’s possible to
+specify a personal wordlist in a normal spelling session.
+
+This makes it possible to rewrite the enchant program to use only public
+APIs, thus making a cleaner separation between front-end and library.
+
+
 2.3.4 (February 19, 2023)
 -------------------------
 
