@@ -45,9 +45,6 @@ EnchantPWL* enchant_pwl_init_with_file(const char * file);
 void enchant_pwl_add(EnchantPWL * me, const char *const word, ssize_t len);
 void enchant_pwl_remove(EnchantPWL * me, const char *const word, ssize_t len);
 int enchant_pwl_check(EnchantPWL * me, const char *const word, ssize_t len);
-/*gives the best set of suggestions from pwl that are at least as good as the given suggs*/
-char** enchant_pwl_suggest(EnchantPWL *me, const char *const word,
-			   ssize_t len, char ** suggs, size_t* out_n_suggs);
 void enchant_pwl_free(EnchantPWL* me);
 
 #ifdef __cplusplus
