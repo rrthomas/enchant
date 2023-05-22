@@ -19,6 +19,8 @@
  * THE SOFTWARE.
  */
 
+#include "config.h"
+#include <stdio.h>
 #include <UnitTest++/UnitTest++.h>
 #include <enchant.h>
 #include <enchant-provider.h>
@@ -49,6 +51,10 @@ struct str_enchant_broker
 // comes with a list of directories or providers
 int main(int argc, char* argv[])
 {
+#ifndef ENABLE_RELOCATABLE
+    fprintf(stderr, "You must configure with --enable-relocatable to be able to run the tests\n");
+    return 1;
+#endif
     int result = 0;
     for(int i=1; i < argc; ++i)
     {
