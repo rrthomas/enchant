@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2021 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2023 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,22 +34,7 @@
  *  type EnchantPWL.
  *
  *  Under the hood, a PWL is stored as a Trie.  Checking strings for
- *  correctness and making suggestions is done by traversing the Trie
- *  while allowing a certain number of miss-steps.  Due to the prefix
- *  compression of the Trie, this allows all strings in the PWL within
- *  a given edit distance of the target word to be enumerated quite
- *  efficiently.
- *
- *  Ideas for the future:
- *
- *     - Order the suggestions first by edit distance, then by
- *       soundex key, to put the most similar sounding suggestions
- *       at the front of the list.  Would need a "soundex" that is
- *       general enough to handle languages other than English.
- *
- *     - iterative deepening to find suggestions, rather than a straight
- *       search to depth three.
- *
+ *  correctness is done by traversing the Trie.
  */
 
 #include "config.h"
@@ -67,9 +52,6 @@
 #include "enchant-provider.h"
 
 #include "pwl.h"
-
-#define ENCHANT_PWL_MAX_ERRORS 3
-#define ENCHANT_PWL_MAX_SUGGS 15
 
 static const gunichar BOM = 0xfeff;
 
@@ -108,14 +90,6 @@ struct str_enchant_pwl
 static EnchantTrie n_EOSTrie;
 static EnchantTrie* EOSTrie = &n_EOSTrie;
 
-/* mode for searching trie */
-typedef enum enum_matcher_mode EnchantTrieMatcherMode;
-enum enum_matcher_mode
-{
-	case_sensitive,
-	case_insensitive
-};
-
 /*  The EnchantTrieMatcher structure maintains the state necessary to
  *  search for matching strings within an EnchantTrie.  It includes a
  *  callback function which will be called with each matching string
@@ -129,9 +103,6 @@ enum enum_matcher_mode
 typedef struct str_enchant_trie_matcher EnchantTrieMatcher;
 struct str_enchant_trie_matcher
 {
-	int num_errors;		/* Num errors encountered so far. */
-	int max_errors;		/* Max errors before search should terminate */
-
 	char* word;	/* Word being searched for */
 	ssize_t word_pos;	/* Current position in the word */
 
@@ -139,21 +110,8 @@ struct str_enchant_trie_matcher
 	ssize_t path_len;	/* Length of allocated path string */
 	ssize_t path_pos;	/* Current end pos of path string */
 
-	EnchantTrieMatcherMode mode;
-
-	void (*cbfunc)(char*,EnchantTrieMatcher*); /* callback func */
 	void* cbdata;		/* Private data for use by callback func */
 };
-
-/*  To allow the list of suggestions to be built up an item at a time,
- *  its state is maintained in an EnchantSuggList object.
- */
-typedef struct str_enchant_sugg_list
-{
-	char** suggs;
-	int* sugg_errs;
-	size_t n_suggs;
-} EnchantSuggList;
 
 /*
  *   Function Prototypes
@@ -162,24 +120,16 @@ typedef struct str_enchant_sugg_list
 static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
 					const char *const word, size_t len);
 static void enchant_pwl_refresh_from_file(EnchantPWL* pwl);
-static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher);
-static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher);
 static void enchant_trie_free(EnchantTrie* trie);
 static void enchant_trie_free_cb(void*,void*,void*);
 static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word);
 static void enchant_trie_remove(EnchantTrie* trie,const char *const word);
 static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matcher);
-static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcherV);
 static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word, size_t len,
-				int maxerrs,
-				EnchantTrieMatcherMode mode,
-				void(*cbfunc)(char*,EnchantTrieMatcher*),
 				void* cbdata);
 static void enchant_trie_matcher_free(EnchantTrieMatcher* matcher);
 static void enchant_trie_matcher_pushpath(EnchantTrieMatcher* matcher,char* newchars);
 static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num);
-
-static int edit_dist(const char* word1, const char* word2);
 
 #define enchant_lock_file(f) flock (fileno (f), LOCK_EX)
 #define enchant_unlock_file(f) flock (fileno (f), LOCK_UN)
@@ -187,7 +137,7 @@ static int edit_dist(const char* word1, const char* word2);
 /**
  * enchant_pwl_init
  *
- * Returns: a new PWL object used to store/check/suggest words.
+ * Returns: a new PWL object used to store/check words.
  */
 EnchantPWL* enchant_pwl_init(void)
 {
@@ -200,7 +150,7 @@ EnchantPWL* enchant_pwl_init(void)
 /**
  * enchant_pwl_init_with_file
  *
- * Returns: a new PWL object used to store/check/suggest words
+ * Returns: a new PWL object used to store/check words
  * or NULL if the file cannot be opened or created
  */
 EnchantPWL* enchant_pwl_init_with_file(const char * file)
@@ -433,8 +383,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 static int enchant_pwl_contains(EnchantPWL *pwl, const char *const word, size_t len)
 {
 	int count = 0;
-	EnchantTrieMatcher *matcher = enchant_trie_matcher_init(word, len, 0, case_sensitive, enchant_pwl_check_cb,
-								&count);
+	EnchantTrieMatcher *matcher = enchant_trie_matcher_init(word, len, &count);
 	enchant_trie_find_matches(pwl->trie,matcher);
 	enchant_trie_matcher_free(matcher);
 
@@ -570,124 +519,6 @@ static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher)
 	(*((int*)(matcher->cbdata)))++;
 }
 
-static void enchant_pwl_case_and_denormalize_suggestions(EnchantPWL *pwl,
-							 const char *const word, size_t len,
-							 EnchantSuggList* suggs_list)
-{
-	gchar* (*utf8_case_convert_function)(const gchar*str, gssize len) = NULL;
-	if(enchant_is_title_case(word, len))
-		utf8_case_convert_function = enchant_utf8_strtitle;
-	else if (enchant_is_all_caps(word, len))
-		utf8_case_convert_function = g_utf8_strup;
-
-	for (size_t i = 0; i < suggs_list->n_suggs; ++i)
-		{
-			gchar* suggestion = g_hash_table_lookup (pwl->words_in_trie, suggs_list->suggs[i]);
-			size_t suggestion_len = strlen(suggestion);
-
-			gchar* cased_suggestion;
-			if (utf8_case_convert_function && !enchant_is_all_caps(suggestion, suggestion_len))
-				cased_suggestion = utf8_case_convert_function(suggestion, suggestion_len);
-			else
-				cased_suggestion = g_strndup(suggestion, suggestion_len);
-
-			g_free(suggs_list->suggs[i]);
-			suggs_list->suggs[i] = cased_suggestion;
-		}
-}
-
-static int best_distance(char** suggs, const char *const word, size_t len)
-{
-	char *normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
-	int best_dist = g_utf8_strlen(normalized_word, -1);
-
-	for (char **sugg_it = suggs; *sugg_it; ++sugg_it)
-		{
-			char* normalized_sugg = g_utf8_normalize (*sugg_it, -1, G_NORMALIZE_NFD);
-			int dist = edit_dist(normalized_word, normalized_sugg);
-			g_free(normalized_sugg);
-			best_dist = MIN (dist, best_dist);
-		}
-
-	g_free(normalized_word);
-	return best_dist;
-}
-
-/* gives the best set of suggestions from pwl that are at least as good as the
- * given suggs (if suggs == NULL just best from pwl) */
-char** enchant_pwl_suggest(EnchantPWL *pwl, const char *const word,
-			   ssize_t len, char** suggs, size_t* out_n_suggs)
-{
-	if (len < 0)
-		len = strlen (word);
-
-	int max_dist = suggs ? best_distance(suggs, word, len) : ENCHANT_PWL_MAX_ERRORS;
-	max_dist = MIN (max_dist, ENCHANT_PWL_MAX_ERRORS);
-
-	enchant_pwl_refresh_from_file(pwl);
-
-	EnchantSuggList sugg_list;
-	sugg_list.suggs = g_new0(char*,ENCHANT_PWL_MAX_SUGGS+1);
-	sugg_list.sugg_errs = g_new0(int,ENCHANT_PWL_MAX_SUGGS);
-	sugg_list.n_suggs = 0;
-
-	EnchantTrieMatcher *matcher = enchant_trie_matcher_init(word, len, max_dist,
-								case_insensitive,
-								enchant_pwl_suggest_cb,
-								&sugg_list);
-	enchant_trie_find_matches(pwl->trie,matcher);
-	enchant_trie_matcher_free(matcher);
-
-	g_free(sugg_list.sugg_errs);
-	sugg_list.suggs[sugg_list.n_suggs] = NULL;
-	(*out_n_suggs) = sugg_list.n_suggs;
-
-	enchant_pwl_case_and_denormalize_suggestions(pwl, word, len, &sugg_list);
-
-	return sugg_list.suggs;
-}
-
-/* matcher callback when a match is found*/
-static void enchant_pwl_suggest_cb(char* match,EnchantTrieMatcher* matcher)
-{
-	EnchantSuggList *sugg_list = (EnchantSuggList*)(matcher->cbdata);
-
-	/* only get best errors so adapt */
-	if(matcher->num_errors < matcher->max_errors)
-		matcher->max_errors = matcher->num_errors;
-
-	/* Find appropriate location in the array, if any */
-	/* In future, this could be done using binary search...  */
-	size_t loc;
-	for(loc=0; loc < sugg_list->n_suggs; loc++) {
-		/* Better than an existing suggestion, so stop */
-		if(sugg_list->sugg_errs[loc] > matcher->num_errors)
-			break;
-		/* Already in the list with better score, just return */
-		if(strcmp(match,sugg_list->suggs[loc])==0) {
-			g_free(match);
-			return;
-		}
-	}
-	/* If it's not going to fit, just throw it away */
-	if(loc >= ENCHANT_PWL_MAX_SUGGS) {
-		g_free(match);
-		return;
-	}
-
-	int changes = 1;  /* num words added to list */
-
-	/* Remove all elements with worse score */
-	for(size_t i=loc; i < sugg_list->n_suggs; i++){
-		g_free(sugg_list->suggs[i]);
-		changes--;
-	}
-
-	sugg_list->suggs[loc] = match;
-	sugg_list->sugg_errs[loc] = matcher->num_errors;
-	sugg_list->n_suggs = sugg_list->n_suggs + changes;
-}
-
 static void enchant_trie_free(EnchantTrie* trie)
 {
 	/* Don't try to free NULL or the EOSTrie pointer */
@@ -801,20 +632,12 @@ static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
 }
 
 static EnchantTrie* enchant_trie_get_subtrie(EnchantTrie* trie,
-					     EnchantTrieMatcher* matcher,
 					     char** nxtChS)
 {
 	if(trie->subtries == NULL || *nxtChS == NULL)
 		return NULL;
 
-	EnchantTrie *subtrie = g_hash_table_lookup(trie->subtries,*nxtChS);
-	if(subtrie == NULL && matcher->mode == case_insensitive) {
-		char* nxtChSUp = g_utf8_strup(*nxtChS, -1); /* we ignore the title case scenario since that will give us an edit_distance of one which is acceptable since this mode is used for suggestions*/
-		g_free(*nxtChS);
-		*nxtChS = nxtChSUp;
-		subtrie = g_hash_table_lookup(trie->subtries,nxtChSUp);
-	}
-	return subtrie;
+	return g_hash_table_lookup(trie->subtries,*nxtChS);
 }
 
 static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matcher)
@@ -825,40 +648,22 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 	if(trie == NULL)
 		return;
 
-	/* Bail out if over the error limits */
-	if(matcher->num_errors > matcher->max_errors){
-		return;
-	}
-
 	/* If the end of a string has been reached, no point recursing */
 	if (trie == EOSTrie) {
 		size_t word_len = strlen(matcher->word);
-		int errs = matcher->num_errors;
-		if((ssize_t)word_len > matcher->word_pos)
-			matcher->num_errors = errs + word_len - matcher->word_pos;
-		if (matcher->num_errors <= matcher->max_errors)
-			matcher->cbfunc(g_strdup(matcher->path),matcher);
-		matcher->num_errors = errs;
+		if((ssize_t)word_len <= matcher->word_pos)
+			enchant_pwl_check_cb(g_strdup(matcher->path),matcher);
 		return;
 	}
 
 	/* If there is a value, just check it, no recursion */
 	if (trie->value != NULL) {
 		gchar* value;
-		int errs = matcher->num_errors;
 		value = trie->value;
-		if(matcher->mode == case_insensitive)
-			value = g_utf8_strdown(value, -1);
-		matcher->num_errors = errs + edit_dist(value,
-					   &(matcher->word[matcher->word_pos]));
-		if(matcher->mode == case_insensitive)
-			g_free(value);
-
-		if (matcher->num_errors <= matcher->max_errors)
-			matcher->cbfunc(g_strconcat(matcher->path,
+		if (strcmp(value, &(matcher->word[matcher->word_pos])) == 0)
+			enchant_pwl_check_cb(g_strconcat(matcher->path,
 							trie->value,NULL),
 					matcher);
-		matcher->num_errors = errs;
 		return;
 	}
 
@@ -867,7 +672,7 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 				 (nxtChI - matcher->word_pos));
 
 	/* Precisely match the first character, and recurse */
-	EnchantTrie* subtrie = enchant_trie_get_subtrie(trie, matcher, &nxtChS);
+	EnchantTrie* subtrie = enchant_trie_get_subtrie(trie, &nxtChS);
 	if (subtrie != NULL) {
 		enchant_trie_matcher_pushpath(matcher,nxtChS);
 		ssize_t oldPos = matcher->word_pos;
@@ -878,97 +683,26 @@ static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matc
 	}
 
 	g_free(nxtChS);
-
-	matcher->num_errors++;
-	if (matcher->word[matcher->word_pos] != '\0') {
-		/* Match on inserting word[0] */
-		ssize_t oldPos = matcher->word_pos;
-		matcher->word_pos = nxtChI;
-		enchant_trie_find_matches(trie,matcher);
-		matcher->word_pos = oldPos;
-	}
-	/* for each subtrie, match on delete or substitute word[0] or transpose word[0] and word[1] */
-	g_hash_table_foreach(trie->subtries,
-				enchant_trie_find_matches_cb,
-				matcher);
-	matcher->num_errors--;
-}
-
-static void enchant_trie_find_matches_cb(void* keyV,void* subtrieV,void* matcherV)
-{
-	char *key = (char*) keyV;
-	EnchantTrie *subtrie = (EnchantTrie*) subtrieV;
-	EnchantTrieMatcher *matcher = (EnchantTrieMatcher*) matcherV;
-
-	ssize_t nxtChI = (ssize_t) (g_utf8_next_char(&matcher->word[matcher->word_pos]) - matcher->word);
-
-	/* Don't handle actual matches, that's already done */
-	if (strncmp(key,&matcher->word[matcher->word_pos],nxtChI-matcher->word_pos) == 0)
-		return;
-
-	enchant_trie_matcher_pushpath(matcher,key);
-
-	/* Match on deleting word[0] */
-	enchant_trie_find_matches(subtrie,matcher);
-	/* Match on substituting word[0] */
-	ssize_t oldPos = matcher->word_pos;
-	matcher->word_pos = nxtChI;
-	enchant_trie_find_matches(subtrie,matcher);
-
-	enchant_trie_matcher_poppath(matcher,strlen(key));
-
-	/* Match on transposing word[0] and word[1] */
-	char *key2 = g_strndup(&matcher->word[oldPos],nxtChI-oldPos);
-	EnchantTrie *subtrie2 = enchant_trie_get_subtrie(subtrie, matcher, &key2);
-
-	if(subtrie2 != NULL) {
-		nxtChI = (ssize_t) (g_utf8_next_char(&matcher->word[matcher->word_pos]) - matcher->word);
-		if (strncmp(key,&matcher->word[matcher->word_pos],nxtChI-matcher->word_pos) == 0) {
-			matcher->word_pos = nxtChI;
-			enchant_trie_matcher_pushpath(matcher,key);
-			enchant_trie_matcher_pushpath(matcher,key2);
-
-			enchant_trie_find_matches(subtrie2,matcher);
-			enchant_trie_matcher_poppath(matcher,strlen(key2));
-			enchant_trie_matcher_poppath(matcher,strlen(key));
-		}
-	}
-
-	g_free(key2);
-
-	matcher->word_pos = oldPos;
 }
 
 static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
 						     size_t len,
-						     int maxerrs,
-						     EnchantTrieMatcherMode mode,
-						     void(*cbfunc)(char*,EnchantTrieMatcher*),
 						     void* cbdata)
 {
 	char * normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
 	len = strlen(normalized_word);
 
 	char * pattern = normalized_word;
-	if (mode == case_insensitive)
-		{
-			pattern = g_utf8_strdown (normalized_word, len);
-			g_free(normalized_word);
-		}
 
 	EnchantTrieMatcher* matcher = g_new(EnchantTrieMatcher,1);
-	matcher->num_errors = 0;
-	matcher->max_errors = maxerrs;
-	matcher->word = g_new0(char,len+maxerrs+2); // Ensure matcher does not overrun buffer: +2 for transpose check
+	matcher->word = g_new0(char,len+2); // Ensure matcher does not overrun buffer: +2 for transpose check
 	strcpy(matcher->word, pattern);
 	g_free(pattern);
 	matcher->word_pos = 0;
-	matcher->path = g_new0(char,len+maxerrs+1);
+	matcher->path = g_new0(char,len+1);
 	matcher->path[0] = '\0';
-	matcher->path_len = len+maxerrs+1;
+	matcher->path_len = len+1;
 	matcher->path_pos = 0;
-	matcher->mode = mode;
-	matcher->cbfunc = cbfunc;
 	matcher->cbdata = cbdata;
 
 	return matcher;
@@ -1003,39 +737,4 @@ static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num)
 	if(matcher->path_pos < 0)
 		matcher->path_pos = 0;
 	matcher->path[matcher->path_pos] = '\0';
-}
-
-static int edit_dist(const char* utf8word1, const char* utf8word2)
-{
-	glong len1, len2;
-	gunichar * word1 = g_utf8_to_ucs4_fast(utf8word1, -1, &len1);
-	gunichar * word2 = g_utf8_to_ucs4_fast(utf8word2, -1, &len2);
-
-	int * table = g_new0(int, (len1+1)*(len2+1));
-
-	/* Initialise outer rows of table */
-	for (glong i = 0; i < len1 + 1; i++)
-		table[i*(len2+1)] = i;
-	for (glong i = 0; i < len2 + 1; i++)
-		table[i] = i;
-
-	/* Fill in table in dynamic programming style */
-	for (glong i = 1; i < len1+1; i++){
-		for (glong j = 1; j < len2+1; j++) {
-			int cost = word1[i-1] != word2[j-1];
-			int v1 = table[(i-1)*(len2+1)+j] + 1;
-			if (i > 1 && j > 1 && word1[i-1] == word2[j-2] && word1[i-2] == word2[j-1])
-				v1 = MIN (v1, table[(i-2)*(len2+1)+(j-2)] + cost);
-
-			int v2 = table[i*(len2+1)+(j-1)] + 1;
-			int v3 = table[(i-1)*(len2+1)+(j-1)] + cost;
-			table[i*(len2+1)+j] = MIN (MIN (v1, v2), v3);
-		}
-	}
-
-	int cost = table[len1*(len2+1) + len2];
-	g_free(word1);
-	g_free(word2);
-	g_free(table);
-	return cost;
 }

@@ -210,36 +210,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_InBrokerPwlSession)
-{
-    enchant_dict_add(_pwl, "hello", -1);
-    _pwl_suggestions = enchant_dict_suggest(_pwl, "helo", -1, NULL);
-    CHECK(_pwl_suggestions);
-    CHECK(!dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_SuggestionsFromPersonal_addedToEnd)
-{
-    size_t cSuggestions;
-    enchant_dict_add(_dict, "hello", -1);
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
-    CHECK(_suggestions);
-    CHECK_EQUAL(5, cSuggestions);
-
-    std::vector<std::string> suggestions;
-    if(_suggestions != NULL){
-        suggestions.insert(suggestions.begin(), _suggestions, _suggestions+cSuggestions);
-    }
-
-    std::vector<std::string> expected = GetExpectedSuggestions("helo");
-    expected.push_back("hello");
-
-    CHECK_ARRAY_EQUAL(expected, suggestions, std::min((size_t)5,cSuggestions));
-}
-
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
              EnchantDictionarySuggest_DuplicateSuggestionsFromPersonal_notIncluded)
 {
     size_t cSuggestions;

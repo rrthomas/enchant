@@ -475,8 +475,8 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word, ssize_t len, s
 	g_return_val_if_fail (len, NULL);
 	g_return_val_if_fail (g_utf8_validate(word, len, NULL), NULL);
 
-	size_t n_dict_suggs = 0, n_pwl_suggs = 0, n_suggsT = 0;
-	char **dict_suggs = NULL, **pwl_suggs = NULL, **suggsT;
+	size_t n_dict_suggs = 0, n_suggsT = 0;
+	char **dict_suggs = NULL, **suggsT;
 
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
@@ -494,34 +494,18 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word, ssize_t len, s
 				}
 		}
 
-	/* Check for suggestions from personal dictionary */
-	if (session->personal)
-		{
-			pwl_suggs = enchant_pwl_suggest(session->personal, word, len, dict_suggs, &n_pwl_suggs);
-			if (pwl_suggs)
-				{
-					suggsT = enchant_dict_get_good_suggestions(dict, pwl_suggs, n_pwl_suggs, &n_suggsT);
-					enchant_free_string_list (pwl_suggs);
-					pwl_suggs = suggsT;
-					n_pwl_suggs = n_suggsT;
-				}
-		}
-
 	/* Clone suggestions, if any */
 	char **suggs = NULL;
-	size_t n_suggs = n_pwl_suggs + n_dict_suggs;
+	size_t n_suggs = n_dict_suggs;
 	if (n_suggs > 0)
 		{
 			suggs = g_new0 (char *, n_suggs + 1);
 			n_suggs = 0;
 			if (dict_suggs != NULL)
 				n_suggs = enchant_dict_merge_suggestions(suggs, n_suggs, dict_suggs, n_dict_suggs);
-			if (pwl_suggs != NULL)
-				n_suggs = enchant_dict_merge_suggestions(suggs, n_suggs, pwl_suggs, n_pwl_suggs);
 		}
 
 	g_strfreev(dict_suggs);
-	g_strfreev(pwl_suggs);
 
 	if (out_n_suggs)
 		*out_n_suggs = n_suggs;
