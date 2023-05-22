@@ -61,7 +61,8 @@ struct EnchantBrokerRequestDictionary_TestFixture : EnchantBrokerTestFixture
  * @tag: The non-null language tag you wish to request a dictionary for ("en_US", "de_DE", ...)
  *
  * Returns: An #EnchantDict, or %null if no suitable dictionary could be found.
- */
+ * The default personal wordlist file is used.
+*/
 
 
 
