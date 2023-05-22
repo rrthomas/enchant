@@ -19,6 +19,8 @@
  * THE SOFTWARE.
  */
 
+#include "config.h"
+#include <stdio.h>
 #include <UnitTest++/UnitTest++.h>
 #include "EnchantBrokerTestFixture.h"
 #include "enchant.h"
@@ -29,6 +31,11 @@ ConfigureHook EnchantBrokerTestFixture::userMockProvider2Configuration=NULL;
 
 
 int main(){
+#ifndef ENABLE_RELOCATABLE
+  fprintf(stderr, "You must configure with --enable-relocatable to be able to run the tests\n");
+  return 1;
+#else
   enchant_set_prefix_dir(".");
   return UnitTest::RunAllTests();
+#endif
 }
