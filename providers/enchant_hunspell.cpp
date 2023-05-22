@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003-2004 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
- * Copyright (C) 2016-2021 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2023 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -76,6 +76,8 @@ public:
 
 	bool checkWord (const char *word, size_t len);
 	char **suggestWord (const char* const word, size_t len, size_t *out_n_suggs);
+	void add (const char* const word, size_t len);
+	void remove (const char* const word, size_t len);
 	const char *getWordchars ();
 	bool apostropheIsWordChar;
 
@@ -86,6 +88,7 @@ private:
 	GIConv  m_translate_out;
 	Hunspell *hunspell;
 	char *wordchars; /* Value returned by getWordChars() */
+	char *normalizeUtf8(const char *utf8Word, size_t len);
 };
 
 /***************************************************************************/
@@ -111,16 +114,24 @@ HunspellChecker::~HunspellChecker()
 	free(wordchars);
 }
 
-bool
-HunspellChecker::checkWord(const char *utf8Word, size_t len)
+char*
+HunspellChecker::normalizeUtf8(const char *utf8Word, size_t len)
 {
-	if (len > MAXWORDUTF8LEN || !g_iconv_is_valid(m_translate_in))
-		return false;
+	if (len > MAXWORDUTF8LEN
+		|| !g_iconv_is_valid(m_translate_in))
+		return NULL;
 
 	// the 8bit encodings use precomposed forms
 	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
 	char *out = do_iconv(m_translate_in, normalizedWord);
 	g_free(normalizedWord);
+	return out;
+}
+
+bool
+HunspellChecker::checkWord(const char *utf8Word, size_t len)
+{
+	char *out = normalizeUtf8(utf8Word, len);
 	if (out == NULL)
 		return false;
 	bool result = hunspell->spell(std::string(out)) != 0;
@@ -131,15 +142,10 @@ HunspellChecker::checkWord(const char *utf8Word, size_t len)
 char**
 HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsug)
 {
-	if (len > MAXWORDUTF8LEN
-		|| !g_iconv_is_valid(m_translate_in)
-		|| !g_iconv_is_valid(m_translate_out))
+	if (!g_iconv_is_valid(m_translate_out))
 		return nullptr;
 
-	// the 8bit encodings use precomposed forms
-	char *normalizedWord = g_utf8_normalize (utf8Word, len, G_NORMALIZE_NFC);
-	char *out = do_iconv(m_translate_in, normalizedWord);
-	g_free(normalizedWord);
+	char *out = normalizeUtf8(utf8Word, len);
 	if (out == NULL)
 		return nullptr;
 
@@ -157,6 +163,28 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 		return sug;
 	}
 	return nullptr;
+}
+
+void
+HunspellChecker::add(const char* const utf8Word, size_t len)
+{
+	char *out = normalizeUtf8(utf8Word, len);
+	if (out == NULL)
+		return;
+
+	hunspell->add(out);
+	free(out);
+}
+
+void
+HunspellChecker::remove(const char* const utf8Word, size_t len)
+{
+	char *out = normalizeUtf8(utf8Word, len);
+	if (out == NULL)
+		return;
+
+	hunspell->remove(out);
+	free(out);
 }
 
 _GL_ATTRIBUTE_PURE const char*
@@ -353,6 +381,22 @@ hunspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	return 1;
 }
 
+static void
+hunspell_dict_add_to_session (EnchantDict * me,
+			      const char *const word, size_t len)
+{
+	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
+	checker->add(word, len);
+}
+
+static void
+hunspell_dict_remove_from_session (EnchantDict * me,
+				   const char *const word, size_t len)
+{
+	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
+	checker->remove(word, len);
+}
+
 static const char*
 hunspell_dict_get_extra_word_characters (EnchantDict *me)
 {
@@ -450,7 +494,9 @@ hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED, const char *cons
 	dict->user_data = (void *) checker;
 	dict->check = hunspell_dict_check;
 	dict->suggest = hunspell_dict_suggest;
-	// don't implement personal, session
+	// don't implement personal
+	dict->add_to_session = hunspell_dict_add_to_session;
+	dict->add_to_exclude = hunspell_dict_remove_from_session;
 	dict->get_extra_word_characters = hunspell_dict_get_extra_word_characters;
 	dict->is_word_character = hunspell_dict_is_word_character;
 
