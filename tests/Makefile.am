@@ -104,6 +104,7 @@ main_test_SOURCES = main.test.cpp \
 	broker/enchant_broker_init_tests.cpp \
 	broker/enchant_broker_list_dicts_tests.cpp \
 	broker/enchant_broker_request_dict_tests.cpp \
+	broker/enchant_broker_request_dict_with_pwl_tests.cpp \
 	broker/enchant_broker_request_pwl_dict_tests.cpp \
 	broker/enchant_broker_set_ordering_tests.cpp \
 	pwl/enchant_pwl_tests.cpp \

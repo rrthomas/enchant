@@ -65,8 +65,20 @@ void enchant_broker_free (EnchantBroker * broker);
  * @tag: The non-null language tag you wish to request a dictionary for ("en_US", "de_DE", ...)
  *
  * Returns: An #EnchantDict, or %null if no suitable dictionary could be found. This dictionary is reference counted.
+ * The default personal wordlist file is used.
  */
 EnchantDict *enchant_broker_request_dict (EnchantBroker * broker, const char *const tag);
+
+/**
+ * enchant_broker_request_dict_with_pwl
+ * @broker: A non-null #EnchantBroker
+ * @tag: The non-null language tag you wish to request a dictionary for ("en_US", "de_DE", ...)
+ * @pwl: A non-null pathname in the GLib file name encoding (UTF-8 on Windows) to the personal wordlist file
+ *
+ * Returns: An #EnchantDict, or %null if no suitable dictionary could be found, or if the pwl could not be opened.
+ * This dictionary is reference counted.
+ */
+EnchantDict *enchant_broker_request_dict_with_pwl (EnchantBroker * broker, const char *const tag, const char *pwl);
 
 /**
  * enchant_broker_request_pwl_dict

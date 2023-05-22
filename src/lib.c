@@ -266,42 +266,31 @@ enchant_session_new_with_pwl (EnchantProvider * provider,
 }
 
 static EnchantSession *
-_enchant_session_new (EnchantProvider *provider, const char * const user_config_dir,
-		      const char * const lang, gboolean fail_if_no_pwl)
-{
-	if (!user_config_dir || !lang)
-		return NULL;
-
-	char *filename = g_strdup_printf ("%s.dic", lang);
-	char *dic = g_build_filename (user_config_dir, filename, NULL);
-	g_free (filename);
-
-	filename = g_strdup_printf ("%s.exc", lang);
-	char *excl = g_build_filename (user_config_dir, filename, NULL);
-	g_free (filename);
-
-	EnchantSession * session = enchant_session_new_with_pwl (provider, dic, excl, lang, fail_if_no_pwl);
-
-	g_free (dic);
-	g_free (excl);
-
-	return session;
-}
-
-static EnchantSession *
-enchant_session_new (EnchantProvider *provider, const char * const lang)
+enchant_session_new (EnchantProvider *provider, const char * const lang, const char * pwl)
 {
 	char *user_config_dir = enchant_get_user_config_dir ();
 
 	EnchantSession * session = NULL;
-	session = _enchant_session_new (provider, user_config_dir, lang, TRUE);
+	if (!user_config_dir || !lang)
+		return NULL;
+	enchant_ensure_dir_exists (user_config_dir);
 
-	if (session == NULL && user_config_dir != NULL)
-		{
-			enchant_ensure_dir_exists (user_config_dir);
-			session = _enchant_session_new (provider, user_config_dir, lang, FALSE);
-		}
+	char *filename, *excl = NULL, *alloc_pwl = NULL;
+	if (pwl == NULL) {
+		filename = g_strdup_printf ("%s.dic", lang);
+		pwl = alloc_pwl = g_build_filename (user_config_dir, filename, NULL);
+		g_free (filename);
 
+		filename = g_strdup_printf ("%s.exc", lang);
+		excl = g_build_filename (user_config_dir, filename, NULL);
+		g_free (filename);
+	}
+
+	// Insist that PWL be opened only if we supplied it explicitly.
+	session = enchant_session_new_with_pwl (provider, pwl, excl, lang, alloc_pwl == NULL);
+
+	g_free (alloc_pwl);
+	g_free (excl);
 	g_free (user_config_dir);
 
 	return session;
@@ -1047,7 +1036,7 @@ enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl)
 }
 
 static EnchantDict *
-_enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
+_enchant_broker_request_dict (EnchantBroker * broker, const char *const tag, const char *const pwl)
 {
 	EnchantDict *dict = (EnchantDict*)g_hash_table_lookup (broker->dict_map, (gpointer) tag);
 	if (dict) {
@@ -1064,7 +1053,7 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 
 			if (dict)
 				{
-					EnchantSession *session = enchant_session_new (provider, tag);
+					EnchantSession *session = enchant_session_new (provider, tag, pwl);
 					EnchantDictPrivateData *enchant_dict_private_data = g_new0 (EnchantDictPrivateData, 1);
 					enchant_dict_private_data->reference_count = 1;
 					enchant_dict_private_data->session = session;
@@ -1079,7 +1068,7 @@ _enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 }
 
 EnchantDict *
-enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
+enchant_broker_request_dict_with_pwl (EnchantBroker * broker, const char *const tag, const char *const pwl)
 {
 	EnchantDict *dict = NULL;
 
@@ -1091,15 +1080,21 @@ enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
 	char * normalized_tag = enchant_normalize_dictionary_tag (tag);
 	if(!enchant_is_valid_dictionary_tag(normalized_tag))
 		enchant_broker_set_error (broker, "invalid tag character found");
-	else if ((dict = _enchant_broker_request_dict (broker, normalized_tag)) == NULL)
+	else if ((dict = _enchant_broker_request_dict (broker, normalized_tag, pwl)) == NULL)
 		{
 			char * iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
-			dict = _enchant_broker_request_dict (broker, iso_639_only_tag);
+			dict = _enchant_broker_request_dict (broker, iso_639_only_tag, pwl);
 			free (iso_639_only_tag);
 		}
 	free (normalized_tag);
 
 	return dict;
+}
+
+EnchantDict *
+enchant_broker_request_dict (EnchantBroker * broker, const char *const tag)
+{
+	return enchant_broker_request_dict_with_pwl (broker, tag, NULL);
 }
 
 void
