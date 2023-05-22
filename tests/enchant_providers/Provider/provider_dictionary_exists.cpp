@@ -55,7 +55,7 @@ TEST_FIXTURE(ProviderDictionaryExists_TestFixture,
 {
 	if (_provider->dictionary_exists)
 		{
-			int exists = (*_provider->dictionary_exists) (_provider, "zxx"); /*zxx is no linguistic content*/
+			(*_provider->dictionary_exists) (_provider, "zxx"); /*zxx is no linguistic content*/
 			CHECK_EQUAL((void*)NULL, GetErrorMessage(_provider));
 		}
 }
