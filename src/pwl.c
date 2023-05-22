@@ -29,12 +29,8 @@
  */
 
 /**
- *
  *  This file implements personal word list (PWL) dictionaries in the
  *  type EnchantPWL.
- *
- *  Under the hood, a PWL is stored as a Trie.  Checking strings for
- *  correctness is done by traversing the Trie.
  */
 
 #include "config.h"
@@ -55,81 +51,22 @@
 
 static const gunichar BOM = 0xfeff;
 
-/*  A PWL dictionary is stored as a Trie-like data structure EnchantTrie.
- *  The EnchantTrie datatype is completely recursive - all child nodes
- *  are simply EnchantTrie pointers.  This means that all functions
- *  that potentially modify a trie need to return the modified trie,
- *  as additional memory may have been allocated.
- *
- *  The empty trie is simply the null pointer.  If a trie contains
- *  a single string, it is recorded in the "value" attribute and
- *  "subtries" is set to NULL.  When two or more strings are contained,
- *  "value" is NULL and "subtries" is a GHashTable mapping the first
- *  character of each string to the subtrie containing the remainder of
- *  that string.
- *
- *  All strings stored in the Trie are assumed to be in UTF format.
- *  Branching is done on unicode characters, not individual bytes.
+/*  A PWL dictionary is stored as a GHashTable of UTF-8 strings.
  */
-typedef struct str_enchant_trie EnchantTrie;
-struct str_enchant_trie
-{
-	char* value;           /* final string found under this node */
-	GHashTable* subtries;  /* Maps characters to subtries */
-};
-
 struct str_enchant_pwl
 {
-	EnchantTrie* trie;
 	char * filename;
 	time_t file_changed;
-	GHashTable *words_in_trie;
-};
-
-/* Special Trie node indicating the end of a string */
-static EnchantTrie n_EOSTrie;
-static EnchantTrie* EOSTrie = &n_EOSTrie;
-
-/*  The EnchantTrieMatcher structure maintains the state necessary to
- *  search for matching strings within an EnchantTrie.  It includes a
- *  callback function which will be called with each matching string
- *  as it is found.  The arguments to this function are:
- *
- *      - a freshly-allocated copy of the matching string, which must
- *        be freed by external code
- *      - the EnchantTrieMatcher object, giving the context of the match
- *        (e.g. number of errors)
- */
-typedef struct str_enchant_trie_matcher EnchantTrieMatcher;
-struct str_enchant_trie_matcher
-{
-	char* word;	/* Word being searched for */
-	ssize_t word_pos;	/* Current position in the word */
-
-	char* path;		    /* Path taken through the trie so far */
-	ssize_t path_len;	/* Length of allocated path string */
-	ssize_t path_pos;	/* Current end pos of path string */
-
-	void* cbdata;		/* Private data for use by callback func */
+	GHashTable *words;
 };
 
 /*
  *   Function Prototypes
  */
 
-static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
+static void enchant_pwl_add_to_table(EnchantPWL *pwl,
 					const char *const word, size_t len);
 static void enchant_pwl_refresh_from_file(EnchantPWL* pwl);
-static void enchant_trie_free(EnchantTrie* trie);
-static void enchant_trie_free_cb(void*,void*,void*);
-static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word);
-static void enchant_trie_remove(EnchantTrie* trie,const char *const word);
-static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matcher);
-static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word, size_t len,
-				void* cbdata);
-static void enchant_trie_matcher_free(EnchantTrieMatcher* matcher);
-static void enchant_trie_matcher_pushpath(EnchantTrieMatcher* matcher,char* newchars);
-static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num);
 
 #define enchant_lock_file(f) flock (fileno (f), LOCK_EX)
 #define enchant_unlock_file(f) flock (fileno (f), LOCK_UN)
@@ -142,7 +79,7 @@ static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num);
 EnchantPWL* enchant_pwl_init(void)
 {
 	EnchantPWL *pwl = g_new0(EnchantPWL, 1);
-	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	pwl->words = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 	return pwl;
 }
@@ -177,10 +114,8 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 	   pwl->file_changed == stats.st_mtime) /* nothing changed since last read */
 		return;
 
-	enchant_trie_free(pwl->trie);
-	pwl->trie = NULL;
-	g_hash_table_destroy (pwl->words_in_trie);
-	pwl->words_in_trie = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+	g_hash_table_destroy (pwl->words);
+	pwl->words = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 
 	FILE *f = g_fopen(pwl->filename, "r");
 	if (!f)
@@ -213,7 +148,7 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 			if( line[0] && line[0] != '#')
 				{
 					if(g_utf8_validate(line, -1, NULL))
-						enchant_pwl_add_to_trie(pwl, line, strlen(line));
+						enchant_pwl_add_to_table(pwl, line, strlen(line));
 					else
 						g_warning ("Bad UTF-8 sequence in %s at line:%zu\n", pwl->filename, line_number);
 				}
@@ -225,40 +160,28 @@ static void enchant_pwl_refresh_from_file(EnchantPWL* pwl)
 
 void enchant_pwl_free(EnchantPWL *pwl)
 {
-	enchant_trie_free(pwl->trie);
 	g_free(pwl->filename);
-	g_hash_table_destroy (pwl->words_in_trie);
+	g_hash_table_destroy (pwl->words);
 	g_free(pwl);
 }
 
-static void enchant_pwl_add_to_trie(EnchantPWL *pwl,
+static void enchant_pwl_add_to_table(EnchantPWL *pwl,
 					const char *const word, size_t len)
 {
 	char * normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
-	if(NULL != g_hash_table_lookup (pwl->words_in_trie, normalized_word)) {
+	if(NULL != g_hash_table_lookup (pwl->words, normalized_word)) {
 		g_free (normalized_word);
 		return;
 	}
 
-	g_hash_table_insert (pwl->words_in_trie, normalized_word, g_strndup(word,len));
-
-	pwl->trie = enchant_trie_insert(pwl->trie, normalized_word);
+	g_hash_table_insert (pwl->words, normalized_word, g_strndup(word,len));
 }
 
-static void enchant_pwl_remove_from_trie(EnchantPWL *pwl,
+static void enchant_pwl_remove_from_table(EnchantPWL *pwl,
 					const char *const word, size_t len)
 {
 	char * normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
-
-	if( g_hash_table_remove (pwl->words_in_trie, normalized_word) )
-		{
-			enchant_trie_remove(pwl->trie, normalized_word);
-			if(pwl->trie && pwl->trie->subtries == NULL && pwl->trie->value == NULL) {
-				enchant_trie_free (pwl->trie);
-				pwl->trie = NULL; /* make trie empty if has no content */
-			}
-		}
-
+	g_hash_table_remove (pwl->words, normalized_word);
 	g_free(normalized_word);
 }
 
@@ -270,7 +193,7 @@ void enchant_pwl_add(EnchantPWL *pwl,
 
 	enchant_pwl_refresh_from_file(pwl);
 
-	enchant_pwl_add_to_trie(pwl, word, len);
+	enchant_pwl_add_to_table(pwl, word, len);
 
 	if (pwl->filename != NULL)
 	{
@@ -314,7 +237,7 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 
 	enchant_pwl_refresh_from_file(pwl);
 
-	enchant_pwl_remove_from_trie(pwl, word, len);
+	enchant_pwl_remove_from_table(pwl, word, len);
 
 	if (pwl->filename)
 		{
@@ -382,12 +305,10 @@ void enchant_pwl_remove(EnchantPWL *pwl,
 
 static int enchant_pwl_contains(EnchantPWL *pwl, const char *const word, size_t len)
 {
-	int count = 0;
-	EnchantTrieMatcher *matcher = enchant_trie_matcher_init(word, len, &count);
-	enchant_trie_find_matches(pwl->trie,matcher);
-	enchant_trie_matcher_free(matcher);
-
-	return count != 0;
+	char * normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
+	int found = NULL != g_hash_table_lookup (pwl->words, normalized_word);
+	g_free(normalized_word);
+	return found;
 }
 
 static int enchant_is_all_caps(const char*const word, size_t len)
@@ -510,231 +431,4 @@ int enchant_pwl_check(EnchantPWL *pwl, const char *const word, ssize_t len)
 		}
 
 	return 1; /* not found */
-}
-
-/* matcher callback when a match is found*/
-static void enchant_pwl_check_cb(char* match,EnchantTrieMatcher* matcher)
-{
-	g_free(match);
-	(*((int*)(matcher->cbdata)))++;
-}
-
-static void enchant_trie_free(EnchantTrie* trie)
-{
-	/* Don't try to free NULL or the EOSTrie pointer */
-	if(trie == NULL || trie == EOSTrie)
-		return;
-
-	/* Because we have not set a destroy function for the hashtable
-	 * (to make code cleaner below), we need to explicitly free all
-	 * subtries with a callback function.
-	 */
-	if (trie->subtries != NULL) {
-		g_hash_table_foreach(trie->subtries,enchant_trie_free_cb,NULL);
-		g_hash_table_destroy(trie->subtries);
-	}
-
-	g_free(trie->value);
-	g_free(trie);
-}
-
-static void enchant_trie_free_cb(void* key _GL_UNUSED,
-				 void* value,
-				 void* data _GL_UNUSED)
-{
-	enchant_trie_free((EnchantTrie*) value);
-}
-
-static EnchantTrie* enchant_trie_insert(EnchantTrie* trie,const char *const word)
-{
-	if (trie == NULL)
-		trie = g_new0(EnchantTrie, 1);
-
-	if (trie->value == NULL) {
-		if (trie->subtries == NULL) {
-			/*  When single word, store in trie->value */
-			trie->value = g_strdup(word);
-		} else {
-			/* Store multiple words in subtries */
-			if (word[0] == '\0') {
-				/* Mark end-of-string with special node */
-				char *tmpWord = g_strdup("");
-				g_hash_table_insert(trie->subtries, tmpWord, EOSTrie);
-			} else {
-				ssize_t nxtCh = (ssize_t)(g_utf8_next_char(word)-word);
-				char *tmpWord = g_strndup(word,nxtCh);
-				EnchantTrie* subtrie = g_hash_table_lookup(trie->subtries, tmpWord);
-				subtrie = enchant_trie_insert(subtrie, word + nxtCh);
-				g_hash_table_insert(trie->subtries, tmpWord, subtrie);
-			}
-		}
-	} else {
-		/* Create new hash table for subtries, and reinsert */
-		trie->subtries = g_hash_table_new_full(g_str_hash,
-						       g_str_equal, g_free, NULL);
-		char *tmpWord = trie->value;
-		trie->value = NULL;
-		enchant_trie_insert(trie, tmpWord);
-		enchant_trie_insert(trie, word);
-		g_free(tmpWord);
-	}
-
-	return trie;
-}
-
-static void enchant_trie_remove(EnchantTrie* trie,const char *const word)
-{
-	if (trie == NULL)
-		return;
-
-	if (trie->value == NULL) {
-		if (trie->subtries != NULL) {
-			/* Store multiple words in subtries */
-			if (word[0] == '\0')
-				/* End-of-string is marked with special node */
-				g_hash_table_remove(trie->subtries, "");
-			else {
-				ssize_t nxtCh = (ssize_t)(g_utf8_next_char(word) - word);
-				char *tmpWord = g_strndup(word, nxtCh);
-				EnchantTrie *subtrie = g_hash_table_lookup(trie->subtries, tmpWord);
-				enchant_trie_remove(subtrie, word + nxtCh);
-
-				if(subtrie->subtries == NULL && subtrie->value == NULL) {
-					g_hash_table_remove(trie->subtries, tmpWord);
-					enchant_trie_free (subtrie);
-				}
-
-				g_free(tmpWord);
-			}
-
-			if(g_hash_table_size(trie->subtries) == 1)
-				{
-					GList* keys = g_hash_table_get_keys(trie->subtries);
-					char *key = (char*) keys->data;
-					EnchantTrie *subtrie = g_hash_table_lookup(trie->subtries, key);
-
-					/* only remove trie nodes that have values by propagating these up */
-					if(subtrie->value)
-						{
-							trie->value = g_strconcat(key, subtrie->value, NULL);
-							enchant_trie_free(subtrie);
-							g_hash_table_destroy(trie->subtries);
-							trie->subtries = NULL;
-						}
-
-					g_list_free(keys);
-				}
-		}
-	} else if(strcmp(trie->value, word) == 0) {
-		g_free(trie->value);
-		trie->value = NULL;
-	}
-}
-
-static EnchantTrie* enchant_trie_get_subtrie(EnchantTrie* trie,
-					     char** nxtChS)
-{
-	if(trie->subtries == NULL || *nxtChS == NULL)
-		return NULL;
-
-	return g_hash_table_lookup(trie->subtries,*nxtChS);
-}
-
-static void enchant_trie_find_matches(EnchantTrie* trie,EnchantTrieMatcher *matcher)
-{
-	g_return_if_fail(matcher);
-
-	/* Can't match in the empty trie */
-	if(trie == NULL)
-		return;
-
-	/* If the end of a string has been reached, no point recursing */
-	if (trie == EOSTrie) {
-		size_t word_len = strlen(matcher->word);
-		if((ssize_t)word_len <= matcher->word_pos)
-			enchant_pwl_check_cb(g_strdup(matcher->path),matcher);
-		return;
-	}
-
-	/* If there is a value, just check it, no recursion */
-	if (trie->value != NULL) {
-		gchar* value;
-		value = trie->value;
-		if (strcmp(value, &(matcher->word[matcher->word_pos])) == 0)
-			enchant_pwl_check_cb(g_strconcat(matcher->path,
-							trie->value,NULL),
-					matcher);
-		return;
-	}
-
-	ssize_t nxtChI = (ssize_t)(g_utf8_next_char(&matcher->word[matcher->word_pos]) - matcher->word);
-	char *nxtChS = g_strndup(&matcher->word[matcher->word_pos],
-				 (nxtChI - matcher->word_pos));
-
-	/* Precisely match the first character, and recurse */
-	EnchantTrie* subtrie = enchant_trie_get_subtrie(trie, &nxtChS);
-	if (subtrie != NULL) {
-		enchant_trie_matcher_pushpath(matcher,nxtChS);
-		ssize_t oldPos = matcher->word_pos;
-		matcher->word_pos = nxtChI;
-		enchant_trie_find_matches(subtrie,matcher);
-		matcher->word_pos = oldPos;
-		enchant_trie_matcher_poppath(matcher,strlen(nxtChS));
-	}
-
-	g_free(nxtChS);
-}
-
-static EnchantTrieMatcher* enchant_trie_matcher_init(const char* const word,
-						     size_t len,
-						     void* cbdata)
-{
-	char * normalized_word = g_utf8_normalize (word, len, G_NORMALIZE_NFD);
-	len = strlen(normalized_word);
-
-	char * pattern = normalized_word;
-
-	EnchantTrieMatcher* matcher = g_new(EnchantTrieMatcher,1);
-	matcher->word = g_new0(char,len+2); // Ensure matcher does not overrun buffer: +2 for transpose check
-	strcpy(matcher->word, pattern);
-	g_free(pattern);
-	matcher->word_pos = 0;
-	matcher->path = g_new0(char,len+1);
-	matcher->path[0] = '\0';
-	matcher->path_len = len+1;
-	matcher->path_pos = 0;
-	matcher->cbdata = cbdata;
-
-	return matcher;
-}
-
-static void enchant_trie_matcher_free(EnchantTrieMatcher* matcher)
-{
-	g_free(matcher->word);
-	g_free(matcher->path);
-	g_free(matcher);
-}
-
-static void enchant_trie_matcher_pushpath(EnchantTrieMatcher* matcher,char* newchars)
-{
-	ssize_t len = strlen(newchars);
-	if(matcher->path_pos + len >= matcher->path_len) {
-		matcher->path_len = matcher->path_len + len + 10;
-		matcher->path = g_renew(char,matcher->path,matcher->path_len);
-	}
-
-	for (ssize_t i = 0; i < len; i++) {
-		matcher->path[matcher->path_pos + i] = newchars[i];
-	}
-	matcher->path_pos = matcher->path_pos + len;
-	matcher->path[matcher->path_pos] = '\0';
-}
-
-static void enchant_trie_matcher_poppath(EnchantTrieMatcher* matcher,int num)
-{
-	g_return_if_fail(matcher->path_pos >= 0);
-	matcher->path_pos = matcher->path_pos - num;
-	if(matcher->path_pos < 0)
-		matcher->path_pos = 0;
-	matcher->path[matcher->path_pos] = '\0';
 }
