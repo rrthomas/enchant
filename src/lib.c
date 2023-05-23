@@ -513,6 +513,24 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word, ssize_t len, s
 	return suggs;
 }
 
+static void
+enchant_dict_session_add (EnchantDict * dict, const char *const word, ssize_t len)
+{
+	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
+	enchant_session_add (session, word, len);
+	if (dict->add_to_session)
+		(*dict->add_to_session) (dict, word, len);
+}
+
+static void
+enchant_dict_session_remove (EnchantDict * dict, const char *const word, ssize_t len)
+{
+	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
+	enchant_session_remove (session, word, len);
+	if (dict->remove_from_session)
+		(*dict->remove_from_session) (dict, word, len);
+}
+
 void
 enchant_dict_add (EnchantDict * dict, const char *const word, ssize_t len)
 {
@@ -527,6 +545,8 @@ enchant_dict_add (EnchantDict * dict, const char *const word, ssize_t len)
 
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
+
+	enchant_dict_session_add (dict, word, len);
 	enchant_pwl_add(session->personal, word, len);
 	enchant_pwl_remove(session->exclude, word, len);
 }
@@ -546,9 +566,7 @@ enchant_dict_add_to_session (EnchantDict * dict, const char *const word, ssize_t
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
-	enchant_session_add (session, word, len);
-	if (dict->add_to_session)
-		(*dict->add_to_session) (dict, word, len);
+	enchant_dict_session_add (dict, word, len);
 }
 
 int
@@ -584,6 +602,7 @@ enchant_dict_remove (EnchantDict * dict, const char *const word, ssize_t len)
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
+	enchant_dict_session_remove (dict, word, len);
 	enchant_pwl_remove(session->personal, word, len);
 	enchant_pwl_add(session->exclude, word, len);
 }
@@ -603,9 +622,7 @@ enchant_dict_remove_from_session (EnchantDict * dict, const char *const word, ss
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
 
-	enchant_session_remove (session, word, len);
-	if (dict->remove_from_session)
-		(*dict->remove_from_session) (dict, word, len);
+	enchant_dict_session_remove (dict, word, len);
 }
 
 int

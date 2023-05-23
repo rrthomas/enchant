@@ -305,7 +305,6 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 					if (str->len == 1)
 						goto empty_word;
 					enchant_dict_add (dict, str->str + 1, -1);
-					enchant_dict_add_to_session(dict, str->str + 1, -1);
 					break;
 				case '@': /* Accept for this session */
 					if (str->len == 1)
@@ -316,7 +315,6 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 					if (str->len == 1)
 						goto empty_word;
 					enchant_dict_remove (dict, str->str + 1, -1);
-					enchant_dict_remove_from_session (dict, str->str + 1, -1);
 					break;
 				case '_': /* Remove from this session */
 					if (str->len == 1)
