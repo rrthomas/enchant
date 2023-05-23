@@ -107,7 +107,7 @@ case "$host" in
     ;;
 esac
 AC_MSG_RESULT([$native_win32])
-AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
+AM_CONDITIONAL(OS_WIN32, test "$native_win32" = yes)
 
 AM_CONDITIONAL([SHLIBS_IN_BINDIR], [case "$host_os" in mingw* | cygwin*) true;; *) false;; esac])
 
@@ -147,25 +147,25 @@ AC_DEFUN([ENCHANT_CHECK_PROVIDER_SETUP],
    AC_ARG_WITH([$1[]-dir],
       AS_HELP_STRING([--with-[]$1-dir=PATH],
          [path to installed $1 dicts]))
-   AS_IF([test "x$with_[]$1_dir" != "x"],
+   AS_IF([test "$with_[]$1_dir" != ""],
       [$1[]_dir=$with_[]$1_dir])])
 
 AC_DEFUN([ENCHANT_CHECK_PKG_CONFIG_PROVIDER],
   [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
-   AS_IF([test "x$with_[]$1" != xno],
+   AS_IF([test "$with_[]$1" != no],
          [PKG_CHECK_MODULES([$2], [m4_default([$3], [$1])],
          [$2[]_CFLAGS="$[]$2[]_CFLAGS -DENCHANT_[]$2[]_DICT_DIR='\"$[]$1_dir\"'"
          with_$1=yes
          build_providers="$build_providers $1"],
-         [if test "x$with_$1" != xcheck; then
+         [if test "$with_$1" != check; then
             AC_MSG_FAILURE([--with-[]$1 was given, but test(s) for $1 failed])
           fi
           with_$1=no])])
-   AM_CONDITIONAL(WITH_[]$2, test "x$with_[]$1" = xyes)])
+   AM_CONDITIONAL(WITH_[]$2, test "$with_[]$1" = yes)])
 
 AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
   [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
-   AS_IF([test "x$with_[]$1" != xno],
+   AS_IF([test "$with_[]$1" != no],
       [_enchant_header=m4_default([$6], [$1[].h])
       AC_CHECK_HEADERS([$_enchant_header], [_header_found=yes], [_header_found=no], [])
       if test "$3" != NOLIB; then
@@ -173,8 +173,8 @@ AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
       else
          ac_cv_lib_[]$1[]_[]$3=yes
       fi
-      if test "x$_header_found" != xyes -o "x$ac_cv_lib_[]$1[]_[]$3" != xyes; then
-         if test "x$with_[]$1" != xcheck; then
+      if test "$_header_found" != yes -o "$ac_cv_lib_[]$1[]_[]$3" != yes; then
+         if test "$with_[]$1" != check; then
             AC_MSG_FAILURE([--with-[]$1 was given, but tests for $1 failed])
          fi
          with_[]$1=no
@@ -183,7 +183,7 @@ AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
          build_providers="$build_providers $1"
          LIBS="$LIBS $5"
       fi])
-   AM_CONDITIONAL(WITH_[]$2, test "x$with_[]$1" = xyes)])
+   AM_CONDITIONAL(WITH_[]$2, test "$with_[]$1" = yes)])
 
 
 dnl Check for providers
@@ -203,7 +203,7 @@ if test "$ac_cv_objcxx_compiler_gnu" = "yes"; then
   AC_LANG_POP([Objective C++])
 fi
 dnl Must call AM_CONDITIONAL outside conditional
-AM_CONDITIONAL(WITH_APPLESPELL, test "x$with_applespell" = xyes)
+AM_CONDITIONAL(WITH_APPLESPELL, test "$with_applespell" = yes)
 
 dnl Experimental/deprecated providers
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([zemberek], [ZEMBEREK], [dbus-glib-1 >= 0.62], [no])
@@ -230,11 +230,11 @@ AC_OUTPUT
 dnl ===========================================================================================
 
 echo "Providers to build:${build_providers}"
-if test "x$build_providers" = "x"; then
+if test "$build_providers" = ""; then
    AC_MSG_WARN([No spell-checking provider selected!])
 fi
 
-if test "x$with_zemberek" = "xyes"; then
+if test "$with_zemberek" = yes; then
    echo "
 The Zemberek Turkish spell-checking plugin is enabled. It is known
 to cause crashes with WebKit. Use at your own discretion."
