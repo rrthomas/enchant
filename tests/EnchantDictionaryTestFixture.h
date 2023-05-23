@@ -38,9 +38,7 @@ MockProviderRequestEmptyMockDictionary(EnchantProvider *, const char *)
     dict->user_data = NULL;
     dict->check = NULL;
     dict->suggest = NULL;
-    dict->add_to_personal = NULL;
     dict->add_to_session = NULL;
-    dict->store_replacement = NULL;
 	
     return dict;
 }

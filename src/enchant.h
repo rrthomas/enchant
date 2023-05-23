@@ -254,9 +254,7 @@ int enchant_dict_is_removed (EnchantDict * dict, const char *const word, ssize_t
  * @cor: The non-null correction word, in UTF-8 encoding
  * @cor_len: The byte length of @cor, or -1 for strlen (@cor)
  *
- * Notes that you replaced @mis with @cor, so it's possibly more likely
- * that future occurrences of @mis will be replaced with @cor. So it might
- * bump @cor up in the suggestion list.
+ * Does nothing; API is deprecated and retained only for backwards compatibility.
  */
 void enchant_dict_store_replacement (EnchantDict * dict,
 				     const char *const mis, ssize_t mis_len,

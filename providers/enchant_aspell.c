@@ -103,31 +103,11 @@ aspell_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 static void
-aspell_dict_add_to_personal (EnchantDict * me,
-			     const char *const word, size_t len)
-{
-	AspellSpeller *manager = (AspellSpeller *) me->user_data;
-	aspell_speller_add_to_personal (manager, word, len);
-	aspell_speller_save_all_word_lists (manager);
-}
-
-static void
 aspell_dict_add_to_session (EnchantDict * me,
 			    const char *const word, size_t len)
 {
 	AspellSpeller *manager = (AspellSpeller *) me->user_data;
 	aspell_speller_add_to_session (manager, word, len);
-}
-
-static void
-aspell_dict_store_replacement (EnchantDict * me,
-			       const char *const mis, size_t mis_len,
-			       const char *const cor, size_t cor_len)
-{
-	AspellSpeller *manager = (AspellSpeller *) me->user_data;
-	aspell_speller_store_replacement (manager, mis, mis_len,
-					  cor, cor_len);
-	aspell_speller_save_all_word_lists (manager);
 }
 
 static EnchantDict *
@@ -153,9 +133,7 @@ aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED, const char *const
 	dict->user_data = (void *) manager;
 	dict->check = aspell_dict_check;
 	dict->suggest = aspell_dict_suggest;
-	dict->add_to_personal = aspell_dict_add_to_personal;
 	dict->add_to_session = aspell_dict_add_to_session;
-	dict->store_replacement = aspell_dict_store_replacement;
 
 	return dict;
 }

@@ -529,9 +529,6 @@ enchant_dict_add (EnchantDict * dict, const char *const word, ssize_t len)
 	enchant_session_clear_error (session);
 	enchant_pwl_add(session->personal, word, len);
 	enchant_pwl_remove(session->exclude, word, len);
-
-	if (dict->add_to_personal)
-		(*dict->add_to_personal) (dict, word, len);
 }
 
 void
@@ -589,9 +586,6 @@ enchant_dict_remove (EnchantDict * dict, const char *const word, ssize_t len)
 
 	enchant_pwl_remove(session->personal, word, len);
 	enchant_pwl_add(session->exclude, word, len);
-
-	if (dict->add_to_exclude)
-		(*dict->add_to_exclude) (dict, word, len);
 }
 
 void
@@ -632,33 +626,12 @@ enchant_dict_is_removed (EnchantDict * dict, const char *const word, ssize_t len
 	return enchant_session_exclude (session, word, len);
 }
 
+/* Stub for obsolete API. */
 void
-enchant_dict_store_replacement (EnchantDict * dict,
-				const char *const mis, ssize_t mis_len,
-				const char *const cor, ssize_t cor_len)
+enchant_dict_store_replacement (EnchantDict * dict _GL_UNUSED,
+				const char *const mis _GL_UNUSED, ssize_t mis_len _GL_UNUSED,
+				const char *const cor _GL_UNUSED, ssize_t cor_len _GL_UNUSED)
 {
-	g_return_if_fail (dict);
-	g_return_if_fail (mis);
-	g_return_if_fail (cor);
-
-	if (mis_len < 0)
-		mis_len = strlen (mis);
-
-	if (cor_len < 0)
-		cor_len = strlen (cor);
-
-	g_return_if_fail (mis_len);
-	g_return_if_fail (cor_len);
-
-	g_return_if_fail (g_utf8_validate(mis, mis_len, NULL));
-	g_return_if_fail (g_utf8_validate(cor, cor_len, NULL));
-
-	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
-	enchant_session_clear_error (session);
-
-	/* if it's not implemented, it's not worth emulating */
-	if (dict->store_replacement)
-		(*dict->store_replacement) (dict, mis, mis_len, cor, cor_len);
 }
 
 void

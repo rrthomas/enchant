@@ -59,13 +59,6 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
                   addedWords = _addedWordsByDict.equal_range(dict);
 
         AddedWordsByDict::const_iterator it;
-        for(it = addedWords.first; it != addedWords.second; ++it)
-        {
-            if(dict->add_to_exclude)
-            {
-                (*dict->add_to_exclude)(dict, it->second.c_str(), it->second.length());
-            }
-        }
         _addedWordsByDict.erase(dict);
         Provider_TestFixture::ReleaseDictionary(dict);
     }
@@ -103,16 +96,6 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
         if(dict->add_to_session)
         {
             (*dict->add_to_session) (dict, word.c_str(), word.length());
-            if(IsWordInDictionary(word))
-            {
-                return true;
-            }
-        }
-
-        if(dict->add_to_personal)
-        {
-            _addedWordsByDict.insert(std::pair<EnchantDict*, std::string>(dict,word));
-            (*dict->add_to_personal) (dict, word.c_str(), word.length());
             if(IsWordInDictionary(word))
             {
                 return true;
