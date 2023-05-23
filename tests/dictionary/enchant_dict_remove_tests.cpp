@@ -23,17 +23,6 @@
 #include <enchant.h>
 #include "EnchantDictionaryTestFixture.h"
 
-static bool addToExcludeCalled;
-static std::string wordToAdd;
-
-static void
-MockDictionaryAddToExclude (EnchantDict * dict, const char *const word, size_t len)
-{
-    dict;
-    addToExcludeCalled = true;
-    wordToAdd = std::string(word, len);
-}
-
 static bool dictCheckCalled;
 
 static int
@@ -53,7 +42,6 @@ static EnchantDict* MockProviderRequestAddToExcludeMockDictionary(EnchantProvide
 {
     
     EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
-    dict->add_to_exclude = MockDictionaryAddToExclude;
     dict->check = MockDictionaryCheck;
     return dict;
 }
@@ -70,7 +58,6 @@ struct EnchantDictionaryRemove_TestFixture : EnchantDictionaryTestFixture
     EnchantDictionaryRemove_TestFixture():
             EnchantDictionaryTestFixture(DictionaryAddToExclude_ProviderConfiguration)
     { 
-        addToExcludeCalled = false;
         dictCheckCalled = false;
     }
 };
@@ -95,7 +82,6 @@ struct EnchantDictionaryRemoveNotImplemented_TestFixture : EnchantDictionaryTest
     EnchantDictionaryRemoveNotImplemented_TestFixture():
             EnchantDictionaryTestFixture(DictionaryCheck_ProviderConfiguration)
     { 
-        addToExcludeCalled = false;
         dictCheckCalled = false;
     }
 };
@@ -143,46 +129,6 @@ TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
     CHECK(PersonalWordListFileHasContents());
     enchant_dict_remove(_dict, "hello", -1);
     CHECK(!PersonalWordListFileHasContents());
-}
-
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_PassedOnToProvider_LenComputed)
-{
-    enchant_dict_remove(_dict, "hello", -1);
-    CHECK(addToExcludeCalled);
-    CHECK_EQUAL(std::string("hello"), wordToAdd);
-}
-
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_PassedOnToProvider_LenSpecified)
-{
-    enchant_dict_remove(_dict, "hellodisregard me", 5);
-    CHECK(addToExcludeCalled);
-    CHECK_EQUAL(std::string("hello"), wordToAdd);
-}
-
-
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_WordRemovedFromSession_StillCallsProvider)
-{
-    enchant_dict_remove_from_session(_dict, "hello", -1);
-    CHECK(!addToExcludeCalled);
-
-    enchant_dict_remove(_dict, "hello", -1);
-    CHECK(addToExcludeCalled);
-    CHECK_EQUAL(std::string("hello"), wordToAdd);
-}
-
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_WordExistsInExclude_StillCallsProvider)
-{
-    enchant_dict_remove(_dict, "hello", -1);
-    addToExcludeCalled=false;
-    wordToAdd = std::string();
-
-    enchant_dict_remove(_dict, "hello", -1);
-    CHECK(addToExcludeCalled);
-    CHECK_EQUAL(std::string("hello"), wordToAdd);
 }
 
 TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
@@ -252,7 +198,6 @@ TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
     CHECK(!BrokerPWLFileHasContents());
 
     enchant_dict_remove(_pwl, "personal", -1);
-    CHECK(!addToExcludeCalled);
     CHECK(!ExcludeFileHasContents());
 }
 
@@ -279,54 +224,12 @@ TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
 
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_NullDictionary_NotRemoved)
-{
-    enchant_dict_remove(NULL, "hello", -1);
-    CHECK(!addToExcludeCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_NullWord_NotRemoved)
-{
-    enchant_dict_remove(_dict, NULL, -1);
-    CHECK(!addToExcludeCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_EmptyWord_NotRemoved)
-{
-    enchant_dict_remove(_dict, "", -1);
-    CHECK(!addToExcludeCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_WordSize0_NotRemoved)
-{
-    enchant_dict_remove(_dict, "hello", 0);
-    CHECK(!addToExcludeCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryRemove_TestFixture,
-             EnchantDictionaryRemove_InvalidUtf8Word_NotRemoved)
-{
-    enchant_dict_remove(_dict, "\xa5\xf1\x08", -1);
-    CHECK(!addToExcludeCalled);
-}
-
 TEST_FIXTURE(EnchantDictionaryRemoveNotImplemented_TestFixture,
              EnchantDictionaryRemoveNotImplemented_WordAddedToExcludeFile)
 {
     CHECK(!ExcludeFileHasContents());
     enchant_dict_remove(_dict, "hello", -1);
     CHECK(ExcludeFileHasContents());
-}
-
-TEST_FIXTURE(EnchantDictionaryRemoveNotImplemented_TestFixture,
-             EnchantDictionaryRemoveNotImplemented_NotPassedOnToProvider)
-{
-    enchant_dict_remove(_dict, "hello", -1);
-    CHECK(!addToExcludeCalled);
 }
 
 TEST_FIXTURE(EnchantDictionaryRemoveNotImplemented_TestFixture,

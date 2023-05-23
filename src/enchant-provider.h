@@ -135,21 +135,11 @@ struct str_enchant_dict
 			   const char *const word, size_t len,
 			   size_t * out_n_suggs);
 
-	void (*add_to_personal) (struct str_enchant_dict * me,
-				 const char *const word, size_t len);
-
-	void (*add_to_exclude) (struct str_enchant_dict * me,
-				const char *const word, size_t len);
-
 	void (*add_to_session) (struct str_enchant_dict * me,
 				const char *const word, size_t len);
 
 	void (*remove_from_session) (struct str_enchant_dict * me,
 				const char *const word, size_t len);
-
-	void (*store_replacement) (struct str_enchant_dict * me,
-				   const char *const mis, size_t mis_len,
-				   const char *const cor, size_t cor_len);
 
 	const char * (*get_extra_word_characters) (struct str_enchant_dict * me);
 

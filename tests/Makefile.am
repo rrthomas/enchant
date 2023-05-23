@@ -93,7 +93,6 @@ main_test_SOURCES = main.test.cpp \
 	dictionary/enchant_dict_is_word_character_tests.cpp \
 	dictionary/enchant_dict_remove_from_session_tests.cpp \
 	dictionary/enchant_dict_remove_tests.cpp \
-	dictionary/enchant_dict_store_replacement_tests.cpp \
 	dictionary/enchant_dict_suggest_tests.cpp \
 	broker/enchant_broker_describe_tests.cpp \
 	broker/enchant_broker_dict_exists_tests.cpp \
