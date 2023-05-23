@@ -197,8 +197,8 @@ char **enchant_dict_suggest (EnchantDict * dict, const char *const word,
  * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
  * @len: The byte length of @word, or -1 for strlen (@word)
  *
- * Remarks: if the word exists in the exclude dictionary, it will be removed from the
- *          exclude dictionary
+ * The word is also added to the session. If the word exists in the exclude
+ * dictionary, it will be removed from the exclude dictionary.
  */
 void enchant_dict_add (EnchantDict * dict, const char *const word, ssize_t len);
 
@@ -218,6 +218,7 @@ void enchant_dict_add_to_session (EnchantDict * dict, const char *const word, ss
  *        remove from the personal dictionary, in UTF-8 encoding
  * @len: The byte length of @word, or -1 for strlen (@word)
  *
+ * The word is also removed from the session.
  */
 void enchant_dict_remove (EnchantDict * dict, const char *const word, ssize_t len);
 

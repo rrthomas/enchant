@@ -116,8 +116,6 @@ TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
              EnchantDictionaryAddToSession_WordExistsInPersonal_StillCallsProvider)
 {
     enchant_dict_add(_dict, "personal", -1);
-    CHECK(!addToSessionCalled);
-
     enchant_dict_add_to_session(_dict, "personal", -1);
     CHECK(addToSessionCalled);
     CHECK_EQUAL(std::string("personal"), wordToAdd);

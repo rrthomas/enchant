@@ -5,7 +5,7 @@ This version simplifies the handling of personal wordlists. End-users should
 not notice much difference, but internally the code has been considerably
 simplified.
 
-There are two developer-visible changes:
+There are three developer-visible changes:
 
   * A new dictionary method remove_from_session() allows providers to stay
     in sync with Enchant’s personal wordlist, by removing as well as adding
@@ -13,12 +13,14 @@ There are two developer-visible changes:
   * The public API enchant_dict_store_replacement() is deprecated, and no
     longer does anything. It only previously had an effect with the Aspell
     provider.
+  * The APIs enchant_dict_add() and enchant_dict_remove() also respectively
+    add the word to the session or remove it.
 
 Note that these changes do not affect the public ABI, which only uses
 pointers to dictionary objects (it does change the provider ABI, but as far
 as the maintainers know, there are no 3rd-party providers).
 
-There are two main changes under the hood.
+There are three main changes under the hood.
 
 First, Enchant’s mechanism for generating suggestions from personal
 wordlists is removed. This mechanism was complicated, would generate
@@ -33,6 +35,10 @@ Of the known providers, only Aspell used this support, and only partially.
 This was likely to be confusing: for example, words could be added to the
 Aspell, but not removed, so Aspell’s personal wordlist could get out of sync
 with Enchant’s. The relevant dictionary methods have been removed.
+
+Finally, as mentioned above, adding a word to the personal wordlist also
+adds it to the session, and removing it also removes it from the session.
+This keeps the session and personal wordlist in sync automatically.
 
 
 2.4.0 (May 22, 2023)
