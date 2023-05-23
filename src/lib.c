@@ -610,6 +610,8 @@ enchant_dict_remove_from_session (EnchantDict * dict, const char *const word, ss
 	enchant_session_clear_error (session);
 
 	enchant_session_remove (session, word, len);
+	if (dict->remove_from_session)
+		(*dict->remove_from_session) (dict, word, len);
 }
 
 int
