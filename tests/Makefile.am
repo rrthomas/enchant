@@ -1,5 +1,3 @@
-SUBDIRS = enchant_providers
-
 # Get libdir suffix
 if GNU_MAKE
 libdir_subdir=$(shell echo "$(libdir)" | sed -e 's|^$(exec_prefix)/||' | sed -e 's|^/||')
@@ -18,6 +16,7 @@ AM_TESTS_ENVIRONMENT = \
 	$(MAKE) libenchant-copy; \
 	cp $(srcdir)/test.pwl.orig $(builddir)/test.pwl; \
 	cp $(builddir)/@objdir@/*@shlibext@ .; \
+	cp $(top_builddir)/providers/@objdir@/*@shlibext@ $(builddir) || :; \
 	chmod +w $(builddir)/test.pwl; \
 	export LSAN_OPTIONS=suppressions=$(srcdir)/asan-suppressions.txt:fast_unwind_on_malloc=0;
 
@@ -73,8 +72,10 @@ libenchant_null_describe_la_CPPFLAGS = $(libenchant_mock_provider_la_CPPFLAGS) -
 libenchant_null_describe_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_describe_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
-check_PROGRAMS = main.test
+check_PROGRAMS = main.test providers.test
 LOG_COMPILER = $(srcdir)/run-test
+# Make the tests run serially.
+providers.log: main.log
 
 main_test_SOURCES = main.test.cpp \
 	EnchantBrokerTestFixture.h \
@@ -116,5 +117,27 @@ main_test_SOURCES = main.test.cpp \
 main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
 main_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
 main_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
+
+APPLESPELL_CONFIG = config/AppleSpell.config
+$(APPLESPELL_CONFIG): $(top_srcdir)/providers/AppleSpell.config
+	$(MKDIR_P) config
+	cp $(top_srcdir)/providers/AppleSpell.config config/
+
+providers_test_SOURCES = enchant_providers/providers.test.cpp \
+	EnchantTestFixture.h \
+	EnchantBrokerTestFixture.h \
+	EnchantDictionaryTestFixture.h \
+	enchant_providers/unittest_enchant_providers.h \
+	enchant_providers/Dictionary/dictionary_check.cpp \
+	enchant_providers/Dictionary/dictionary_suggest.cpp \
+	enchant_providers/Provider/provider_describe_dict.cpp \
+	enchant_providers/Provider/provider_dictionary_exists.cpp \
+	enchant_providers/Provider/provider_identify_dict.cpp \
+	enchant_providers/Provider/provider_list_dicts.cpp \
+	enchant_providers/Provider/provider_request_dict.cpp \
+	$(NULL)
+providers_test_DEPENDENCIES = $(LIBENCHANT_COPY) $(APPLESPELL_CONFIG)
+providers_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
+providers_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
 TESTS = $(check_PROGRAMS)

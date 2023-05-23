@@ -222,7 +222,6 @@ src/enchant-lsmod.1
 src/enchant.5
 providers/Makefile
 tests/Makefile
-tests/enchant_providers/Makefile
 ], [],
 [ENCHANT_MAJOR_VERSION="$ENCHANT_MAJOR_VERSION"])
 AC_OUTPUT
