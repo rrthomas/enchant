@@ -112,8 +112,10 @@ int TestProvidersInDirectory(char * dir_name)
     const char *dir_entry;
     while ((dir_entry = g_dir_read_name (dir)) != NULL)
         {
+#define PROVIDER_PREFIX "enchant_"
             size_t entry_len = strlen (dir_entry);
-            if ((entry_len > g_module_suffix_len) && 
+            if ((entry_len > g_module_suffix_len) &&
+                !strncmp(dir_entry, PROVIDER_PREFIX, sizeof(PROVIDER_PREFIX)) &&
                 !strcmp(dir_entry + (entry_len - g_module_suffix_len), G_MODULE_SUFFIX))
                 {
                     char *filename = g_build_filename (dir_name, dir_entry, NULL);
