@@ -9,7 +9,9 @@ Enchant \- a spellchecker
 .br
 .SH DESCRIPTION
 .B Enchant
-is an ispell-compatible spellchecker.
+is an Ispell-compatible spellchecker.
+Note that unlike Ispell, it does not have an interactive mode; it is
+designed to be used by other programs.
 .TP
 \fB\-d \fIDICTIONARY\fR
 use the given dictionary
@@ -18,7 +20,7 @@ use the given dictionary
 use the given personal wordlist
 .TP
 .B "\-a"
-list suggestions in ispell pipe mode format
+list suggestions in Ispell pipe mode format
 .TP
 .B "\-l"
 list only the misspellings

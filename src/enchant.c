@@ -73,7 +73,7 @@ print_help (const char * prog)
 		 "Usage: %s -a|-l|-h|-v [-L] [-d DICTIONARY] [FILE]\n\
   -d DICTIONARY  use the given dictionary\n\
   -p FILE        use the given personal word list\n\
-  -a             list suggestions in ispell pipe mode format\n\
+  -a             communicate non-interactively through a pipe like Ispell\n\
   -l             list only the misspellings\n\
   -L             display line numbers\n\
   -h             display help and exit\n\
