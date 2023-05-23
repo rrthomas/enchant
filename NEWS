@@ -1,3 +1,40 @@
+2.5.0 (May 23, 2022)
+--------------------
+
+This version simplifies the handling of personal wordlists. End-users should
+not notice much difference, but internally the code has been considerably
+simplified.
+
+There are two developer-visible changes:
+
+  * A new dictionary method remove_from_session() allows providers to stay
+    in sync with Enchant’s personal wordlist, by removing as well as adding
+    words in the spelling session.
+  * The public API enchant_dict_store_replacement() is deprecated, and no
+    longer does anything. It only previously had an effect with the Aspell
+    provider.
+
+Note that these changes do not affect the public ABI, which only uses
+pointers to dictionary objects (it does change the provider ABI, but as far
+as the maintainers know, there are no 3rd-party providers).
+
+There are two main changes under the hood.
+
+First, Enchant’s mechanism for generating suggestions from personal
+wordlists is removed. This mechanism was complicated, would generate
+suggestions in a different way from each provider, and was unlikely to work
+well for many languages. Instead, support has been improved for supplying
+words from the user’s personal wordlist to the provider, so that it can
+include them in suggestions. This is supported by the Aspell and Hunspell
+backends.
+
+Second, Enchant’s support for provider-specific wordlists has been removed.
+Of the known providers, only Aspell used this support, and only partially.
+This was likely to be confusing: for example, words could be added to the
+Aspell, but not removed, so Aspell’s personal wordlist could get out of sync
+with Enchant’s. The relevant dictionary methods have been removed.
+
+
 2.4.0 (May 22, 2023)
 --------------------
 
