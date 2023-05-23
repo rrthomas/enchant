@@ -132,8 +132,6 @@ dnl FIXME: we need UnitTest++ >= 1.6, but adding the version check breaks
 dnl the Windows build: https://github.com/msys2/MINGW-packages/issues/17297
 PKG_CHECK_EXISTS([UnitTest++],
     [PKG_CHECK_MODULES(UNITTESTPP, [UnitTest++])])
-AC_SUBST(UNITTESTPP_CFLAGS)
-AC_SUBST(UNITTESTPP_LIBS)
 AC_LANG_POP([C++])
 
 
