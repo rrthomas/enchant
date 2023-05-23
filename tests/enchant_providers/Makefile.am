@@ -7,7 +7,7 @@ else
 libdir_subdir=lib
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/src $(GLIB_CFLAGS)
 
 ENCHANT_CONFIG_DIR = config
 
@@ -38,7 +38,7 @@ $(APPLESPELL_CONFIG): $(top_srcdir)/providers/AppleSpell.config
 	$(MKDIR_P) config
 	cp $(top_srcdir)/providers/AppleSpell.config config/
 
-LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS)
+LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS)
 LIBADD = $(LIBENCHANT_COPY)
 DEPS = $(LIBENCHANT_COPY)
 
@@ -59,7 +59,7 @@ providers_test_SOURCES = providers.test.cpp \
 	Provider/provider_request_dict.cpp \
 	$(NULL)
 providers_test_DEPENDENCIES = $(LIBENCHANT_COPY) $(APPLESPELL_CONFIG)
-providers_test_LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS) $(UNITTESTPP_LIBS)
+providers_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
 providers_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
 TESTS = $(check_PROGRAMS)
