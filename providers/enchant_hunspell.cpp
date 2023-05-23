@@ -494,9 +494,8 @@ hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED, const char *cons
 	dict->user_data = (void *) checker;
 	dict->check = hunspell_dict_check;
 	dict->suggest = hunspell_dict_suggest;
-	// don't implement personal
 	dict->add_to_session = hunspell_dict_add_to_session;
-	dict->add_to_exclude = hunspell_dict_remove_from_session;
+	dict->remove_from_session = hunspell_dict_remove_from_session;
 	dict->get_extra_word_characters = hunspell_dict_get_extra_word_characters;
 	dict->is_word_character = hunspell_dict_is_word_character;
 
