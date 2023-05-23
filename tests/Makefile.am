@@ -7,7 +7,7 @@ else
 libdir_subdir=lib
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir)/src $(ENCHANT_CFLAGS) -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
+AM_CPPFLAGS = -I$(top_srcdir)/src $(GLIB_CFLAGS) -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
 
 ENCHANT_CONFIG_DIR = config
 
@@ -38,7 +38,7 @@ libenchant-copy:
 	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/
 	cp $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la $(libdir_subdir)/
 
-LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS)
+LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS)
 LIBADD = $(LIBENCHANT_COPY)
 DEPS = $(LIBENCHANT_COPY)
 
@@ -50,9 +50,9 @@ check_LTLIBRARIES = \
 	libenchant_null_describe.la
 
 # Should not really use _ENCHANT_BUILD here, but seems to be necessary to get correct DLL exports for Windows
-libenchant_mock_provider_la_CPPFLAGS=-I$(top_srcdir)/src $(ENCHANT_CFLAGS) -D_ENCHANT_BUILD=1
+libenchant_mock_provider_la_CPPFLAGS=-I$(top_srcdir)/src $(GLIB_CFLAGS) -D_ENCHANT_BUILD=1
 # Adding -rpath to LDFLAGS causes the .so to be built even though the lib is not to be installed
-libenchant_mock_provider_la_LDFLAGS = -module -avoid-version -no-undefined -rpath /foo $(ENCHANT_LIBS)
+libenchant_mock_provider_la_LDFLAGS = -module -avoid-version -no-undefined -rpath /foo $(GLIB_LIBS)
 libenchant_mock_provider_la_SOURCES = mock_provider.cpp
 
 # Build distinct libraries rather than copying a single one, to avoid being
@@ -114,7 +114,7 @@ main_test_SOURCES = main.test.cpp \
 	provider/enchant_provider_get_user_language_tests.cpp \
 	$(NULL)
 main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
-main_test_LDADD = $(LIBENCHANT_COPY) $(ENCHANT_LIBS) $(UNITTESTPP_LIBS)
+main_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
 main_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
 TESTS = $(check_PROGRAMS)
