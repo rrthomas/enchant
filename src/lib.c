@@ -93,7 +93,7 @@ typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider,
 /********************************************************************************/
 
 /* Relocate a path and ensure the result is allocated on the heap */
-char *
+_GL_ATTRIBUTE_MALLOC char *
 enchant_relocate (const char *path)
 {
 	char *newpath = (char *) relocate (path);
@@ -200,10 +200,12 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	return new_tag;
 }
 
-static char *
+static _GL_ATTRIBUTE_MALLOC char *
 enchant_iso_639_from_tag (const char * const dict_tag)
 {
 	char * new_tag = strdup (dict_tag);
+	if (new_tag == NULL)
+		return NULL;
 	char * needle = strchr (new_tag, '_');
 
 	if (needle != NULL)
@@ -1059,6 +1061,10 @@ enchant_broker_request_dict_with_pwl (EnchantBroker * broker, const char *const 
 	else if ((dict = _enchant_broker_request_dict (broker, normalized_tag, pwl)) == NULL)
 		{
 			char * iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
+			if (iso_639_only_tag == NULL) {
+				free (normalized_tag);
+				return NULL;
+			}
 			dict = _enchant_broker_request_dict (broker, iso_639_only_tag, pwl);
 			free (iso_639_only_tag);
 		}
@@ -1239,6 +1245,10 @@ enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag)
 	else if ((exists = _enchant_broker_dict_exists (broker, normalized_tag)) == 0)
 		{
 			char * iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
+			if (iso_639_only_tag == NULL) {
+				free (normalized_tag);
+				return 0;
+			}
 
 			if (strcmp (normalized_tag, iso_639_only_tag) != 0)
 				exists = _enchant_broker_dict_exists (broker, iso_639_only_tag);
@@ -1388,7 +1398,7 @@ enchant_get_user_language(void)
 }
 
 
-char *
+_GL_ATTRIBUTE_MALLOC char *
 enchant_get_prefix_dir(void)
 {
 	return enchant_relocate (INSTALLPREFIX);
