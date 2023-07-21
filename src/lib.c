@@ -62,7 +62,7 @@ struct str_enchant_broker
 	gchar * error;
 };
 
-typedef struct str_enchant_session
+typedef struct
 {
 	GHashTable *session_include;
 	GHashTable *session_exclude;
@@ -80,7 +80,7 @@ typedef struct str_enchant_session
 	EnchantProvider * provider;
 } EnchantSession;
 
-typedef struct str_enchant_dict_private_data
+typedef struct
 {
 	unsigned int reference_count;
 	EnchantSession* session;
