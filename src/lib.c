@@ -354,12 +354,6 @@ enchant_session_clear_error (EnchantSession * session)
 /********************************************************************************/
 /********************************************************************************/
 
-static void
-enchant_free_string_list (char ** string_list)
-{
-	g_strfreev (string_list);
-}
-
 void
 enchant_dict_set_error (EnchantDict * dict, const char * const err)
 {
@@ -490,7 +484,7 @@ enchant_dict_suggest (EnchantDict * dict, const char *const word, ssize_t len, s
 			if (dict_suggs)
 				{
 					suggsT = enchant_dict_get_good_suggestions(dict, dict_suggs, n_dict_suggs, &n_suggsT);
-					enchant_free_string_list (dict_suggs);
+					g_strfreev (dict_suggs);
 					dict_suggs = suggsT;
 					n_dict_suggs = n_suggsT;
 				}
@@ -1141,7 +1135,7 @@ enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, voi
 					}
 				}
 
-			enchant_free_string_list (dicts);
+			g_strfreev (dicts);
 		}
 
 	GSList *tags = NULL;
@@ -1205,7 +1199,7 @@ enchant_provider_dictionary_exists (EnchantProvider * provider, const char * con
 					break;
 				}
 
-			enchant_free_string_list (dicts);
+			g_strfreev (dicts);
 		}
 
 	return exists;
