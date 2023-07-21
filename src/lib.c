@@ -233,10 +233,10 @@ enchant_session_destroy (EnchantSession * session)
 
 static EnchantSession *
 enchant_session_new_with_pwl (EnchantProvider * provider,
-			      const char * const pwl,
-			      const char * const excl,
-			      const char * const lang,
-			      gboolean fail_if_no_pwl)
+				  const char * const pwl,
+				  const char * const excl,
+				  const char * const lang,
+				  gboolean fail_if_no_pwl)
 {
 	EnchantPWL *personal = NULL;
 	if (pwl)
@@ -455,7 +455,7 @@ enchant_dict_get_good_suggestions(EnchantDict * dict, char ** suggs, size_t n_su
 				continue;
 
 			if (g_utf8_validate(suggs[i], sugg_len, NULL) &&
-			    !enchant_session_exclude(session, suggs[i], sugg_len))
+				!enchant_session_exclude(session, suggs[i], sugg_len))
 				filtered_suggs[n_filtered_suggs++] = strdup (suggs[i]);
 		}
 
@@ -768,7 +768,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 						{
 							EnchantProviderInitFunc init_func;
 							if (g_module_symbol (module, "init_enchant_provider", (gpointer *) (&init_func))
-							    && init_func)
+								&& init_func)
 								{
 									provider = init_func ();
 									if (!enchant_provider_is_valid(provider))
@@ -799,7 +799,7 @@ enchant_load_providers_in_dir (EnchantBroker * broker, const char *dir_name)
 					/* optional entry point to allow modules to look for associated files */
 					EnchantPreConfigureFunc conf_func;
 					if (g_module_symbol (module, "configure_enchant_provider", (gpointer *) (&conf_func))
-					    && conf_func)
+						&& conf_func)
 						{
 							conf_func (provider, dir_name);
 							if (!enchant_provider_is_valid(provider))
@@ -1343,7 +1343,7 @@ enchant_broker_set_ordering (EnchantBroker * broker, const char * const tag, con
 		{
 			/* we will free ordering_dupl && tag_dupl when the hash is destroyed */
 			g_hash_table_insert (broker->provider_ordering, (gpointer)tag_dupl,
-					     (gpointer)(ordering_dupl));
+						 (gpointer)(ordering_dupl));
 		}
 	else
 		{
