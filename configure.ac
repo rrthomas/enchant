@@ -180,14 +180,12 @@ AC_DEFUN([ENCHANT_CHECK_PKG_CONFIG_PROVIDER],
 AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
   [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
    AS_IF([test "$with_[]$1" != no],
-      [_enchant_header=m4_default([$6], [$1[].h])
-      AC_CHECK_HEADERS([$_enchant_header], [_header_found=yes], [_header_found=no], [])
-      if test "$3" != NOLIB; then
+      [if test "$3" != NOLIB; then
          AC_CHECK_LIB([$1], [$3],,, [$5])
       else
          ac_cv_lib_[]$1[]_[]$3=yes
       fi
-      if test "$_header_found" != yes -o "$ac_cv_lib_[]$1[]_[]$3" != yes; then
+      if test "$HAVE_[]$6" != yes -o "$ac_cv_lib_[]$1[]_[]$3" != yes; then
          if test "$with_[]$1" != check; then
             AC_MSG_FAILURE([--with-[]$1 was given, but tests for $1 failed])
          fi
@@ -204,16 +202,19 @@ dnl Check for providers
 build_providers=
 
 dnl Standard providers
+AC_CHECK_HEADERS([aspell.h], [HAVE_ASPELL_H=yes])
+AC_CHECK_HEADERS([hspell.h], [HAVE_HSPELL_H=yes])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([hunspell], [HUNSPELL])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([nuspell], [NUSPELL], [nuspell >= 5.1.0])
-ENCHANT_CHECK_LIB_PROVIDER([aspell], [ASPELL], [get_aspell_dict_info_list])
-ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path],, [-lz])
+ENCHANT_CHECK_LIB_PROVIDER([aspell], [ASPELL], [get_aspell_dict_info_list],,, [ASPELL_H])
+ENCHANT_CHECK_LIB_PROVIDER([hspell], [HSPELL], [hspell_get_dictionary_path],, [-lz], [HSPELL_H])
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([voikko], [VOIKKO], [libvoikko])
 dnl FIXME: The test below assumes GCC(-compatible) ObjC++ compiler, but
 dnl OBJCXX is set even if no compiler is found.
 if test "$ac_cv_objcxx_compiler_gnu" = "yes"; then
   AC_LANG_PUSH([Objective C++])
-  ENCHANT_CHECK_LIB_PROVIDER([applespell], [APPLESPELL], [NOLIB],, [-framework Cocoa], [Cocoa/Cocoa.h])
+  AC_CHECK_HEADERS([Cocoa/Cocoa.h], [HAVE_COCOA_COCOA_H=yes])
+  ENCHANT_CHECK_LIB_PROVIDER([applespell], [APPLESPELL], [NOLIB],, [-framework Cocoa], [COCOA_COCOA_H])
   AC_LANG_POP([Objective C++])
 fi
 dnl Must call AM_CONDITIONAL outside conditional
