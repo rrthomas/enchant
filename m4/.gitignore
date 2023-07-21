@@ -63,3 +63,6 @@
 /zzgnulib.m4
 /assert_h.m4
 /stdalign.m4
+/build-to-host.m4
+/codeset.m4
+/locale-fr.m4
