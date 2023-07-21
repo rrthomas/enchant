@@ -831,6 +831,7 @@ enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 	if (!ch)
 		return;
 
+	g_debug("reading ordering file %s", file);
 	gchar *line;
 	gsize terminator;
 	while (G_IO_STATUS_NORMAL == g_io_channel_read_line (ch, &line, NULL, &terminator, NULL)) {
@@ -1108,10 +1109,12 @@ enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, voi
 	GHashTable *tag_map = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	enchant_broker_clear_error (broker);
+	g_debug("enchant_broker_list_dicts");
 
 	for (GSList *list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
 			EnchantProvider *provider = (EnchantProvider *) list->data;
+			g_debug("provider %s", provider->describe(provider));
 
 			size_t n_dicts;
 			char ** dicts = (*provider->list_dicts) (provider, &n_dicts);
@@ -1119,9 +1122,11 @@ enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, voi
 			for (size_t i = 0; i < n_dicts; i++)
 				{
 					const char * tag = dicts[i];
+					g_debug("tag %s", tag);
 					if (enchant_is_valid_dictionary_tag (tag)) {
 						GSList *providers = enchant_get_ordered_providers (broker, tag);
 						gint this_priority = g_slist_index (providers, provider);
+						g_debug("priority %d", this_priority);
 						if (this_priority != -1) {
 							gint min_priority = this_priority + 1;
 							gpointer ptr = g_hash_table_lookup (tag_map, tag);
