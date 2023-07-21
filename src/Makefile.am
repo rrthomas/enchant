@@ -38,9 +38,7 @@ enchant.html: enchant.5
 	groff -mandoc -Thtml $< > $@
 
 enchant-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant.1 Makefile.am $(top_builddir)/config.status
-	rm -f $@ $@.tmp
-	$(edit) $(abs_builddir)/enchant.1 >$@.tmp
-	mv $@.tmp $@
+	cp $(abs_builddir)/enchant.1 $@
 
 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant-lsmod.1 Makefile.am $(top_builddir)/config.status
 	cp $(abs_builddir)/enchant-lsmod.1 $@
