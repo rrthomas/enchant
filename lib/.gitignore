@@ -15,6 +15,7 @@
 /relocatable.c
 /relocatable.h
 /relocatable.valgrind
+/stddef.h
 /stddef.in.h
 /stdlib.in.h
 /strchrnul.c
