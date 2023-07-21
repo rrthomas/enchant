@@ -11,7 +11,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(GLIB_CFLAGS) $(WARN_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
 
 lib_LTLIBRARIES = libenchant-@ENCHANT_MAJOR_VERSION@.la
 
@@ -32,7 +32,6 @@ endif
 
 libenchant_includedir = $(pkgincludedir)-@ENCHANT_MAJOR_VERSION@
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
-noinst_HEADERS = debug.h
 
 pkgdata_DATA = enchant.ordering
 

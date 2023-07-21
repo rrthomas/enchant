@@ -67,6 +67,17 @@ ln -s OTHER-DICT ENCHANT-DICT
 .PP
 to replace the other dictionary file with a link to the Enchant dictionary,
 again filling in the name of the dictionary files.
+.SH ENVIRONMENT
+The following variables affect the behavior of Enchant:
+.TP
+\fIENCHANT_CONFIG_DIR\fR
+A directory in which Enchant should look for configuration files. See below.
+.TP
+\fIG_MESSAGES_DEBUG\fR
+Enchant uses GLib's log functions, with the domain \fIlibenchant\fR, to
+output messages useful for debugging. Setting \fIG_MESSAGES_DEBUG\fR to
+\fIlibenchant\fR will cause Enchant to output debugging messages to standard
+error. See the GLib documentation for more details.
 .SH FILES AND DIRECTORIES
 Enchant looks in the following places for files, in decreasing order of precedence:
 .TP

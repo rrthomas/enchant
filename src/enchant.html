@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Mon May 22 22:23:30 2023 -->
+<!-- CreationDate: Fri Jul 21 15:57:19 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -23,6 +23,7 @@
 <a href="#NAME">NAME</a><br>
 <a href="#ORDERING FILE">ORDERING FILE</a><br>
 <a href="#PERSONAL WORD LISTS">PERSONAL WORD LISTS</a><br>
+<a href="#ENVIRONMENT">ENVIRONMENT</a><br>
 <a href="#FILES AND DIRECTORIES">FILES AND DIRECTORIES</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
 <a href="#AUTHOR">AUTHOR</a><br>
@@ -119,6 +120,27 @@ ln -s OTHER-DICT ENCHANT-DICT</p>
 <p style="margin-left:11%; margin-top: 1em">to replace the
 other dictionary file with a link to the Enchant dictionary,
 again filling in the name of the dictionary files.</p>
+
+<h2>ENVIRONMENT
+<a name="ENVIRONMENT"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">The following
+variables affect the behavior of Enchant: <i><br>
+ENCHANT_CONFIG_DIR</i></p>
+
+<p style="margin-left:22%;">A directory in which Enchant
+should look for configuration files. See below.</p>
+
+<p style="margin-left:11%;"><i>G_MESSAGES_DEBUG</i></p>
+
+<p style="margin-left:22%;">Enchant uses GLib&rsquo;s log
+functions, with the domain <i>libenchant</i>, to output
+messages useful for debugging. Setting
+<i>G_MESSAGES_DEBUG</i> to <i>libenchant</i> will cause
+Enchant to output debugging messages to standard error. See
+the GLib documentation for more details.</p>
 
 <h2>FILES AND DIRECTORIES
 <a name="FILES AND DIRECTORIES"></a>
