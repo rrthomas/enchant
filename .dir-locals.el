@@ -1,1 +1,1 @@
-((c-mode . ((c-file-style . "K&R"))))
+((c-mode . ((c-file-style . "gnu"))))
