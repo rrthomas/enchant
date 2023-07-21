@@ -1,3 +1,17 @@
+# configure.ac for Enchant
+# Process this file with autoconf to produce a configure script
+#
+# Copyright (C) 2003 Dom Lachowicz
+#               2016-2023 Reuben Thomas
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+
 AC_PREREQ([2.71])
 AC_INIT([enchant],[2.5.0])
 AC_CONFIG_SRCDIR(src/enchant.h)
