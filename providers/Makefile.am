@@ -1,5 +1,16 @@
-EXTRA_DIST =			\
-	AppleSpell.config
+## Makefile.am for the providers subdirectory of Enchant
+#
+# Copyright (C) 2017-2023 Reuben Thomas
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+
+EXTRA_DIST = AppleSpell.config
 
 provider_LTLIBRARIES =
 providerdir = $(pkglibdir)-@ENCHANT_MAJOR_VERSION@
