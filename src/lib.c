@@ -157,20 +157,6 @@ enchant_get_conf_dirs (void)
 /********************************************************************************/
 /********************************************************************************/
 
-/* returns TRUE if tag is valid
- * for requires alphanumeric ASCII or underscore
- */
-static G_GNUC_PURE int
-enchant_is_valid_dictionary_tag(const char * const tag)
-{
-	const char * it;
-	for (it = tag; *it; ++it)
-		if(!g_ascii_isalnum(*it) && *it != '_')
-			return 0;
-
-	return it != tag; /*empty tag invalid*/
-}
-
 static char *
 enchant_normalize_dictionary_tag (const char * const dict_tag)
 {
@@ -1015,9 +1001,7 @@ enchant_broker_request_dict_with_pwl (EnchantBroker * broker, const char *const 
 	enchant_broker_clear_error (broker);
 
 	char * normalized_tag = enchant_normalize_dictionary_tag (tag);
-	if(!enchant_is_valid_dictionary_tag(normalized_tag))
-		enchant_broker_set_error (broker, "invalid tag character found");
-	else if ((dict = _enchant_broker_request_dict (broker, normalized_tag, pwl)) == NULL)
+	if ((dict = _enchant_broker_request_dict (broker, normalized_tag, pwl)) == NULL)
 		{
 			char * iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
 			if (iso_639_only_tag == NULL) {
@@ -1088,20 +1072,18 @@ enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, voi
 				{
 					const char * tag = dicts[i];
 					g_debug("tag %s", tag);
-					if (enchant_is_valid_dictionary_tag (tag)) {
-						GSList *providers = enchant_get_ordered_providers (broker, tag);
-						gint this_priority = g_slist_index (providers, provider);
-						g_debug("priority %d", this_priority);
-						if (this_priority != -1) {
-							gint min_priority = this_priority + 1;
-							gpointer ptr = g_hash_table_lookup (tag_map, tag);
-							if (ptr != NULL)
-								min_priority = g_slist_index (providers, ptr);
-							if (this_priority < min_priority)
-								g_hash_table_insert (tag_map, strdup (tag), provider);
-						}
-						g_slist_free (providers);
+					GSList *providers = enchant_get_ordered_providers (broker, tag);
+					gint this_priority = g_slist_index (providers, provider);
+					g_debug("priority %d", this_priority);
+					if (this_priority != -1) {
+						gint min_priority = this_priority + 1;
+						gpointer ptr = g_hash_table_lookup (tag_map, tag);
+						if (ptr != NULL)
+							min_priority = g_slist_index (providers, ptr);
+						if (this_priority < min_priority)
+							g_hash_table_insert (tag_map, strdup (tag), provider);
 					}
+					g_slist_free (providers);
 				}
 
 			g_strfreev (dicts);
@@ -1203,9 +1185,7 @@ enchant_broker_dict_exists (EnchantBroker * broker, const char * const tag)
 	char * normalized_tag = enchant_normalize_dictionary_tag (tag);
 	int exists = 0;
 
-	if(!enchant_is_valid_dictionary_tag(normalized_tag))
-		enchant_broker_set_error (broker, "invalid tag character found");
-	else if ((exists = _enchant_broker_dict_exists (broker, normalized_tag)) == 0)
+	if ((exists = _enchant_broker_dict_exists (broker, normalized_tag)) == 0)
 		{
 			char * iso_639_only_tag = enchant_iso_639_from_tag (normalized_tag);
 			if (iso_639_only_tag == NULL) {
