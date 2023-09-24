@@ -169,9 +169,11 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	*strchrnul (new_tag, '.') = '\0';
 
 	/* turn en-GB into en_GB */
-	char * needle;
-	if ((needle = strchr (new_tag, '-')) != NULL)
-		*needle = '_';
+        char * needle_dash;
+        char * needle = strchrnul (new_tag, '_');
+	if (((needle_dash = strchr (new_tag, '-')) != NULL) &&
+            (needle > needle_dash))
+		*needle_dash = '_';
 
 	/* everything before first '_' is converted to lower case */
 	needle = strchrnul (new_tag, '_');
