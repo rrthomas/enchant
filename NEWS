@@ -1,4 +1,28 @@
-2.5.0 (May 23, 2022)
+2.6.0 (September 24, 2023)
+--------------------------
+
+This version removes validation of language tags; dictionary names no longer
+have to be valid language tags. This is because dictionaries in the wild
+sometimes are sometimes not named with valid tags, and so are not visible to
+Enchant. Programs that use Enchant will have to cope with this, for the
+purposes of working out which languages are supported; but it should not a
+big deal, as Enchant already accepted valid language tags with extra stuff
+on the end, such as “en_GB-ize”.
+
+Debug output now uses GLib’s debug system, and can be enabled at run-time by
+setting the environment variable G_MESSAGES_DEBUG to ‘libenchant’. If you
+have had problems understanding why Enchant is not using the spelling
+provider you expect, now’s the time to get in touch via the issue tracker
+and see if we can work out what’s going on!
+
+The Aspell back-end has a fix to let it work with language variants such as
+“en_GB-ize”. Thanks to Abdul-Lateef Haji-Ali for this fix!
+
+There’s more code clean-up, build system updates, and a couple of null
+pointer dereference fixes (thanks, GCC!).
+
+
+2.5.0 (May 23, 2023)
 --------------------
 
 This version simplifies the handling of personal wordlists. End-users should
@@ -417,5 +441,3 @@ Aspell/Pspell support
 Ispell support
 Uspell support
 Ability to order dictionaries/providers
-
-
