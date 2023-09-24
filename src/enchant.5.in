@@ -19,7 +19,7 @@ to decide which spelling provider to use for particular languages.
 The per-user file takes precedence.
 .PP
 The ordering file takes the form \fIlanguage_tag:<comma-separated list of spelling
-providers>\fR. The language tag is an IETF BCP 47 language tag, typically of the form \fICOUNTRY_LANGUAGE\fR.
+providers>\fR. The language tag is typically an IETF BCP 47 language tag of the form \fICOUNTRY_LANGUAGE\fR.
 To see what dictionaries are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. \(oq*\(cq is
 used to mean \(lquse this ordering for all languages, unless instructed otherwise.\(rq For example:
 .IP

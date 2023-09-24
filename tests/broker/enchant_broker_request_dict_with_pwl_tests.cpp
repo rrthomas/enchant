@@ -215,11 +215,3 @@ TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
     CHECK(!requestDictionaryCalled);
 
 }
-
-TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
-             EnchantBrokerRequestDictionaryWithPwl_InvalidTag_NULL_ErrorSet)
-{
-    _dict = enchant_broker_request_dict_with_pwl(_broker, "en~US", _pwlFileName.c_str());
-    CHECK_EQUAL((void*)NULL, _dict);
-    CHECK(NULL != enchant_broker_get_error(_broker));
-}

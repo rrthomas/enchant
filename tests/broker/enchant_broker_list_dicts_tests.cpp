@@ -79,31 +79,6 @@ struct EnchantBrokerListDictionaries_TestFixture : EnchantBrokerListDictionaries
     { }
 };
 
-static char ** 
-InvalidTagEnGbListDictionaries (EnchantProvider *, 
-		 	                  size_t * out_n_dicts)
-{
-    *out_n_dicts = 2;
-    char** out_list = g_new0 (char *, *out_n_dicts + 1);
-    out_list[0] = g_strdup ("en_GB");
-    out_list[1] = g_strdup ("en-GB");
-
-    return out_list;
-}
-
-static void List_Dictionaries_InvalidTag_ProviderConfiguration (EnchantProvider * me, const char *)
-{
-     me->list_dicts=InvalidTagEnGbListDictionaries;
-}
-
-struct EnchantBrokerListDictionaries_ProviderReturnsInvalidTag_TestFixture : EnchantBrokerListDictionaries_TestFixtureBase
-{
-    //Setup
-    EnchantBrokerListDictionaries_ProviderReturnsInvalidTag_TestFixture():
-            EnchantBrokerListDictionaries_TestFixtureBase(List_Dictionaries_InvalidTag_ProviderConfiguration)
-    { }
-};
-
 
 static char ** 
 DuplicateEnGbListDictionaries (EnchantProvider *, 
@@ -214,13 +189,6 @@ TEST_FIXTURE(EnchantBrokerTestFixture,
 
 TEST_FIXTURE(EnchantBrokerListDictionaries_ProviderDuplicateTags_TestFixture,
              EnchantBrokerListDictionaries_ProviderDuplicateTags_CallbackCalledOnlyOncePerUniqueTag)
-{
-    enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeCallback, &_dictionaryList);
-    CHECK_EQUAL((unsigned int)1, _dictionaryList.size());
-}
-
-TEST_FIXTURE(EnchantBrokerListDictionaries_ProviderReturnsInvalidTag_TestFixture,
-             EnchantBrokerListDictionaries_ProviderReturnsInvalidTag)
 {
     enchant_broker_list_dicts(_broker, EnchantDictionaryDescribeCallback, &_dictionaryList);
     CHECK_EQUAL((unsigned int)1, _dictionaryList.size());

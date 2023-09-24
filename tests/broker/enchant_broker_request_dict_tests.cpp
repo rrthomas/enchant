@@ -207,14 +207,6 @@ TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
 
 }
 
-TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture, 
-             EnchantBrokerRequestDictionary_InvalidTag_NULL_ErrorSet)
-{
-    _dict = enchant_broker_request_dict(_broker, "en~US");
-    CHECK_EQUAL((void*)NULL, _dict);
-    CHECK(NULL != enchant_broker_get_error(_broker));
-}
-
 TEST_FIXTURE(EnchantBrokerTestFixture,
              EnchantBrokerRequestDictionary_ProviderLacksListDictionaries_CallbackNeverCalled)
 {
