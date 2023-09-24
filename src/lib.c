@@ -168,18 +168,20 @@ enchant_normalize_dictionary_tag (const char * const dict_tag)
 	/* strip off en_GB.UTF-8 */
 	*strchrnul (new_tag, '.') = '\0';
 
-	/* turn en-GB into en_GB */
-	char * needle;
-	if ((needle = strchr (new_tag, '-')) != NULL)
-		*needle = '_';
-
-	/* everything before first '_' is converted to lower case */
-	needle = strchrnul (new_tag, '_');
-	for (gchar *it = new_tag; it != needle; ++it)
+	/* everything before first '_' or '-' is converted to lower case */
+	gchar *it = new_tag;
+	for (; *it != '\0' && *it != '-' && *it != '_'; ++it)
 		*it = g_ascii_tolower (*it);
-	/* everything after first '_' is converted to upper case */
-	for (gchar *it = needle; *it; ++it)
-		*it = g_ascii_toupper (*it);
+
+	/* turn en-GB into en_GB */
+	if (*it == '-')
+		*it = '_';
+
+	/* first run of alphanumberics after first '_' is converted to upper
+	   case */
+	if (*it != '\0')
+		for (++it; g_ascii_isalnum (*it); ++it)
+			*it = g_ascii_toupper (*it);
 
 	return new_tag;
 }
