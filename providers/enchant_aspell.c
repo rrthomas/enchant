@@ -113,7 +113,7 @@ static EnchantDict *
 aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED, const char *const tag)
 {
 	AspellConfig *spell_config = new_aspell_config ();
-	aspell_config_replace (spell_config, "language-tag", tag);
+	aspell_config_replace (spell_config, "master", tag);
 	aspell_config_replace (spell_config, "encoding", "utf-8");
 
 	AspellCanHaveError *spell_error = new_aspell_speller (spell_config);
