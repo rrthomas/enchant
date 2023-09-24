@@ -1,3 +1,13 @@
+2.6.1 (September 24, 2023)
+--------------------------
+
+This version tweaks normalization of language tags so that only the part of
+the tag that specifies country and language is altered; any extra that is
+not removed is left alone. This fixes the use case for Aspell dictionaries
+that was fixed in the Aspell backend in 2.6.0. Thanks again to Abdul-Lateef
+Haji-Ali for the report and help with the fix.
+
+
 2.6.0 (September 24, 2023)
 --------------------------
 
