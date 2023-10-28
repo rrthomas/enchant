@@ -1,3 +1,10 @@
+2.6.2 (October 28, 2023)
+------------------------
+
+This version documents exclude files: each personal word list is paired with
+an exclude file that contains words the user considers invalid.
+
+
 2.6.1 (September 24, 2023)
 --------------------------
 
