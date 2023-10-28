@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Sun Sep 24 15:52:23 2023 -->
+<!-- CreationDate: Sat Oct 28 15:41:14 2023 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -73,7 +73,13 @@ fr:hunspell,nuspell,aspell</p>
 
 <p style="margin-left:11%; margin-top: 1em">Personal word
 lists are simple plain text files with one word per line.
-Lines starting with a hash sign &rsquo;#&rsquo; are
+The name of the file starts with the language tag and ends
+<i>.dic</i>. Each personal word list has a corresponding
+exclude file, ending in <i>.exc</i>, which lists words that
+are found in the dictionary but that the user wants to be
+considered invalid. The files are stored in an Enchant
+configuration directory; see <b>FILES AND DIRECTORIES</b>
+below. Lines starting with a hash sign &rsquo;#&rsquo; are
 ignored.</p>
 
 <p style="margin-left:11%; margin-top: 1em"><b>SHARING
