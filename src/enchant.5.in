@@ -32,6 +32,13 @@ en_GB:hunspell,nuspell,aspell
 fr:hunspell,nuspell,aspell
 .SH PERSONAL WORD LISTS
 Personal word lists are simple plain text files with one word per line.
+The name of the file starts with the language tag and ends \fI.dic\fR.
+Each personal word list has a corresponding exclude file, ending in
+\fI.exc\fR, which lists words that are found in the dictionary but that the
+user wants to be considered invalid.
+The files are stored in an Enchant configuration directory; see
+.B FILES AND DIRECTORIES
+below.
 Lines starting with a hash sign \(oq#\(cq are ignored.
 .SS SHARING PERSONAL WORD LISTS BETWEEN SPELL-CHECKERS
 It is possible, and usually safe, to share Enchant\(cqs personal word lists
