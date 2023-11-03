@@ -225,7 +225,7 @@ TEST_FIXTURE(EnchantBrokerDescribeTestFixture,
     CHECK_EQUAL((unsigned int)2, _providerList.size());
     CHECK_EQUAL(2, std::count_if(_providerList.begin(), 
                                  _providerList.end(), 
-                                 std::mem_fun_ref(&ProviderDescription::DataIsComplete)));
+                                 std::mem_fn(&ProviderDescription::DataIsComplete)));
 }
 
 TEST_FIXTURE(EnchantBrokerDescribeTestFixture, 
@@ -287,7 +287,7 @@ TEST_FIXTURE(EnchantBrokerDescribe_ProviderLacksIdentify_TestFixture,
   CHECK_EQUAL((unsigned int)1, _providerList.size());
   CHECK_EQUAL(1, std::count_if(_providerList.begin(), 
                                _providerList.end(), 
-                               std::mem_fun_ref(&ProviderDescription::DataIsComplete)));
+                               std::mem_fn(&ProviderDescription::DataIsComplete)));
 }
 
 TEST_FIXTURE(EnchantBrokerDescribe_ProviderLacksDescribe_TestFixture, 
@@ -297,7 +297,7 @@ TEST_FIXTURE(EnchantBrokerDescribe_ProviderLacksDescribe_TestFixture,
     CHECK_EQUAL((unsigned int)1, _providerList.size());
     CHECK_EQUAL(1, std::count_if(_providerList.begin(), 
                                  _providerList.end(), 
-                                 std::mem_fun_ref(&ProviderDescription::DataIsComplete)));
+                                 std::mem_fn(&ProviderDescription::DataIsComplete)));
 }
 
 TEST_FIXTURE(EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture, 
@@ -307,7 +307,7 @@ TEST_FIXTURE(EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture,
     CHECK_EQUAL((unsigned int)1, _providerList.size());
     CHECK_EQUAL(1, std::count_if(_providerList.begin(), 
                                  _providerList.end(), 
-                                 std::mem_fun_ref(&ProviderDescription::DataIsComplete)));
+                                 std::mem_fn(&ProviderDescription::DataIsComplete)));
 }
 
 TEST_FIXTURE(EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_TestFixture, 
@@ -317,5 +317,5 @@ TEST_FIXTURE(EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_TestFixture,
     CHECK_EQUAL((unsigned int)1, _providerList.size());
     CHECK_EQUAL(1, std::count_if(_providerList.begin(), 
                                  _providerList.end(), 
-                                 std::mem_fun_ref(&ProviderDescription::DataIsComplete)));
+                                 std::mem_fn(&ProviderDescription::DataIsComplete)));
 }
