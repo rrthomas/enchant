@@ -27,7 +27,7 @@
 +versions can be installed in parallel.  The one exception is the data files
 +(under pkgdatadir), as these are compatible between different major
 +versions.  To change e.g. /usr/share/enchant to /usr/share/enchant-2, set
-+pkgdatadir when running make, e.g.:
++pkgdatadir when running any make command (including check & install), e.g.:
 +
 +make pkgdatadir=/usr/share/enchant-2
 +
