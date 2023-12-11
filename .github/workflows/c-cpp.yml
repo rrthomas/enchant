@@ -10,7 +10,7 @@ jobs:
       ASAN_FLAGS: "-fsanitize=address -fsanitize=undefined"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with: { submodules: true }
     - name: Install dependencies
       run: sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr groff
@@ -41,7 +41,7 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with: { submodules: true }
     - name: Install dependencies
       run: |
@@ -84,7 +84,7 @@ jobs:
           mingw-w64-${{matrix.env}}-hunspell-en
           mingw-w64-${{matrix.env}}-nuspell
           mingw-w64-${{matrix.env}}-unittest-cpp
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with: { submodules: true }
     - name: Bootstrap (gnulib and autoreconf)
       run: ./bootstrap
