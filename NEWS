@@ -1,5 +1,11 @@
+2.6.3 (December 11, 2023)
+-------------------------
+
+This version makes pkgdatadir versioned by default.
+
+
 2.6.3 (December 2, 2023)
------------------------
+------------------------
 
 This version fixes a bug in the tests when pkgdatadir is set to a
 non-default value, and clarifies the documentation for setting pkgdatadir.
