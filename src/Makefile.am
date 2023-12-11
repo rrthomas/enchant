@@ -33,7 +33,8 @@ endif
 libenchant_includedir = $(pkgincludedir)-@ENCHANT_MAJOR_VERSION@
 libenchant_include_HEADERS = enchant.h enchant-provider.h enchant++.h
 
-pkgdata_DATA = enchant.ordering
+libenchant_datadir = $(pkgdatadir)-@ENCHANT_MAJOR_VERSION@
+libenchant_data_DATA = enchant.ordering
 
 dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1 enchant.5
 nodist_doc_DATA = enchant-@ENCHANT_MAJOR_VERSION@.html enchant-lsmod-@ENCHANT_MAJOR_VERSION@.html enchant.html
@@ -60,7 +61,7 @@ bin_PROGRAMS = enchant-@ENCHANT_MAJOR_VERSION@ enchant-lsmod-@ENCHANT_MAJOR_VERS
 enchant_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant.c
 enchant_lsmod_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant-lsmod.c
 
-EXTRA_DIST = $(pkgdata_DATA) enchant.1.in enchant-lsmod.1.in
+EXTRA_DIST = $(libenchant_data_DATA) enchant.1.in enchant-lsmod.1.in
 
 .rc.lo:
 	$(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --tag=RC --mode=compile $(RC) $(RCFLAGS) $< -o $@

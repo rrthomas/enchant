@@ -14,6 +14,7 @@ EXTRA_DIST = AppleSpell.config
 
 provider_LTLIBRARIES =
 providerdir = $(pkglibdir)-@ENCHANT_MAJOR_VERSION@
+libenchant_datadir = $(pkgdatadir)-@ENCHANT_MAJOR_VERSION@
 
 AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib -I$(top_srcdir)/src $(GLIB_CFLAGS) -D_ENCHANT_BUILD=1
 AM_CFLAGS = $(WARN_CFLAGS)
@@ -57,7 +58,7 @@ enchant_zemberek_la_SOURCES = enchant_zemberek.cpp
 
 if WITH_APPLESPELL
 provider_LTLIBRARIES += enchant_applespell.la
-pkgdata_DATA = AppleSpell.config
+libenchant_data_DATA = AppleSpell.config
 endif
 enchant_applespell_la_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag=CXX
 enchant_applespell_la_OBJCXXFLAGS = $(AM_OBJCXXFLAGS)
