@@ -206,10 +206,15 @@ struct _EnchantProvider {
 			       size_t * out_n_dicts);
 };
 
-struct str_composite_dict
-{
-	GSList *dict_list;
-};
+/**
+ * composite_provider_create_dict
+ * @list_of_dicts: A non-null list of #EnchantDicts
+ *
+ * Remarks: creates a composite dictionary that composes of EnchantDicts in @list_of_dicts
+ *          and maps all methods to composite provider methods for dictionary operations.
+ */
+EnchantDict *composite_provider_create_dict (GSList *dicts);
+
 #ifdef __cplusplus
 }
 #endif

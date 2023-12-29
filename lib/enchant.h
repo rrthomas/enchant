@@ -40,7 +40,6 @@ extern "C" {
 
 typedef struct _EnchantBroker EnchantBroker;
 typedef struct _EnchantDict   EnchantDict;
-typedef struct _EnchantCompositeDict CompositeDict;
 
 const char *enchant_get_version (void);
 
@@ -91,6 +90,15 @@ EnchantDict *enchant_broker_request_dict_with_pwl (EnchantBroker * broker, const
  * Returns: An EnchantDict.
  */
 EnchantDict *enchant_broker_request_pwl_dict (EnchantBroker * broker, const char *const pwl);
+
+/**
+ * enchant_broker_request_composite_dict
+ * @broker: A non-null #EnchantBroker
+ * @tags: The non-null language tags you wish to request a 'composite' dictionary for ("en_US", "de_DE", ...)
+ *
+ * Returns: A 'composite' #EnchantDict, or %null if no suitable dictionary could be found.
+ */
+EnchantDict *enchant_broker_request_composite_dict (EnchantBroker * broker, const char *const tag_string);
 
 /**
  * enchant_broker_free_dict
