@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2023 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -345,7 +345,6 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 {
 	g_return_if_fail (dict);
 	g_return_if_fail (err);
-	g_return_if_fail (g_utf8_validate(err, -1, NULL));
 
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
@@ -1302,7 +1301,6 @@ enchant_provider_set_error (EnchantProvider * provider, const char * const err)
 {
 	g_return_if_fail (provider);
 	g_return_if_fail (err);
-	g_return_if_fail (g_utf8_validate(err, -1, NULL));
 
 	EnchantBroker * broker = provider->owner;
 	g_return_if_fail (broker);
