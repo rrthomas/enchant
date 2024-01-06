@@ -129,7 +129,7 @@ void enchant_broker_set_ordering (EnchantBroker * broker,
  * enchant_broker_get_error
  * @broker: A non-null broker
  *
- * Returns a const char string or NULL describing the last exception in UTF8 encoding.
+ * Returns a const char string or NULL describing the last exception in UTF-8 encoding.
  * WARNING: error is transient and is likely cleared as soon as the
  * next broker operation happens
  */
@@ -137,9 +137,9 @@ const char *enchant_broker_get_error (EnchantBroker * broker);
 
 /**
  * EnchantBrokerDescribeFn
- * @provider_name: The provider's identifier, such as "hunspell" or "aspell", in UTF8 encoding
- * @provider_desc: A description of the provider, such as "Aspell 0.53" in UTF8 encoding
- * @provider_dll_file: The provider's DLL filename in Glib file encoding (UTF8 on Windows)
+ * @provider_name: The provider's identifier, such as "hunspell" or "aspell", in UTF-8 encoding
+ * @provider_desc: A description of the provider, such as "Aspell 0.53" in UTF-8 encoding
+ * @provider_dll_file: The provider's DLL filename in Glib file encoding (UTF-8 on Windows)
  * @user_data: Supplied user data, or %null if you don't care
  *
  * Callback used to enumerate and describe Enchant's various providers
@@ -233,7 +233,7 @@ void enchant_dict_remove_from_session (EnchantDict * dict, const char *const wor
 /**
  * enchant_dict_is_added
  * @dict: A non-null #EnchantDict
- * @word: The word you wish to see if it has been added (to your session or dict) in UTF8 encoding
+ * @word: The word you wish to see if it has been added (to your session or dict) in UTF-8 encoding
  * @len: the byte length of @word, or -1 for strlen (@word)
  */
 int enchant_dict_is_added (EnchantDict * dict, const char *const word, ssize_t len);
@@ -241,7 +241,7 @@ int enchant_dict_is_added (EnchantDict * dict, const char *const word, ssize_t l
 /**
  * enchant_dict_is_removed
  * @dict: A non-null #EnchantDict
- * @word: The word you wish to see if it has been removed (from your session or dict) in UTF8 encoding
+ * @word: The word you wish to see if it has been removed (from your session or dict) in UTF-8 encoding
  * @len: the byte length of @word, or -1 for strlen (@word)
  */
 int enchant_dict_is_removed (EnchantDict * dict, const char *const word, ssize_t len);
@@ -273,7 +273,7 @@ void enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
  * enchant_dict_get_error
  * @dict: A non-null #EnchantDict
  *
- * Returns a const char string or NULL describing the last exception in UTF8 encoding.
+ * Returns a const char string or NULL describing the last exception in UTF-8 encoding.
  * WARNING: error is transient. It will likely be cleared as soon as
  * the next dictionary operation is called.
  */
@@ -320,9 +320,9 @@ int enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc, size_t n);
 /**
  * EnchantDictDescribeFn
  * @lang_tag: The dictionary's language tag (eg: en_US, de_AT, ...)
- * @provider_name: The provider's name (eg: Aspell) in UTF8 encoding
- * @provider_desc: The provider's description (eg: Aspell 0.50.3) in UTF8 encoding
- * @provider_file: The DLL/SO where this dict's provider was loaded from in Glib file encoding (UTF8 on Windows)
+ * @provider_name: The provider's name (eg: Aspell) in UTF-8 encoding
+ * @provider_desc: The provider's description (eg: Aspell 0.50.3) in UTF-8 encoding
+ * @provider_file: The DLL/SO where this dict's provider was loaded from in Glib file encoding (UTF-8 on Windows)
  * @user_data: Supplied user data, or %null if you don't care
  *
  * Callback used to describe an individual dictionary
