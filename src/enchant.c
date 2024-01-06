@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2003 Dom Lachowicz
  *               2007 Hannu Väisänen
- *               2016-2023 Reuben Thomas
+ *               2016-2024 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -269,7 +269,12 @@ parse_file (FILE * in, IspellMode_t mode, gboolean countLines, gchar *dictionary
 	dict = enchant_broker_request_dict_with_pwl (broker, lang, perslist);
 
 	if (!dict) {
-		fprintf (stderr, "Couldn't create a dictionary for %s\n", lang);
+		fprintf (stderr, "No dictionary available for '%s'", lang);
+		const char *errmsg = enchant_broker_get_error (broker);
+		if (errmsg != NULL)
+			fprintf (stderr, ": %s", errmsg);
+		putc('\n', stderr);
+
 		free (lang);
 		enchant_broker_free (broker);
 		return 1;
