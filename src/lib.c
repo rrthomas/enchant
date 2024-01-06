@@ -348,6 +348,7 @@ enchant_dict_set_error (EnchantDict * dict, const char * const err)
 
 	EnchantSession * session = ((EnchantDictPrivateData*)dict->enchant_private_data)->session;
 	enchant_session_clear_error (session);
+	g_debug("enchant_dict_set_error: %s", err);
 	session->error = strdup (err);
 }
 
@@ -648,13 +649,6 @@ enchant_broker_clear_error (EnchantBroker * broker)
 			g_free (broker->error);
 			broker->error = NULL;
 		}
-}
-
-static void
-enchant_broker_set_error (EnchantBroker * broker, const char * const err)
-{
-	enchant_broker_clear_error (broker);
-	broker->error = strdup (err);
 }
 
 static int
@@ -1305,7 +1299,9 @@ enchant_provider_set_error (EnchantProvider * provider, const char * const err)
 	EnchantBroker * broker = provider->owner;
 	g_return_if_fail (broker);
 
-	enchant_broker_set_error (broker, err);
+	enchant_broker_clear_error (broker);
+	g_debug("enchant_provider_set_error: %s", err);
+	broker->error = strdup (err);
 }
 
 const char *
