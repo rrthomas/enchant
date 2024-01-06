@@ -82,14 +82,6 @@ TEST_FIXTURE(EnchantBrokerSetErrorTests,
     CHECK_EQUAL(std::string(), GetErrorMessage());
 }
 
-TEST_FIXTURE(EnchantBrokerSetErrorTests,
-             SetErrorMessageOnProvider_InvalidUtf8ErrorMessage_NoErrorSet)
-{
-    enchant_provider_set_error(provider, "\xa5\xf1\x08");
-
-    CHECK_EQUAL(std::string(), GetErrorMessage());
-}
-
 TEST_FIXTURE(EnchantBrokerSetErrorTests, 
              SetErrorMessageOnProvider_MessageCopied)
 {

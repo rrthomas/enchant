@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
- * Copyright (C) 2016-2023 Reuben Thomas
+ * Copyright (C) 2016-2024 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -130,8 +130,9 @@ void enchant_broker_set_ordering (EnchantBroker * broker,
  * @broker: A non-null broker
  *
  * Returns a const char string or NULL describing the last exception in UTF-8 encoding.
+ * WARNING: The error message may not be valid UTF-8.
  * WARNING: error is transient and is likely cleared as soon as the
- * next broker operation happens
+ * next broker operation happens.
  */
 const char *enchant_broker_get_error (EnchantBroker * broker);
 
@@ -274,6 +275,7 @@ void enchant_dict_free_string_list (EnchantDict * dict, char **string_list);
  * @dict: A non-null #EnchantDict
  *
  * Returns a const char string or NULL describing the last exception in UTF-8 encoding.
+ * WARNING: The error message may not be valid UTF-8.
  * WARNING: error is transient. It will likely be cleared as soon as
  * the next dictionary operation is called.
  */
