@@ -6,6 +6,13 @@ UTF-8. This allows error messages in particular about invalid UTF-8
 characters in personal wordlists to be shown to the user. Developers take
 note!
 
+The --with-hunspell-dir configure option is removed (along with all the
+other ---with-PROVIDER-dir options, which did nothing). Users who have
+Hunspell dictionaries in non-standard locations should set the
+Hunspell-specific environment variable DICPATH, or copy the dictionaries
+into their user’s Enchant configuration directory (for example
+~/.config/enchant/hunspell).
+
 Doxygen API documentation is now included in the release tarball (it is also
 now available online).
 
