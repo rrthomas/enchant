@@ -155,12 +155,7 @@ AC_DEFUN([ENCHANT_CHECK_PROVIDER_SETUP],
       [enable the $1 provider @<:@default=provider_check@:>@]),
       [with_[]$1=$withval],
       [with_[]$1=provider_check])
-   $1[]_dir=${datadir}/$1
-   AC_ARG_WITH([$1[]-dir],
-      AS_HELP_STRING([--with-[]$1-dir=PATH],
-         [path to installed $1 dicts]))
-   AS_IF([test "$with_[]$1_dir" != ""],
-      [$1[]_dir=$with_[]$1_dir])])
+   $1[]_dir=${datadir}/$1])
 
 AC_DEFUN([ENCHANT_CHECK_PKG_CONFIG_PROVIDER],
   [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])

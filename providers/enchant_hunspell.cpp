@@ -222,12 +222,6 @@ s_buildDictionaryDirs (std::vector<std::string> & dirs)
 			free(enchant_prefix);
 			g_free(tmp);
 		}
-
-#ifdef ENCHANT_HUNSPELL_DICT_DIR
-	config_dir = enchant_relocate (ENCHANT_HUNSPELL_DICT_DIR);
-	dirs.push_back (config_dir);
-	free(config_dir);
-#endif
 }
 
 static void
