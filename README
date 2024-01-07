@@ -15,7 +15,7 @@ be added without needing any change to the program using Enchant.
 Enchant can be configured by the user, who can even add spell-checker
 plugins if desired.
 
-Enchant currently works with the following spell-checkers:
+Enchant works with the following spell-checkers:
 
     * Hunspell (formerly Myspell)
     * Nuspell
