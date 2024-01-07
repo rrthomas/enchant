@@ -1,0 +1,5 @@
+var structEnchantBrokerDescribe__ProviderHasInvalidUtf8Identify__TestFixture =
+[
+    [ "EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_TestFixture", "structEnchantBrokerDescribe__ProviderHasInvalidUtf8Identify__TestFixture.html#acffad0d4a9ffad2765f999200c15858e", null ],
+    [ "EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_TestFixture", "structEnchantBrokerDescribe__ProviderHasInvalidUtf8Identify__TestFixture.html#acffad0d4a9ffad2765f999200c15858e", null ]
+];

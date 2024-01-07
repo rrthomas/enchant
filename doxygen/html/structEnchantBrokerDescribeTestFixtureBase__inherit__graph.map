@@ -1,0 +1,10 @@
+<map id="EnchantBrokerDescribeTestFixtureBase" name="EnchantBrokerDescribeTestFixtureBase">
+<area shape="rect" id="node1" title=" " alt="" coords="408,159,592,200"/>
+<area shape="rect" id="node4" href="$structEnchantBrokerDescribeTestFixture.html" title=" " alt="" coords="655,5,839,47"/>
+<area shape="rect" id="node5" href="$structEnchantBrokerDescribe__ProviderHasInvalidUtf8Describe__TestFixture.html" title=" " alt="" coords="640,71,855,127"/>
+<area shape="rect" id="node6" href="$structEnchantBrokerDescribe__ProviderHasInvalidUtf8Identify__TestFixture.html" title=" " alt="" coords="644,151,851,207"/>
+<area shape="rect" id="node7" href="$structEnchantBrokerDescribe__ProviderLacksDescribe__TestFixture.html" title=" " alt="" coords="665,231,829,287"/>
+<area shape="rect" id="node8" href="$structEnchantBrokerDescribe__ProviderLacksIdentify__TestFixture.html" title=" " alt="" coords="668,311,827,367"/>
+<area shape="rect" id="node2" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="188,166,360,193"/>
+<area shape="rect" id="node3" href="$structEnchantTestFixture.html" title=" " alt="" coords="5,166,140,193"/>
+</map>
