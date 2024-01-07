@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script
 #
 # Copyright (C) 2003 Dom Lachowicz
-#               2016-2023 Reuben Thomas
+#               2016-2024 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,7 +16,7 @@ AC_PREREQ([2.71])
 AC_INIT([enchant],[2.6.4])
 AC_CONFIG_SRCDIR(src/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([subdir-objects])
+AM_INIT_AUTOMAKE([subdir-objects tar-ustar])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -64,7 +64,7 @@ AC_SUBST([objdir])
 LT_SYS_MODULE_EXT
 AC_SUBST([shlibext], [$libltdl_cv_shlibext])
 AC_CONFIG_LIBOBJ_DIR([lib])
-
+AC_PATH_PROG([DOXYGEN],[doxygen],[AC_MSG_ERROR([Doxygen not found])])
 
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0])
 
