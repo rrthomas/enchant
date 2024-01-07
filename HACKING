@@ -104,11 +104,11 @@ existing code.  Code clean-ups are always welcome.
 API documentation
 -----------------
 
-To generate API documentation, simply run
+To generate API documentation, run
 
-doxygen
+make doxygen
 
-and see doxygen/html/index.html in a web browser.
+and open doxygen/html/index.html in a web browser.
 
 
 Making a release

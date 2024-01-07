@@ -1,7 +1,7 @@
 # Makefile.am for Enchant
 #
 # Copyright (C) 2003 Dom Lachowicz
-#               2016-2023 Reuben Thomas
+#               2016-2024 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,6 +30,8 @@ EXTRA_DIST =		\
 	ChangeLog 	\
 	AUTHORS 	\
 	COPYING.LIB	\
+	Doxyfile	\
+	doxygen/html	\
 	m4/gnulib-cache.m4
 
 ALL_SOURCE_FILES = \
@@ -43,8 +45,20 @@ ALL_SOURCE_FILES = \
 	providers/*.cpp \
 	providers/*.mm
 
+.PHONY:	doxygen
+doxygen:
+	$(DOXYGEN) $(srcdir)/Doxyfile
+
+dist: doxygen
+
 loc:
 	cloc --force-lang="Bourne Shell",conf $(ALL_SOURCE_FILES)
+
+# Ignore built files that are part of the distribution (specifically,
+# doxygen/*).
+distcleancheck_listfiles = \
+       find . -type f -exec sh -c 'test -f $(srcdir)/$$1 || echo $$1' \
+	    sh '{}' ';'
 
 release: distcheck
 	git diff --exit-code && \

@@ -27,8 +27,9 @@ Enchant works with the following spell-checkers:
 
 Enchant is written in C and C++, and its only external dependency is glib.
 
-Enchant bindings are supplied for C and C++; there are third-party bindings
-for various languages (see the home page).
+Enchant bindings are supplied for C and C++. API documentation is available
+in the doxygen/html directory, or online (see the home page). There are
+third-party bindings for various languages (see the home page).
 
 
 Installation
