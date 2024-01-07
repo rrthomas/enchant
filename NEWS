@@ -1,4 +1,16 @@
-2.6.3 (December 11, 2023)
+2.6.5 (January 7, 2024)
+-----------------------
+
+This version permits error messages from spelling providers not to be valid
+UTF-8. This allows error messages in particular about invalid UTF-8
+characters in personal wordlists to be shown to the user. Developers take
+note!
+
+Doxygen API documentation is now included in the release tarball (it is also
+now available online).
+
+
+2.6.4 (December 11, 2023)
 -------------------------
 
 This version makes pkgdatadir versioned by default.
