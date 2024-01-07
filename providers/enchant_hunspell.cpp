@@ -67,6 +67,8 @@ static char *do_iconv(GIConv conv, const char *word) {
 	return out_buf;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
 class HunspellChecker
 {
 public:
@@ -89,6 +91,7 @@ private:
 	char *wordchars; /* Value returned by getWordChars() */
 	char *normalizeUtf8(const char *utf8Word, size_t len);
 };
+#pragma GCC diagnostic pop
 
 /***************************************************************************/
 
