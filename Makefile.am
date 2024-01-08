@@ -63,7 +63,7 @@ distcleancheck_listfiles = \
 release: distcheck
 	git diff --exit-code && \
 	git tag -a -m "Release tag" "v$(VERSION)" && \
-	git push && git push --tags && \
+	git push --follow-tags && \
 	woger github \
 		github_user=AbiWord \
 		package=$(PACKAGE) \
