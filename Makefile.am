@@ -61,6 +61,7 @@ distcleancheck_listfiles = \
 	    sh '{}' ';'
 
 release: distcheck
+	git checkout doxygen && \
 	git diff --exit-code && \
 	git tag -a -m "Release tag" "v$(VERSION)" && \
 	git push --follow-tags && \
