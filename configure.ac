@@ -227,7 +227,7 @@ src/libenchant.rc
 src/Makefile
 src/enchant.1
 src/enchant-lsmod.1
-src/enchant.5
+src/enchant.5.in
 providers/Makefile
 tests/Makefile
 ], [],

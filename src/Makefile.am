@@ -40,9 +40,15 @@ dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_V
 nodist_doc_DATA = enchant-@ENCHANT_MAJOR_VERSION@.html enchant-lsmod-@ENCHANT_MAJOR_VERSION@.html enchant.html
 
 edit = sed \
-	-e 's|DATADIR|$(datadir)|g'
+	-e 's|@PKGDATADIR[@]|$(pkgdatadir)|g' \
+	-e 's|@SYSCONFDIR[@]|$(sysconfdir)|g'
 
 DISTCLEANFILES = $(dist_man_MANS) $(nodist_doc_DATA)
+
+enchant.5: $(builddir)/enchant.5.in Makefile.am $(top_builddir)/config.status
+	rm -f $@ $@.tmp
+	$(edit) $(abs_builddir)/enchant.5.in >$@.tmp
+	mv $@.tmp $@
 
 .1.html:
 	groff -mandoc -Thtml $< > $@

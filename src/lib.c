@@ -128,13 +128,13 @@ enchant_get_conf_dirs (void)
 	char *pkgconfdir = NULL;
 	char *user_config_dir = NULL;
 
-	if ((pkgdatadir = enchant_relocate (PKGDATADIR)) == NULL)
+	if ((pkgdatadir = enchant_relocate (PKGDATADIR "-" ENCHANT_MAJOR_VERSION)) == NULL)
 		goto error_exit;
 	conf_dirs = g_slist_append (conf_dirs, pkgdatadir);
 
 	if ((sysconfdir = enchant_relocate (SYSCONFDIR)) == NULL)
 		goto error_exit;
-	if ((pkgconfdir = g_build_filename (sysconfdir, "enchant", NULL)) == NULL)
+	if ((pkgconfdir = g_build_filename (sysconfdir, "enchant-" ENCHANT_MAJOR_VERSION, NULL)) == NULL)
 		goto error_exit;
 	conf_dirs = g_slist_append (conf_dirs, pkgconfdir);
 	free (sysconfdir);
