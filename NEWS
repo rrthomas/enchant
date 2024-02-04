@@ -1,10 +1,22 @@
-2.x.y (??? ? ????)
-------------------
+2.6.6 (February 4, 2024)
+------------------------
+
+This version fixes the implementation and documentation of system paths for
+configuration files (enchant.ordering). Since version 2.6.4, the wrong path
+was searched for pkgdatadir: not, for example /usr/share/enchant-2, as
+documented, but the old path /usr/share/enchant. The enchant(5) man page
+referred to “DATADIR” rather than the actual configured path. The sysconfdir
+location, typically /etc, was not documented.
 
 Hunspell users should note that, contrary to the NEWS entry for 2.6.5, the
 DICPATH environment variable cannot be used to specify the location of
 hunspell dictionaries to Enchant. That is because it only works with the
 hunspell program (which Enchant does not use), not the hunspell library.
+
+Additional debug logging has been added for developers trying to diagnose
+problems with configuration files and providers, which can be enabled at
+run-time by setting the environment variable G_MESSAGES_DEBUG to
+‘libenchant’.
 
 
 2.6.5 (January 7, 2024)
