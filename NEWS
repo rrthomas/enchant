@@ -1,3 +1,12 @@
+2.x.y (??? ? ????)
+------------------
+
+Hunspell users should note that, contrary to the NEWS entry for 2.6.5, the
+DICPATH environment variable cannot be used to specify the location of
+hunspell dictionaries to Enchant. That is because it only works with the
+hunspell program (which Enchant does not use), not the hunspell library.
+
+
 2.6.5 (January 7, 2024)
 -----------------------
 
