@@ -295,8 +295,10 @@ hunspell_request_dictionary (const char * tag)
 	s_buildDictionaryDirs (dirs);
 
 	for (size_t i = 0; i < dirs.size(); i++) {
-		GDir *dir = g_dir_open (dirs[i].c_str(), 0, nullptr);
-		if (dir) {
+		GError *err;
+		GDir *dir = g_dir_open (dirs[i].c_str(), 0, &err);
+		g_assert ((dir == NULL && err != NULL) || (dir != NULL && err == NULL));
+		if (err == NULL) {
 			const char *dir_entry;
 			while ((dir_entry = g_dir_read_name (dir)) != NULL) {
 				if (is_plausible_dict_for_tag(dir_entry, tag)) {
@@ -305,12 +307,17 @@ hunspell_request_dictionary (const char * tag)
 					if(s_fileExists(s_correspondingAffFile(dict))) {
 						g_dir_close (dir);
 						return dict;
+					} else {
+						g_debug ("hunspell provider: dictionary file %s has no corresponding affix file", dict);
 					}
 					g_free(dict);
 				}
 			}
 
 			g_dir_close (dir);
+		} else {
+			g_debug ("hunspell provider: could not open directory %s: %s", dirs[i].c_str(), err->message);
+			g_error_free (err);
 		}
 	}
 

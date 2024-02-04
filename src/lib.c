@@ -773,9 +773,14 @@ enchant_load_providers (EnchantBroker * broker)
 static void
 enchant_load_ordering_from_file (EnchantBroker * broker, const char * file)
 {
-	GIOChannel * ch = g_io_channel_new_file (file, "r", NULL);
-	if (!ch)
+	GError *err = NULL;
+	GIOChannel * ch = g_io_channel_new_file (file, "r", &err);
+	g_assert ((ch == NULL && err != NULL) || (ch != NULL && err == NULL));
+	if (err != NULL) {
+		g_debug ("could not open ordering file %s: %s", file, err->message);
+		g_error_free (err);
 		return;
+	}
 
 	g_debug("reading ordering file %s", file);
 	gchar *line;
@@ -1053,7 +1058,9 @@ enchant_broker_list_dicts (EnchantBroker * broker, EnchantDictDescribeFn fn, voi
 	GHashTable *tag_map = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL);
 
 	enchant_broker_clear_error (broker);
-	g_debug("enchant_broker_list_dicts");
+	g_debug("listing dictionaries");
+	if (broker->provider_list == NULL)
+		g_debug("no providers found!");
 
 	for (GSList *list = broker->provider_list; list != NULL; list = g_slist_next (list))
 		{
