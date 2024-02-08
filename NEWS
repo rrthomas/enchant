@@ -1,3 +1,9 @@
+2.6.7 (February 8, 2024)
+------------------------
+
+This version fixes an error introduced in the previous version that caused the Hunspell provider to fail on startup. Apologies!
+
+
 2.6.6 (February 4, 2024)
 ------------------------
 

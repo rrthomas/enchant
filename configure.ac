@@ -13,7 +13,7 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.71])
-AC_INIT([enchant],[2.6.6])
+AC_INIT([enchant],[2.6.7])
 AC_CONFIG_SRCDIR(src/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([subdir-objects tar-ustar])
