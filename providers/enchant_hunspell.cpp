@@ -295,7 +295,7 @@ hunspell_request_dictionary (const char * tag)
 	s_buildDictionaryDirs (dirs);
 
 	for (size_t i = 0; i < dirs.size(); i++) {
-		GError *err;
+		GError *err = NULL;
 		GDir *dir = g_dir_open (dirs[i].c_str(), 0, &err);
 		g_assert ((dir == NULL && err != NULL) || (dir != NULL && err == NULL));
 		if (err == NULL) {
