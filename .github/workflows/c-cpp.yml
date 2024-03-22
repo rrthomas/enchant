@@ -69,7 +69,6 @@ jobs:
       matrix:
         include:
         - { sys: mingw64, env: x86_64 }
-        - { sys: mingw32, env: i686 }
     steps:
     - uses: msys2/setup-msys2@v2
       with:
