@@ -107,9 +107,8 @@ Dictionaries are looked for in a subdirectory with the same name as the
 provider; for example, \fI@PKGDATADIR@/hunspell\fR and
 \fI~/.config/enchant/hunspell\fR.
 .PP
-Some providers may also look in a standard system directory for their
-dictionaries; the hunspell provider can be configured to do so at build
-time.
+Some providers may also look in specific system and user directories for their
+dictionaries; see the documentation for each supported spell-checker.
 .SH "SEE ALSO"
 .BR enchant-@ENCHANT_MAJOR_VERSION@ (1),
 .BR enchant-lsmod-@ENCHANT_MAJOR_VERSION@ (1)
