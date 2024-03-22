@@ -103,12 +103,13 @@ Default: \fIC:\\Documents and Settings\\\fRusername\fI\\Local Settings\\Applicat
 \fI@PKGDATADIR@-@ENCHANT_MAJOR_VERSION@\fR
 (Or the equivalent location relative to the enchant library for a relocatable build.)
 .PP
-Dictionaries are looked for in a subdirectory with the same name as the
-provider; for example, \fI@PKGDATADIR@/hunspell\fR and
-\fI~/.config/enchant/hunspell\fR.
+Dictionaries for some providers are looked for in a subdirectory with the
+same name as the provider, for example, \fI@PKGDATADIR@/hunspell\fR and
+\fI~/.config/enchant/hunspell\fR. Currently this only works for Hunspell.
 .PP
-Some providers may also look in specific system and user directories for their
-dictionaries; see the documentation for each supported spell-checker.
+Providers also look in specific system directories, and in some cases and
+user directories, for their dictionaries; see the documentation for each
+provider.
 .SH "SEE ALSO"
 .BR enchant-@ENCHANT_MAJOR_VERSION@ (1),
 .BR enchant-lsmod-@ENCHANT_MAJOR_VERSION@ (1)
