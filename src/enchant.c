@@ -428,7 +428,7 @@ int main (int argc, char ** argv)
 #endif
 
 	int optchar;
-	while ((optchar = getopt (argc, argv, ":d:p:alvLmB")) != -1) {
+	while ((optchar = getopt (argc, argv, ":d:p:alvLmBh")) != -1) {
 		switch (optchar) {
 		case 'd':
 			dictionary = optarg;  /* Emacs calls ispell with '-d dictionary'. */
