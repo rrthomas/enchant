@@ -170,8 +170,7 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 
 		for (size_t i = 0; i < *out_n_dicts; i++) {
 			entry = aspell_dict_info_enumeration_next (dels);
-			/* FIXME: should this be entry->code or entry->name ? */
-			out_list[i] = g_strdup (entry->code);
+			out_list[i] = g_strdup (entry->name);
 		}
 
 		delete_aspell_dict_info_enumeration (dels);
