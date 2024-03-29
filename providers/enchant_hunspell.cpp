@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003-2004 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
- * Copyright (C) 2016-2023 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2023 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public

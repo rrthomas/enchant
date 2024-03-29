@@ -1,5 +1,6 @@
 /* enchant
  * Copyright (C) 2003,2004 Dom Lachowicz
+ * Copyright (C) 2017-2024 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
