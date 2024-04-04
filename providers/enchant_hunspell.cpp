@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003-2004 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
- * Copyright (C) 2016-2023 Reuben Thomas
+ * Copyright (C) 2016-2024 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -72,7 +72,7 @@ static char *do_iconv(GIConv conv, const char *word) {
 class HunspellChecker
 {
 public:
-	HunspellChecker();
+	HunspellChecker(EnchantProvider *meInit);
 	~HunspellChecker();
 
 	bool checkWord (const char *word, size_t len);
@@ -88,6 +88,7 @@ private:
 	GIConv  m_translate_in; /* Selected translation from/to Unicode */
 	GIConv  m_translate_out;
 	Hunspell *hunspell;
+	EnchantProvider *me;
 	char *wordchars; /* Value returned by getWordChars() */
 	char *normalizeUtf8(const char *utf8Word, size_t len);
 };
@@ -101,8 +102,8 @@ g_iconv_is_valid(GIConv i)
 	return (i != nullptr);
 }
 
-HunspellChecker::HunspellChecker()
-: apostropheIsWordChar(false), m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr), wordchars(nullptr)
+HunspellChecker::HunspellChecker(EnchantProvider *meInit)
+: apostropheIsWordChar(false), m_translate_in(nullptr), m_translate_out(nullptr), hunspell(nullptr), me(meInit), wordchars(nullptr)
 {
 }
 
@@ -196,41 +197,29 @@ HunspellChecker::getWordchars()
 }
 
 static void
-s_buildDictionaryDirs (std::vector<std::string> & dirs)
+s_buildDictionaryDirs (EnchantProvider * me, std::vector<std::string> & dirs)
 {
 	dirs.clear ();
 
-	char * config_dir = enchant_get_user_config_dir ();
-	gchar * tmp = g_build_filename (config_dir, "hunspell", nullptr);
+	gchar * tmp = enchant_get_user_dict_dir (me);
 	dirs.push_back (tmp);
-	free (config_dir);
 	g_free(tmp);
 
 	for (const gchar* const * iter = g_get_system_data_dirs (); *iter; iter++)
 		{
-			tmp = g_build_filename (*iter, "hunspell", nullptr);
+			tmp = g_build_filename (*iter, me->identify (me), nullptr);
 			dirs.push_back (tmp);
-			g_free(tmp);
-		}
-
-	/* Dynamically locate library and search for modules relative to it. */
-	char * enchant_prefix = enchant_get_prefix_dir();
-	if(enchant_prefix)
-		{
-			tmp = g_build_filename(enchant_prefix, "share", "enchant", "hunspell", nullptr);
-			dirs.push_back (tmp);
-			free(enchant_prefix);
 			g_free(tmp);
 		}
 }
 
 static void
-s_buildHashNames (std::vector<std::string> & names, const char * dict)
+s_buildHashNames (EnchantProvider * me, std::vector<std::string> & names, const char * dict)
 {
 	names.clear ();
 
 	std::vector<std::string> dirs;
-	s_buildDictionaryDirs (dirs);
+	s_buildDictionaryDirs (me, dirs);
 
 	char *dict_dic = g_strconcat(dict, ".dic", nullptr);
 	for (size_t i = 0; i < dirs.size(); i++)
@@ -279,11 +268,11 @@ static bool is_plausible_dict_for_tag(const char *dir_entry, const char *tag)
 }
 
 static char *
-hunspell_request_dictionary (const char * tag)
+hunspell_request_dictionary (EnchantProvider * me, const char * tag)
 {
 	std::vector<std::string> names;
 
-	s_buildHashNames (names, tag);
+	s_buildHashNames (me, names, tag);
 
 	for (size_t i = 0; i < names.size (); i++) {
 		if (s_fileExists(names[i]) && s_fileExists(s_correspondingAffFile(names[i]))) {
@@ -292,7 +281,7 @@ hunspell_request_dictionary (const char * tag)
 	}
 
 	std::vector<std::string> dirs;
-	s_buildDictionaryDirs (dirs);
+	s_buildDictionaryDirs (me, dirs);
 
 	for (size_t i = 0; i < dirs.size(); i++) {
 		GError *err = NULL;
@@ -327,7 +316,7 @@ hunspell_request_dictionary (const char * tag)
 bool
 HunspellChecker::requestDictionary(const char *szLang)
 {
-	char *dic = hunspell_request_dictionary (szLang);
+	char *dic = hunspell_request_dictionary (me, szLang);
 	if (!dic)
 		return false;
 
@@ -456,13 +445,12 @@ hunspell_provider_enum_dicts (const char * const directory,
 extern "C" {
 
 static char **
-hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
-			      size_t * out_n_dicts)
+hunspell_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 {
 	std::vector<std::string> dict_dirs, dicts;
 	char ** dictionary_list = NULL;
 
-	s_buildDictionaryDirs (dict_dirs);
+	s_buildDictionaryDirs (me, dict_dirs);
 
 	for (size_t i = 0; i < dict_dirs.size(); i++)
 		{
@@ -481,9 +469,9 @@ hunspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 }
 
 static EnchantDict *
-hunspell_provider_request_dict(EnchantProvider * me _GL_UNUSED, const char *const tag)
+hunspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 {
-	HunspellChecker * checker = new HunspellChecker();
+	HunspellChecker * checker = new HunspellChecker(me);
 
 	if (!checker)
 		return NULL;
@@ -515,11 +503,11 @@ hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * d
 }
 
 static int
-hunspell_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED,
+hunspell_provider_dictionary_exists (struct str_enchant_provider * me,
 				     const char *const tag)
 {
 	std::vector <std::string> names;
-	s_buildHashNames (names, tag);
+	s_buildHashNames (me, names, tag);
 	for (size_t i = 0; i < names.size(); i++) {
 		if (s_fileExists(names[i]) && s_fileExists(s_correspondingAffFile(names[i])))
 		{
