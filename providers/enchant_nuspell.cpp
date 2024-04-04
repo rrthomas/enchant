@@ -30,7 +30,7 @@
 /*
  * This is the Nuspell Enchant Backend.
  * Nuspell is by Dimitrij Mijoski and Sander van Geloven.
- * See: http://nuspell.github.io/
+ * See: https://nuspell.github.io/
  */
 
 #include "config.h"
@@ -84,12 +84,22 @@ static char** nuspell_dict_suggest(EnchantDict* me, const char* const word,
 // EnchantProvider functions
 static void nuspell_provider_dispose(EnchantProvider* me) { g_free(me); }
 
-static EnchantDict*
-nuspell_provider_request_dict(_GL_UNUSED EnchantProvider* me,
-                              const char* const tag)
+static vector<filesystem::path>
+nuspell_get_dict_dirs(EnchantProvider *me)
 {
 	auto dirs = vector<filesystem::path>();
+	char *dir = enchant_get_user_dict_dir(me);
+	dirs.push_back(std::filesystem::u8path(dir));
+	g_free(dir);
 	nuspell::append_default_dir_paths(dirs);
+	return dirs;
+}
+
+static EnchantDict*
+nuspell_provider_request_dict(EnchantProvider* me,
+                              const char* const tag)
+{
+	auto dirs = nuspell_get_dict_dirs(me);
 	auto dic_path = nuspell::search_dirs_for_one_dict(dirs, tag);
 	if (empty(dic_path))
 		return nullptr;
@@ -118,11 +128,10 @@ static void nuspell_provider_dispose_dict(_GL_UNUSED EnchantProvider* me,
 }
 
 static int
-nuspell_provider_dictionary_exists(_GL_UNUSED EnchantProvider* me,
+nuspell_provider_dictionary_exists(EnchantProvider* me,
                                    const char* const tag)
 {
-	auto dirs = vector<filesystem::path>();
-	nuspell::append_default_dir_paths(dirs);
+	auto dirs = nuspell_get_dict_dirs(me);
 	auto dic_path = nuspell::search_dirs_for_one_dict(dirs, tag);
 	return !empty(dic_path);
 }
@@ -140,10 +149,12 @@ nuspell_provider_describe(_GL_UNUSED EnchantProvider* me)
 }
 
 static char**
-nuspell_provider_list_dicts(_GL_UNUSED EnchantProvider* me,
+nuspell_provider_list_dicts(EnchantProvider* me,
                             size_t* out_n_dicts)
 {
-	auto dicts = nuspell::search_default_dirs_for_dicts();
+	auto dirs = nuspell_get_dict_dirs(me);
+	auto dicts = vector<filesystem::path>();
+	nuspell::search_dirs_for_dicts(dirs, dicts);
 	if (empty(dicts)) {
 		*out_n_dicts = 0;
 		return nullptr;

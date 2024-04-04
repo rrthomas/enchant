@@ -86,7 +86,7 @@ output messages useful for debugging. Setting \fIG_MESSAGES_DEBUG\fR to
 \fIlibenchant\fR will cause Enchant to output debugging messages to standard
 error. See the GLib documentation for more details.
 .SH FILES AND DIRECTORIES
-Enchant looks in the following places for files, in decreasing order of precedence:
+Enchant looks in the following places for user files, in decreasing order of precedence:
 .TP
 \fIENCHANT_CONFIG_DIR\fR
 (If the environment variable is set.)
@@ -96,20 +96,22 @@ Default: \fI~/.config/enchant\fR
 .TP
 \fICSIDL_LOCAL_APPDATA\\enchant\fR (Windows systems)
 Default: \fIC:\\Documents and Settings\\\fRusername\fI\\Local Settings\\Application Data\\enchant
+.PP
+Dictionaries for some providers are looked for in a subdirectory with the
+same name as the provider, for example \fI~/.config/enchant/hunspell\fR.
+Currently this works for Hspell, Hunspell, Nuspell and Voikko.
+.PP
+Providers also look in specific system directories, and in some cases and
+user directories, for their dictionaries; see the documentation for each
+provider.
+.PP
+In addition, Enchant looks in the following systems directories for ordering files:
 .TP
 \fI@SYSCONFDIR@/enchant-@ENCHANT_MAJOR_VERSION@\fR
 (Or the equivalent location relative to the enchant library for a relocatable build.)
 .TP
 \fI@PKGDATADIR@-@ENCHANT_MAJOR_VERSION@\fR
 (Or the equivalent location relative to the enchant library for a relocatable build.)
-.PP
-Dictionaries for some providers are looked for in a subdirectory with the
-same name as the provider, for example, \fI@PKGDATADIR@/hunspell\fR and
-\fI~/.config/enchant/hunspell\fR. Currently this only works for Hunspell.
-.PP
-Providers also look in specific system directories, and in some cases and
-user directories, for their dictionaries; see the documentation for each
-provider.
 .SH "SEE ALSO"
 .BR enchant-@ENCHANT_MAJOR_VERSION@ (1),
 .BR enchant-lsmod-@ENCHANT_MAJOR_VERSION@ (1)

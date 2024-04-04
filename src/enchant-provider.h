@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
- * Copyright (C) 2017-2021 Reuben Thomas
+ * Copyright (C) 2017-2024 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -60,23 +60,33 @@ char *enchant_get_user_language(void);
  * glib's g_get_user_config_dir() is called to get the user's configuration
  * directory, and the sub-directory "enchant" is appended.
  *
- * The returned string must be free'd.
+ * The returned string must be g_free'd.
  */
 char *enchant_get_user_config_dir (void);
 
 /**
-  * enchant_get_conf_dirs
-  *
-  * Returns a list (GSList *) of configuration directories, in the order in
-  * which they are used, or NULL on error.
-  *
-  * The following directories are in the list:
-  *
-  *  + Enchant's internal configuration directory (pkgdatadir)
-  *  + The system configuration directory (sysconfdir/enchant)
-  *  + The user configuration directory, as returned by
-  *     enchant_get_user_config_dir(), if it exists.
-  */
+ * enchant_get_user_dict_dir
+ *
+ * Returns the user dictionary directory for the given provider, or NULL on
+ * error, or if none exists.
+ *
+ * The return value must be g_free'd.
+ */
+char *enchant_get_user_dict_dir (EnchantProvider * provider);
+
+/**
+ * enchant_get_conf_dirs
+ *
+ * Returns a list (GSList *) of configuration directories, in the order in
+ * which they are used, or NULL on error.
+ *
+ * The following directories are in the list:
+ *
+ *  + Enchant's internal configuration directory (pkgdatadir)
+ *  + The system configuration directory (sysconfdir/enchant)
+ *  + The user configuration directory, as returned by
+ *     enchant_get_user_config_dir(), if it exists.
+ */
 GSList *enchant_get_conf_dirs (void);
 
 /**

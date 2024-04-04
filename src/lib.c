@@ -119,6 +119,15 @@ enchant_get_user_config_dir (void)
 	return g_build_filename (g_get_user_config_dir (), "enchant", NULL);
 }
 
+_GL_ATTRIBUTE_MALLOC char *
+enchant_get_user_dict_dir (EnchantProvider *provider)
+{
+	char *config_dir = enchant_get_user_config_dir ();
+	gchar *dir = g_build_filename (config_dir, provider->identify(provider), NULL);
+	g_free (config_dir);
+	return dir;
+}
+
 GSList *
 enchant_get_conf_dirs (void)
 {
@@ -150,7 +159,7 @@ enchant_get_conf_dirs (void)
 	free (pkgdatadir);
 	free (sysconfdir);
 	g_free (pkgconfdir);
-	free (user_config_dir);
+	g_free (user_config_dir);
 	return NULL;
 }
 

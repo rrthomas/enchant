@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
 #include <libvoikko/voikko.h>
 
 #include "enchant-provider.h"
@@ -42,7 +43,7 @@
 /**
  * Voikko is a spell checker for VFST and HFST format dictionaries. More information is available from:
  *
- * http://voikko.sourceforge.net/
+ * https://voikko.sourceforge.net/
  */
 
 static int
@@ -88,13 +89,14 @@ voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dic
 }
 
 static char **
-voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
-			    size_t * out_n_dicts)
+voikko_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 {
 	size_t i;
 	char ** out_list = NULL;
 	*out_n_dicts = 0;
-	char ** voikko_langs = voikkoListSupportedSpellingLanguages (NULL);
+	char * user_dict_dir = enchant_get_user_dict_dir (me);
+	char ** voikko_langs = voikkoListSupportedSpellingLanguages (user_dict_dir);
+	g_free (user_dict_dir);
 
 	for (i = 0; voikko_langs[i] != NULL; i++) {
 		(*out_n_dicts)++;
@@ -113,14 +115,15 @@ voikko_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 }
 
 static int
-voikko_provider_dictionary_exists (struct str_enchant_provider * me _GL_UNUSED,
+voikko_provider_dictionary_exists (struct str_enchant_provider * me,
 				   const char *const tag)
 {
-	size_t i;
-	int exists = 0;
-	char ** voikko_langs = voikkoListSupportedSpellingLanguages (NULL);
+	char * user_dict_dir = enchant_get_user_dict_dir (me);
+	char ** voikko_langs = voikkoListSupportedSpellingLanguages (user_dict_dir);
+	g_free (user_dict_dir);
 
-	for (i = 0; voikko_langs[i] != NULL; i++) {
+	int exists = 0;
+	for (size_t i = 0; voikko_langs[i] != NULL; i++) {
 		if (strncmp (tag, voikko_langs[i], strlen (tag)) == 0) {
 			exists = 1;
 			break;
@@ -136,11 +139,13 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	const char * voikko_error;
 
-	if (!voikko_provider_dictionary_exists (NULL, tag)) {
+	if (!voikko_provider_dictionary_exists (me, tag)) {
 		return NULL;
 	}
 
-	struct VoikkoHandle *voikko_handle = voikkoInit (&voikko_error, tag, NULL);
+	char * user_dict_dir = enchant_get_user_dict_dir (me);
+	struct VoikkoHandle *voikko_handle = voikkoInit (&voikko_error, tag, user_dict_dir);
+	g_free (user_dict_dir);
 	if (voikko_handle == NULL) {
 		enchant_provider_set_error (me, voikko_error);
 		return NULL;
