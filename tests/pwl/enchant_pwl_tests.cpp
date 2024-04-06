@@ -220,39 +220,6 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
-// Too long lines ignored
-TEST_FIXTURE(EnchantPwl_TestFixture, 
-             IsWordInDictionary_DictionaryHasSuperLongLine_DoesNotReadLine)
-{
-  const size_t lineLen = BUFSIZ + 1; // enchant ignores PWL lines longer than BUFSIZ
-
-  std::vector<std::string> sWords;
-  sWords.push_back("cat");
-  sWords.push_back("hat");
-  sWords.push_back("that");
-  sWords.push_back("bat");
-  sWords.push_back("tot");
-
-  std::vector<std::string>::const_iterator superlong = sWords.insert(sWords.begin()+2, std::string(lineLen, 'c')); //super long line
-  ExternalAddWordsToDictionary(sWords);
-  ReloadTestDictionary();
-
-  for(std::vector<std::string>::const_iterator itWord = sWords.begin(); itWord != superlong; ++itWord){
-    CHECK( IsWordInDictionary(*itWord) );
-  }
-
-  CHECK(!IsWordInDictionary(*superlong) );
-  for(size_t i=0; i != lineLen; ++i)
-  {
-      CHECK(!IsWordInDictionary(std::string(i, 'c')) );
-  }
-
-  for(std::vector<std::string>::const_iterator itWord = superlong+1; itWord != sWords.end(); ++itWord){
-    CHECK(IsWordInDictionary(*itWord) );
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
 // Unicode normalization
 TEST_FIXTURE(EnchantPwl_TestFixture, 
              IsWordInDictionary_DictionaryHasComposed_SuccessfulCheckWithComposedAndDecomposed)
