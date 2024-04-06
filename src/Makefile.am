@@ -1,7 +1,7 @@
 # Makefile.am for Enchant
 #
 # Copyright (C) 2003 Dom Lachowicz
-#               2016-2023 Reuben Thomas
+#               2016-2024 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -11,9 +11,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
+AM_VALAFLAGS = --debug --no-color --vapidir=. --pkg config --pkg posix --pkg gnu --pkg gio-2.0
+AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
+
+VAPIS =	config.vapi
 
 lib_LTLIBRARIES = libenchant-@ENCHANT_MAJOR_VERSION@.la
+
+src/dummy.vala: $(VAPIS)
+	touch $@
 
 libenchant_@ENCHANT_MAJOR_VERSION@_la_CPPFLAGS = $(AM_CPPFLAGS) -D_ENCHANT_BUILD=1 -DENCHANT_VERSION_STRING=\"@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.@ENCHANT_MICRO_VERSION@\" -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
 libenchant_@ENCHANT_MAJOR_VERSION@_la_LIBADD = $(top_builddir)/lib/libgnu.la $(GLIB_LIBS) $(LTLIBOBJS)
@@ -25,7 +31,7 @@ else
 libenchant_@ENCHANT_MAJOR_VERSION@_la_LDFLAGS += -version-info $(VERSION_INFO)
 endif
 
-libenchant_@ENCHANT_MAJOR_VERSION@_la_SOURCES = lib.c pwl.c enchant.h pwl.h
+libenchant_@ENCHANT_MAJOR_VERSION@_la_SOURCES = lib.c enchant.h pwl.h pwl.vala
 if OS_WIN32
 libenchant_@ENCHANT_MAJOR_VERSION@_la_SOURCES += libenchant.rc
 endif
