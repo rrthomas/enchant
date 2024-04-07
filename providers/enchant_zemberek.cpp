@@ -160,14 +160,8 @@ zemberek_dict_suggest (EnchantDict * me, const char *const word,
     return result;
 }
 
-static void
-zemberek_provider_dispose(EnchantProvider *me)
-{
-    g_free(me);
-}
-
 static EnchantDict*
-zemberek_provider_request_dict(EnchantProvider *me _GL_UNUSED, const char *tag)
+zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
 {
     if (!((strcmp(tag, "tr") == 0) || (strncmp(tag, "tr_", 3) == 0)))
         return NULL; // only handle turkish
@@ -176,7 +170,7 @@ zemberek_provider_request_dict(EnchantProvider *me _GL_UNUSED, const char *tag)
       {
         Zemberek* checker = new Zemberek();
 
-        EnchantDict* dict = g_new0(EnchantDict, 1);
+        EnchantDict* dict = enchant_broker_new_dict(me->owner);
         dict->user_data = (void *) checker;
         dict->check = zemberek_dict_check;
         dict->suggest = zemberek_dict_suggest;
@@ -195,7 +189,6 @@ zemberek_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * d
 {
     Zemberek *checker = (Zemberek *) dict->user_data;
     delete checker;
-    g_free (dict);
 }
 
 static const char *
@@ -232,8 +225,7 @@ zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 EnchantProvider *
 init_enchant_provider(void)
 {
-    EnchantProvider *provider = g_new0(EnchantProvider, 1);
-    provider->dispose = zemberek_provider_dispose;
+    EnchantProvider *provider = enchant_provider_new ();
     provider->request_dict = zemberek_provider_request_dict;
     provider->dispose_dict = zemberek_provider_dispose_dict;
     provider->identify = zemberek_provider_identify;

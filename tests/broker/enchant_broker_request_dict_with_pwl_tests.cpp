@@ -86,17 +86,6 @@ TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
 }
 
 TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
-             EnchantBrokerRequestDictionaryWithPwl_CalledTwice_CallsProviderOnceReturnsSame)
-{
-    _dict = enchant_broker_request_dict_with_pwl(_broker, "en_GB", _pwlFileName.c_str());
-    requestDictionaryCalled = false;
-    EnchantDict* dict = enchant_broker_request_dict_with_pwl(_broker, "en_GB", _pwlFileName.c_str());
-    CHECK(!requestDictionaryCalled);
-
-    CHECK_EQUAL(_dict, dict);
-}
-
-TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
              EnchantBrokerRequestDictionaryWithPwl_ProviderDoesNotHave_CallsProvider)
 {
     _dict = enchant_broker_request_dict_with_pwl(_broker, "en", _pwlFileName.c_str());

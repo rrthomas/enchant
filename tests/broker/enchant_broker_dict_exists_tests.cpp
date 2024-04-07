@@ -95,18 +95,6 @@ struct EnchantBrokerDictExists_ProviderImplementsAll_TestFixture : EnchantBroker
     }
 };
 
-TEST_FIXTURE(EnchantBrokerDictExists_ProviderImplementsAll_TestFixture, 
-             EnchantBrokerDictExists_CalledWhenDictionaryIsInUse_DoesNotCallAnyMethods_GetsCachedResult)
-{
-  EnchantDict* dict = enchant_broker_request_dict(_broker, "en-GB");
-
-  enchant_broker_dict_exists(_broker, "en-GB");
-  CHECK_EQUAL(0,listDictionariesCalled);
-  CHECK_EQUAL(0,dictionaryExistsCalled);
-
-  enchant_broker_free_dict(_broker, dict);
-}
-
 TEST_FIXTURE(EnchantBrokerTestFixture, 
              EnchantBrokerDictExists_ProviderImplementsNoMethods_0)
 {

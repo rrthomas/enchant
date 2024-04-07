@@ -201,7 +201,7 @@ s_buildDictionaryDirs (EnchantProvider * me, std::vector<std::string> & dirs)
 {
 	dirs.clear ();
 
-	gchar * tmp = enchant_get_user_dict_dir (me);
+	gchar * tmp = enchant_provider_get_user_dict_dir (me);
 	dirs.push_back (tmp);
 	g_free(tmp);
 
@@ -481,7 +481,7 @@ hunspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 
-	EnchantDict *dict = g_new0(EnchantDict, 1);
+	EnchantDict *dict = enchant_broker_new_dict(me->owner);
 	dict->user_data = (void *) checker;
 	dict->check = hunspell_dict_check;
 	dict->suggest = hunspell_dict_suggest;
@@ -498,12 +498,10 @@ hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * d
 {
 	HunspellChecker *checker = (HunspellChecker *) dict->user_data;
 	delete checker;
-
-	g_free (dict);
 }
 
 static int
-hunspell_provider_dictionary_exists (struct str_enchant_provider * me,
+hunspell_provider_dictionary_exists (EnchantProvider * me,
 				     const char *const tag)
 {
 	std::vector <std::string> names;
@@ -516,12 +514,6 @@ hunspell_provider_dictionary_exists (struct str_enchant_provider * me,
 	}
 
 	return 0;
-}
-
-static void
-hunspell_provider_dispose (EnchantProvider * me)
-{
-	g_free (me);
 }
 
 static const char *
@@ -541,8 +533,7 @@ EnchantProvider *init_enchant_provider (void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider = g_new0(EnchantProvider, 1);
-	provider->dispose = hunspell_provider_dispose;
+	EnchantProvider *provider = enchant_provider_new ();
 	provider->request_dict = hunspell_provider_request_dict;
 	provider->dispose_dict = hunspell_provider_dispose_dict;
 	provider->dictionary_exists = hunspell_provider_dictionary_exists;

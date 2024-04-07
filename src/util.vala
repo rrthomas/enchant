@@ -1,4 +1,4 @@
-/* config.vapi
+/* enchant: Utility functions
  * Copyright (C) 2024 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
@@ -26,16 +26,9 @@
  * do so, delete this exception statement from your version.
  */
 
-[CCode (cheader_filename = "configmake.h")]
-const string SYSCONFDIR;
-[CCode (cheader_filename = "configmake.h")]
-const string PKGLIBDIR;
-[CCode (cheader_filename = "configmake.h")]
-const string PKGDATADIR;
-[CCode (cheader_filename = "configmake.h")]
-const string INSTALLPREFIX;
-
-[CCode (cheader_filename = "configmake.h")]
-const string ENCHANT_MAJOR_VERSION;
-[CCode (cheader_filename = "configmake.h")]
-const string ENCHANT_VERSION_STRING;
+string? buf_to_utf8_string(string str_buf, ssize_t len) {
+	string res = str_buf.substring(0, len);
+	if (res.length == 0 || !res.validate())
+		return null;
+	return res;
+}

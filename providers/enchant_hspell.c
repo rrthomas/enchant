@@ -154,7 +154,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	g_debug("hspell_provider_request_dict");
 	gboolean dict_found = FALSE;
-	char * user_dict_dir = enchant_get_user_dict_dir (me);
+	char * user_dict_dir = enchant_provider_get_user_dict_dir (me);
 	GSList * dict_files = hspell_provider_enum_dict_files (user_dict_dir);
 	for (GSList * dict_file = dict_files;
 	     dict_file != NULL;
@@ -188,7 +188,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 			return NULL;
 		}
 
-	EnchantDict *dict = g_new0 (EnchantDict, 1);
+	EnchantDict *dict = enchant_broker_new_dict (me->owner);
 	dict->user_data = (void *) hspell_dict;
 	dict->check = hspell_dict_check;
 	dict->suggest = hspell_dict_suggest;
@@ -201,7 +201,6 @@ hspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dic
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)dict->user_data;
 	hspell_uninit (hspell_dict);
-	g_free (dict);
 }
 
 /* Find any user dictionaries, and test default dictionary. */
@@ -211,7 +210,7 @@ hspell_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 {
 	*out_n_dicts = 0;
 
-	char * user_dict_dir = enchant_get_user_dict_dir (me);
+	char * user_dict_dir = enchant_provider_get_user_dict_dir (me);
 	GSList * dict_files = hspell_provider_enum_dict_files (user_dict_dir);
 	guint n_user_dicts = g_slist_length (dict_files);
 	char ** out_list = g_new0 (char *, n_user_dicts + 3);
@@ -237,12 +236,6 @@ hspell_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 	return out_list;
 }
 
-static void
-hspell_provider_dispose (EnchantProvider * me)
-{
-	g_free (me);
-}
-
 static const char *
 hspell_provider_identify (EnchantProvider * me _GL_UNUSED)
 {
@@ -260,8 +253,7 @@ EnchantProvider *init_enchant_provider (void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider = g_new0 (EnchantProvider, 1);
-	provider->dispose = hspell_provider_dispose;
+	EnchantProvider *provider = enchant_provider_new ();
 	provider->request_dict = hspell_provider_request_dict;
 	provider->dispose_dict = hspell_provider_dispose_dict;
 	provider->identify = hspell_provider_identify;

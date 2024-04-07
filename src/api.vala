@@ -1,5 +1,6 @@
-/* config.vapi
- * Copyright (C) 2024 Reuben Thomas <rrt@sc3d.org>
+/* enchant: miscellaneous public APIs
+ * Copyright (C) 2003, 2004 Dom Lachowicz
+ * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,16 +27,34 @@
  * do so, delete this exception statement from your version.
  */
 
-[CCode (cheader_filename = "configmake.h")]
-const string SYSCONFDIR;
-[CCode (cheader_filename = "configmake.h")]
-const string PKGLIBDIR;
-[CCode (cheader_filename = "configmake.h")]
-const string PKGDATADIR;
-[CCode (cheader_filename = "configmake.h")]
-const string INSTALLPREFIX;
+using Gnu;
 
-[CCode (cheader_filename = "configmake.h")]
-const string ENCHANT_MAJOR_VERSION;
-[CCode (cheader_filename = "configmake.h")]
-const string ENCHANT_VERSION_STRING;
+
+public void enchant_set_prefix_dir(string new_prefix) {
+#if RELOCATABLE
+	set_relocation_prefix(INSTALLPREFIX, new_prefix);
+#endif
+}
+
+public unowned string enchant_get_version() {
+	return ENCHANT_VERSION_STRING;
+}
+
+public string enchant_get_user_language() {
+#if OS_WIN32
+	return Win32.getlocale();
+#else
+	string locale = Environment.get_variable("LANG");
+
+	if (locale == null)
+		locale = Intl.setlocale(LocaleCategory.MESSAGES);
+
+	if (locale == null)
+		locale = Intl.setlocale(LocaleCategory.ALL);
+
+	if (locale == null || locale == "C")
+		locale = "en";
+
+	return locale;
+#endif /* !OS_WIN32 */
+}

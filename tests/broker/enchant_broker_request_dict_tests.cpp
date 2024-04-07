@@ -78,17 +78,6 @@ TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
 }
 
 TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture, 
-             EnchantBrokerRequestDictionary_CalledTwice_CallsProviderOnceReturnsSame)
-{
-    _dict = enchant_broker_request_dict(_broker, "en_GB");
-    requestDictionaryCalled = false;
-    EnchantDict* dict = enchant_broker_request_dict(_broker, "en_GB");
-    CHECK(!requestDictionaryCalled);
-
-    CHECK_EQUAL(_dict, dict);
-}
-
-TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture, 
              EnchantBrokerRequestDictionary_ProviderDoesNotHave_CallsProvider)
 {
     _dict = enchant_broker_request_dict(_broker, "en");

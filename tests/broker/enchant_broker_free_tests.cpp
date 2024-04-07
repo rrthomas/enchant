@@ -37,14 +37,10 @@ static void
 Dispose (EnchantProvider *me)
 {
     disposeWasCalled = true;
-    MockProviderDispose(me);
 }
 
 static void
-AlternativeDispose (EnchantProvider *me)
-{
-    MockProviderDispose(me);
-}
+AlternativeDispose (EnchantProvider *me) { }
 
 bool disposeDictionaryCalled;
 static void
