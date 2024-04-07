@@ -39,7 +39,9 @@ ALL_SOURCE_FILES = \
 	configure.ac \
 	Makefile.am \
 	src/Makefile.am \
-	src/*.[chi] \
+	src/*.h \
+	src/enchant*.c \
+	src/*.vala \
 	providers/Makefile.am \
 	providers/*.[ch] \
 	providers/*.cpp \

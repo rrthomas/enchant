@@ -32,13 +32,14 @@
 
 #include <enchant.h>
 #include <glib.h>
+#include <glib-object.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct str_enchant_provider EnchantProvider;
+typedef struct _EnchantProvider EnchantProvider;
 
 /**
  * enchant_get_user_language
@@ -65,14 +66,14 @@ char *enchant_get_user_language(void);
 char *enchant_get_user_config_dir (void);
 
 /**
- * enchant_get_user_dict_dir
+ * enchant_provider_get_user_dict_dir
  *
  * Returns the user dictionary directory for the given provider, or NULL on
  * error, or if none exists.
  *
  * The return value must be g_free'd.
  */
-char *enchant_get_user_dict_dir (EnchantProvider * provider);
+char *enchant_provider_get_user_dict_dir (EnchantProvider * provider);
 
 /**
  * enchant_get_conf_dirs
@@ -112,6 +113,13 @@ char *enchant_get_prefix_dir(void);
 char *enchant_relocate (const char *path);
 
 /**
+ * enchant_broker_new_dict
+ *
+ * Returns a new EnchantDict in the given EnchantBroker.
+ */
+EnchantDict *enchant_broker_new_dict (EnchantBroker *broker);
+
+/**
  * enchant_dict_set_error
  * @dict: A non-null dictionary
  * @err: A non-null error message
@@ -120,6 +128,13 @@ char *enchant_relocate (const char *path);
  * providers.
  */
 void enchant_dict_set_error (EnchantDict * dict, const char * const err);
+
+/**
+ * enchant_provider_new
+ *
+ * Returns a new EnchantProvider.
+ */
+EnchantProvider *enchant_provider_new (void);
 
 /**
  * enchant_provider_set_error
@@ -131,54 +146,63 @@ void enchant_dict_set_error (EnchantDict * dict, const char * const err);
  */
 void enchant_provider_set_error (EnchantProvider * provider, const char * const err);
 
-struct str_enchant_dict
+typedef struct _EnchantDictPrivate *EnchantDictPrivate;
+
+struct _EnchantDict
 {
+	GTypeInstance parent_instance;
+	volatile int ref_count;
+	EnchantDictPrivate * priv;
 	void *user_data;
 	void *enchant_private_data;
 
-	int (*check) (struct str_enchant_dict * me, const char *const word,
+	int (*check) (struct _EnchantDict * me, const char *const word,
 			  size_t len);
 
 	/* returns utf8*/
-	char **(*suggest) (struct str_enchant_dict * me,
+	char **(*suggest) (struct _EnchantDict * me,
 			   const char *const word, size_t len,
 			   size_t * out_n_suggs);
 
-	void (*add_to_session) (struct str_enchant_dict * me,
+	void (*add_to_session) (struct _EnchantDict * me,
 				const char *const word, size_t len);
 
-	void (*remove_from_session) (struct str_enchant_dict * me,
+	void (*remove_from_session) (struct _EnchantDict * me,
 				const char *const word, size_t len);
 
-	const char * (*get_extra_word_characters) (struct str_enchant_dict * me);
+	const char * (*get_extra_word_characters) (struct _EnchantDict * me);
 
-	int (*is_word_character) (struct str_enchant_dict * me,
+	int (*is_word_character) (struct _EnchantDict * me,
 				  uint32_t uc_in, size_t n);
 };
 
-struct str_enchant_provider
-{
-	void *user_data;
-	void *enchant_private_data;
-	EnchantBroker * owner;
+typedef struct _EnchantProviderPrivate *EnchantProviderPrivate;
 
-	void (*dispose) (struct str_enchant_provider * me);
+struct _EnchantProvider {
+	GTypeInstance parent_instance;
+	volatile int ref_count;
+	EnchantProviderPrivate * priv;
+	void* user_data;
+	void* enchant_private_data;
+	EnchantBroker* owner;
 
-	EnchantDict *(*request_dict) (struct str_enchant_provider * me,
+	void (*dispose) (struct _EnchantProvider * me);
+
+	EnchantDict *(*request_dict) (struct _EnchantProvider * me,
 				      const char *const tag);
 
-	void (*dispose_dict) (struct str_enchant_provider * me,
+	void (*dispose_dict) (struct _EnchantProvider * me,
 				  EnchantDict * dict);
 
-	int (*dictionary_exists) (struct str_enchant_provider * me,
+	int (*dictionary_exists) (struct _EnchantProvider * me,
 				  const char *const tag);
 
 	/* returns utf8*/
-	const char * (*identify) (struct str_enchant_provider * me);
+	const char * (*identify) (struct _EnchantProvider * me);
 	/* returns utf8*/
-	const  char * (*describe) (struct str_enchant_provider * me);
+	const  char * (*describe) (struct _EnchantProvider * me);
 
-	char ** (*list_dicts) (struct str_enchant_provider * me,
+	char ** (*list_dicts) (struct _EnchantProvider * me,
 			       size_t * out_n_dicts);
 };
 

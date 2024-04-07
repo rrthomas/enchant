@@ -38,14 +38,12 @@ int TestProvidersInDirectory(char * dir_name);
 typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
 typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider, const char * module_dir);
 
-// from enchant.c: we need this so that providers can set errors.
-struct str_enchant_broker
-{
-	GSList *provider_list;	/* list of all of the spelling backend providers */
-	GHashTable *dict_map;		/* map of language tag -> dictionary */
-	GHashTable *provider_ordering; /* map of language tag -> provider order */
-
-	gchar * error;
+// from lib.c: we need this so that providers can set errors.
+struct _EnchantBroker {
+	GSList* provider_list;
+	GHashTable* provider_ordering;
+	GList* dict_list;
+	gchar* _error;
 };
 
 // comes with a list of directories or providers
@@ -83,7 +81,7 @@ EnchantProvider* GetProviderForTests()
 
 char* GetErrorMessage(EnchantProvider* provider)
 {
-    return provider->owner->error;
+    return provider->owner->_error;
 }
 
 //path is provider filename or directory containing providers
@@ -166,7 +164,7 @@ int TestProvider(char* filename)
 	if (g_provider)
 	{
         EnchantBroker broker; // just so we have someplace to put errors
-        broker.error=NULL;
+        broker._error=NULL;
 
         g_provider->enchant_private_data = (void *) module;
 		g_provider->owner = &broker;
@@ -176,7 +174,7 @@ int TestProvider(char* filename)
 			g_provider->dispose(g_provider);
 
         g_provider = NULL;
-        free(broker.error);
+        free(broker._error);
 	}
 
     if(module){

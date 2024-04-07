@@ -82,13 +82,11 @@ static char** nuspell_dict_suggest(EnchantDict* me, const char* const word,
 // End EnchantDict functions
 
 // EnchantProvider functions
-static void nuspell_provider_dispose(EnchantProvider* me) { g_free(me); }
-
 static vector<filesystem::path>
 nuspell_get_dict_dirs(EnchantProvider *me)
 {
 	auto dirs = vector<filesystem::path>();
-	char *dir = enchant_get_user_dict_dir(me);
+	char *dir = enchant_provider_get_user_dict_dir(me);
 	dirs.push_back(std::filesystem::u8path(dir));
 	g_free(dir);
 	nuspell::append_default_dir_paths(dirs);
@@ -112,7 +110,7 @@ nuspell_provider_request_dict(EnchantProvider* me,
 		return nullptr;
 	}
 
-	EnchantDict* dict = g_new0(EnchantDict, 1);
+	EnchantDict* dict = enchant_broker_new_dict(me->owner);
 	dict->user_data = static_cast<void*>(dict_cpp.release());
 	dict->check = nuspell_dict_check;
 	dict->suggest = nuspell_dict_suggest;
@@ -124,7 +122,6 @@ static void nuspell_provider_dispose_dict(_GL_UNUSED EnchantProvider* me,
 {
 	auto dict_cpp = static_cast<nuspell::Dictionary*>(dict->user_data);
 	delete dict_cpp;
-	g_free(dict);
 }
 
 static int
@@ -184,8 +181,7 @@ extern "C" EnchantProvider* init_enchant_provider(void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider = g_new0(EnchantProvider, 1);
-	provider->dispose = nuspell_provider_dispose;
+	EnchantProvider *provider = enchant_provider_new ();
 	provider->request_dict = nuspell_provider_request_dict;
 	provider->dispose_dict = nuspell_provider_dispose_dict;
 	provider->dictionary_exists = nuspell_provider_dictionary_exists;

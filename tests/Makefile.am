@@ -51,7 +51,6 @@ libenchant-copy:
 	cp $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la $(libdir_subdir)/
 
 LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS)
-LIBADD = $(LIBENCHANT_COPY)
 DEPS = $(LIBENCHANT_COPY)
 
 check_LTLIBRARIES = \
@@ -64,25 +63,30 @@ check_LTLIBRARIES = \
 # Should not really use _ENCHANT_BUILD here, but seems to be necessary to get correct DLL exports for Windows
 libenchant_mock_provider_la_CPPFLAGS=-I$(top_srcdir)/src $(GLIB_CFLAGS) -D_ENCHANT_BUILD=1
 # Adding -rpath to LDFLAGS causes the .so to be built even though the lib is not to be installed
-libenchant_mock_provider_la_LDFLAGS = -module -avoid-version -no-undefined -rpath /foo $(GLIB_LIBS)
+libenchant_mock_provider_la_LDFLAGS = -module -avoid-version -no-undefined -rpath /foo
+libenchant_mock_provider_la_LIBADD = $(LIBENCHANT_COPY) $(GLIB_LIBS)
 libenchant_mock_provider_la_SOURCES = mock_provider.cpp
 
 # Build distinct libraries rather than copying a single one, to avoid being
 # defeated by caching, so we can configure each one differently.
 libenchant_mock_provider2_la_CPPFLAGS = $(libenchant_mock_provider_la_CPPFLAGS)
 libenchant_mock_provider2_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
+libenchant_mock_provider2_la_LIBADD = $(LIBENCHANT_COPY)
 libenchant_mock_provider2_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
 libenchant_null_provider_la_CPPFLAGS = $(libenchant_mock_provider_la_CPPFLAGS) -DENCHANT_TEST_NULL_PROVIDER
 libenchant_null_provider_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
+libenchant_null_provider_la_LIBADD = $(LIBENCHANT_COPY)
 libenchant_null_provider_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
 libenchant_null_identify_la_CPPFLAGS = $(libenchant_mock_provider_la_CPPFLAGS) -DENCHANT_TEST_NULL_IDENTIFY
 libenchant_null_identify_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
+libenchant_null_identify_la_LIBADD = $(LIBENCHANT_COPY)
 libenchant_null_identify_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
 libenchant_null_describe_la_CPPFLAGS = $(libenchant_mock_provider_la_CPPFLAGS) -DENCHANT_TEST_NULL_DESCRIBE
 libenchant_null_describe_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
+libenchant_null_describe_la_LIBADD = $(LIBENCHANT_COPY)
 libenchant_null_describe_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
 check_PROGRAMS = main.test providers.test

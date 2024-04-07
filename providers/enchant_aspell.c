@@ -111,7 +111,7 @@ aspell_dict_add_to_session (EnchantDict * me,
 }
 
 static EnchantDict *
-aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED, const char *const tag)
+aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	AspellConfig *spell_config = new_aspell_config ();
 	aspell_config_replace (spell_config, "master", tag);
@@ -129,7 +129,7 @@ aspell_provider_request_dict (EnchantProvider * me _GL_UNUSED, const char *const
 
 	AspellSpeller *manager = to_aspell_speller (spell_error);
 
-	EnchantDict *dict = g_new0 (EnchantDict, 1);
+	EnchantDict *dict = enchant_broker_new_dict (me->owner);
 	dict->user_data = (void *) manager;
 	dict->check = aspell_dict_check;
 	dict->suggest = aspell_dict_suggest;
@@ -143,8 +143,6 @@ aspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dic
 {
 	AspellSpeller *manager = (AspellSpeller *) dict->user_data;
 	delete_aspell_speller (manager);
-
-	g_free (dict);
 }
 
 static char **
@@ -182,12 +180,6 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 	return out_list;
 }
 
-static void
-aspell_provider_dispose (EnchantProvider * me)
-{
-	g_free (me);
-}
-
 static const char *
 aspell_provider_identify (EnchantProvider * me _GL_UNUSED)
 {
@@ -203,8 +195,7 @@ aspell_provider_describe (EnchantProvider * me _GL_UNUSED)
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider = g_new0 (EnchantProvider, 1);
-	provider->dispose = aspell_provider_dispose;
+	EnchantProvider *provider = enchant_provider_new ();
 	provider->request_dict = aspell_provider_request_dict;
 	provider->dispose_dict = aspell_provider_dispose_dict;
 	provider->identify = aspell_provider_identify;

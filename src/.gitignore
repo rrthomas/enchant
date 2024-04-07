@@ -12,4 +12,13 @@
 /enchant-lsmod-[1-9].1
 /libenchant.rc
 /libenchant_2_la_vala.stamp
+/libenchant_2_la_vala.stamp-t
+/api.c
+/broker.c
+/dict.c
+/provider.c
 /pwl.c
+/session.c
+/util.c
+/dummy.vala
+/dummy.c

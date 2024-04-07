@@ -27,9 +27,6 @@
  * do so, delete this exception statement from your version.
  */
 
-using Config;
-
-using GLib;
 using Posix;
 using Gnu;
 
@@ -123,16 +120,6 @@ static bool is_title_case(string word) {
 	return true;
 }
 
-string buf_to_string(uint8[] str_buf, ssize_t len) {
-	if (len < 0)
-		return (string)str_buf;
-	var tmp = new uint8[len + 1];
-	Memory.copy(tmp, str_buf, len);
-	tmp[len] = '\0';
-	return (string)tmp;
-}
-
-[Compact]
 public class EnchantPWL {
 	public string? filename;
 	public time_t file_changed;
@@ -176,8 +163,8 @@ public class EnchantPWL {
 			this.words.insert(normalized_word, word);
 	}
 
-	public void add([CCode (array_length = false)] uint8[] word_buf, ssize_t len) {
-		string word = buf_to_string(word_buf, len);
+	public void add(string word_buf, real_ssize_t len) {
+		string word = buf_to_utf8_string(word_buf, len);
 
 		this.refresh_from_file();
 		this.add_to_table(word);
@@ -207,12 +194,12 @@ public class EnchantPWL {
 		}
 	}
 
-	public void remove([CCode (array_length = false)] uint8[] word_buf, ssize_t len) {
+	public void remove(string word_buf, real_ssize_t len) {
 		// 'check' calls 'refresh_from_file' for us.
 		if (this.check(word_buf, len) == 1)
 			return;
 
-		string word = buf_to_string(word_buf, len);
+		string word = buf_to_utf8_string(word_buf, len);
 		this.words.remove(word.normalize());
 
 		if (this.filename != null) {
@@ -264,8 +251,8 @@ public class EnchantPWL {
 		}
 	}
 
-	public int check([CCode (array_length = false)] uint8[] word_buf, ssize_t len) {
-		string word = buf_to_string(word_buf, len);
+	public int check(string word_buf, real_ssize_t len) {
+		string word = buf_to_utf8_string(word_buf, len);
 		this.refresh_from_file();
 
 		if (this.words.contains(word.normalize()))

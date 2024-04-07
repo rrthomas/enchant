@@ -301,7 +301,7 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 	@autoreleasepool {
 		// NSLog (@"appleSpell_provider_request_dict");
 		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
-		EnchantDict * dict = g_new0 (EnchantDict, 1);
+		EnchantDict * dict = enchant_broker_new_dict (me->owner);
 
 		if (!me || !tag || !checker || !dict)
 			{
@@ -348,7 +348,6 @@ static void appleSpell_provider_dispose_dict (EnchantProvider * me, EnchantDict 
 						[ASD->DictionaryName release];
 						g_free (ASD);
 					}
-				g_free (dict);
 			}
 	}
 }
@@ -395,8 +394,6 @@ static void appleSpell_provider_dispose (EnchantProvider * me)
 				AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
 				if (checker)
 					delete checker;
-
-				g_free (me);
 			}
 	}
 }
@@ -417,7 +414,7 @@ extern "C" {
 		@autoreleasepool {
 			// NSLog (@"init_enchant_provider");
 
-			EnchantProvider * provider = g_new0 (EnchantProvider, 1);
+			EnchantProvider * provider = enchant_provider_new ();
 			if (!provider)
 				{
 					return 0;

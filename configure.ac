@@ -71,7 +71,7 @@ AC_PATH_PROG([DOXYGEN],[doxygen],[AC_MSG_ERROR([Doxygen not found])])
 
 dnl Vala
 AX_CHECK_GNU_MAKE(,[AC_MSG_WARN([GNU make is required to build from Vala sources])])
-AM_PROG_VALAC(0.52,,[AC_MSG_WARN([valac not found or too old: cannot compile Vala sources])])
+AM_PROG_VALAC(0.56,,[AC_MSG_WARN([valac not found or too old: cannot compile Vala sources])])
 
 dnl Glib and friends
 PKG_CHECK_MODULES(GLIB, [glib-2.0 >= 2.6 gmodule-2.0 gobject-2.0 gio-2.0])
@@ -131,23 +131,11 @@ esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "$native_win32" = yes)
 
+AM_CONDITIONAL(RELOCATABLE, test "$RELOCATABLE" = yes)
+
 AM_CONDITIONAL([SHLIBS_IN_BINDIR], [case "$host_os" in mingw* | cygwin*) true;; *) false;; esac])
 
 dnl ===========================================================================
-
-m4_copy([AC_DEFUN],[glib_DEFUN])
-glib_DEFUN([GLIB_LC_MESSAGES],
-  [AC_CHECK_HEADERS([locale.h])
-    if test $ac_cv_header_locale_h = yes; then
-    AC_CACHE_CHECK([for LC_MESSAGES], am_cv_val_LC_MESSAGES,
-      [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <locale.h>]], [[return LC_MESSAGES]])],[am_cv_val_LC_MESSAGES=yes],[am_cv_val_LC_MESSAGES=no])])
-    if test $am_cv_val_LC_MESSAGES = yes; then
-      AC_DEFINE(HAVE_LC_MESSAGES, 1,
-        [Define if your <locale.h> file defines LC_MESSAGES.])
-    fi
-  fi])
-
-GLIB_LC_MESSAGES
 
 AC_LANG_PUSH([C++])
 PKG_CHECK_EXISTS([UnitTest++],

@@ -31,12 +31,6 @@
 
 //////////////////////////////////////
 // Mock provider functions
-static void
-MockProviderDispose(EnchantProvider *me)
-{
-    g_free(me);
-}
-
 static int
 MockEnGbAndQaaProviderDictionaryExists (EnchantProvider *,
 				     const char *const tag)
@@ -51,7 +45,7 @@ MockEnGbAndQaaProviderRequestDictionary(EnchantProvider * me, const char *tag)
   	EnchantDict *dict = NULL;
 
     if(MockEnGbAndQaaProviderDictionaryExists(me, tag)){
-	    dict = g_new0 (EnchantDict, 1);
+	    dict = enchant_broker_new_dict (me->owner);
     }
 	return dict;
 }
@@ -59,7 +53,6 @@ MockEnGbAndQaaProviderRequestDictionary(EnchantProvider * me, const char *tag)
 static void
 MockProviderDisposeDictionary (EnchantProvider *, EnchantDict * dict)
 {
-    g_free(dict);
 }
 
 static const char *

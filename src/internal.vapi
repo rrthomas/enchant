@@ -1,4 +1,4 @@
-/* config.vapi
+/* Bits of enchant.h that we need in Vala
  * Copyright (C) 2024 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
@@ -26,16 +26,37 @@
  * do so, delete this exception statement from your version.
  */
 
-[CCode (cheader_filename = "configmake.h")]
-const string SYSCONFDIR;
-[CCode (cheader_filename = "configmake.h")]
-const string PKGLIBDIR;
-[CCode (cheader_filename = "configmake.h")]
-const string PKGDATADIR;
-[CCode (cheader_filename = "configmake.h")]
-const string INSTALLPREFIX;
+[CCode (has_target = false, cheader_filename = "enchant.h")]
+public delegate void EnchantBrokerDescribeFn(string provider_name,
+											 string provider_desc,
+											 string provider_dll_file,
+											 void *user_data);
 
-[CCode (cheader_filename = "configmake.h")]
-const string ENCHANT_MAJOR_VERSION;
-[CCode (cheader_filename = "configmake.h")]
-const string ENCHANT_VERSION_STRING;
+[CCode (has_target = false, cheader_filename = "enchant.h")]
+public delegate void EnchantDictDescribeFn(string lang_tag,
+										   string provider_name,
+										   string provider_desc,
+										   string provider_file,
+										   void *user_data);
+
+
+// Vala maps size_t to gsize and ssize_t to gssize by default, but these
+// types are not necessarily the same as size_t and ssize_t.  Hence, reuse
+// the definitions of size_t and ssize_t from posix.vapi used in the 'posix'
+// profile.
+
+[CCode (cname = "size_t", cheader_filename = "sys/types.h", default_value = "0UL")]
+[IntegerType (rank = 9)]
+public struct real_size_t {
+	public inline string to_string () {
+		return "%zu".printf (this);
+	}
+}
+
+[CCode (cname = "ssize_t", cheader_filename = "sys/types.h", default_value = "0L")]
+[IntegerType (rank = 8)]
+public struct real_ssize_t {
+	public inline string to_string () {
+		return "%zi".printf (this);
+	}
+}
