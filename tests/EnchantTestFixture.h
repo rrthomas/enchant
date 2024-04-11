@@ -69,7 +69,9 @@ struct EnchantTestFixture
     {
         GSList *config_dirs = enchant_get_conf_dirs();
         const char *pkgdatadir = (char *)g_slist_nth(config_dirs, 0)->data;
-        return std::string(pkgdatadir);
+        auto res = std::string(pkgdatadir);
+        g_slist_free_full(config_dirs, g_free);
+        return res;
     }
 
     static void DeleteDirAndFiles(const std::string& dir)
