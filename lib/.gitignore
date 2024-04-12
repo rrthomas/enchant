@@ -2,6 +2,7 @@
 /_Noreturn.h
 /alloca.c
 /alloca.in.h
+/assert.h
 /arg-nonnull.h
 /c++defs.h
 /flock.c
@@ -17,6 +18,7 @@
 /relocatable.valgrind
 /stddef.h
 /stddef.in.h
+/stdint.h
 /stdlib.in.h
 /strchrnul.c
 /strchrnul.valgrind
