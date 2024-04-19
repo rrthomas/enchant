@@ -1,3 +1,20 @@
+2.6.9 (April 4, 2024)
+---------------------
+
+This release implements user dictionary support for Nuspell, Voikko and
+Hspell. Users can install dictionaries in the appropriate sub-directory of
+their Enchant user settings directory, and they will be found by the
+spelling providers. (Hunspell is already supported; Aspell support is
+planned.)
+
+
+2.6.8 (March 22, 2024)
+----------------------
+
+This release better documents the limited capabilities Enchant currently has
+for user-installed dictionaries.
+
+
 2.6.7 (February 8, 2024)
 ------------------------
 
