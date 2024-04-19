@@ -66,23 +66,23 @@ namespace Gnu {
 		UN
 	}
 	[CCode (cheader_filename = "sys/file.h")]
-	public int flock(int fd, FlockOperation operation);
+	public int flock (int fd, FlockOperation operation);
 
 	[CCode (cheader_filename = "quote.h")]
 	public string quote (string arg);
 
 	[CCode (cheader_filename = "relocatable.h", cname = "relocate")]
-	private unowned string _gnulib_relocate(string path);
+	private unowned string _gnulib_relocate (string path);
 	[CCode (cname = "_vala_relocate")]
-	public string relocate(string path) {
-		unowned string newpath = _gnulib_relocate(path);
+	public string relocate (string path) {
+		unowned string newpath = _gnulib_relocate (path);
 		// If relocate malloced, then return the value, defeating Vala's attempt
 		// to (re-)strdup it.
-		GLib.return_val_if_fail(newpath.data == path.data, newpath);
+		GLib.return_val_if_fail (newpath.data == path.data, newpath);
 		// Otherwise, allow Vala to strdup the non-malloced return value.
 		return newpath;
 	}
 
 	[CCode (cheader_filename = "relocatable.h")]
-	public void set_relocation_prefix(string orig_prefix, string curr_prefix);
+	public void set_relocation_prefix (string orig_prefix, string curr_prefix);
 }
