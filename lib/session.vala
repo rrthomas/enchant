@@ -46,7 +46,7 @@ public class EnchantSession {
 		this.session_exclude = new GenericSet<string>(str_hash, str_equal);
 	}
 
-	public static EnchantSession? with_implicit_pwl(EnchantProvider provider, string lang, string? pwl) {
+	public static EnchantSession? with_implicit_pwl(EnchantProvider? provider, string lang, string? pwl) {
 		string user_config_dir = enchant_get_user_config_dir();
 		if (user_config_dir == null || lang == null)
 			return null;
