@@ -1,7 +1,6 @@
 <map id="EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture" name="EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture">
-<area shape="rect" id="node1" title=" " alt="" coords="5,261,220,317"/>
-<area shape="rect" id="node2" href="$structEnchantBrokerDescribeTestFixtureBase.html" title=" " alt="" coords="21,171,205,212"/>
-<area shape="rect" id="node3" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="27,95,199,121"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,244,220,300"/>
+<area shape="rect" id="node2" href="$structEnchantBrokerDescribeTestFixtureBase.html" title=" " alt="" coords="21,155,205,196"/>
+<area shape="rect" id="node3" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="27,80,199,107"/>
 <area shape="rect" id="node4" href="$structEnchantTestFixture.html" title=" " alt="" coords="45,5,180,32"/>
-<area shape="rect" id="node5" href="$structstr__enchant__broker.html" title=" " alt="" coords="204,5,336,32"/>
 </map>

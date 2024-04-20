@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['applespellchecker_0',['AppleSpellChecker',['../classAppleSpellChecker.html',1,'']]],
-  ['applespelldictionary_1',['AppleSpellDictionary',['../structAppleSpellDictionary.html',1,'']]]
+  ['_5fenchantbroker_0',['_EnchantBroker',['../struct__EnchantBroker.html',1,'']]]
 ];

@@ -119,10 +119,10 @@ $(document).ready(function(){initNavTree('EnchantDictionaryTestFixture_8h_source
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="keyword">static</span> <a class="code" href="structstr__enchant__dict.html">EnchantDict</a>*</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;MockProviderRequestEmptyMockDictionary(<a class="code" href="structstr__enchant__provider.html">EnchantProvider</a> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *)</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="keyword">static</span> EnchantDict*</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;MockProviderRequestEmptyMockDictionary(EnchantProvider *me, <span class="keyword">const</span> <span class="keywordtype">char</span> *)</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;{</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <a class="code" href="structstr__enchant__dict.html">EnchantDict</a>* dict = g_new0(<a class="code" href="structstr__enchant__dict.html">EnchantDict</a>, 1);</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    EnchantDict* dict = enchant_broker_new_dict(me-&gt;owner);</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    dict-&gt;user_data = NULL;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    dict-&gt;check = NULL;</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    dict-&gt;suggest = NULL;</div>
@@ -131,7 +131,7 @@ $(document).ready(function(){initNavTree('EnchantDictionaryTestFixture_8h_source
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordflow">return</span> dict;</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> EmptyDictionary_ProviderConfiguration (<a class="code" href="structstr__enchant__provider.html">EnchantProvider</a> * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *)</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> EmptyDictionary_ProviderConfiguration (EnchantProvider * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *)</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;{</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;     me-&gt;request_dict = MockProviderRequestEmptyMockDictionary;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;     me-&gt;dispose_dict = MockProviderDisposeDictionary;</div>
@@ -139,7 +139,7 @@ $(document).ready(function(){initNavTree('EnchantDictionaryTestFixture_8h_source
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="keyword">static</span> <span class="keywordtype">char</span>**</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;MockDictionarySuggest (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * , </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;MockDictionarySuggest (EnchantDict * , </div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word,</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                       <span class="keywordtype">size_t</span> len, </div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                       <span class="keywordtype">size_t</span> * out_n_suggs)</div>
@@ -159,17 +159,17 @@ $(document).ready(function(){initNavTree('EnchantDictionaryTestFixture_8h_source
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <span class="keywordflow">return</span> sugg_arr;</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keyword">static</span> <a class="code" href="structstr__enchant__dict.html">EnchantDict</a>*</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;MockProviderRequestBasicMockDictionary(<a class="code" href="structstr__enchant__provider.html">EnchantProvider</a> *me, <span class="keyword">const</span> <span class="keywordtype">char</span> *tag)</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keyword">static</span> EnchantDict*</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;MockProviderRequestBasicMockDictionary(EnchantProvider *me, <span class="keyword">const</span> <span class="keywordtype">char</span> *tag)</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;{</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    </div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <a class="code" href="structstr__enchant__dict.html">EnchantDict</a>* dict = MockProviderRequestEmptyMockDictionary(me, tag);</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);</div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    dict-&gt;suggest = MockDictionarySuggest;</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    <span class="keywordflow">return</span> dict;</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;}</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> BasicDictionary_ProviderConfiguration (<a class="code" href="structstr__enchant__provider.html">EnchantProvider</a> * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *)</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="keyword">static</span> <span class="keywordtype">void</span> BasicDictionary_ProviderConfiguration (EnchantProvider * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *)</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;{</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;     me-&gt;request_dict = MockProviderRequestBasicMockDictionary;</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;     me-&gt;dispose_dict = MockProviderDisposeDictionary;</div>
@@ -177,8 +177,8 @@ $(document).ready(function(){initNavTree('EnchantDictionaryTestFixture_8h_source
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
 <div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="structEnchantDictionaryTestFixture.html">   90</a></span>&#160;<span class="keyword">struct </span><a class="code" href="structEnchantDictionaryTestFixture.html">EnchantDictionaryTestFixture</a> : <a class="code" href="structEnchantBrokerTestFixture.html">EnchantBrokerTestFixture</a></div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;{</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <a class="code" href="structstr__enchant__dict.html">EnchantDict</a>* _dict;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <a class="code" href="structstr__enchant__dict.html">EnchantDict</a>* _pwl;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    EnchantDict* _dict;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    EnchantDict* _pwl;</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    std::string _pwlFileName;</div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    std::string origLangEnv;</div>
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="keywordtype">bool</span> hasLangEnv;</div>
@@ -433,10 +433,8 @@ $(document).ready(function(){initNavTree('EnchantDictionaryTestFixture_8h_source
 <div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;};</div>
 <div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160; </div>
 <div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="astructEnchantBrokerTestFixture_html"><div class="ttname"><a href="structEnchantBrokerTestFixture.html">EnchantBrokerTestFixture</a></div><div class="ttdef"><b>Definition:</b> EnchantBrokerTestFixture.h:103</div></div>
+<div class="ttc" id="astructEnchantBrokerTestFixture_html"><div class="ttname"><a href="structEnchantBrokerTestFixture.html">EnchantBrokerTestFixture</a></div><div class="ttdef"><b>Definition:</b> EnchantBrokerTestFixture.h:96</div></div>
 <div class="ttc" id="astructEnchantDictionaryTestFixture_html"><div class="ttname"><a href="structEnchantDictionaryTestFixture.html">EnchantDictionaryTestFixture</a></div><div class="ttdef"><b>Definition:</b> EnchantDictionaryTestFixture.h:91</div></div>
-<div class="ttc" id="astructstr__enchant__dict_html"><div class="ttname"><a href="structstr__enchant__dict.html">str_enchant_dict</a></div><div class="ttdef"><b>Definition:</b> enchant-provider.h:125</div></div>
-<div class="ttc" id="astructstr__enchant__provider_html"><div class="ttname"><a href="structstr__enchant__provider.html">str_enchant_provider</a></div><div class="ttdef"><b>Definition:</b> enchant-provider.h:150</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

@@ -1,10 +1,8 @@
 <map id="EnchantDictionaryDescribe_TestFixture" name="EnchantDictionaryDescribe_TestFixture">
-<area shape="rect" id="node1" title=" " alt="" coords="11,379,194,420"/>
-<area shape="rect" id="node2" href="$structEnchantDictionaryDescribe__TestFixtureBase.html" title=" " alt="" coords="11,288,194,329"/>
-<area shape="rect" id="node3" href="$structEnchantDictionaryTestFixture.html" title=" " alt="" coords="5,199,200,225"/>
-<area shape="rect" id="node4" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="17,95,189,121"/>
+<area shape="rect" id="node1" title=" " alt="" coords="109,337,291,379"/>
+<area shape="rect" id="node2" href="$structEnchantDictionaryDescribe__TestFixtureBase.html" title=" " alt="" coords="109,247,291,288"/>
+<area shape="rect" id="node3" href="$structEnchantDictionaryTestFixture.html" title=" " alt="" coords="5,157,200,184"/>
+<area shape="rect" id="node4" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="17,81,189,108"/>
 <area shape="rect" id="node5" href="$structEnchantTestFixture.html" title=" " alt="" coords="35,5,170,32"/>
-<area shape="rect" id="node6" href="$structstr__enchant__broker.html" title=" " alt="" coords="194,5,326,32"/>
-<area shape="rect" id="node7" href="$structstr__enchant__dict.html" title=" " alt="" coords="213,95,331,121"/>
-<area shape="rect" id="node8" href="$structDictionaryDescription.html" title=" " alt="" coords="225,199,373,225"/>
+<area shape="rect" id="node6" href="$structDictionaryDescription.html" title=" " alt="" coords="225,157,373,184"/>
 </map>

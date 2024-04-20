@@ -1,10 +1,6 @@
 var annotated_dup =
 [
-    [ "enchant", null, [
-      [ "Exception", "classenchant_1_1Exception.html", "classenchant_1_1Exception" ],
-      [ "Dict", "classenchant_1_1Dict.html", "classenchant_1_1Dict" ],
-      [ "Broker", "classenchant_1_1Broker.html", "classenchant_1_1Broker" ]
-    ] ],
+    [ "_EnchantBroker", "struct__EnchantBroker.html", "struct__EnchantBroker" ],
     [ "AppleSpellChecker", "classAppleSpellChecker.html", "classAppleSpellChecker" ],
     [ "AppleSpellDictionary", "structAppleSpellDictionary.html", "structAppleSpellDictionary" ],
     [ "DictionaryCheck_TestFixture", "structDictionaryCheck__TestFixture.html", "structDictionaryCheck__TestFixture" ],
@@ -57,11 +53,9 @@ var annotated_dup =
     [ "EnchantDictionarySuggestNotImplemented_TestFixture", "structEnchantDictionarySuggestNotImplemented__TestFixture.html", "structEnchantDictionarySuggestNotImplemented__TestFixture" ],
     [ "EnchantDictionarySuggestTestFixtureBase", "structEnchantDictionarySuggestTestFixtureBase.html", "structEnchantDictionarySuggestTestFixtureBase" ],
     [ "EnchantDictionaryTestFixture", "structEnchantDictionaryTestFixture.html", "structEnchantDictionaryTestFixture" ],
-    [ "EnchantDictPrivateData", "structEnchantDictPrivateData.html", "structEnchantDictPrivateData" ],
     [ "EnchantGetPrefixDirTestFixture", "structEnchantGetPrefixDirTestFixture.html", "structEnchantGetPrefixDirTestFixture" ],
     [ "EnchantPwl_TestFixture", "structEnchantPwl__TestFixture.html", "structEnchantPwl__TestFixture" ],
     [ "EnchantPwlWithDictSuggs_TestFixture", "structEnchantPwlWithDictSuggs__TestFixture.html", "structEnchantPwlWithDictSuggs__TestFixture" ],
-    [ "EnchantSession", "structEnchantSession.html", "structEnchantSession" ],
     [ "EnchantTestFixture", "structEnchantTestFixture.html", "structEnchantTestFixture" ],
     [ "HunspellChecker", "classHunspellChecker.html", "classHunspellChecker" ],
     [ "Provider_TestFixture", "structProvider__TestFixture.html", "structProvider__TestFixture" ],
@@ -71,10 +65,5 @@ var annotated_dup =
     [ "ProviderIdentify_TestFixture", "structProviderIdentify__TestFixture.html", "structProviderIdentify__TestFixture" ],
     [ "ProviderListDicts_TestFixture", "structProviderListDicts__TestFixture.html", "structProviderListDicts__TestFixture" ],
     [ "ProviderRequestDictionary_TestFixture", "structProviderRequestDictionary__TestFixture.html", "structProviderRequestDictionary__TestFixture" ],
-    [ "rpl_max_align_t", "unionrpl__max__align__t.html", "unionrpl__max__align__t" ],
-    [ "str_enchant_broker", "structstr__enchant__broker.html", "structstr__enchant__broker" ],
-    [ "str_enchant_dict", "structstr__enchant__dict.html", "structstr__enchant__dict" ],
-    [ "str_enchant_provider", "structstr__enchant__provider.html", "structstr__enchant__provider" ],
-    [ "str_enchant_pwl", "structstr__enchant__pwl.html", "structstr__enchant__pwl" ],
     [ "Zemberek", "classZemberek.html", "classZemberek" ]
 ];

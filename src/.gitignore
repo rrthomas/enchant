@@ -1,7 +1,5 @@
 /enchant-[1-9]
-/enchant.[15]
-/enchant.5.in
-/enchant.html
+/enchant.1
 /enchant-[1-9].1
 /enchant-[1-9].html
 /enchant-[1-9].exe
@@ -10,15 +8,3 @@
 /enchant-lsmod-[1-9].exe
 /enchant-lsmod.1
 /enchant-lsmod-[1-9].1
-/libenchant.rc
-/libenchant_2_la_vala.stamp
-/libenchant_2_la_vala.stamp-t
-/api.c
-/broker.c
-/dict.c
-/provider.c
-/pwl.c
-/session.c
-/util.c
-/dummy.vala
-/dummy.c

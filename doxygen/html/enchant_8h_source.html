@@ -126,91 +126,91 @@ $(document).ready(function(){initNavTree('enchant_8h_source.html',''); initResiz
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structstr__enchant__broker.html">str_enchant_broker</a> <a class="code" href="structstr__enchant__broker.html">EnchantBroker</a>;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structstr__enchant__dict.html">str_enchant_dict</a>   <a class="code" href="structstr__enchant__dict.html">EnchantDict</a>;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="struct__EnchantBroker.html">_EnchantBroker</a> <a class="code" href="struct__EnchantBroker.html">EnchantBroker</a>;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="struct__EnchantDict.html">_EnchantDict</a>   <a class="code" href="struct__EnchantDict.html">EnchantDict</a>;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="keyword">const</span> <span class="keywordtype">char</span> *enchant_get_version (<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> *enchant_broker_init (<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> *enchant_broker_init (<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keywordtype">void</span> enchant_broker_free (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keywordtype">void</span> enchant_broker_free (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker);</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> *enchant_broker_request_dict (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> tag);</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<a class="code" href="struct__EnchantDict.html">EnchantDict</a> *enchant_broker_request_dict (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> tag);</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> *enchant_broker_request_dict_with_pwl (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> tag, <span class="keyword">const</span> <span class="keywordtype">char</span> *pwl);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> *enchant_broker_request_pwl_dict (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> pwl);</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="keywordtype">void</span> enchant_broker_free_dict (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker, <a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict);</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="keywordtype">int</span> enchant_broker_dict_exists (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker, <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> tag);</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160; </div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="keywordtype">void</span> enchant_broker_set_ordering (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker,</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                  <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> tag,</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;                  <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> ordering);</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;<span class="keyword">const</span> <span class="keywordtype">char</span> *enchant_broker_get_error (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker);</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="keyword">typedef</span> void (*EnchantBrokerDescribeFn) (<span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_name,</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_desc,</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_dll_file,</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;                     <span class="keywordtype">void</span> * user_data);</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160; </div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;<span class="keywordtype">void</span> enchant_broker_describe (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker,</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                  EnchantBrokerDescribeFn fn,</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                  <span class="keywordtype">void</span> * user_data);</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160; </div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="keywordtype">int</span> enchant_dict_check (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160; </div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;<span class="keywordtype">char</span> **enchant_dict_suggest (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word,</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;                 ssize_t len, <span class="keywordtype">size_t</span> * out_n_suggs);</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160; </div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;<span class="keywordtype">void</span> enchant_dict_add (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160; </div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;<span class="keywordtype">void</span> enchant_dict_add_to_session (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="keywordtype">void</span> enchant_dict_remove (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160; </div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;<span class="keywordtype">void</span> enchant_dict_remove_from_session (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160; </div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;<span class="keywordtype">int</span> enchant_dict_is_added (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160; </div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;<span class="keywordtype">int</span> enchant_dict_is_removed (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160; </div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;<span class="keywordtype">void</span> enchant_dict_store_replacement (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict,</div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> mis, ssize_t mis_len,</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> cor, ssize_t cor_len);</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160; </div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;<span class="keywordtype">void</span> enchant_dict_free_string_list (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <span class="keywordtype">char</span> **string_list);</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160; </div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;<span class="keyword">const</span> <span class="keywordtype">char</span> *enchant_dict_get_error (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict);</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160; </div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;<span class="keyword">const</span> <span class="keywordtype">char</span> *enchant_dict_get_extra_word_characters (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict);</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160; </div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;<span class="keywordtype">int</span> enchant_dict_is_word_character (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, uint32_t uc, <span class="keywordtype">size_t</span> n);</div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160; </div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;<span class="keyword">typedef</span> void (*EnchantDictDescribeFn) (<span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> lang_tag,</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_name,</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_desc,</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_file,</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;                       <span class="keywordtype">void</span> * user_data);</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160; </div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;<span class="keywordtype">void</span> enchant_dict_describe (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict,</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;                EnchantDictDescribeFn fn,</div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;                <span class="keywordtype">void</span> * user_data);</div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160; </div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;<span class="keywordtype">void</span> enchant_broker_list_dicts (<a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker,</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;                EnchantDictDescribeFn fn,</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;                <span class="keywordtype">void</span> * user_data);</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160; </div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;<span class="keywordtype">void</span> enchant_set_prefix_dir(<span class="keyword">const</span> <span class="keywordtype">char</span> *);</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160; </div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;}</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160; </div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* ENCHANT_H */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="astructstr__enchant__broker_html"><div class="ttname"><a href="structstr__enchant__broker.html">str_enchant_broker</a></div><div class="ttdef"><b>Definition:</b> lib.c:55</div></div>
-<div class="ttc" id="astructstr__enchant__dict_html"><div class="ttname"><a href="structstr__enchant__dict.html">str_enchant_dict</a></div><div class="ttdef"><b>Definition:</b> enchant-provider.h:125</div></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<a class="code" href="struct__EnchantDict.html">EnchantDict</a> *enchant_broker_request_dict_with_pwl (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> tag, <span class="keyword">const</span> <span class="keywordtype">char</span> *pwl);</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<a class="code" href="struct__EnchantDict.html">EnchantDict</a> *enchant_broker_request_pwl_dict (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> pwl);</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="keywordtype">void</span> enchant_broker_free_dict (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker, <a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict);</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160; </div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="keywordtype">int</span> enchant_broker_dict_exists (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker, <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> tag);</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="keywordtype">void</span> enchant_broker_set_ordering (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker,</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                  <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> tag,</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                  <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> ordering);</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="keyword">const</span> <span class="keywordtype">char</span> *enchant_broker_get_error (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker);</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;<span class="keyword">typedef</span> void (*EnchantBrokerDescribeFn) (<span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_name,</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_desc,</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_dll_file,</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;                     <span class="keywordtype">void</span> * user_data);</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160; </div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="keywordtype">void</span> enchant_broker_describe (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker,</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;                  EnchantBrokerDescribeFn fn,</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                  <span class="keywordtype">void</span> * user_data);</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160; </div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="keywordtype">int</span> enchant_dict_check (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="keywordtype">char</span> **enchant_dict_suggest (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word,</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;                 ssize_t len, <span class="keywordtype">size_t</span> * out_n_suggs);</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160; </div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;<span class="keywordtype">void</span> enchant_dict_add (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160; </div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;<span class="keywordtype">void</span> enchant_dict_add_to_session (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160; </div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;<span class="keywordtype">void</span> enchant_dict_remove (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160; </div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;<span class="keywordtype">void</span> enchant_dict_remove_from_session (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160; </div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;<span class="keywordtype">int</span> enchant_dict_is_added (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160; </div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;<span class="keywordtype">int</span> enchant_dict_is_removed (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160; </div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;<span class="keywordtype">void</span> enchant_dict_store_replacement (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict,</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> mis, ssize_t mis_len,</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;                     <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> cor, ssize_t cor_len);</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160; </div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;<span class="keywordtype">void</span> enchant_dict_free_string_list (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <span class="keywordtype">char</span> **string_list);</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160; </div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="keyword">const</span> <span class="keywordtype">char</span> *enchant_dict_get_error (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict);</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160; </div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;<span class="keyword">const</span> <span class="keywordtype">char</span> *enchant_dict_get_extra_word_characters (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict);</div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160; </div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;<span class="keywordtype">int</span> enchant_dict_is_word_character (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, uint32_t uc, <span class="keywordtype">size_t</span> n);</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160; </div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;<span class="keyword">typedef</span> void (*EnchantDictDescribeFn) (<span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> lang_tag,</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_name,</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_desc,</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">char</span> * <span class="keyword">const</span> provider_file,</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;                       <span class="keywordtype">void</span> * user_data);</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160; </div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;<span class="keywordtype">void</span> enchant_dict_describe (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict,</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;                EnchantDictDescribeFn fn,</div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;                <span class="keywordtype">void</span> * user_data);</div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160; </div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;<span class="keywordtype">void</span> enchant_broker_list_dicts (<a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker,</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;                EnchantDictDescribeFn fn,</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;                <span class="keywordtype">void</span> * user_data);</div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160; </div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;<span class="keywordtype">void</span> enchant_set_prefix_dir(<span class="keyword">const</span> <span class="keywordtype">char</span> *);</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160; </div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;}</div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160; </div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* ENCHANT_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="astruct__EnchantBroker_html"><div class="ttname"><a href="struct__EnchantBroker.html">_EnchantBroker</a></div><div class="ttdef"><b>Definition:</b> broker.c:127</div></div>
+<div class="ttc" id="astruct__EnchantDict_html"><div class="ttname"><a href="struct__EnchantDict.html">_EnchantDict</a></div><div class="ttdef"><b>Definition:</b> broker.c:176</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

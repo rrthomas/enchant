@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['broker_78',['Broker',['../classenchant_1_1Broker.html',1,'enchant']]]
+  ['applespellchecker_68',['AppleSpellChecker',['../classAppleSpellChecker.html',1,'']]],
+  ['applespelldictionary_69',['AppleSpellDictionary',['../structAppleSpellDictionary.html',1,'']]]
 ];

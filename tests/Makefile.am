@@ -18,7 +18,7 @@ else
 libdir_subdir=lib
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir)/src $(GLIB_CFLAGS) -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
+AM_CPPFLAGS = -I$(top_srcdir)/lib $(GLIB_CFLAGS) -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
 
 ENCHANT_CONFIG_DIR = config
 
@@ -41,14 +41,14 @@ distclean-local:
 EXTRA_DIST = test.pwl.orig mock_provider.h run-test
 
 LIBENCHANT_COPY = $(builddir)/$(libdir_subdir)/libenchant-@ENCHANT_MAJOR_VERSION@.la
-$(LIBENCHANT_COPY): $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la
+$(LIBENCHANT_COPY): $(top_builddir)/lib/libenchant-@ENCHANT_MAJOR_VERSION@.la
 	$(MAKE) libenchant-copy
 
 libenchant-copy:
 	rm -rf $(libdir_subdir)
 	$(MKDIR_P) $(libdir_subdir)/enchant-@ENCHANT_MAJOR_VERSION@
-	cp -r $(top_builddir)/src/@objdir@ $(libdir_subdir)/
-	cp $(top_builddir)/src/libenchant-@ENCHANT_MAJOR_VERSION@.la $(libdir_subdir)/
+	cp -r $(top_builddir)/lib/@objdir@ $(libdir_subdir)/
+	cp $(top_builddir)/lib/libenchant-@ENCHANT_MAJOR_VERSION@.la $(libdir_subdir)/
 
 LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS)
 DEPS = $(LIBENCHANT_COPY)
@@ -61,7 +61,7 @@ check_LTLIBRARIES = \
 	libenchant_null_describe.la
 
 # Should not really use _ENCHANT_BUILD here, but seems to be necessary to get correct DLL exports for Windows
-libenchant_mock_provider_la_CPPFLAGS=-I$(top_srcdir)/src $(GLIB_CFLAGS) -D_ENCHANT_BUILD=1
+libenchant_mock_provider_la_CPPFLAGS=-I$(top_srcdir)/lib $(GLIB_CFLAGS) -D_ENCHANT_BUILD=1
 # Adding -rpath to LDFLAGS causes the .so to be built even though the lib is not to be installed
 libenchant_mock_provider_la_LDFLAGS = -module -avoid-version -no-undefined -rpath /foo
 libenchant_mock_provider_la_LIBADD = $(LIBENCHANT_COPY) $(GLIB_LIBS)

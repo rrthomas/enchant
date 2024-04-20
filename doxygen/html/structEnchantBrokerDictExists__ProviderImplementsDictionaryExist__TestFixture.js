@@ -1,5 +1,4 @@
 var structEnchantBrokerDictExists__ProviderImplementsDictionaryExist__TestFixture =
 [
-    [ "EnchantBrokerDictExists_ProviderImplementsDictionaryExist_TestFixture", "structEnchantBrokerDictExists__ProviderImplementsDictionaryExist__TestFixture.html#a25056630141b361afe7bf568b7e2469a", null ],
     [ "EnchantBrokerDictExists_ProviderImplementsDictionaryExist_TestFixture", "structEnchantBrokerDictExists__ProviderImplementsDictionaryExist__TestFixture.html#a25056630141b361afe7bf568b7e2469a", null ]
 ];
