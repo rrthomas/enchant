@@ -14,7 +14,7 @@
 
 AC_PREREQ([2.71])
 AC_INIT([enchant],[2.7.0])
-AC_CONFIG_SRCDIR(src/enchant.h)
+AC_CONFIG_SRCDIR(lib/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([subdir-objects tar-ustar])
 AC_CANONICAL_HOST
@@ -218,13 +218,14 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 Makefile
 enchant-$ENCHANT_MAJOR_VERSION.pc:enchant.pc.in
+lib/libenchant.rc
 lib/Makefile
-src/libenchant.rc
+lib/enchant.5.in
+libgnu/Makefile
+providers/Makefile
 src/Makefile
 src/enchant.1
 src/enchant-lsmod.1
-src/enchant.5.in
-providers/Makefile
 tests/Makefile
 ], [],
 [ENCHANT_MAJOR_VERSION="$ENCHANT_MAJOR_VERSION"])

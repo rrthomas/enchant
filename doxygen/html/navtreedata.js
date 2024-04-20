@@ -39,9 +39,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"annotated.html",
-"structEnchantBrokerNoProvidersTestFixture.html#a0a8710731d715aad9ef8f1d9d05fa231",
-"structProviderDescription.html#ae6f11aaf57a83f5ac3b7968fe73aab73"
+"EnchantBrokerTestFixture_8h_source.html",
+"structEnchantGetPrefixDirTestFixture.html#add23ebb2ccd267992f6922d6971eba5d"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

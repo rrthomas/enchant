@@ -124,23 +124,23 @@ $(document).ready(function(){initNavTree('pwl_8h_source.html',''); initResizable
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structstr__enchant__pwl.html">str_enchant_pwl</a> <a class="code" href="structstr__enchant__pwl.html">EnchantPWL</a>;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>str_enchant_pwl <a class="code" href="struct__EnchantPWL.html">EnchantPWL</a>;</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">/* Create and initialise a new, empty PWL */</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<a class="code" href="structstr__enchant__pwl.html">EnchantPWL</a>* enchant_pwl_init(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<a class="code" href="structstr__enchant__pwl.html">EnchantPWL</a>* enchant_pwl_init_with_file(<span class="keyword">const</span> <span class="keywordtype">char</span> * file);</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<a class="code" href="struct__EnchantPWL.html">EnchantPWL</a>* enchant_pwl_init(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<a class="code" href="struct__EnchantPWL.html">EnchantPWL</a>* enchant_pwl_init_with_file(<span class="keyword">const</span> <span class="keywordtype">char</span> * file);</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="keywordtype">void</span> enchant_pwl_add(<a class="code" href="structstr__enchant__pwl.html">EnchantPWL</a> * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keywordtype">void</span> enchant_pwl_remove(<a class="code" href="structstr__enchant__pwl.html">EnchantPWL</a> * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="keywordtype">int</span> enchant_pwl_check(<a class="code" href="structstr__enchant__pwl.html">EnchantPWL</a> * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="keywordtype">void</span> enchant_pwl_free(<a class="code" href="structstr__enchant__pwl.html">EnchantPWL</a>* me);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="keywordtype">void</span> enchant_pwl_add(<a class="code" href="struct__EnchantPWL.html">EnchantPWL</a> * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keywordtype">void</span> enchant_pwl_remove(<a class="code" href="struct__EnchantPWL.html">EnchantPWL</a> * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="keywordtype">int</span> enchant_pwl_check(<a class="code" href="struct__EnchantPWL.html">EnchantPWL</a> * me, <span class="keyword">const</span> <span class="keywordtype">char</span> *<span class="keyword">const</span> word, ssize_t len);</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="keywordtype">void</span> enchant_pwl_free(<a class="code" href="struct__EnchantPWL.html">EnchantPWL</a>* me);</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;}</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* PWL_H */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="astructstr__enchant__pwl_html"><div class="ttname"><a href="structstr__enchant__pwl.html">str_enchant_pwl</a></div><div class="ttdef"><b>Definition:</b> pwl.c:56</div></div>
+<div class="ttc" id="astruct__EnchantPWL_html"><div class="ttname"><a href="struct__EnchantPWL.html">_EnchantPWL</a></div><div class="ttdef"><b>Definition:</b> pwl.c:73</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

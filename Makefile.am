@@ -14,7 +14,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_DISTCHECK_CONFIGURE_FLAGS = --enable-relocatable
 
-SUBDIRS = lib src providers tests
+SUBDIRS = libgnu lib src providers tests
 
 # Note that the template file is called library.pc.in, but generates a
 # versioned .pc file using some magic in AC_CONFIG_FILES.
@@ -38,10 +38,12 @@ ALL_SOURCE_FILES = \
 	bootstrap.conf \
 	configure.ac \
 	Makefile.am \
+	libgnu/Makefile.am \
+	lib/Makefile.am \
+	lib/*.vala \
 	src/Makefile.am \
 	src/*.h \
 	src/enchant*.c \
-	src/*.vala \
 	providers/Makefile.am \
 	providers/*.[ch] \
 	providers/*.cpp \

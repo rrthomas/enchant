@@ -275,7 +275,7 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;                dict-&gt;m_provider_file = provider_file;</div>
 <div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;            }</div>
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> (<a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict, <a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * broker)</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker)</div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;                : m_dict (dict), m_broker (broker) {</div>
 <div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;                enchant_dict_describe (m_dict, s_describe_fn, <span class="keyword">this</span>);</div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;            }</div>
@@ -285,8 +285,8 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> (<span class="keyword">const</span> <a class="code" href="classenchant_1_1Dict.html">Dict</a> &amp; rhs);</div>
 <div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a>&amp; operator=(<span class="keyword">const</span> <a class="code" href="classenchant_1_1Dict.html">Dict</a> &amp; rhs);</div>
 <div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160; </div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;            <a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * m_dict;</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;            <a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * m_broker;</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;            <a class="code" href="struct__EnchantDict.html">EnchantDict</a> * m_dict;</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;            <a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * m_broker;</div>
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
 <div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;            std::string m_lang;</div>
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;            std::string m_provider_name;</div>
@@ -309,7 +309,7 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;            }</div>
 <div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160; </div>
 <div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> * request_dict (<span class="keyword">const</span> std::string &amp; lang) {</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;                <a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict = enchant_broker_request_dict (m_broker, lang.c_str());</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;                <a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict = enchant_broker_request_dict (m_broker, lang.c_str());</div>
 <div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160; </div>
 <div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;                <span class="keywordflow">if</span> (!dict) {</div>
 <div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classenchant_1_1Exception.html">enchant::Exception</a> (enchant_broker_get_error (m_broker));</div>
@@ -320,7 +320,7 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;            }</div>
 <div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160; </div>
 <div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> * request_pwl_dict (<span class="keyword">const</span> std::string &amp; pwl) {</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;                <a class="code" href="structstr__enchant__dict.html">EnchantDict</a> * dict = enchant_broker_request_pwl_dict (m_broker, pwl.c_str());</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;                <a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict = enchant_broker_request_pwl_dict (m_broker, pwl.c_str());</div>
 <div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160; </div>
 <div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;                <span class="keywordflow">if</span> (!dict) {</div>
 <div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classenchant_1_1Exception.html">enchant::Exception</a> (enchant_broker_get_error (m_broker));</div>
@@ -354,7 +354,7 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;            <a class="code" href="classenchant_1_1Broker.html">Broker</a> (<span class="keyword">const</span> <a class="code" href="classenchant_1_1Broker.html">Broker</a> &amp; rhs);</div>
 <div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;            <a class="code" href="classenchant_1_1Broker.html">Broker</a>&amp; operator=(<span class="keyword">const</span> <a class="code" href="classenchant_1_1Broker.html">Broker</a> &amp; rhs);</div>
 <div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160; </div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;            <a class="code" href="structstr__enchant__broker.html">EnchantBroker</a> * m_broker;</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;            <a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * m_broker;</div>
 <div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        }; <span class="comment">// class enchant::Broker</span></div>
 <div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;} <span class="comment">// enchant namespace</span></div>
 <div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160; </div>
@@ -362,8 +362,8 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="ttc" id="aclassenchant_1_1Broker_html"><div class="ttname"><a href="classenchant_1_1Broker.html">enchant::Broker</a></div><div class="ttdef"><b>Definition:</b> enchant++.h:210</div></div>
 <div class="ttc" id="aclassenchant_1_1Dict_html"><div class="ttname"><a href="classenchant_1_1Dict.html">enchant::Dict</a></div><div class="ttdef"><b>Definition:</b> enchant++.h:67</div></div>
 <div class="ttc" id="aclassenchant_1_1Exception_html"><div class="ttname"><a href="classenchant_1_1Exception.html">enchant::Exception</a></div><div class="ttdef"><b>Definition:</b> enchant++.h:47</div></div>
-<div class="ttc" id="astructstr__enchant__broker_html"><div class="ttname"><a href="structstr__enchant__broker.html">str_enchant_broker</a></div><div class="ttdef"><b>Definition:</b> lib.c:55</div></div>
-<div class="ttc" id="astructstr__enchant__dict_html"><div class="ttname"><a href="structstr__enchant__dict.html">str_enchant_dict</a></div><div class="ttdef"><b>Definition:</b> enchant-provider.h:125</div></div>
+<div class="ttc" id="astruct__EnchantBroker_html"><div class="ttname"><a href="struct__EnchantBroker.html">_EnchantBroker</a></div><div class="ttdef"><b>Definition:</b> broker.c:127</div></div>
+<div class="ttc" id="astruct__EnchantDict_html"><div class="ttname"><a href="struct__EnchantDict.html">_EnchantDict</a></div><div class="ttdef"><b>Definition:</b> broker.c:176</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

@@ -106,27 +106,21 @@ Collaboration diagram for DictionaryCheck_TestFixture:</div>
 <div class="dyncontent">
 <div class="center"><img src="structDictionaryCheck__TestFixture__coll__graph.png" border="0" usemap="#aDictionaryCheck__TestFixture_coll__map" alt="Collaboration graph"/></div>
 <map name="aDictionaryCheck__TestFixture_coll__map" id="aDictionaryCheck__TestFixture_coll__map">
-<area shape="rect" title=" " alt="" coords="77,260,269,287"/>
-<area shape="rect" href="structProvider__TestFixture.html" title=" " alt="" coords="101,184,244,211"/>
-<area shape="rect" href="structstr__enchant__provider.html" title=" " alt="" coords="101,95,244,121"/>
-<area shape="rect" href="structstr__enchant__dict.html" title=" " alt="" coords="5,5,124,32"/>
-<area shape="rect" href="structstr__enchant__broker.html" title=" " alt="" coords="148,5,280,32"/>
+<area shape="rect" title=" " alt="" coords="5,80,197,107"/>
+<area shape="rect" href="structProvider__TestFixture.html" title=" " alt="" coords="30,5,173,32"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a741f7e9e9cb4da62fd21e964c9a3a7cf"><td class="memItemLeft" align="right" valign="top"><a id="a741f7e9e9cb4da62fd21e964c9a3a7cf"></a>
-typedef std::multimap&lt; <a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>AddedWordsByDict</b></td></tr>
-<tr class="separator:a741f7e9e9cb4da62fd21e964c9a3a7cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a741f7e9e9cb4da62fd21e964c9a3a7cf"><td class="memItemLeft" align="right" valign="top"><a id="a741f7e9e9cb4da62fd21e964c9a3a7cf"></a>
-typedef std::multimap&lt; <a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>AddedWordsByDict</b></td></tr>
+typedef std::multimap&lt; EnchantDict *, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>AddedWordsByDict</b></td></tr>
 <tr class="separator:a741f7e9e9cb4da62fd21e964c9a3a7cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab1ae0f49f73cfa906f8df837f5deb5d0"><td class="memItemLeft" align="right" valign="top"><a id="ab1ae0f49f73cfa906f8df837f5deb5d0"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ReleaseDictionary</b> (<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *dict)</td></tr>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ReleaseDictionary</b> (EnchantDict *dict)</td></tr>
 <tr class="separator:ab1ae0f49f73cfa906f8df837f5deb5d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa99a0643d21911971035a55459d319c4"><td class="memItemLeft" align="right" valign="top"><a id="aa99a0643d21911971035a55459d319c4"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsWordInDictionary</b> (const std::string &amp;word)</td></tr>
@@ -135,19 +129,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsWordInDictionary</b
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>AddWordToDictionary</b> (const std::string &amp;word)</td></tr>
 <tr class="separator:a9d44815549d07b87437ebabd651842fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70a69ae86eb19fa6e1ee45eed56e43fa"><td class="memItemLeft" align="right" valign="top"><a id="a70a69ae86eb19fa6e1ee45eed56e43fa"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>AddWordToDictionary</b> (<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *dict, const std::string &amp;word)</td></tr>
-<tr class="separator:a70a69ae86eb19fa6e1ee45eed56e43fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1ae0f49f73cfa906f8df837f5deb5d0"><td class="memItemLeft" align="right" valign="top"><a id="ab1ae0f49f73cfa906f8df837f5deb5d0"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>ReleaseDictionary</b> (<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *dict)</td></tr>
-<tr class="separator:ab1ae0f49f73cfa906f8df837f5deb5d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa99a0643d21911971035a55459d319c4"><td class="memItemLeft" align="right" valign="top"><a id="aa99a0643d21911971035a55459d319c4"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsWordInDictionary</b> (const std::string &amp;word)</td></tr>
-<tr class="separator:aa99a0643d21911971035a55459d319c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d44815549d07b87437ebabd651842fc"><td class="memItemLeft" align="right" valign="top"><a id="a9d44815549d07b87437ebabd651842fc"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>AddWordToDictionary</b> (const std::string &amp;word)</td></tr>
-<tr class="separator:a9d44815549d07b87437ebabd651842fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a70a69ae86eb19fa6e1ee45eed56e43fa"><td class="memItemLeft" align="right" valign="top"><a id="a70a69ae86eb19fa6e1ee45eed56e43fa"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>AddWordToDictionary</b> (<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *dict, const std::string &amp;word)</td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>AddWordToDictionary</b> (EnchantDict *dict, const std::string &amp;word)</td></tr>
 <tr class="separator:a70a69ae86eb19fa6e1ee45eed56e43fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_structProvider__TestFixture"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_structProvider__TestFixture')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="structProvider__TestFixture.html">Provider_TestFixture</a></td></tr>
 <tr class="memitem:a5fe06c7aadae233ada28f99c4e2f9f9a inherit pub_methods_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="a5fe06c7aadae233ada28f99c4e2f9f9a"></a>
@@ -157,51 +139,36 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><b>Convert</b> (c
 std::wstring&#160;</td><td class="memItemRight" valign="bottom"><b>Convert</b> (const std::string &amp;s)</td></tr>
 <tr class="separator:a121f2569ef83d2dec367c905f6f515ce inherit pub_methods_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55c980baf7a5f18ea96a78bdf5af5950 inherit pub_methods_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="a55c980baf7a5f18ea96a78bdf5af5950"></a>
-<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>GetDefaultDictionary</b> ()</td></tr>
+EnchantDict *&#160;</td><td class="memItemRight" valign="bottom"><b>GetDefaultDictionary</b> ()</td></tr>
 <tr class="separator:a55c980baf7a5f18ea96a78bdf5af5950 inherit pub_methods_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaa92891b6aea09d220730b0d4f60b084 inherit pub_methods_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="aaa92891b6aea09d220730b0d4f60b084"></a>
-<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>GetDictionary</b> (const char *language)</td></tr>
-<tr class="separator:aaa92891b6aea09d220730b0d4f60b084 inherit pub_methods_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5fe06c7aadae233ada28f99c4e2f9f9a inherit pub_methods_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="a5fe06c7aadae233ada28f99c4e2f9f9a"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>Convert</b> (const std::wstring &amp;ws)</td></tr>
-<tr class="separator:a5fe06c7aadae233ada28f99c4e2f9f9a inherit pub_methods_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a121f2569ef83d2dec367c905f6f515ce inherit pub_methods_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="a121f2569ef83d2dec367c905f6f515ce"></a>
-std::wstring&#160;</td><td class="memItemRight" valign="bottom"><b>Convert</b> (const std::string &amp;s)</td></tr>
-<tr class="separator:a121f2569ef83d2dec367c905f6f515ce inherit pub_methods_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a55c980baf7a5f18ea96a78bdf5af5950 inherit pub_methods_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="a55c980baf7a5f18ea96a78bdf5af5950"></a>
-<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>GetDefaultDictionary</b> ()</td></tr>
-<tr class="separator:a55c980baf7a5f18ea96a78bdf5af5950 inherit pub_methods_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaa92891b6aea09d220730b0d4f60b084 inherit pub_methods_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="aaa92891b6aea09d220730b0d4f60b084"></a>
-<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>GetDictionary</b> (const char *language)</td></tr>
+EnchantDict *&#160;</td><td class="memItemRight" valign="bottom"><b>GetDictionary</b> (const char *language)</td></tr>
 <tr class="separator:aaa92891b6aea09d220730b0d4f60b084 inherit pub_methods_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a65520d76ce57ce1ef83ff744dfa18573"><td class="memItemLeft" align="right" valign="top"><a id="a65520d76ce57ce1ef83ff744dfa18573"></a>
-static bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsWordInDictionary</b> (<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *dict, const std::string &amp;word)</td></tr>
-<tr class="separator:a65520d76ce57ce1ef83ff744dfa18573"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65520d76ce57ce1ef83ff744dfa18573"><td class="memItemLeft" align="right" valign="top"><a id="a65520d76ce57ce1ef83ff744dfa18573"></a>
-static bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsWordInDictionary</b> (<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *dict, const std::string &amp;word)</td></tr>
+static bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsWordInDictionary</b> (EnchantDict *dict, const std::string &amp;word)</td></tr>
 <tr class="separator:a65520d76ce57ce1ef83ff744dfa18573"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a3915f091f9f7a72bb8c3a978e53ec070"><td class="memItemLeft" align="right" valign="top"><a id="a3915f091f9f7a72bb8c3a978e53ec070"></a>
-<a class="el" href="structstr__enchant__dict.html">EnchantDict</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_dict</b></td></tr>
-<tr class="separator:a3915f091f9f7a72bb8c3a978e53ec070"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abcb2c6b46e73e0b44b7c9dbc193cee8d"><td class="memItemLeft" align="right" valign="top"><a id="abcb2c6b46e73e0b44b7c9dbc193cee8d"></a>
+<tr class="memitem:a088d91adfee8d453a427638b2197cbac"><td class="memItemLeft" align="right" valign="top"><a id="a088d91adfee8d453a427638b2197cbac"></a>
+EnchantDict *&#160;</td><td class="memItemRight" valign="bottom"><b>_dict</b></td></tr>
+<tr class="separator:a088d91adfee8d453a427638b2197cbac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ab91251b389508247f7b96e37f32641"><td class="memItemLeft" align="right" valign="top"><a id="a6ab91251b389508247f7b96e37f32641"></a>
 const char *&#160;</td><td class="memItemRight" valign="bottom"><b>_provider_name</b></td></tr>
-<tr class="separator:abcb2c6b46e73e0b44b7c9dbc193cee8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a6ab91251b389508247f7b96e37f32641"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a59c75e187f9c5f29ed111ed62ef55adc"><td class="memItemLeft" align="right" valign="top"><a id="a59c75e187f9c5f29ed111ed62ef55adc"></a>
 AddedWordsByDict&#160;</td><td class="memItemRight" valign="bottom"><b>_addedWordsByDict</b></td></tr>
 <tr class="separator:a59c75e187f9c5f29ed111ed62ef55adc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_structProvider__TestFixture"><td colspan="2" onclick="javascript:toggleInherit('pub_attribs_structProvider__TestFixture')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="structProvider__TestFixture.html">Provider_TestFixture</a></td></tr>
-<tr class="memitem:a3d1a85496994e327802106e19f10a0e9 inherit pub_attribs_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="a3d1a85496994e327802106e19f10a0e9"></a>
-<a class="el" href="structstr__enchant__provider.html">EnchantProvider</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>_provider</b></td></tr>
-<tr class="separator:a3d1a85496994e327802106e19f10a0e9 inherit pub_attribs_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0977a08b06b92436e7b6f7b97e8b5c44 inherit pub_attribs_structProvider__TestFixture"><td class="memItemLeft" align="right" valign="top"><a id="a0977a08b06b92436e7b6f7b97e8b5c44"></a>
+EnchantProvider *&#160;</td><td class="memItemRight" valign="bottom"><b>_provider</b></td></tr>
+<tr class="separator:a0977a08b06b92436e7b6f7b97e8b5c44 inherit pub_attribs_structProvider__TestFixture"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>enchant-2.6.5/tests/enchant_providers/Dictionary/dictionary_check.cpp</li>
+<li>tests/enchant_providers/Dictionary/dictionary_check.cpp</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

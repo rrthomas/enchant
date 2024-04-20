@@ -1,7 +1,5 @@
 <map id="EnchantBrokerFreeDictTestFixture" name="EnchantBrokerFreeDictTestFixture">
-<area shape="rect" id="node1" title=" " alt="" coords="5,184,188,225"/>
-<area shape="rect" id="node2" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="11,95,183,121"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,155,188,196"/>
+<area shape="rect" id="node2" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="11,80,183,107"/>
 <area shape="rect" id="node3" href="$structEnchantTestFixture.html" title=" " alt="" coords="29,5,164,32"/>
-<area shape="rect" id="node4" href="$structstr__enchant__broker.html" title=" " alt="" coords="188,5,320,32"/>
-<area shape="rect" id="node5" href="$structstr__enchant__dict.html" title=" " alt="" coords="207,95,325,121"/>
 </map>

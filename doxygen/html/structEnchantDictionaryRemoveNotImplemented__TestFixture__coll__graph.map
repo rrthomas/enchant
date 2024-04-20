@@ -1,8 +1,6 @@
 <map id="EnchantDictionaryRemoveNotImplemented_TestFixture" name="EnchantDictionaryRemoveNotImplemented_TestFixture">
-<area shape="rect" id="node1" title=" " alt="" coords="5,275,204,316"/>
-<area shape="rect" id="node2" href="$structEnchantDictionaryTestFixture.html" title=" " alt="" coords="7,199,202,225"/>
-<area shape="rect" id="node3" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="19,95,191,121"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,229,204,271"/>
+<area shape="rect" id="node2" href="$structEnchantDictionaryTestFixture.html" title=" " alt="" coords="7,155,202,181"/>
+<area shape="rect" id="node3" href="$structEnchantBrokerTestFixture.html" title=" " alt="" coords="19,80,191,107"/>
 <area shape="rect" id="node4" href="$structEnchantTestFixture.html" title=" " alt="" coords="37,5,172,32"/>
-<area shape="rect" id="node5" href="$structstr__enchant__broker.html" title=" " alt="" coords="196,5,328,32"/>
-<area shape="rect" id="node6" href="$structstr__enchant__dict.html" title=" " alt="" coords="215,95,333,121"/>
 </map>
