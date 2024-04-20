@@ -126,3 +126,15 @@ TEST_FIXTURE(EnchantBrokerFreeTestFixture,
     _broker = NULL;
     CHECK(disposeDictionaryCalled);
 }
+
+TEST_FIXTURE(EnchantBrokerFreeTestFixture,
+             EnchantBrokerFree_CompositeDictionaryNotFreed_FreesDictionary)
+{
+    EnchantDict* dict = enchant_broker_request_dict(_broker, "en_GB:qaa");
+    CHECK(dict);
+    CHECK(!disposeDictionaryCalled);
+
+    enchant_broker_free(_broker);
+    _broker = NULL;
+    CHECK(disposeDictionaryCalled);
+}
