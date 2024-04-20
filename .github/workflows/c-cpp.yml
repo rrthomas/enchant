@@ -33,7 +33,7 @@ jobs:
     - name: make
       run: make --jobs=`nproc`
     - name: make check
-      run: make check --jobs=`nproc`
+      run: make check --jobs=`nproc` || ( cat tests/test-suite.log && exit 1 )
     - name: make distcheck
       # normal build is with ASAN, distcheck is without ASAN. Both are covered.
       run: make distcheck --jobs=`nproc`
