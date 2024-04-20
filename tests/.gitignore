@@ -4,8 +4,8 @@
 /main.test.exe
 /providers.test
 /providers.test.exe
-/enchant-composite.test
-/enchant-composite.test.exe
+/composite.test
+/composite.test.exe
 libenchant_*.so
 libenchant_*.dylib
 *enchant*.dll

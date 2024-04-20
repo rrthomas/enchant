@@ -282,19 +282,32 @@ public class EnchantBroker {
 		return dict;
 	}
 
-	public unowned EnchantDict? request_composite_dict(string composite_tag)
+	public unowned EnchantDict? request_dict_with_pwl(string composite_tag, string? pwl)
 			requires (composite_tag.length > 0)
 		{
+		// Parse the composite tag and check each is non-empty
+		var tags = composite_tag.split(":");
+		foreach (unowned string tag in tags)
+			if (tag.length == 0)
+				return null;
+
 		this.clear_error();
 
-		// Parse the composite tag
-		var tags = composite_tag.split(":"); // the tag will have several language tags separated by ":"
+		// Get the dictionaries, and return null if none found
 		var dict_list = new SList<weak EnchantDict>();
-		foreach (unowned string lang_tag in tags) {
-			var dict = this.request_dict(lang_tag);
-			if (dict != null)
-				dict_list.append(dict);
+		foreach (unowned string tag in tags) {
+			string normalized_tag = normalize_dictionary_tag(tag);
+			unowned EnchantDict dict = this._request_dict(normalized_tag, pwl);
+			if (dict == null)
+				dict = this._request_dict(iso_639_from_tag(normalized_tag), pwl);
+			if (dict == null)
+				return null;
+			dict_list.append(dict);
 		}
+
+		// If there was only one tag, return a single dictionary.
+		if (dict_list.length() == 1)
+			return dict_list.data;
 
 		// Create the composite dictionary
 		var comp_dict = new EnchantCompositeDict();
@@ -306,20 +319,6 @@ public class EnchantBroker {
 		dict.suggest_method = composite_dict_suggest;
 		dict.add_to_session_method = composite_dict_add_to_session;
 		dict.session = EnchantSession.with_implicit_pwl(null, composite_tag, null);
-
-		return dict;
-	}
-
-	public unowned EnchantDict? request_dict_with_pwl(string tag, string? pwl)
-			requires (tag.length > 0)
-		{
-		this.clear_error();
-
-		string normalized_tag = normalize_dictionary_tag(tag);
-		unowned EnchantDict dict = this._request_dict(normalized_tag, pwl);
-		if (dict == null)
-			dict = this._request_dict(iso_639_from_tag(normalized_tag), pwl);
-
 		return dict;
 	}
 
