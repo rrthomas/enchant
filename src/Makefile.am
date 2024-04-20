@@ -20,6 +20,7 @@ AM_VALAFLAGS += -D RELOCATABLE
 endif
 AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/lib $(ISYSTEM)$(top_srcdir)/lib $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
 
+# FIXME: Require Vala 0.58 when released, and remove copy of gnu.vapi
 VAPIS =	config.vapi internal.vapi gnu.vapi
 
 lib_LTLIBRARIES = libenchant-@ENCHANT_MAJOR_VERSION@.la
