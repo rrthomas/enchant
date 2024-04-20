@@ -75,7 +75,7 @@ delegate void EnchantPreConfigureFunc(EnchantProvider provider, string module_di
 public class EnchantBroker {
 	SList<EnchantProvider> provider_list;	/* list of all of the spelling backend providers */
 	HashTable<string, string> provider_ordering; /* map of language tag -> provider order */
-	List<EnchantDict> dict_list;
+	GenericSet<EnchantDict> dicts;
 
 	string _error;
 
@@ -86,7 +86,7 @@ public class EnchantBroker {
 
 		this.load_providers();
 		this.load_provider_ordering();
-		this.dict_list = new List<EnchantDict>();
+		this.dicts = new GenericSet<EnchantDict>(direct_hash, direct_equal);
 	}
 
 	~EnchantBroker() {
@@ -389,13 +389,13 @@ public class EnchantBroker {
 
 	public unowned EnchantDict new_dict() {
 		var dict = new EnchantDict();
-		this.dict_list.append(dict);
+		this.dicts.add(dict);
 		unowned var dict_ref = dict;
 		return dict_ref;
 	}
 
 	public void free_dict(EnchantDict dict) {
-		this.dict_list.remove(dict);
+		this.dicts.remove(dict);
 		this.clear_error();
 	}
 }
