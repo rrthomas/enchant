@@ -8,7 +8,7 @@ To build from git, or without relying on the generated files in a source
 release, automake, autoconf, libtool, pkg-config and git must be installed.
 
 (Note, the exact packages needed for certain distros may be found in
-.travis.yml and appveyor.yml.)
+.github/workflows/c-cpp.yml.)
 
 Run
 
@@ -31,10 +31,8 @@ Working in libenchant
 	3) Modular and well designed
 
     When you submit code for inclusion in libenchant, please keep those
-things in mind.  While performance is important please note that
-well-designed algorithms and data structures are fertile areas for
-development; obfuscated code to make a loop 3% faster is not.  Specifically,
-this means:
+things in mind.  Performance is not generally an issue: Enchant leaves the
+heavy lifting to its spelling providers.  Specifically, this means:
 
 	- Clarity of design and function are paramount
 	- Make sure your code does not generate warnings
@@ -45,11 +43,7 @@ Formatting style
 ----------------
 
    The formatting style of libenchant is a mix of various styles.  Please
-familiarise yourself with the GNU coding standards (shipped with most
-GNU/Linux systems as the standards.info file), then read the Linux
-kernel coding standards and ignore Linus's jokes.  Then look at the
-Gtk+ header files to get acquainted with how to write nice header files
-that are almost self documenting.
+follow the style that seems to predominate in any given area of the code base; broadly, there are different styles for the Vala library code, providers and commands, and the tests.  The public header files are written in GLib style.
 
    Emacs users should use the supplied .dir-locals.el.
 
@@ -57,7 +51,8 @@ that are almost self documenting.
 code honest as you will be forced to split your routines into more
 modular chunks (as detailed by Linus). 
    
-   On top of that, please:
+   On top of that, please in Vala follow the conventions of typical Vala
+code, and in C/C++:
 
 	- Follow the Gtk+ cleanliness conventions for function
 	  prototypes.
@@ -65,29 +60,11 @@ modular chunks (as detailed by Linus).
 	- Follow the Gtk+ namespace convention for function names:
 	  module_submodule_operation
 
-	- Every entry point to a public routine should use the
-	  g_return_if_fail and g_return_val_if_fail macros to verify
-	  that the parameters passed are valid.
-
-	- Under no circumstances use magic variables.  Use typedef
-	  enum { ... } type; to create enumerations.  Do not use
-	  integers to hold enumeration values: the compiler can help
-	  catch various errors.
-
-	- Use g_warning to mark spots that need to be reviewed or are
-	  not finished.
-
 	- Do not submit code that is just a temporary workaround for a
 	  full fledged feature.  We do not want to maintain limited
 	  features.  It is better to submit an implementation designed
 	  to be expanded and enhanced, even if it is not completely
 	  finished.
-
-	- Follow the libenchant commenting style, which is not the Gtk
-	  style;
-		/* ie. use this for
-		 * multi-line comments
-		 */
 
    All of this is to ensure the libenchant code will be kept within
 reasonable margins of maintainability for the future: Remember, in two years
@@ -97,8 +74,10 @@ might become a burden to the program maintainers.
    libenchant is intended to be a foundation for a various document-centric
 projects.
 
-   Cleaning code in libenchant is more important than trying not to break
-existing code.  Code clean-ups are always welcome.
+   Simplifying code in libenchant is important.  Simplifications are almost
+always welcome.  But please don't reformat code you're not editing, even
+where the formatting is inconsistent or ugly, as it makes the history of the
+project harder to understand.
 
 
 API documentation
@@ -118,9 +97,9 @@ To make a release, you'll need woger:
 
 https://github.com/rrthomas/woger
 
-and github-release, suitably configured:
+and gh:
 
-https://github.com/aktau/github-release
+https://cli.github.com
 
 Having tested and pushed all the changes, update the version number in
 configure.ac and write the NEWS entry and push those too.
