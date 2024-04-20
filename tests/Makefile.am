@@ -1,7 +1,7 @@
 ## Makefile.am for the tests subdirectory of Enchant
 #
 # Copyright (C) 2003 Dom Lachowicz
-#               2016-2023 Reuben Thomas
+#               2016-2024 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -89,10 +89,11 @@ libenchant_null_describe_la_LDFLAGS = $(libenchant_mock_provider_la_LDFLAGS)
 libenchant_null_describe_la_LIBADD = $(LIBENCHANT_COPY)
 libenchant_null_describe_la_SOURCES = $(libenchant_mock_provider_la_SOURCES)
 
-check_PROGRAMS = main.test providers.test enchant-composite.test
+check_PROGRAMS = main.test providers.test composite.test
 LOG_COMPILER = $(srcdir)/run-test
 # Make the tests run serially.
 providers.log: main.log
+composite.log: providers.log
 
 main_test_SOURCES = main.test.cpp \
 	EnchantBrokerTestFixture.h \
@@ -135,10 +136,10 @@ main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
 main_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
 main_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
-enchant_composite_test_SOURCES = enchant-composite.test.c
-enchant_composite_test_DEPENDENCIES = $(LIBENCHANT_COPY)
-enchant_composite_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
-enchant_composite_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
+composite_test_SOURCES = composite.test.c
+composite_test_DEPENDENCIES = $(LIBENCHANT_COPY)
+composite_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
+composite_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
 APPLESPELL_CONFIG = config/AppleSpell.config
 $(APPLESPELL_CONFIG): $(top_srcdir)/providers/AppleSpell.config

@@ -28,11 +28,7 @@
 
 
 static EnchantDict *request_dict(EnchantBroker *broker, const char *tag) {
-	EnchantDict *dict;
-	if (strchr(tag, ':') == NULL)
-		dict = enchant_broker_request_dict(broker, tag);
-	else
-		dict = enchant_broker_request_composite_dict(broker, tag);
+	EnchantDict *dict = enchant_broker_request_dict(broker, tag);
 	if (dict == NULL) {
 		const char *err = enchant_broker_get_error(broker);
 		fprintf(stderr, "Couldn't create dictionary for %s", tag);
@@ -48,7 +44,7 @@ static void test1() {
 	EnchantBroker *broker = enchant_broker_init();
 
 	//test string
-	char tc[]="abcd";
+	char tc[] = "abcd";
 
 	//create a normal dictionary to benchmark results
 	EnchantDict *eng_dict = request_dict(broker, "en_US");
@@ -60,7 +56,6 @@ static void test1() {
 
 	g_assert_cmpint(enchant_dict_check(eng_dict, tc, strlen(tc)), ==, enchant_dict_check(cdict, tc, strlen(tc)));
 
-	printf("test1 complete\n");
 	enchant_broker_free(broker);
 }
 
@@ -68,7 +63,7 @@ static void test2() {
 	EnchantBroker *broker = enchant_broker_init();
 
 	//test string
-	char tc[]="indien";
+	char tc[] = "indien";
 
 	//create a normal dictionary for en_US
 	EnchantDict *eng_dict = request_dict(broker, "en_US");
@@ -84,7 +79,6 @@ static void test2() {
 	g_assert_cmpint(enchant_dict_check(eng_dict, tc, strlen(tc)), !=, enchant_dict_check(cdict, tc, strlen(tc)));
 	g_assert_cmpint(enchant_dict_check(fr_dict, tc, strlen(tc)), ==, enchant_dict_check(cdict, tc, strlen(tc)));
 
-	printf("test2 complete\n");
 	enchant_broker_free(broker);
 }
 
@@ -92,17 +86,17 @@ static void test3() {
 	EnchantBroker *broker = enchant_broker_init();
 
 	//test string
-	char tc[]="‘abcdefghijklmnop";
+	char tc[] = "‘abcdefghijklmnop";
 
 	//create a normal dictionary for en_US
-	EnchantDict *eng_dict = enchant_broker_request_dict(broker, "en_US");
+	EnchantDict *eng_dict = request_dict(broker, "en_US");
 	g_assert_true(eng_dict != NULL);
 	//create a normal dictionary for fr_FR
-	EnchantDict *fr_dict = enchant_broker_request_dict(broker, "fr_FR");
+	EnchantDict *fr_dict = request_dict(broker, "fr_FR");
 	g_assert_true(fr_dict != NULL);
 
 	//create a composite dictionary Eng,Fr
-	EnchantDict *cdict = enchant_broker_request_composite_dict(broker, "en_US:fr_FR");
+	EnchantDict *cdict = request_dict(broker, "en_US:fr_FR");
 	g_assert_true(cdict != NULL);
 	
 	size_t n_sug_eng, n_sug_fr, n_sug_comp;
@@ -115,7 +109,6 @@ static void test3() {
 	g_assert_cmpint(n_sug_fr, ==, 0);
 	g_assert_cmpint(n_sug_comp, ==, 0);
 
-	printf("test3 complete\n");
 	enchant_broker_free(broker);
 }
 
@@ -123,18 +116,18 @@ static void test4() {
 	EnchantBroker *broker = enchant_broker_init();
 
 	//test string
-	char tc[]="‘teh";
+	char tc[] = "‘teh";
 
 	//create a normal dictionary for en_US
-	EnchantDict *eng_dict = enchant_broker_request_dict(broker, "en_US");
+	EnchantDict *eng_dict = request_dict(broker, "en_US");
 	g_assert_true(eng_dict != NULL);
 
 	//create a normal dictionary for fr_FR
-	EnchantDict *fr_dict = enchant_broker_request_dict(broker, "fr_FR");
+	EnchantDict *fr_dict = request_dict(broker, "fr_FR");
 	g_assert_true(fr_dict != NULL);
 
 	//create a composite dictionary Eng,Fr
-	EnchantDict *cdict = enchant_broker_request_composite_dict(broker, "en_US:fr_FR");
+	EnchantDict *cdict = request_dict(broker, "en_US:fr_FR");
 	g_assert_true(cdict != NULL);
 
 	size_t n_sug_eng,n_sug_fr,n_sug_comp;
@@ -145,7 +138,6 @@ static void test4() {
 	//just asserting the number of suggestions to begin with
 	g_assert_cmpint(n_sug_comp, ==, n_sug_eng + n_sug_fr);
 
-	printf("test4 complete\n");
 	enchant_broker_free(broker);
 }
 
