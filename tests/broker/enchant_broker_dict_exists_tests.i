@@ -125,7 +125,7 @@ TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
 // Test Error Conditions
 
 TEST_FIXTURE(EnchantBrokerDictExistsTestFixture, 
-			 EnchantBrokerDictExists_NullBroker_0)
+             EnchantBrokerDictExists_NullBroker_0)
 {
     CHECK_EQUAL(0, enchant_broker_dict_exists (NULL, "en_US"));
 }
@@ -140,4 +140,10 @@ TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
              EnchantBrokerDictExists_EmptyTag_0)
 {
     CHECK_EQUAL(0, enchant_broker_dict_exists (_broker, ""));
+}
+
+TEST_FIXTURE(EnchantBrokerDictExistsTestFixture, 
+             EnchantBrokerDictExists_CompositeTag_0)
+{
+    CHECK_EQUAL(0, enchant_broker_dict_exists (_broker, "qaa:qaa"));
 }

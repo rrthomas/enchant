@@ -125,6 +125,13 @@ TEST_FIXTURE(EnchantBrokerFreeDictTestFixture,
     enchant_broker_free_dict(_broker, dictionary2);
 }
 
+TEST_FIXTURE(EnchantBrokerFreeDictTestFixture, 
+             EnchantBrokerFreeDict_CompositeDictionary_NoCrash)
+{
+    EnchantDict* dictionary = enchant_broker_request_dict(_broker, "en-GB:qaa");
+    enchant_broker_free_dict(_broker, dictionary);
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerFreeDictTestFixture, 
