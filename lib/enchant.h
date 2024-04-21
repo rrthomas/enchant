@@ -168,10 +168,7 @@ void enchant_broker_describe (EnchantBroker * broker,
  * @word: The non-null word you wish to check, in UTF-8 encoding
  * @len: The byte length of @word, or -1 for strlen (@word)
  *
- * Will return an "incorrect" value if any of those pre-conditions
- * are not met.
- *
- * Returns: 0 if the word is correctly spelled, positive if not, negative if error
+ * Returns: 0 if the word is correctly spelled, positive if not, negative on invalid arguments or other error
  */
 int enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len);
 
