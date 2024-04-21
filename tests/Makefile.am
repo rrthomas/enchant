@@ -100,8 +100,11 @@ main_test_SOURCES = main.test.cpp \
 	EnchantTestFixture.h \
 	mock_provider.h \
 	dictionary/enchant_dict_add_tests.cpp \
+	dictionary/enchant_dict_add_tests.i \
 	dictionary/enchant_dict_add_to_session_tests.cpp \
+	dictionary/enchant_dict_add_to_session_tests.i \
 	dictionary/enchant_dict_check_tests.cpp \
+	dictionary/enchant_dict_check_tests.i \
 	dictionary/enchant_dict_describe_tests.cpp \
 	dictionary/enchant_dict_free_string_list_tests.cpp \
 	dictionary/enchant_dict_get_error_tests.cpp \
@@ -110,8 +113,10 @@ main_test_SOURCES = main.test.cpp \
 	dictionary/enchant_dict_is_removed_tests.cpp \
 	dictionary/enchant_dict_is_word_character_tests.cpp \
 	dictionary/enchant_dict_remove_from_session_tests.cpp \
+	dictionary/enchant_dict_remove_from_session_tests.i \
 	dictionary/enchant_dict_remove_tests.cpp \
 	dictionary/enchant_dict_suggest_tests.cpp \
+	dictionary/enchant_dict_suggest_tests.i \
 	broker/enchant_broker_describe_tests.cpp \
 	broker/enchant_broker_dict_exists_tests.cpp \
 	broker/enchant_broker_dict_exists_tests.i \
@@ -125,8 +130,10 @@ main_test_SOURCES = main.test.cpp \
 	broker/enchant_broker_request_pwl_dict_tests.cpp \
 	broker/enchant_broker_set_ordering_tests.cpp \
 	pwl/enchant_pwl_tests.cpp \
+	pwl/enchant_pwl_tests.i \
 	provider/enchant_provider_broker_set_error_tests.cpp \
 	provider/enchant_provider_dict_set_error_tests.cpp \
+	provider/enchant_provider_dict_set_error_tests.i \
 	provider/enchant_provider_get_prefix_dir_tests.cpp \
 	provider/enchant_provider_get_user_config_dirs_tests.cpp \
 	provider/enchant_provider_get_user_language_tests.cpp \

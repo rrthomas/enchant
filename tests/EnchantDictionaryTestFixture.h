@@ -161,7 +161,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         return FileHasContents(GetExcludeDictFileName());
     }
 
-	bool BrokerPWLFileHasContents()
+    bool BrokerPWLFileHasContents()
     {
         return FileHasContents(_pwlFileName);
     }

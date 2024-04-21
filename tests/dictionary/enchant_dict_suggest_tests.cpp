@@ -40,8 +40,8 @@ static enum SuggestBehavior{
 struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
 {
     //Setup
-    EnchantDictionarySuggestTestFixtureBase(ConfigureHook userConfiguration):
-            EnchantDictionaryTestFixture(userConfiguration)
+    EnchantDictionarySuggestTestFixtureBase(ConfigureHook userConfiguration, const std::string& languageTag="qaa"):
+            EnchantDictionaryTestFixture(userConfiguration, languageTag)
     { 
         dictSuggestCalled = false;
         _suggestions = NULL;
@@ -111,14 +111,21 @@ static void DictionarySuggest_ProviderConfiguration (EnchantProvider * me, const
 
 
 
-struct EnchantDictionarySuggest_TestFixture : EnchantDictionarySuggestTestFixtureBase
+struct EnchantDictionarySuggest_TestFixture_qaa : EnchantDictionarySuggestTestFixtureBase
 {
     //Setup
-    EnchantDictionarySuggest_TestFixture():
-            EnchantDictionarySuggestTestFixtureBase(DictionarySuggest_ProviderConfiguration)
+    EnchantDictionarySuggest_TestFixture_qaa():
+            EnchantDictionarySuggestTestFixtureBase(DictionarySuggest_ProviderConfiguration, "qaa")
     { }
 };
 
+struct EnchantDictionarySuggest_TestFixture_qaaqaa : EnchantDictionarySuggestTestFixtureBase
+{
+    //Setup
+    EnchantDictionarySuggest_TestFixture_qaaqaa():
+            EnchantDictionarySuggestTestFixtureBase(DictionarySuggest_ProviderConfiguration, "qaa,qaa")
+    { }
+};
 
 
 
@@ -136,221 +143,28 @@ static void DictionaryNoSuggest_ProviderConfiguration (EnchantProvider * me, con
      me->dispose_dict = MockProviderDisposeDictionary;
 }
 
-struct EnchantDictionarySuggestNotImplemented_TestFixture : EnchantDictionarySuggestTestFixtureBase
+struct EnchantDictionarySuggestNotImplemented_TestFixture_qaa : EnchantDictionarySuggestTestFixtureBase
 {
     //Setup
-    EnchantDictionarySuggestNotImplemented_TestFixture():
-            EnchantDictionarySuggestTestFixtureBase(DictionaryNoSuggest_ProviderConfiguration)
+    EnchantDictionarySuggestNotImplemented_TestFixture_qaa():
+            EnchantDictionarySuggestTestFixtureBase(DictionaryNoSuggest_ProviderConfiguration, "qaa")
     { }
 };
 
-
-/**
- * enchant_dict_suggest
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to find suggestions for, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- * @out_n_suggs: The location to store the # of suggestions returned, or %null
- *
- * Will return an %null value if any of those pre-conditions
- * are not met.
- *
- * Returns: A %null terminated list of UTF-8 encoded suggestions, or %null
- */
-/////////////////////////////////////////////////////////////////////////////
-// Test Normal Operation
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_LenComputed)
+struct EnchantDictionarySuggestNotImplemented_TestFixture_qaaqaa : EnchantDictionarySuggestTestFixtureBase
 {
-    size_t cSuggestions;
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
-    CHECK(_suggestions);
-    CHECK_EQUAL(std::string("helo"), suggestWord);
-    CHECK_EQUAL(4, cSuggestions);
+    //Setup
+    EnchantDictionarySuggestNotImplemented_TestFixture_qaaqaa():
+            EnchantDictionarySuggestTestFixtureBase(DictionaryNoSuggest_ProviderConfiguration, "qaa,qaa")
+    { }
+};
 
-    std::vector<std::string> suggestions;
-    if(_suggestions != NULL){
-        suggestions.insert(suggestions.begin(), _suggestions, _suggestions+cSuggestions);
-    }
+#define EnchantDictionarySuggest_TestFixture EnchantDictionarySuggest_TestFixture_qaa
+#define EnchantDictionarySuggestNotImplemented_TestFixture EnchantDictionarySuggestNotImplemented_TestFixture_qaa
+#include "enchant_dict_suggest_tests.i"
 
-    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo"), suggestions, std::min((size_t)4,cSuggestions));
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_LenSpecified)
-{
-    size_t cSuggestions;
-    _suggestions = enchant_dict_suggest(_dict, "helodisregard me", 4, &cSuggestions);
-    CHECK(_suggestions);
-    CHECK_EQUAL(std::string("helo"), suggestWord);
-    CHECK_EQUAL(4, cSuggestions);
-
-    std::vector<std::string> suggestions;
-    if(_suggestions != NULL){
-        suggestions.insert(suggestions.begin(), _suggestions, _suggestions+cSuggestions);
-    }
-
-    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo"), suggestions, std::min((size_t)4,cSuggestions));
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_StringListFreed)
-{
-    size_t cSuggs;
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggs);
-    CHECK(dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_NullOutputSuggestionCount)
-{
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, NULL);
-    CHECK(_suggestions);
-    CHECK(dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_DuplicateSuggestionsFromPersonal_notIncluded)
-{
-    size_t cSuggestions;
-
-    enchant_dict_add(_dict, "aelo", -1);
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
-    CHECK(_suggestions);
-    CHECK_EQUAL(4, cSuggestions);
-
-    std::vector<std::string> suggestions;
-    if(_suggestions != NULL){
-        suggestions.insert(suggestions.begin(), _suggestions, _suggestions+cSuggestions);
-    }
-
-    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo"), suggestions, std::min((size_t)4,cSuggestions));
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_SuggestionExcluded_Null)
-{
-    suggestBehavior = returnFianceNfc;
-    RemoveWordFromDictionary(Convert(L"fianc\xe9"));  // u00e9 = Latin small letter e with acute
-
-    _suggestions = enchant_dict_suggest(_dict, "fiance", -1, NULL);
-    CHECK(!_suggestions);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture, 
-             EnchantDictionarySuggest_HasPreviousError_ErrorCleared)
-{
-    SetErrorOnMockDictionary("something bad happened");
-
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, NULL);
-    CHECK_EQUAL((void*)NULL, (void*)enchant_dict_get_error(_dict));
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Error Conditions
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_NullDictionary_NullSuggestions)
-{
-    _suggestions = enchant_dict_suggest(NULL, "helo", -1, NULL);
-
-    CHECK(!_suggestions);
-    CHECK(!dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_NullWord_NullSuggestions)
-{
-    _suggestions = enchant_dict_suggest(_dict, NULL, -1, NULL);
-
-    CHECK(!_suggestions);
-    CHECK(!dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_EmptyWord_NullSuggestions)
-{
-    _suggestions = enchant_dict_suggest(_dict, "", -1, NULL);
-
-    CHECK(!_suggestions);
-    CHECK(!dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_WordSize0_NullSuggestions)
-{
-    _suggestions = enchant_dict_suggest(_dict, "helo", 0, NULL);
-
-    CHECK(!_suggestions);
-    CHECK(!dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_InvalidUtf8Correction_DoNothing)
-{
-    _suggestions = enchant_dict_suggest(_dict, "\xa5\xf1\x08", -1, NULL);
-
-    CHECK(!_suggestions);
-    CHECK(!dictSuggestCalled);
-}
-
-
-TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
-             EnchantDictionarySuggestNotImplemented_NullSuggestions)
-{
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, NULL);
-
-    CHECK(!_suggestions);
-    CHECK(!dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_SuggestionListWithInvalidUtf8_InvalidSuggestionIgnored_FreeCalled)
-{
-    suggestBehavior = returnFourOneInvalidUtf8;
-    size_t cSuggestions;
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
-    CHECK(_suggestions);
-    CHECK(dictSuggestCalled);
-
-    CHECK_EQUAL(3, cSuggestions);
-
-    std::vector<std::string> suggestions;
-    if(_suggestions != NULL){
-        suggestions.insert(suggestions.begin(), _suggestions, _suggestions+cSuggestions);
-    }
-
-    CHECK_ARRAY_EQUAL(GetExpectedSuggestions("helo",1), suggestions, std::min((size_t)3,cSuggestions));
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_WordNfcInDictionaryNfdInPwl_ReturnsFromDict)
-{
-    suggestBehavior = returnFianceNfc;
-
-    ExternalAddWordToDictionary(Convert(L"fiance\x301")); // NFD u0301 = Combining acute accent
-
-    ReloadTestDictionary();
-
-    size_t cSuggestions;
-    _suggestions = enchant_dict_suggest(_dict, "fiance", -1, &cSuggestions);
-    CHECK(_suggestions);
-
-    CHECK_EQUAL(1, cSuggestions);
-    CHECK_EQUAL(Convert(L"fianc\xe9"), _suggestions[0]);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
-             EnchantDictionarySuggest_WordInDictionaryAndExclude_NotInSuggestions)
-{
-    ExternalAddWordToExclude("hello");
-    ExternalAddWordToDictionary("hello");
-
-    ReloadTestDictionary();
-
-    size_t cSuggestions;
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
-    CHECK(!_suggestions);
-
-    CHECK_EQUAL(0, cSuggestions);
-}
-
+#undef EnchantDictionarySuggest_TestFixture
+#define EnchantDictionarySuggest_TestFixture EnchantDictionarySuggest_TestFixture_qaaqaa
+#undef EnchantDictionarySuggestNotImplemented_TestFixture
+#define EnchantDictionarySuggestNotImplemented_TestFixture EnchantDictionarySuggestNotImplemented_TestFixture_qaaqaa
+#include "enchant_dict_suggest_tests.i"

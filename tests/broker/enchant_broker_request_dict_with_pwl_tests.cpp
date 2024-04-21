@@ -62,17 +62,6 @@ struct EnchantBrokerRequestDictionaryWithPwl_TestFixture : EnchantBrokerTestFixt
     EnchantDict* _dict;
 };
 
-/**
- * enchant_broker_request_dict_with_pwl
- * @broker: A non-null #EnchantBroker
- * @tag: The non-null language tag or tags you wish to request a dictionary for ("en_US", "de_DE", "en_US:fr_FR", ...)
- * @pwl: A non-null pathname in the GLib file name encoding (UTF-8 on Windows) to the personal wordlist file
- *
- * Returns: An #EnchantDict, or %null if no suitable dictionary could be found, or if the pwl could not be opened.
- */
-
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 
@@ -164,14 +153,14 @@ TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
 TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
              EnchantBrokerRequestDictionaryWithPwl_DifferentCase_Composite_Finds)
 {
-  _dict = enchant_broker_request_dict_with_pwl(_broker, "QAA:en_GB", _pwlFileName.c_str());
+  _dict = enchant_broker_request_dict_with_pwl(_broker, "QAA,en_GB", _pwlFileName.c_str());
   CHECK(_dict);
 }
 
 TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
              EnchantBrokerRequestDictionaryWithPwl_DifferentCase_SameCompositeTwice_Finds)
 {
-  _dict = enchant_broker_request_dict_with_pwl(_broker, "QAA:qaa", _pwlFileName.c_str());
+  _dict = enchant_broker_request_dict_with_pwl(_broker, "QAA,qaa", _pwlFileName.c_str());
   CHECK(_dict);
 }
 
@@ -221,7 +210,7 @@ TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
              EnchantBrokerRequestDictionaryWithPwl_EmptyLanguageCompositeTagFirst_NULL)
 {
 
-    _dict = enchant_broker_request_dict_with_pwl(_broker, ":en", _pwlFileName.c_str());
+    _dict = enchant_broker_request_dict_with_pwl(_broker, ",en", _pwlFileName.c_str());
 
     CHECK_EQUAL((void*)NULL, _dict);
     CHECK(!requestDictionaryCalled);
@@ -231,7 +220,7 @@ TEST_FIXTURE(EnchantBrokerRequestDictionaryWithPwl_TestFixture,
              EnchantBrokerRequestDictionaryWithPwl_EmptyLanguageCompositeTagSecond_NULL)
 {
 
-    _dict = enchant_broker_request_dict_with_pwl(_broker, "en:", _pwlFileName.c_str());
+    _dict = enchant_broker_request_dict_with_pwl(_broker, "en,", _pwlFileName.c_str());
 
     CHECK_EQUAL((void*)NULL, _dict);
     CHECK(!requestDictionaryCalled);
