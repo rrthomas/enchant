@@ -60,6 +60,8 @@ static bool zemberek_service_is_running ()
    return true;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
 class Zemberek
 {
 public:
@@ -73,6 +75,7 @@ private:
     DBusGConnection *connection;
     DBusGProxy *proxy;
 };
+#pragma GCC diagnostic pop
 
 Zemberek::Zemberek()
   : connection(nullptr), proxy(nullptr)
