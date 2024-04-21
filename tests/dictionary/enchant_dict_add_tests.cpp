@@ -23,74 +23,25 @@
 #include <enchant.h>
 #include "EnchantDictionaryTestFixture.h"
 
-/**
- * enchant_dict_add
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to add to your personal dictionary, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- *
- * Remarks: if the word exists in the exclude dictionary, it will be removed from the 
- *          exclude dictionary
- */
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Normal Operation
-TEST_FIXTURE(EnchantDictionaryTestFixture,
-             EnchantDictionaryAdd_WordExistsInDictionary)
+struct EnchantDictionaryAdd_TestFixture_qaa : EnchantDictionaryTestFixture
 {
-    enchant_dict_add(_dict, "hello", -1);
-    CHECK(IsWordInDictionary("hello"));
-}
+    //Setup
+    EnchantDictionaryAdd_TestFixture_qaa():
+            EnchantDictionaryTestFixture(BasicDictionary_ProviderConfiguration, "qaa")
+    { }
+};
 
-TEST_FIXTURE(EnchantDictionaryTestFixture,
-             EnchantDictionaryAdd_WordExistsInSession)
+struct EnchantDictionaryAdd_TestFixture_qaaqaa : EnchantDictionaryTestFixture
 {
-    enchant_dict_add(_dict, "hello", -1);
-    CHECK(IsWordInSession("hello"));
-}
+    //Setup
+    EnchantDictionaryAdd_TestFixture_qaaqaa():
+            EnchantDictionaryTestFixture(BasicDictionary_ProviderConfiguration, "qaa,qaa")
+    { }
+};
 
-TEST_FIXTURE(EnchantDictionaryTestFixture,
-             EnchantDictionaryAdd_WordAddedToEnchantPwlFile)
-{
-    CHECK(!PersonalWordListFileHasContents());
-    enchant_dict_add(_dict, "hello", -1);
-    CHECK(PersonalWordListFileHasContents());
-}
+#define EnchantDictionaryAdd_TestFixture EnchantDictionaryAdd_TestFixture_qaa
+#include "enchant_dict_add_tests.i"
 
-TEST_FIXTURE(EnchantDictionaryTestFixture,
-             EnchantDictionaryAdd_WordExistsInExclude_RemovedFromExcludeAddedToPersonal)
-{
-    enchant_dict_remove(_dict, "personal", -1);
-    CHECK(ExcludeFileHasContents());
-    enchant_dict_add(_dict, "personal", -1);
-    CHECK(!ExcludeFileHasContents());
-    CHECK(PersonalWordListFileHasContents());
-}
-
-TEST_FIXTURE(EnchantDictionaryTestFixture,
-             EnchantDictionaryAdd_InBrokerPwl)
-{
-    enchant_dict_add(_pwl, "personal", -1);
-    CHECK(!PersonalWordListFileHasContents());
-}
-
-TEST_FIXTURE(EnchantDictionaryTestFixture,
-             EnchantDictionaryAdd_IsPermanent)
-{
-    enchant_dict_add(_dict, "hello", -1);
-    CHECK(IsWordInDictionary("hello"));
-
-    ReloadTestDictionary();
-
-    CHECK(IsWordInDictionary("hello"));
-}
-
-
-TEST_FIXTURE(EnchantDictionaryTestFixture, 
-             EnchantDictionaryAdd_HasPreviousError_ErrorCleared)
-{
-    SetErrorOnMockDictionary("something bad happened");
-
-    enchant_dict_add(_dict, "hello", -1);
-    CHECK_EQUAL((void*)NULL, (void*)enchant_dict_get_error(_dict));
-}
+#undef EnchantDictionaryAdd_TestFixture
+#define EnchantDictionaryAdd_TestFixture EnchantDictionaryAdd_TestFixture_qaaqaa
+#include "enchant_dict_add_tests.i"

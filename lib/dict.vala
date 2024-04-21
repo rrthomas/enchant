@@ -169,8 +169,9 @@ public class EnchantDict {
 		return sb.end();
 	}
 
-	[CCode (array_length = false)]
-	public string[]? suggest(string word_buf, real_ssize_t len, real_size_t *out_n_suggs) {
+	// FIXME: distinguish error from no results (currently both return null).
+	[CCode (array_length_pos = 3, array_length_type = "size_t")]
+	public string[]? suggest(string word_buf, real_ssize_t len) {
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return null;
@@ -187,9 +188,6 @@ public class EnchantDict {
 					dict_suggs = null;
 			}
 		}
-
-		if (out_n_suggs != null)
-			*out_n_suggs = dict_suggs != null ? dict_suggs.length : 0;
 
 		return dict_suggs;
 	}

@@ -48,172 +48,52 @@ static void DictionaryAddToSession_ProviderConfiguration (EnchantProvider * me, 
      me->dispose_dict = MockProviderDisposeDictionary;
 }
 
-struct EnchantDictionaryAddToSession_TestFixture : EnchantDictionaryTestFixture
+struct EnchantDictionaryAddToSession_TestFixture_qaa : EnchantDictionaryTestFixture
 {
     //Setup
-    EnchantDictionaryAddToSession_TestFixture():
-            EnchantDictionaryTestFixture(DictionaryAddToSession_ProviderConfiguration)
+    EnchantDictionaryAddToSession_TestFixture_qaa():
+            EnchantDictionaryTestFixture(DictionaryAddToSession_ProviderConfiguration, "qaa")
     { 
         addToSessionCalled = false;
     }
 };
 
-struct EnchantDictionaryAddToSessionNotImplemented_TestFixture : EnchantDictionaryTestFixture
+struct EnchantDictionaryAddToSession_TestFixture_qaaqaa : EnchantDictionaryTestFixture
 {
     //Setup
-    EnchantDictionaryAddToSessionNotImplemented_TestFixture():
-            EnchantDictionaryTestFixture(EmptyDictionary_ProviderConfiguration)
+    EnchantDictionaryAddToSession_TestFixture_qaaqaa():
+            EnchantDictionaryTestFixture(DictionaryAddToSession_ProviderConfiguration, "qaa,qaa")
     { 
         addToSessionCalled = false;
     }
 };
-/**
- * enchant_dict_add_to_session
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to add to this spell-checking session, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- *
- */
 
-/////////////////////////////////////////////////////////////////////////////
-// Test Normal Operation
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_WordNotAddedToEnchantPwlFile)
+struct EnchantDictionaryAddToSessionNotImplemented_TestFixture_qaa : EnchantDictionaryTestFixture
 {
-    enchant_dict_add_to_session(_dict, "hello", -1);
-    CHECK(!PersonalWordListFileHasContents());
-}
+    //Setup
+    EnchantDictionaryAddToSessionNotImplemented_TestFixture_qaa():
+            EnchantDictionaryTestFixture(EmptyDictionary_ProviderConfiguration, "qaa")
+    { 
+        addToSessionCalled = false;
+    }
+};
 
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_PassedOnToProvider_LenComputed)
+struct EnchantDictionaryAddToSessionNotImplemented_TestFixture_qaaqaa : EnchantDictionaryTestFixture
 {
-    enchant_dict_add_to_session(_dict, "hello", -1);
-    CHECK(addToSessionCalled);
-    CHECK_EQUAL(std::string("hello"), wordToAdd);
-}
+    //Setup
+    EnchantDictionaryAddToSessionNotImplemented_TestFixture_qaaqaa():
+            EnchantDictionaryTestFixture(EmptyDictionary_ProviderConfiguration, "qaa,qaa")
+    { 
+        addToSessionCalled = false;
+    }
+};
 
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_PassedOnToProvider_LenSpecified)
-{
-    enchant_dict_add_to_session(_dict, "hellodisregard me", 5);
-    CHECK(addToSessionCalled);
-    CHECK_EQUAL(std::string("hello"), wordToAdd);
-}
+#define EnchantDictionaryAddToSession_TestFixture EnchantDictionaryAddToSession_TestFixture_qaa
+#define EnchantDictionaryAddToSessionNotImplemented_TestFixture EnchantDictionaryAddToSessionNotImplemented_TestFixture_qaa
+#include "enchant_dict_add_to_session_tests.i"
 
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_WordExistsInSession_StillCallsProvider)
-{
-    enchant_dict_add_to_session(_dict, "session", -1);
-    addToSessionCalled=false;
-    wordToAdd = std::string();
-
-    enchant_dict_add_to_session(_dict, "session", -1);
-    CHECK(addToSessionCalled);
-    CHECK_EQUAL(std::string("session"), wordToAdd);
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_WordExistsInPersonal_StillCallsProvider)
-{
-    enchant_dict_add(_dict, "personal", -1);
-    enchant_dict_add_to_session(_dict, "personal", -1);
-    CHECK(addToSessionCalled);
-    CHECK_EQUAL(std::string("personal"), wordToAdd);
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_WordExistsInExclude_AddedToSessionNotRemovedFromExcludeFile)
-{
-    enchant_dict_remove(_dict, "personal", -1);
-
-    enchant_dict_add_to_session(_dict, "personal", -1);
-    CHECK(IsWordInDictionary("personal"));
-    CHECK(ExcludeFileHasContents());
-}
-
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_WordAddedToSession)
-{
-    enchant_dict_add_to_session(_dict, "hello", -1);
-    CHECK(IsWordInSession("hello"));
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_InBrokerSession)
-{
-    enchant_dict_add_to_session(_pwl, "personal", -1);
-    CHECK(!addToSessionCalled);
-    CHECK(!PersonalWordListFileHasContents());
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_IsNotPermanent)
-{
-    enchant_dict_add_to_session(_dict, "hello", -1);
-    CHECK(IsWordInSession("hello"));
-
-    ReloadTestDictionary();
-
-    CHECK(!IsWordInSession("hello"));
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture, 
-             EnchantDictionaryAddToSession_HasPreviousError_ErrorCleared)
-{
-    SetErrorOnMockDictionary("something bad happened");
-
-    enchant_dict_add_to_session(_dict, "hello", -1);
-    CHECK_EQUAL((void*)NULL, (void*)enchant_dict_get_error(_dict));
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Error Conditions
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_NullDictionary_NotAdded)
-{
-    enchant_dict_add_to_session(NULL, "hello", -1);
-    CHECK(!addToSessionCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_NullWord_NotAdded)
-{
-    enchant_dict_add_to_session(_dict, NULL, -1);
-    CHECK(!addToSessionCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_EmptyWord_NotAdded)
-{
-    enchant_dict_add_to_session(_dict, "", -1);
-    CHECK(!addToSessionCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_WordSize0_NotAdded)
-{
-    enchant_dict_add_to_session(_dict, "hello", 0);
-    CHECK(!addToSessionCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_InvalidUtf8Word_NotAdded)
-{
-    enchant_dict_add_to_session(_dict, "\xa5\xf1\x08", -1);
-    CHECK(!addToSessionCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSessionNotImplemented_TestFixture,
-             EnchantDictionaryAddToSessionNotImplemented_WordAddedToSession)
-{
-    enchant_dict_add_to_session(_dict, "hello", -1);
-    CHECK(IsWordInSession("hello"));
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSessionNotImplemented_TestFixture,
-             EnchantDictionaryAddToSessionNotImplemented_NotPassedOnToProvider)
-{
-    enchant_dict_add_to_session(_dict, "hello", -1);
-    CHECK(!addToSessionCalled);
-}
+#undef EnchantDictionaryAddToSession_TestFixture
+#define EnchantDictionaryAddToSession_TestFixture EnchantDictionaryAddToSession_TestFixture_qaaqaa
+#undef EnchantDictionaryAddToSessionNotImplemented_TestFixture
+#define EnchantDictionaryAddToSessionNotImplemented_TestFixture EnchantDictionaryAddToSessionNotImplemented_TestFixture_qaaqaa
+#include "enchant_dict_add_to_session_tests.i"

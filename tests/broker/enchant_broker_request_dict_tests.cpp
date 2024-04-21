@@ -56,17 +56,6 @@ struct EnchantBrokerRequestDictionary_TestFixture : EnchantBrokerTestFixture
     EnchantDict* _dict;
 };
 
-/**
- * enchant_broker_request_dict
- * @broker: A non-null #EnchantBroker
- * @tag: The non-null language tag or tags you wish to request a dictionary for ("en_US", "de_DE", "en_US:fr_FR", ...)
- *
- * Returns: An #EnchantDict, or %null if no suitable dictionary could be found.
- * The default personal wordlist file is used.
- */
-
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 
@@ -158,14 +147,14 @@ TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
 TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture, 
              EnchantBrokerRequestDictionary_Composite_Finds)
 {
-  _dict = enchant_broker_request_dict(_broker, "QAA:en_GB");
+  _dict = enchant_broker_request_dict(_broker, "QAA,en_GB");
   CHECK(_dict);
 }
 
 TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture, 
              EnchantBrokerRequestDictionary_SameCompositeTwice_Finds)
 {
-  _dict = enchant_broker_request_dict(_broker, "QAA:qaa");
+  _dict = enchant_broker_request_dict(_broker, "QAA,qaa");
   CHECK(_dict);
 }
 
@@ -213,7 +202,7 @@ TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
 TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
              EnchantBrokerRequestDictionary_EmptyLanguageCompositeTagFirst_NULL)
 {
-    _dict = enchant_broker_request_dict(_broker, ":en");
+    _dict = enchant_broker_request_dict(_broker, ",en");
 
     CHECK_EQUAL((void*)NULL, _dict);
     CHECK(!requestDictionaryCalled);
@@ -222,7 +211,7 @@ TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
 TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
              EnchantBrokerRequestDictionary_EmptyLanguageCompositeTagSecond_NULL)
 {
-    _dict = enchant_broker_request_dict(_broker, "en:");
+    _dict = enchant_broker_request_dict(_broker, "en,");
 
     CHECK_EQUAL((void*)NULL, _dict);
     CHECK(!requestDictionaryCalled);

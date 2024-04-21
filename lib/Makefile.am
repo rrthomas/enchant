@@ -33,6 +33,7 @@ libenchant_@ENCHANT_MAJOR_VERSION@_la_SOURCES = \
 	enchant.h enchant-provider.h pwl.h \
 	api.vala \
 	broker.vala \
+	composite.vala \
 	dict.vala \
 	provider.vala \
 	pwl.vala \

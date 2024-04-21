@@ -50,91 +50,33 @@ void EnchantSingleDictionaryDescribeAssignUserDataToStaticCallback (const char *
 struct EnchantDictionaryDescribe_TestFixtureBase : EnchantDictionaryTestFixture
 {
     //Setup
-    EnchantDictionaryDescribe_TestFixtureBase(ConfigureHook userConfig):
-            EnchantDictionaryTestFixture(userConfig)
+    EnchantDictionaryDescribe_TestFixtureBase(ConfigureHook userConfig, const std::string& languageTag="qaa"):
+            EnchantDictionaryTestFixture(userConfig, languageTag)
     { 
         callbackCalled = false;
     }
     DictionaryDescription _description;
 };
 
-struct EnchantDictionaryDescribe_TestFixture : EnchantDictionaryDescribe_TestFixtureBase
+struct EnchantDictionaryDescribe_TestFixture_qaa : EnchantDictionaryDescribe_TestFixtureBase
 {
     //Setup
-    EnchantDictionaryDescribe_TestFixture():
-            EnchantDictionaryDescribe_TestFixtureBase(EmptyDictionary_ProviderConfiguration)
+    EnchantDictionaryDescribe_TestFixture_qaa():
+            EnchantDictionaryDescribe_TestFixtureBase(EmptyDictionary_ProviderConfiguration, "qaa")
     { }
 };
 
-
-/**
- * enchant_dict_describe
- * @broker: A non-null #EnchantDict
- * @dict: A non-null #EnchantDictDescribeFn
- * @user_data: Optional user-data
- *
- * Describes an individual dictionary
- */
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Normal Operation
-TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
-             EnchantDictionaryDescribe)
+struct EnchantDictionaryDescribe_TestFixture_qaaqaa : EnchantDictionaryDescribe_TestFixtureBase
 {
-    enchant_dict_describe(_dict, EnchantSingleDictionaryDescribeCallback, &_description);
-    CHECK(callbackCalled);
-    CHECK(_description.DataIsComplete());
-    CHECK_EQUAL(std::string("qaa"), _description.LanguageTag);
-}
+    //Setup
+    EnchantDictionaryDescribe_TestFixture_qaaqaa():
+            EnchantDictionaryDescribe_TestFixtureBase(EmptyDictionary_ProviderConfiguration, "qaa,qaa")
+    { }
+};
 
-TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
-             EnchantDictionaryDescribe_Pwl)
-{
-    enchant_dict_describe(_pwl, EnchantSingleDictionaryDescribeCallback, &_description);
-    CHECK(callbackCalled);
-    CHECK(_description.DataIsComplete());
-    CHECK_EQUAL(std::string("Personal Wordlist"), _description.LanguageTag);
-    CHECK_EQUAL(std::string("Personal Wordlist"), _description.Name);
-    CHECK_EQUAL(std::string("Personal Wordlist"), _description.Description);
-}
+#define EnchantDictionaryDescribe_TestFixture EnchantDictionaryDescribe_TestFixture_qaa
+#include "enchant_dict_describe_tests.i"
 
-TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
-             EnchantDictionaryDescribe_NullUserdata_PassedToCallback)
-{
-    enchant_dict_describe(_dict, EnchantSingleDictionaryDescribeAssignUserDataToStaticCallback, NULL);
-    CHECK(callbackCalled);
-    CHECK_EQUAL((void*)NULL, global_user_data);
-}
-
-TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
-             EnchantDictionaryDescribe_NonNullUserdata_PassedToCallback)
-{
-    const char* userData = "some user data";
-    enchant_dict_describe(_dict, EnchantSingleDictionaryDescribeAssignUserDataToStaticCallback, (void*)userData);
-    CHECK(callbackCalled);
-    CHECK_EQUAL(userData, global_user_data);
-}
-
-TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture, 
-             EnchantDictionaryDescribe_HasPreviousError_ErrorCleared)
-{
-    SetErrorOnMockDictionary("something bad happened");
-
-    enchant_dict_describe(_dict, EnchantSingleDictionaryDescribeAssignUserDataToStaticCallback, NULL);
-    CHECK_EQUAL((void*)NULL, (void*)enchant_dict_get_error(_dict));
-}
-/////////////////////////////////////////////////////////////////////////////
-// Test Error Conditions
-TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
-             EnchantDictionaryDescribe_NullDict_DoNothing)
-{
-    enchant_dict_describe(NULL, EnchantSingleDictionaryDescribeCallback, &_description);
-    CHECK(!callbackCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
-             EnchantDictionaryDescribe_NullCallback_DoNothing)
-{
-    enchant_dict_describe(_dict, NULL, &_description);
-    CHECK(!callbackCalled);
-}
+#undef EnchantDictionaryDescribe_TestFixture
+#define EnchantDictionaryDescribe_TestFixture EnchantDictionaryDescribe_TestFixture_qaaqaa
+#include "enchant_dict_describe_tests.i"

@@ -23,9 +23,13 @@
 #include <enchant-provider.h>
 #include "EnchantDictionaryTestFixture.h"
 
-struct EnchantDictionarySetErrorTests : EnchantDictionaryTestFixture
+struct EnchantDictionarySetError_TestFixtureBase : EnchantDictionaryTestFixture
 {
   //Setup
+  EnchantDictionarySetError_TestFixtureBase(ConfigureHook userConfig, const std::string& languageTag="qaa"):
+    EnchantDictionaryTestFixture(userConfig, languageTag)
+  { }
+
   std::string GetErrorMessage(){
       const char* error = enchant_dict_get_error(_dict);
       if(error == NULL){
@@ -35,51 +39,25 @@ struct EnchantDictionarySetErrorTests : EnchantDictionaryTestFixture
   }
 };
 
-/**
- * enchant_dict_set_error
- * @dict: A non-null dictionary
- * @err: A non-null error message
- *
- * Sets the current runtime error to @err. This API is private to the
- * providers.
- */
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Normal Operation
-
-TEST_FIXTURE(EnchantDictionarySetErrorTests, 
-             SetErrorMessageOnDictionary)
+struct EnchantDictionarySetError_TestFixture_qaa : EnchantDictionarySetError_TestFixtureBase
 {
-    std::string expectedErrorMessage("Error message to display");
-    enchant_dict_set_error(_dict, expectedErrorMessage.c_str());
+    //Setup
+    EnchantDictionarySetError_TestFixture_qaa():
+            EnchantDictionarySetError_TestFixtureBase(EmptyDictionary_ProviderConfiguration, "qaa")
+    { }
+};
 
-    CHECK_EQUAL(expectedErrorMessage, GetErrorMessage());
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Error Conditions
-TEST_FIXTURE(EnchantDictionarySetErrorTests, 
-             SetErrorMessageOnDictionary_NullDictionary_NoErrorSet)
+struct EnchantDictionarySetError_TestFixture_qaaqaa : EnchantDictionarySetError_TestFixtureBase
 {
-    enchant_dict_set_error(NULL, "Error message to display");
+    //Setup
+    EnchantDictionarySetError_TestFixture_qaaqaa():
+            EnchantDictionarySetError_TestFixtureBase(EmptyDictionary_ProviderConfiguration, "qaa,qaa")
+    { }
+};
 
-    CHECK_EQUAL(std::string(), GetErrorMessage());
-}
+#define EnchantDictionarySetError_TestFixture EnchantDictionarySetError_TestFixture_qaa
+#include "enchant_provider_dict_set_error_tests.i"
 
-TEST_FIXTURE(EnchantDictionarySetErrorTests, 
-             SetErrorMessageOnDictionary_NullError_NoErrorSet)
-{
-    enchant_dict_set_error(_dict, NULL);
-
-    CHECK_EQUAL(std::string(), GetErrorMessage());
-}
-
-TEST_FIXTURE(EnchantDictionarySetErrorTests, 
-             SetErrorMessageOnDictionary_MessageCopied)
-{
-    std::string expectedErrorMessage("Error message to display");
-    enchant_dict_set_error(_dict, expectedErrorMessage.c_str());
-
-    expectedErrorMessage[0] = 'e';
-    CHECK(expectedErrorMessage != GetErrorMessage());
-}
+#undef EnchantDictionarySetError_TestFixture
+#define EnchantDictionarySetError_TestFixture EnchantDictionarySetError_TestFixture_qaaqaa
+#include "enchant_provider_dict_set_error_tests.i"

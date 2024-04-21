@@ -286,7 +286,7 @@ public class EnchantBroker {
 			requires (composite_tag.length > 0)
 		{
 		// Parse the composite tag and check each is non-empty
-		var tags = composite_tag.split(":");
+		var tags = composite_tag.split(",");
 		foreach (unowned string tag in tags)
 			if (tag.length == 0)
 				return null;
@@ -311,14 +311,15 @@ public class EnchantBroker {
 
 		// Create the composite dictionary
 		var comp_dict = new EnchantCompositeDict();
-		comp_dict.dict_list = dict_list.copy();
+		comp_dict.dict_list = (owned)dict_list;
 
 		unowned var dict = this.new_dict();
 		dict.user_data = (void *)(owned)comp_dict;
 		dict.check_method = composite_dict_check;
 		dict.suggest_method = composite_dict_suggest;
 		dict.add_to_session_method = composite_dict_add_to_session;
-		dict.session = EnchantSession.with_implicit_pwl(null, composite_tag, null);
+		dict.remove_from_session_method = composite_dict_remove_from_session;
+		dict.session = EnchantSession.with_implicit_pwl(null, tags[0], pwl);
 		return dict;
 	}
 
@@ -425,40 +426,4 @@ public class EnchantBroker {
 		this.dicts.remove(dict);
 		this.clear_error();
 	}
-}
-
-
-// Composite dictionaries
-static int composite_dict_check(EnchantDict? self, string word_buf, real_size_t len) {
-	if (self == null || word_buf == null)
-		return -1;
-	string word = buf_to_utf8_string(word_buf, (real_ssize_t)len);
-	if (word == null)
-		return -1;
-
-	var cdict = (EnchantCompositeDict)(self.user_data);
-	foreach (EnchantDict dict in cdict.dict_list) {
-		if (EnchantDict.check(dict, word, (real_ssize_t)len) == 0)
-			return 0;
-	}
-	return 1;
-}
-
-static string[] composite_dict_suggest(EnchantDict me, string word, real_size_t len) {
-	var cdict = (EnchantCompositeDict)(me.user_data);
-	var res = new Array<string>();
-	foreach (EnchantDict dict in cdict.dict_list) {
-		var suggs = dict.suggest_method(dict, word, len);
-		if (suggs != null)
-			foreach (string sugg in suggs)
-				res.append_val(sugg);
-	}
-	return res.data;
-}
-
-static void composite_dict_add_to_session(EnchantDict me, string word, real_size_t len) {
-}
-
-public class EnchantCompositeDict {
-	public SList<weak EnchantDict> dict_list;
 }

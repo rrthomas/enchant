@@ -145,5 +145,5 @@ TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
 TEST_FIXTURE(EnchantBrokerDictExistsTestFixture, 
              EnchantBrokerDictExists_CompositeTag_0)
 {
-    CHECK_EQUAL(0, enchant_broker_dict_exists (_broker, "qaa:qaa"));
+    CHECK_EQUAL(0, enchant_broker_dict_exists (_broker, "qaa,qaa"));
 }
