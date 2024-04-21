@@ -60,3 +60,8 @@ public struct real_ssize_t {
 		return "%zi".printf (this);
 	}
 }
+
+
+// Bind g_strfreev in a way that is compatible with use on char **.
+[CCode (cheader_filename = "glib.h")]
+public void g_strfreev ([CCode (array_length = false, array_null_terminated = true)] owned string[] str_array);
