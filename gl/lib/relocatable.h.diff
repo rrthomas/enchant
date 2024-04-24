@@ -1,0 +1,11 @@
+--- a/lib/relocatable.h
++++ b/lib/relocatable.h
+@@ -109,6 +109,8 @@ extern char * compute_curr_prefix (const char *orig_installprefix,
+ #else
+ 
+ /* By default, we use the hardwired pathnames.  */
++#define set_relocation_prefix(orig_prefix, curr_prefix) \
++  ((void) (orig_prefix), (void) (curr_prefix))
+ #define relocate(pathname) (pathname)
+ #define relocate2(pathname,allocatedp) (*(allocatedp) = NULL, (pathname))
+ 

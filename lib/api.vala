@@ -31,9 +31,7 @@ using Gnu;
 
 
 public void enchant_set_prefix_dir(string new_prefix) {
-#if RELOCATABLE
 	set_relocation_prefix(INSTALLPREFIX, new_prefix);
-#endif
 }
 
 public unowned string enchant_get_version() {
