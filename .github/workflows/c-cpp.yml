@@ -37,6 +37,8 @@ jobs:
     - name: make distcheck
       # normal build is with ASAN, distcheck is without ASAN. Both are covered.
       run: make distcheck --jobs=`nproc`
+    - name: non-relocatable build
+      run: make clean && ./configure && make
 
   build-macos:
     runs-on: macos-latest

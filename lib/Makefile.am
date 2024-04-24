@@ -15,9 +15,6 @@ AM_VALAFLAGS = --debug --no-color --vapidir=. --pkg config --pkg internal --pkg 
 if OS_WIN32
 AM_VALAFLAGS += -D OS_WIN32
 endif
-if RELOCATABLE
-AM_VALAFLAGS += -D RELOCATABLE
-endif
 AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
 
 # FIXME: Require Vala 0.58 when released, and remove copy of gnu.vapi
