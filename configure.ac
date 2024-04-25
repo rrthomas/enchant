@@ -61,7 +61,6 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MKDIR_P
 LT_INIT([win32-dll])
-LT_LANG([Windows Resource])
 gl_INIT
 AC_SUBST([objdir])
 LT_SYS_MODULE_EXT
@@ -120,18 +119,6 @@ else
   ISYSTEM='-I'
 fi
 AC_SUBST([ISYSTEM])
-
-AC_MSG_CHECKING([for native Win32])
-native_win32=no
-case "$host" in
-  *-*-mingw*)
-    native_win32=yes
-    ;;
-esac
-AC_MSG_RESULT([$native_win32])
-AM_CONDITIONAL(OS_WIN32, test "$native_win32" = yes)
-
-AM_CONDITIONAL(RELOCATABLE, test "$RELOCATABLE" = yes)
 
 AM_CONDITIONAL([SHLIBS_IN_BINDIR], [case "$host_os" in mingw* | cygwin*) true;; *) false;; esac])
 
@@ -218,7 +205,6 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
 Makefile
 enchant-$ENCHANT_MAJOR_VERSION.pc:enchant.pc.in
-lib/libenchant.rc
 lib/Makefile
 lib/enchant.5.in
 libgnu/Makefile
