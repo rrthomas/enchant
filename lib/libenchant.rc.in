@@ -17,7 +17,7 @@ VS_VERSION_INFO VERSIONINFO
 	VALUE "FileDescription", "libenchant"
 	VALUE "FileVersion", "@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.@ENCHANT_MICRO_VERSION@"
 	VALUE "InternalName", "libenchant-@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@"
-	VALUE "LegalCopyright", "Copyright (C) 2002-2007 Dom Lachowicz"
+	VALUE "LegalCopyright", "Copyright (C) 2002-2024 Dom Lachowicz and Reuben Thomas"
 	VALUE "OriginalFilename", "libenchant-@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.dll"
 	VALUE "ProductName", "libenchant"
 	VALUE "ProductVersion", "@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.@ENCHANT_MICRO_VERSION@"
