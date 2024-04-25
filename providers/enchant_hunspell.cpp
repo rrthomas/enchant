@@ -43,7 +43,7 @@
 
 #include "enchant-provider.h"
 
-#include <hunspell/hunspell.hxx>
+#include <hunspell.hxx>
 // hunspell itself uses this definition (which only supports the BMP)
 #define MAXWORDUTF8LEN (MAXWORDLEN * 3)
 
