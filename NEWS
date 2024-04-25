@@ -1,5 +1,5 @@
-2.7.1 (??? ??, 2024)
---------------------
+2.7.1 (April 25, 2024)
+----------------------
 
 This release fixes some build-system bugs that crept into 2.7.0. Thanks to
 those who reported them and helped me diagnose them. In particular, building
