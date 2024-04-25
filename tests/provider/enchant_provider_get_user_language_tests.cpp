@@ -31,10 +31,10 @@ bool hasLangEnv;
 
 static void SaveLangEnv()
 {
-    hasLangEnv = (g_getenv("LANG") != NULL);
+    hasLangEnv = (g_getenv("LANGUAGE") != NULL);
     if(hasLangEnv)
     {
-        origLangEnv = std::string(g_getenv("LANG"));
+        origLangEnv = std::string(g_getenv("LANGUAGE"));
     }
 }
 
@@ -42,10 +42,10 @@ static void RestoreLangEnv()
 {
     if(hasLangEnv)
     {
-        g_setenv("LANG", origLangEnv.c_str(), TRUE);
+        g_setenv("LANGUAGE", origLangEnv.c_str(), TRUE);
     }
     else{
-        g_unsetenv("LANG");
+        g_unsetenv("LANGUAGE");
     }
 }
 
@@ -62,7 +62,7 @@ TEST(EnchantGetUserLanguage_FromLangEnvironmentVariable)
 {
     SaveLangEnv();
 
-    g_setenv("LANG", "qaa", TRUE);
+    g_setenv("LANGUAGE", "qaa", TRUE);
     char* userLanguage = enchant_get_user_language();
     CHECK(userLanguage);
     CHECK_EQUAL("qaa", userLanguage);
