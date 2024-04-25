@@ -39,20 +39,9 @@ public unowned string enchant_get_version() {
 }
 
 public string enchant_get_user_language() {
-#if OS_WIN32
-	return Win32.getlocale();
-#else
-	string locale = Environment.get_variable("LANG");
+	// The returned list always contains "C".
+	string[] languages = Intl.get_language_names();
+	assert(languages != null);
 
-	if (locale == null)
-		locale = Intl.setlocale(LocaleCategory.MESSAGES);
-
-	if (locale == null)
-		locale = Intl.setlocale(LocaleCategory.ALL);
-
-	if (locale == null || locale == "C")
-		locale = "en";
-
-	return locale;
-#endif /* !OS_WIN32 */
+	return languages[0] == "C" ? "en" : languages[0];
 }
