@@ -3,7 +3,8 @@
 
 This release fixes some build-system bugs that crept into 2.7.0. Thanks to
 those who reported them and helped me diagnose them. In particular, building
-without --enable-relocatable is fixed.
+without --enable-relocatable is fixed. Some minor long-standing bugs that
+recently came to light with incorrect include paths were also fixed.
 
 Detection of the user’s language has been updated to use a more modern and
 standard method. This means that in particular the LANG environment variable
@@ -11,6 +12,8 @@ no longer overrides the LC_ALL and LC_MESSAGES environment variables, and
 support is added for the LANGUAGE variable, which has highest priority. For
 more details, see the documentation for the GLib function
 g_get_language_names.
+
+Minor code and documentation improvements were made.
 
 
 2.7.0 (April 19, 2024)
