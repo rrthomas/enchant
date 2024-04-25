@@ -46,7 +46,7 @@ enchant_nuspell_la_SOURCES = enchant_nuspell.cpp
 if WITH_VOIKKO
 provider_LTLIBRARIES += enchant_voikko.la
 endif
-enchant_voikko_la_CXXFLAGS = $(AM_CXXFLAGS) $(VOIKKO_CFLAGS)
+enchant_voikko_la_CFLAGS = $(AM_CFLAGS) $(VOIKKO_CFLAGS)
 enchant_voikko_la_LIBADD = $(VOIKKO_LIBS)
 
 if WITH_ZEMBEREK
