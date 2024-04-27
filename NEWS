@@ -1,3 +1,10 @@
+2.7.2 (April 27, 2024)
+----------------------
+
+This release fixes a bug introduced in version 2.7.0. when calling
+providers’ check methods, that could cause a crash.
+
+
 2.7.1 (April 25, 2024)
 ----------------------
 
