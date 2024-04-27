@@ -151,7 +151,7 @@ public class EnchantDict {
 			return 0;
 
 		if (self.check_method != null)
-			return self.check_method(self, word, len);
+			return self.check_method(self, word, word.length);
 		else if (self.session.is_pwl)
 			return 1;
 
