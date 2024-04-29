@@ -1,6 +1,5 @@
-/* enchant: miscellaneous public APIs
- * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>
+/* VAPI for constants from config.h
+ * Copyright (C) 2024 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,13 +26,5 @@
  * do so, delete this exception statement from your version.
  */
 
-using Gnu;
-
-
-public void enchant_set_prefix_dir(string new_prefix) {
-	set_relocation_prefix(INSTALLPREFIX, new_prefix);
-}
-
-public unowned string enchant_get_version() {
-	return ENCHANT_VERSION_STRING;
-}
+[CCode (cheader_filename = "config.h")]
+const string PACKAGE_VERSION;

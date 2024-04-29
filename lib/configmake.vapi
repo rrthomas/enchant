@@ -1,4 +1,4 @@
-/* config.vapi
+/* VAPI for constants from configmake.h
  * Copyright (C) 2024 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
