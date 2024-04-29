@@ -11,18 +11,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-AM_VALAFLAGS = --debug --no-color --vapidir=$(srcdir) --pkg config --pkg internal --pkg posix --pkg gnu --pkg gio-2.0 --pkg gmodule-2.0
+AM_VALAFLAGS = --debug --no-color --vapidir=$(srcdir) --pkg configmake --pkg internal --pkg posix --pkg gnu --pkg gio-2.0 --pkg gmodule-2.0
 AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
 
 # FIXME: Require Vala 0.58 when released, and remove copy of gnu.vapi
-VAPIS =	config.vapi internal.vapi gnu.vapi
+VAPIS =	configmake.vapi internal.vapi gnu.vapi
 
 lib_LTLIBRARIES = libenchant-@ENCHANT_MAJOR_VERSION@.la
-
-BUILT_SOURCES = dummy.vala
-
-dummy.vala: $(VAPIS)
-	touch $@
 
 libenchant_@ENCHANT_MAJOR_VERSION@_la_CPPFLAGS = $(AM_CPPFLAGS) -D_ENCHANT_BUILD=1 -DENCHANT_VERSION_STRING=\"@ENCHANT_MAJOR_VERSION@.@ENCHANT_MINOR_VERSION@.@ENCHANT_MICRO_VERSION@\" -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
 libenchant_@ENCHANT_MAJOR_VERSION@_la_LIBADD = $(top_builddir)/libgnu/libgnu.la $(GLIB_LIBS) $(LTLIBOBJS)
