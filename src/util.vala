@@ -27,13 +27,10 @@
  * do so, delete this exception statement from your version.
  */
 
-using Gnu;
 
-
-public void enchant_set_prefix_dir(string new_prefix) {
-	set_relocation_prefix(INSTALLPREFIX, new_prefix);
-}
-
-public unowned string enchant_get_version() {
-	return ENCHANT_VERSION_STRING;
+public string enchant_get_user_language() {
+	// The returned list always contains "C".
+	unowned string[] languages = Intl.get_language_names();
+	assert(languages != null);
+	return languages[0];
 }
