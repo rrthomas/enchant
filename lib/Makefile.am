@@ -11,7 +11,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-AM_VALAFLAGS = --debug --no-color --vapidir=. --pkg config --pkg internal --pkg posix --pkg gnu --pkg gio-2.0 --pkg gmodule-2.0
+AM_VALAFLAGS = --debug --no-color --vapidir=$(top_srcdir)/lib --pkg config --pkg internal --pkg posix --pkg gnu --pkg gio-2.0 --pkg gmodule-2.0
 AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
 
 # FIXME: Require Vala 0.58 when released, and remove copy of gnu.vapi
