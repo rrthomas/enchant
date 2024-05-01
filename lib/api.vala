@@ -40,7 +40,7 @@ public unowned string enchant_get_version() {
 
 public string enchant_get_user_language() {
 	// The returned list always contains "C".
-	string[] languages = Intl.get_language_names();
+	string[] languages = (string[])Intl.get_language_names();
 	assert(languages != null);
 
 	return languages[0] == "C" ? "en" : languages[0];
