@@ -1,3 +1,11 @@
+2.7.3 (April 27, 2024)
+----------------------
+
+This release is made with Vala 0.56.17 (previous versions were made with
+0.56.0). This works around a bug in `valac` that generates code which causes
+an error in GCC >=14 and Clang >= 16.
+
+
 2.7.2 (April 27, 2024)
 ----------------------
 
