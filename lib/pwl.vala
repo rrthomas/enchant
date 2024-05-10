@@ -27,7 +27,6 @@
  * do so, delete this exception statement from your version.
  */
 
-using Posix;
 using Gnu;
 
 /**
@@ -122,7 +121,6 @@ static bool is_title_case(string word) {
 
 public class EnchantPWL {
 	public string? filename;
-	public time_t file_changed;
 	public HashTable<string, string> words;
 
 	private EnchantPWL() {}
@@ -151,7 +149,6 @@ public class EnchantPWL {
 			return null;
 		EnchantPWL pwl = new EnchantPWL();
 		pwl.filename = file;
-		pwl.file_changed = 0;
 
 		pwl.refresh_from_file();
 		return pwl;
@@ -175,9 +172,6 @@ public class EnchantPWL {
 				/* Since this method does not signal I/O errors, only use
 				   return values to avoid doing things that seem futile. */
 				lock_file(f);
-				Posix.Stat stats;
-				if (Posix.stat(this.filename, out stats) == 0)
-					this.file_changed = stats.st_mtime;
 
 				/* Add a newline if the file doesn't end with one. */
 				if (f.seek(-1, FileSeek.END) == 0) {
@@ -242,10 +236,6 @@ public class EnchantPWL {
 					}
 				}
 
-				Posix.Stat stats;
-				if (Posix.stat(this.filename, out stats) == 0)
-					this.file_changed = stats.st_mtime;
-
 				unlock_file(f);
 			}
 		}
@@ -278,19 +268,12 @@ public class EnchantPWL {
 		if (this.filename == null)
 			return;
 
-		Posix.Stat stats;
-		if (Posix.stat(this.filename, out stats) == -1)
-			return; /* presumably won't be able to open the file either */
-		if (this.file_changed == stats.st_mtime) /* nothing changed since last read */
-			return;
-
 		this.words = new HashTable<string, string>(str_hash, str_equal);
 
 		FileStream? f = FileStream.open(this.filename, "r");
 		if (f == null)
 			return;
 
-		this.file_changed = stats.st_mtime;
 		lock_file(f);
 
 		size_t line_number = 1;
