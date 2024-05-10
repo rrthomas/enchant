@@ -62,7 +62,7 @@ string normalize_dictionary_tag(string dict_tag) {
 	return sb.str;
 }
 
-static string iso_639_from_tag(string dict_tag) {
+string iso_639_from_tag(string dict_tag) {
 	return dict_tag.substring(0, dict_tag.index_of_char('_'));
 }
 
