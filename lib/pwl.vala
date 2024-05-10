@@ -38,22 +38,22 @@ using Gnu;
 
 const unichar BOM = 0xfeff;
 
-static void lock_file(FileStream f) {
+void lock_file(FileStream f) {
 	flock(f.fileno(), FlockOperation.EX);
 }
 
-static void unlock_file(FileStream f) {
+void unlock_file(FileStream f) {
 	flock(f.fileno(), FlockOperation.UN);
 }
 
-static string utf8_strtitle(string str) {
+string utf8_strtitle(string str) {
 	string upper_str = str.up(); /* for locale-sensitive casing */
 	string lower_tail = upper_str.next_char().down();
 	unichar title_case_char = upper_str.get_char(0).totitle();
 	return "%s%s".printf(title_case_char.to_string(), lower_tail);
 }
 
-static bool is_all_caps(string word) {
+bool is_all_caps(string word) {
 	bool has_cap = false;
 	unichar c;
 	for (int i = 0; word.get_next_char(ref i, out c); ) {
@@ -101,7 +101,7 @@ static bool is_all_caps(string word) {
 	return has_cap;
 }
 
-static bool is_title_case(string word) {
+bool is_title_case(string word) {
 	int i = 0;
 	unichar c;
 	word.get_next_char(ref i, out c);
