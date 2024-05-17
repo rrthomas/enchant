@@ -75,8 +75,8 @@ struct EnchantDictionaryRemoveFromSession_TestFixture_qaaqaa : EnchantDictionary
 };
 
 #define EnchantDictionaryRemoveFromSession_TestFixture EnchantDictionaryRemoveFromSession_TestFixture_qaa
-#include "enchant_dict_remove_from_session_tests.i"
+#include "remove_from_session.i"
 
 #undef EnchantDictionaryRemoveFromSession_TestFixture
 #define EnchantDictionaryRemoveFromSession_TestFixture EnchantDictionaryRemoveFromSession_TestFixture_qaaqaa
-#include "enchant_dict_remove_from_session_tests.i"
+#include "remove_from_session.i"

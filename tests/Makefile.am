@@ -99,44 +99,45 @@ main_test_SOURCES = main.test.cpp \
 	EnchantDictionaryTestFixture.h \
 	EnchantTestFixture.h \
 	mock_provider.h \
-	dictionary/enchant_dict_add_tests.cpp \
-	dictionary/enchant_dict_add_tests.i \
-	dictionary/enchant_dict_add_to_session_tests.cpp \
-	dictionary/enchant_dict_add_to_session_tests.i \
-	dictionary/enchant_dict_check_tests.cpp \
-	dictionary/enchant_dict_check_tests.i \
-	dictionary/enchant_dict_describe_tests.cpp \
-	dictionary/enchant_dict_free_string_list_tests.cpp \
-	dictionary/enchant_dict_get_error_tests.cpp \
-	dictionary/enchant_dict_get_extra_word_characters_tests.cpp \
-	dictionary/enchant_dict_is_added_tests.cpp \
-	dictionary/enchant_dict_is_removed_tests.cpp \
-	dictionary/enchant_dict_is_word_character_tests.cpp \
-	dictionary/enchant_dict_remove_from_session_tests.cpp \
-	dictionary/enchant_dict_remove_from_session_tests.i \
-	dictionary/enchant_dict_remove_tests.cpp \
-	dictionary/enchant_dict_suggest_tests.cpp \
-	dictionary/enchant_dict_suggest_tests.i \
-	broker/enchant_broker_describe_tests.cpp \
-	broker/enchant_broker_dict_exists_tests.cpp \
-	broker/enchant_broker_dict_exists_tests.i \
-	broker/enchant_broker_free_dict_tests.cpp \
-	broker/enchant_broker_free_tests.cpp \
-	broker/enchant_broker_get_error_tests.cpp \
-	broker/enchant_broker_init_tests.cpp \
-	broker/enchant_broker_list_dicts_tests.cpp \
-	broker/enchant_broker_request_dict_tests.cpp \
-	broker/enchant_broker_request_dict_with_pwl_tests.cpp \
-	broker/enchant_broker_request_pwl_dict_tests.cpp \
-	broker/enchant_broker_set_ordering_tests.cpp \
-	pwl/enchant_pwl_tests.cpp \
-	pwl/enchant_pwl_tests.i \
-	provider/enchant_provider_broker_set_error_tests.cpp \
-	provider/enchant_provider_dict_set_error_tests.cpp \
-	provider/enchant_provider_dict_set_error_tests.i \
-	provider/enchant_provider_get_prefix_dir_tests.cpp \
-	provider/enchant_provider_get_user_config_dirs_tests.cpp \
-	provider/enchant_provider_get_user_language_tests.cpp \
+	dictionary/add.cpp \
+	dictionary/add.i \
+	dictionary/add_to_session.cpp \
+	dictionary/add_to_session.i \
+	dictionary/check.cpp \
+	dictionary/check.i \
+	dictionary/describe.cpp \
+	dictionary/describe.i \
+	dictionary/free_string_list.cpp \
+	dictionary/get_error.cpp \
+	dictionary/get_extra_word_characters.cpp \
+	dictionary/is_added.cpp \
+	dictionary/is_removed.cpp \
+	dictionary/is_word_character.cpp \
+	dictionary/remove_from_session.cpp \
+	dictionary/remove_from_session.i \
+	dictionary/remove.cpp \
+	dictionary/suggest.cpp \
+	dictionary/suggest.i \
+	broker/describe.cpp \
+	broker/dict_exists.cpp \
+	broker/dict_exists.i \
+	broker/free_dict.cpp \
+	broker/free.cpp \
+	broker/get_error.cpp \
+	broker/init.cpp \
+	broker/list_dicts.cpp \
+	broker/request_dict.cpp \
+	broker/request_dict_with_pwl.cpp \
+	broker/request_pwl_dict.cpp \
+	broker/set_ordering.cpp \
+	pwl/pwl.cpp \
+	pwl/pwl.i \
+	provider/broker_set_error.cpp \
+	provider/dict_set_error.cpp \
+	provider/dict_set_error.i \
+	provider/get_prefix_dir.cpp \
+	provider/get_user_config_dirs.cpp \
+	provider/get_user_language.cpp \
 	$(NULL)
 main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
 main_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
@@ -147,18 +148,18 @@ $(APPLESPELL_CONFIG): $(top_srcdir)/providers/AppleSpell.config
 	$(MKDIR_P) config
 	cp $(top_srcdir)/providers/AppleSpell.config config/
 
-providers_test_SOURCES = enchant_providers/providers.test.cpp \
+providers_test_SOURCES = providers/providers.test.cpp \
 	EnchantTestFixture.h \
 	EnchantBrokerTestFixture.h \
 	EnchantDictionaryTestFixture.h \
-	enchant_providers/unittest_enchant_providers.h \
-	enchant_providers/Dictionary/dictionary_check.cpp \
-	enchant_providers/Dictionary/dictionary_suggest.cpp \
-	enchant_providers/Provider/provider_describe_dict.cpp \
-	enchant_providers/Provider/provider_dictionary_exists.cpp \
-	enchant_providers/Provider/provider_identify_dict.cpp \
-	enchant_providers/Provider/provider_list_dicts.cpp \
-	enchant_providers/Provider/provider_request_dict.cpp \
+	providers/unittest_enchant_providers.h \
+	providers/dictionary/check.cpp \
+	providers/dictionary/suggest.cpp \
+	providers/provider/describe_dict.cpp \
+	providers/provider/dictionary_exists.cpp \
+	providers/provider/identify_dict.cpp \
+	providers/provider/list_dicts.cpp \
+	providers/provider/request_dict.cpp \
 	$(NULL)
 providers_test_DEPENDENCIES = $(LIBENCHANT_COPY) $(APPLESPELL_CONFIG)
 providers_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)

@@ -88,10 +88,10 @@ struct EnchantPwl_TestFixture_qaaqaa : EnchantDictionaryTestFixture
 
 #define EnchantPwl_TestFixture EnchantPwl_TestFixture_qaa
 #define EnchantPwlWithDictSuggs_TestFixture EnchantPwlWithDictSuggs_TestFixture_qaa
-#include "enchant_pwl_tests.i"
+#include "pwl.i"
 
 #undef EnchantPwl_TestFixture
 #define EnchantPwl_TestFixture EnchantPwl_TestFixture_qaaqaa
 #undef EnchantPwlWithDictSuggs_TestFixture
 #define EnchantPwlWithDictSuggs_TestFixture EnchantPwlWithDictSuggs_TestFixture_qaaqaa
-#include "enchant_pwl_tests.i"
+#include "pwl.i"

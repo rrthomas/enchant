@@ -161,10 +161,10 @@ struct EnchantDictionarySuggestNotImplemented_TestFixture_qaaqaa : EnchantDictio
 
 #define EnchantDictionarySuggest_TestFixture EnchantDictionarySuggest_TestFixture_qaa
 #define EnchantDictionarySuggestNotImplemented_TestFixture EnchantDictionarySuggestNotImplemented_TestFixture_qaa
-#include "enchant_dict_suggest_tests.i"
+#include "suggest.i"
 
 #undef EnchantDictionarySuggest_TestFixture
 #define EnchantDictionarySuggest_TestFixture EnchantDictionarySuggest_TestFixture_qaaqaa
 #undef EnchantDictionarySuggestNotImplemented_TestFixture
 #define EnchantDictionarySuggestNotImplemented_TestFixture EnchantDictionarySuggestNotImplemented_TestFixture_qaaqaa
-#include "enchant_dict_suggest_tests.i"
+#include "suggest.i"
