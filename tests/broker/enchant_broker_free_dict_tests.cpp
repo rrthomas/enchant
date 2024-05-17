@@ -22,15 +22,6 @@
 #include <UnitTest++/UnitTest++.h>
 #include <enchant.h>
 #include "EnchantBrokerTestFixture.h"
-/**
- * enchant_broker_free_dict
- * @broker: A non-null #EnchantBroker
- * @dict: A non-null #EnchantDict
- *
- * Releases the dictionary when you are done using it
- * 
- * Must only be called once per dictionary request
- */
 
 EnchantDict* dictionaryToBeFreed=NULL;
 static void

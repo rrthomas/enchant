@@ -189,26 +189,6 @@ struct EnchantBrokerDescribe_ProviderHasInvalidUtf8Describe_TestFixture : Enchan
     }
 };
 
-/**
- * enchant_broker_describe
- * @broker: A non-null #EnchantBroker
- * @fn: A non-null #EnchantBrokerDescribeFn
- * @user_data: Optional user-data
- *
- * Enumerates the Enchant providers and tells
- * you some rudimentary information about them.
- */
-
-
-/*
- * Providers are discovered by probing first in the .enchant directory 
- * in the user's home directory. 
- * [on windows in the enchant directory in the user's Application Data
- *   directory]
- * 
- * Then from the module directory (that libenchant is in).
- */
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantBrokerNoProvidersTestFixture, 
