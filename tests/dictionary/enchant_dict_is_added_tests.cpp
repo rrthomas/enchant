@@ -26,13 +26,6 @@
 struct EnchantDictionaryIsAdded_TestFixture : EnchantDictionaryTestFixture
 {};
 
-/**
- * enchant_dict_is_added
- * @dict: A non-null #EnchantDict
- * @word: The word you wish to see if it's in your session
- * @len: the byte length of @word, or -1 for strlen (@word)
- */
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantDictionaryIsAdded_TestFixture, 

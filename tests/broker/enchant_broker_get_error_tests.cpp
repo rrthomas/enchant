@@ -23,16 +23,6 @@
 #include <enchant.h>
 #include "EnchantBrokerTestFixture.h"
 
-/**
- * enchant_broker_get_error
- * @broker: A non-null broker
- *
- * Returns a const char string or NULL describing the last exception.
- * WARNING: error is transient and is likely cleared as soon as the 
- * next broker operation happens
- */
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 

@@ -28,15 +28,6 @@
 #error EnchantDictionaryCheckNotImplemented_TestFixture must be defined as the testfixture class to run these tests against
 #endif
 
-/**
- * enchant_dict_check
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to correct, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- *
- * Returns: 0 if the word is correctly spelled, positive if not, negative on invalid arguments or other error.
- */
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,

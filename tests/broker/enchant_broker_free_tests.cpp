@@ -23,15 +23,6 @@
 #include <enchant.h>
 #include "EnchantBrokerTestFixture.h"
 
-/**
- * enchant_broker_free
- * @broker: A non-null #EnchantBroker
- *
- * Destroys the broker object
- *
- * Free must only be called once!
- */
-
 bool disposeWasCalled;
 static void
 Dispose (EnchantProvider *me)

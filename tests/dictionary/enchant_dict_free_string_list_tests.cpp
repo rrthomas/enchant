@@ -41,14 +41,6 @@ struct EnchantDictFreeStringList_TestFixture : EnchantDictionaryTestFixture
     char ** _pwl_string_list;
 };
 
-/**
- * enchant_dict_free_string_list
- * @dict: A non-null #EnchantDict
- * @string_list: A non-null string list returned from enchant_dict_suggest
- *
- * Releases the string list
- */
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,

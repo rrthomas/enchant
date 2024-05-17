@@ -26,15 +26,6 @@
 struct EnchantDictionaryIsRemoved_TestFixture : EnchantDictionaryTestFixture
 {};
 
-/**
- * enchant_dict_is_removed
- * @dict: A non-null #EnchantDict
- * @word: The word you wish to query
- * @len: the byte length of @word, or -1 for strlen (@word)
- *
- * returns: 1 if word has been removed (from session or permanently)
- */
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantDictionaryIsRemoved_TestFixture, 

@@ -43,15 +43,6 @@ struct EnchantBrokerSetErrorTests : EnchantBrokerTestFixture
   EnchantProvider* provider;
 };
 
-/**
- * enchant_provider_set_error
- * @provider: A non-null provider
- * @err: A non-null error message
- * 
- * Sets the current runtime error to @err. This API is private to
- * the providers.
- */
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 

@@ -105,16 +105,6 @@ struct EnchantBrokerListDictionaries_ProviderDuplicateTags_TestFixture : Enchant
     { }
 };
 
-/**
- * enchant_broker_list_dicts
- * @broker: A non-null #EnchantBroker
- * @fn: A non-null #EnchantDictDescribeFn
- * @user_data: Optional user-data
- *
- * Enumerates the dictionaries available from
- * all Enchant providers.
- */
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 

@@ -85,15 +85,6 @@ struct EnchantDictionaryRemoveNotImplemented_TestFixture : EnchantDictionaryTest
         dictCheckCalled = false;
     }
 };
-/**
- * enchant_dict_remove
- * @dict: A non-null #EnchantDict
- * @word: The non-null word you wish to add to your exclude dictionary and 
- *        remove from the personal dictionary, in UTF-8 encoding
- * @len: The byte length of @word, or -1 for strlen (@word)
- *
- */
-
 
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation

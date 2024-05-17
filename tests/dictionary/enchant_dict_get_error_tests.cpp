@@ -23,17 +23,6 @@
 #include <enchant.h>
 #include "EnchantDictionaryTestFixture.h"
 
-/**
- * enchant_dict_get_error
- * @dict: A non-null dictionary
- *
- * Returns a const char string or NULL describing the last exception.
- * WARNING: error is transient. It will likely be cleared as soon as 
- * the next dictionary operation is called
- *
- * Returns: an error message
- */
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 

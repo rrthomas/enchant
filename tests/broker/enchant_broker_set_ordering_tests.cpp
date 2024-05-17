@@ -128,21 +128,6 @@ struct EnchantBrokerFileSetOrdering_TestFixture: EnchantBrokerSetOrdering_TestFi
 
 };
 
-
-/**
- * enchant_broker_set_ordering
- * @broker: A non-null #EnchantBroker
- * @tag: A non-null language tag (en_US)
- * @ordering: A non-null ordering (aspell,hunspell,nuspell,hspell)
- *
- * Declares a preference of dictionaries to use for the language
- * described/referred to by @tag. The ordering is a comma delimited
- * list of provider names. As a special exception, the "*" tag can
- * be used as a language tag to declare a default ordering for any
- * language that does not explictly declare an ordering.
- */
-
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,

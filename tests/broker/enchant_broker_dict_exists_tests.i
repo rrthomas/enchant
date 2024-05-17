@@ -6,21 +6,8 @@
 #error DictionaryExistsMethodCalled must be defined as the variable that is set when the method is called
 #endif
 
-/**
- * enchant_broker_dict_exists
- * @broker: A non-null #EnchantBroker
- * @tag: The non-null language tag you wish to request a dictionary for ("en_US", "de_DE", ...)
- *
- * language tags are normalized by stripping leading and trailing whitespace,
- * removing '@' and any trailing characters, removing '.' and any trailing characters,
- * and replacing '-' with '_'
- *
- * If no providers have the given language tag, enchant will fallback to the language code
- * prefix (everything before the first "_")
- *
- * Return existance of the requested dictionary (1 == true, 0 == false)
- */
-
+/////////////////////////////////////////////////////////////////////////////
+// Test Normal Operation
 TEST_FIXTURE(EnchantBrokerDictExistsTestFixture, 
              EnchantBrokerDictExists_DictDoesNotExist_FalseOnlyAsksOnce)
 {
