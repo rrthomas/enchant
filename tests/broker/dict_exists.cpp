@@ -44,7 +44,7 @@ struct EnchantBrokerDictExists_ProviderImplementsDictionaryExist_TestFixture : E
 
 #define EnchantBrokerDictExistsTestFixture EnchantBrokerDictExists_ProviderImplementsDictionaryExist_TestFixture
 #define DictionaryExistsMethodCalled dictionaryExistsCalled
-#include "enchant_broker_dict_exists_tests.i"
+#include "dict_exists.i"
 
 static int listDictionariesCalled;
 static char** ListDictionaries (EnchantProvider * me, size_t * out_n_dicts)
@@ -74,7 +74,7 @@ struct EnchantBrokerDictExists_ProviderImplementsListDictionaries_TestFixture : 
 #define EnchantBrokerDictExistsTestFixture EnchantBrokerDictExists_ProviderImplementsListDictionaries_TestFixture
 #undef DictionaryExistsMethodCalled
 #define DictionaryExistsMethodCalled listDictionariesCalled
-#include "enchant_broker_dict_exists_tests.i"
+#include "dict_exists.i"
 
 static void ProviderConfiguration (EnchantProvider * me, const char *)
 {

@@ -75,8 +75,8 @@ struct EnchantDictionaryDescribe_TestFixture_qaaqaa : EnchantDictionaryDescribe_
 };
 
 #define EnchantDictionaryDescribe_TestFixture EnchantDictionaryDescribe_TestFixture_qaa
-#include "enchant_dict_describe_tests.i"
+#include "describe.i"
 
 #undef EnchantDictionaryDescribe_TestFixture
 #define EnchantDictionaryDescribe_TestFixture EnchantDictionaryDescribe_TestFixture_qaaqaa
-#include "enchant_dict_describe_tests.i"
+#include "describe.i"

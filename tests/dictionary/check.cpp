@@ -97,10 +97,10 @@ struct EnchantDictionaryCheckNotImplemented_TestFixture_qaaqaa : EnchantDictiona
 
 #define EnchantDictionaryCheck_TestFixture EnchantDictionaryCheck_TestFixture_qaa
 #define EnchantDictionaryCheckNotImplemented_TestFixture EnchantDictionaryCheckNotImplemented_TestFixture_qaa
-#include "enchant_dict_check_tests.i"
+#include "check.i"
 
 #undef EnchantDictionaryCheck_TestFixture
 #define EnchantDictionaryCheck_TestFixture EnchantDictionaryCheck_TestFixture_qaaqaa
 #undef EnchantDictionaryCheckNotImplemented_TestFixture
 #define EnchantDictionaryCheckNotImplemented_TestFixture EnchantDictionaryCheckNotImplemented_TestFixture_qaaqaa
-#include "enchant_dict_check_tests.i"
+#include "check.i"

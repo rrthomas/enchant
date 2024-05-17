@@ -40,8 +40,8 @@ struct EnchantDictionaryAdd_TestFixture_qaaqaa : EnchantDictionaryTestFixture
 };
 
 #define EnchantDictionaryAdd_TestFixture EnchantDictionaryAdd_TestFixture_qaa
-#include "enchant_dict_add_tests.i"
+#include "add.i"
 
 #undef EnchantDictionaryAdd_TestFixture
 #define EnchantDictionaryAdd_TestFixture EnchantDictionaryAdd_TestFixture_qaaqaa
-#include "enchant_dict_add_tests.i"
+#include "add.i"

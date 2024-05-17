@@ -56,8 +56,8 @@ struct EnchantDictionarySetError_TestFixture_qaaqaa : EnchantDictionarySetError_
 };
 
 #define EnchantDictionarySetError_TestFixture EnchantDictionarySetError_TestFixture_qaa
-#include "enchant_provider_dict_set_error_tests.i"
+#include "dict_set_error.i"
 
 #undef EnchantDictionarySetError_TestFixture
 #define EnchantDictionarySetError_TestFixture EnchantDictionarySetError_TestFixture_qaaqaa
-#include "enchant_provider_dict_set_error_tests.i"
+#include "dict_set_error.i"
