@@ -12,14 +12,22 @@
 \"
 .TH ENCHANT 5
 .SH NAME
-Enchant \- enchant ordering files and personal word lists
+Enchant \- enchant language tags, ordering files and personal word lists
+.SH LANGUAGE TAGS
+Enchant identifies dictionaries by their language tag. A language tag is
+typically an IETF BCP 47 language tag of the form \fILANGUAGE_COUNTRY\fR;
+for example, \fIen_US\fR or \fIzh_SG\fR. Multiple dictionaries may be used
+together by giving a comma-separated list; for example \fIen_GB,fr_FR\fR.
+This can be useful for checking multi-lingual text, or for using specialised
+word lists for a particular subject, project or document (these might have
+names such as \fIen-medical\fR or \fIen-my-novel\fR).
 .SH ORDERING FILE
 Enchant uses global and per-user ordering files named \fIenchant.ordering\fR
 to decide which spelling provider to use for particular languages.
 The per-user file takes precedence.
 .PP
 The ordering file takes the form \fIlanguage_tag:<comma-separated list of spelling
-providers>\fR. The language tag is typically an IETF BCP 47 language tag of the form \fICOUNTRY_LANGUAGE\fR.
+providers>\fR.
 To see what dictionaries are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. \(oq*\(cq is
 used to mean \(lquse this ordering for all languages, unless instructed otherwise.\(rq For example:
 .IP
@@ -45,15 +53,15 @@ It is possible, and usually safe, to share Enchant\(cqs personal word lists
 with other spelling checkers that use the same format (note that other
 spell-checkers may not support comments!). The spell-checkers known to be
 compatible are Hunspell, Nuspell and Ispell. (Although Enchant does not
-support Ispell as a back-end, it\(cqs still fine to share word lists with it.)
+support Ispell as a provider, it\(cqs still fine to share word lists with it.)
 Other spell-checkers supported by Enchant are either incompatible, or have
 no personal word list mechanism. There may well be yet other spell-checkers,
 unknown to Enchant, that use the same format.
 .PP
 Some applications use Hunspell or Nuspell, but store the personal word list
-under another name or in another location. Firefox is one example. Firefox
+under another name or in another location; Firefox and Thunderbird do this. Firefox
 also seems to reorder its word list when updating it; again, this is OK, as
-the result is still in the same format. Anonther example is Thunderbird.
+the result is still in the same format.
 .PP
 To share word lists with Enchant, find the other spelling checker\(cqs word
 list file, e.g. \fI~/.hunspell_fr_FR\fR or \fI~/.config/nuspell/fr_FR\fR,
@@ -64,7 +72,7 @@ file names:
 .IP
 cat ENCHANT-DICT OTHER-DICT | sort -u > merged.txt
 .PP
-Take a look at merged.txt to check the merge has worked, then
+Take a look at \fImerged.txt\fR to check the merge has worked, then
 .IP
 mv merged.txt ENCHANT-DICT
 .br
