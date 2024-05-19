@@ -98,23 +98,6 @@ public class EnchantDict {
 				return 1; /* hyphens only accepted within a word. */
 			return 0;
 
-		case UnicodeType.CONTROL:
-		case UnicodeType.FORMAT:
-		case UnicodeType.UNASSIGNED:
-		case UnicodeType.PRIVATE_USE:
-		case UnicodeType.SURROGATE:
-		case UnicodeType.CLOSE_PUNCTUATION:
-		case UnicodeType.FINAL_PUNCTUATION:
-		case UnicodeType.INITIAL_PUNCTUATION:
-		case UnicodeType.OTHER_PUNCTUATION:
-		case UnicodeType.OPEN_PUNCTUATION:
-		case UnicodeType.CURRENCY_SYMBOL:
-		case UnicodeType.MODIFIER_SYMBOL:
-		case UnicodeType.MATH_SYMBOL:
-		case UnicodeType.OTHER_SYMBOL:
-		case UnicodeType.LINE_SEPARATOR:
-		case UnicodeType.PARAGRAPH_SEPARATOR:
-		case UnicodeType.SPACE_SEPARATOR:
 		default:
 			return 0;
 		}
