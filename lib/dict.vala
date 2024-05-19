@@ -31,7 +31,7 @@
 public delegate int DictCheck(EnchantDict me, string word, real_size_t len);
 /* returns utf8*/
 [CCode (has_target = false, array_length_type = "size_t")]
-public delegate string[] DictSuggest(EnchantDict me, string word, real_size_t len);
+public delegate string[]? DictSuggest(EnchantDict me, string word, real_size_t len);
 [CCode (has_target = false)]
 public delegate void DictAddToSession(EnchantDict me, string word, real_size_t len);
 [CCode (has_target = false)]
@@ -152,7 +152,6 @@ public class EnchantDict {
 		return sb.end();
 	}
 
-	// FIXME: distinguish error from no results (currently both return null).
 	[CCode (array_length_pos = 3, array_length_type = "size_t")]
 	public string[]? suggest(string word_buf, real_ssize_t len) {
 		string word = buf_to_utf8_string(word_buf, len);
@@ -165,11 +164,8 @@ public class EnchantDict {
 		string[]? dict_suggs = null;
 		if (this.suggest_method != null) {
 			dict_suggs = this.suggest_method(this, word, word.length);
-			if (dict_suggs != null) {
+			if (dict_suggs != null)
 				dict_suggs = this.filter_suggestions(dict_suggs);
-				if (dict_suggs.length == 0)
-					dict_suggs = null;
-			}
 		}
 
 		return dict_suggs;

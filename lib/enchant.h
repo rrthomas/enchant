@@ -188,8 +188,8 @@ int enchant_dict_check (EnchantDict * dict, const char *const word, ssize_t len)
  * @out_n_suggs: The location in which to store the number of suggestions
  *     returned, or %null
  *
- * Returns: A %null terminated list encoded suggestions, or %null if there
- * are no suggestions, or if any of the pre-conditions is not met.
+ * Returns: A %null terminated list of suggestions, or %null if any of the
+ * pre-conditions is not met.
  */
 char **enchant_dict_suggest (EnchantDict * dict, const char *const word,
 			     ssize_t len, size_t * out_n_suggs);

@@ -98,13 +98,14 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_SuggestionExcluded_Null)
+             EnchantDictionarySuggest_SuggestionExcluded_Empty)
 {
     suggestBehavior = returnFianceNfc;
     RemoveWordFromDictionary(Convert(L"fianc\xe9"));  // u00e9 = Latin small letter e with acute
 
-    _suggestions = enchant_dict_suggest(_dict, "fiance", -1, NULL);
-    CHECK(!_suggestions);
+    size_t cSuggestions;
+    _suggestions = enchant_dict_suggest(_dict, "fiance", -1, &cSuggestions);
+    CHECK_EQUAL(cSuggestions, 0);
 }
 
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture, 
@@ -167,9 +168,10 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
              EnchantDictionarySuggestNotImplemented_NullSuggestions)
 {
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, NULL);
+    size_t cSuggestions;
+    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
 
-    CHECK(!_suggestions);
+    CHECK_EQUAL(cSuggestions, 0);
     CHECK(!dictSuggestCalled);
 }
 
@@ -219,8 +221,6 @@ TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
 
     size_t cSuggestions;
     _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
-    CHECK(!_suggestions);
-
     CHECK_EQUAL(0, cSuggestions);
 }
 
