@@ -323,8 +323,15 @@ const char *enchant_dict_get_extra_word_characters (EnchantDict * dict);
  * Note that for some back-ends the result may be a guess, in which case it
  * may allow characters not actually allowed in the given dictionary.
  *
- * If @dict is %null, a built-in implementation is used (FIXME: We should
- * document behavior for this). If @n is not 0, 1 or 2, then 0 is returned.
+ * If @dict is %null, a built-in implementation is used which implements the
+ * following rules:
+ *
+ *     * Apostrophe is accepted anywhere except at the end of a word.
+ *     * Dashes are accepted in the middle of a word.
+ *     * Letters, numbers, connecting punctuation and marks are accepted
+ *       anywhere in a word.
+ *
+ * If @n is not 0, 1 or 2, then 0 is returned.
  */
 int enchant_dict_is_word_character (EnchantDict * dict, uint32_t uc, size_t n);
 
