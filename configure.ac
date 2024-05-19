@@ -203,6 +203,7 @@ dnl ============================================================================
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
+Doxyfile
 Makefile
 enchant-$ENCHANT_MAJOR_VERSION.pc:enchant.pc.in
 lib/Makefile
