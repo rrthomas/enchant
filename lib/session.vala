@@ -107,10 +107,6 @@ public class EnchantSession {
 		this.session_exclude.add(word);
 	}
 
-	/* a word is excluded if it is in the exclude dictionary or in the
-	 * session exclude list AND the word has not been added to the session
-	 * include list
-	 */
 	public bool exclude(string word) {
 		return !this.session_include.contains(word) &&
 			(this.session_exclude.contains(word) ||
