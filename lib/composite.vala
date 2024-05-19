@@ -51,15 +51,21 @@ int composite_dict_check(EnchantDict? self, string word_buf, real_size_t len) {
 	return err;
 }
 
-string[] composite_dict_suggest(EnchantDict me, string word, real_size_t len) {
+string[]? composite_dict_suggest(EnchantDict me, string word, real_size_t len) {
 	var cdict = (EnchantCompositeDict)(me.user_data);
+	var error = true;
 	var res = new Array<string>();
 	foreach (EnchantDict dict in cdict.dict_list) {
 		var suggs = dict.suggest(word, (real_ssize_t)len);
-		if (suggs != null && suggs.length > 0)
-			for (real_size_t i = 0; i < suggs.length; i++)
-				res.append_val(suggs[i]);
+		if (suggs != null) {
+			error = false;
+			if (suggs.length > 0)
+				for (real_size_t i = 0; i < suggs.length; i++)
+					res.append_val(suggs[i]);
+		}
 	}
+	if (error == true)
+		return null;
 	return res.data;
 }
 
