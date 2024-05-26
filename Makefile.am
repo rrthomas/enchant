@@ -24,11 +24,7 @@ pkgconfig_DATA = enchant-$(ENCHANT_MAJOR_VERSION).pc
 DISTCLEANFILES = $(pkgconfig_DATA)
 EXTRA_DIST =		\
 	enchant.pc.in	\
-	README 		\
 	HACKING 	\
-	NEWS 		\
-	ChangeLog 	\
-	AUTHORS 	\
 	COPYING.LIB	\
 	Doxyfile	\
 	doxygen/html	\
