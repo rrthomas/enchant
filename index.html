@@ -36,7 +36,7 @@ communicates over a pipe, like Ispell, and is indeed Ispell-compatible.</p>
 <ul>
 <li><a href="https://hunspell.github.io/">Hunspell</a> (used by many other programs, including Firefox and Thunderbird)</li>
 <li><a href="https://nuspell.github.io/">Nuspell</a> (newest spell checker to be used by many other programs, including Firefox and Thunderbird)</li>
-<li><a href="http://aspell.net/">GNU Aspell</a> (old Ispell replacement)</li>
+<li><a href="http://aspell.net/">GNU Aspell</a> (Ispell replacement)</li>
 <li><a href="http://hspell.ivrix.org.il/">Hspell</a> (Hebrew)</li>
 <li><a href="https://voikko.puimula.org/">Voikko</a> (Finnish)</li>
 <li><a href="https://code.google.com/archive/p/zemberek/">Zemberek</a> (Turkish)</li>
@@ -58,7 +58,7 @@ href="http://www.nl.abisource.com/downloads/enchant/">AbiSource website</a>.</p>
 
 <h2>User configuration</h2>
 
-See <a href="src/enchant.html">enchant(5)</a>.
+See <a href="lib/enchant.html">enchant(5)</a>.
 
 <h2>Command-line programs</h2>
 
@@ -83,10 +83,11 @@ and GNOME applications.</p>
 
 <h2>Compatibility and bindings</h2>
 
-<p>Enchant is written in plain C99 and C++11, and should therefore work on
-most modern operating systems; other than the standard libraries, it
-requires only <a href="https://wiki.gnome.org/Projects/GLib">GLib</a>. The
-build system uses GNU Autotools, and therefore works with most compilers,
+<p>Enchant is written in C99, C++11, and Vala, which compiles to C, and
+should therefore work on most modern operating systems; other than the
+standard libraries, it requires
+only <a href="https://wiki.gnome.org/Projects/GLib">GLib</a>. The build
+system uses GNU Autotools, and therefore works with most compilers,
 including Microsoft Visual C and XCode.</p>
 
 <p>Bindings are available to many other languages:</p>
@@ -96,7 +97,7 @@ including Microsoft Visual C and XCode.</p>
   <li><a href="https://crates.io/crates/enchant">Rust</a></li>
   <li><a href="https://github.com/hermanschaaf/enchant">Go</a></li>
   <li><a href="https://github.com/tlikonen/cl-enchant">Common Lisp</a></li>
-  <li>Vala: built in!</li>
+  <li><a herf="https://vala.dev">Vala</a>: built in!</li>
 </ul>
 
 <p>All inputs and outputs are in UTF-8 encoding. Language tags use
