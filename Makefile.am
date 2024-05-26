@@ -50,7 +50,7 @@ ALL_SOURCE_FILES = \
 	providers/*.mm
 
 .PHONY:	doxygen
-doxygen:
+doxygen: Doxyfile
 	$(DOXYGEN) $(srcdir)/Doxyfile
 
 dist: doxygen

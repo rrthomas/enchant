@@ -1,8 +1,0 @@
-<map id="Provider_TestFixture" name="Provider_TestFixture">
-<area shape="rect" id="node1" title=" " alt="" coords="175,260,317,287"/>
-<area shape="rect" id="node2" href="$struct__EnchantProvider.html" title=" " alt="" coords="183,125,309,152"/>
-<area shape="rect" id="node4" href="$struct__EnchantSession.html" title=" " alt="" coords="27,260,151,287"/>
-<area shape="rect" id="node3" href="$struct__EnchantDict.html" title=" " alt="" coords="177,387,278,414"/>
-<area shape="rect" id="node5" href="$struct__EnchantPWL.html" title=" " alt="" coords="5,125,111,152"/>
-<area shape="rect" id="node6" href="$struct__EnchantBroker.html" title=" " alt="" coords="189,5,303,32"/>
-</map>

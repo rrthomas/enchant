@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['_5fenchantbroker_0',['_EnchantBroker',['../struct__EnchantBroker.html',1,'']]]
+  ['broker_0',['Broker',['../classenchant_1_1Broker.html',1,'enchant']]]
 ];

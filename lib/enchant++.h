@@ -1,4 +1,4 @@
-/* enchant
+/** \file enchant++.h
  * Copyright (C) 2003 Dom Lachowicz
  * Copyright (C) 2017-2022 Reuben Thomas
  *

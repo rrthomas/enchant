@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Enchant: src/enchant++.h Source File</title>
+<title>Enchant: lib/enchant++.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,6 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Enchant
+   &#160;<span id="projectnumber">2.7.3</span>
    </div>
    <div id="projectbrief">Generic spell checking library</div>
   </td>
@@ -86,39 +87,11 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="title">enchant++.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/* enchant</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * Copyright (C) 2003 Dom Lachowicz</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> * Copyright (C) 2017-2022 Reuben Thomas</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> * This library is free software; you can redistribute it and/or</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * modify it under the terms of the GNU Lesser General Public</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * License as published by the Free Software Foundation; either</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> * version 2.1 of the License, or (at your option) any later version.</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * This library is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * Lesser General Public License for more details.</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> * You should have received a copy of the GNU Lesser General Public License</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * along along with this program; if not, see</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * &lt;https://www.gnu.org/licenses/&gt;.</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * In addition, as a special exception, the copyright holders</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * give permission to link the code of this program with</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * non-LGPL Spelling Provider libraries (eg: a MSFT Office</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * spell checker backend) and distribute linked combinations including</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * the two.  You must obey the GNU Lesser General Public License in all</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * respects for all of the code used other than said providers.  If you modify</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * this file, you may extend this exception to your version of the</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> * file, but you are not obligated to do so.  If you do not wish to</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment"> * do so, delete this exception statement from your version.</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<a href="enchant_09_09_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160; </div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#ifndef ENCHANT_PLUS_PLUS_H</span></div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#define ENCHANT_PLUS_PLUS_H</span></div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;enchant.h&gt;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="enchant_8h.html">enchant.h</a>&gt;</span></div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &lt;exception&gt;</span></div>
@@ -126,7 +99,7 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">namespace </span>enchant</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;{</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordtype">void</span> set_prefix_dir (<span class="keyword">const</span> std::string prefix) {</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        enchant_set_prefix_dir (prefix.c_str ());</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <a class="code" href="enchant_8h.html#a0e121c0d31f4f8c6aca4825d82c879b9">enchant_set_prefix_dir</a> (prefix.c_str ());</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    }</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">class </span>Broker;</div>
@@ -158,20 +131,20 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keyword">public</span>:</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;            ~<a class="code" href="classenchant_1_1Dict.html">Dict</a> () {</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                enchant_broker_free_dict (m_broker, m_dict);</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                <a class="code" href="enchant_8h.html#ab5ccc8d6c8786eacb86db6545db191fc">enchant_broker_free_dict</a> (m_broker, m_dict);</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;            }</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;            <span class="keywordtype">bool</span> check (<span class="keyword">const</span> std::string &amp; utf8word) {</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                <span class="keywordtype">int</span> val;</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                val = enchant_dict_check (m_dict, utf8word.c_str(),</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                val = <a class="code" href="enchant_8h.html#af4fba3a4aa3c2619238c47a006ae77a3">enchant_dict_check</a> (m_dict, utf8word.c_str(),</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                              utf8word.size());</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                <span class="keywordflow">if</span> (val == 0)</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                <span class="keywordflow">else</span> <span class="keywordflow">if</span> (val &gt; 0)</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classenchant_1_1Exception.html">enchant::Exception</a> (enchant_dict_get_error (m_dict));</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classenchant_1_1Exception.html">enchant::Exception</a> (<a class="code" href="enchant_8h.html#a60b563b07b51327e2224612fc7ed15c2">enchant_dict_get_error</a> (m_dict));</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                }</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>; <span class="comment">// never reached</span></div>
@@ -184,7 +157,7 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160; </div>
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                out_suggestions.clear ();</div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                suggs = enchant_dict_suggest (m_dict, utf8word.c_str(),</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                suggs = <a class="code" href="enchant_8h.html#a457fe52741e5cedae922776f4060a9c4">enchant_dict_suggest</a> (m_dict, utf8word.c_str(),</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                                  utf8word.size(), &amp;n_suggs);</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                <span class="keywordflow">if</span> (suggs &amp;&amp; n_suggs) {</div>
@@ -194,7 +167,7 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                        out_suggestions.push_back (suggs[i]);</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                    }</div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                    enchant_dict_free_string_list (m_dict, suggs);</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                    <a class="code" href="enchant_8h.html#ac5905848a3d7342bd5f2124a5f4563ec">enchant_dict_free_string_list</a> (m_dict, suggs);</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                }</div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;            }</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160; </div>
@@ -205,38 +178,38 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;            }</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160; </div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;            <span class="keywordtype">void</span> add (<span class="keyword">const</span> std::string &amp; utf8word) {</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                enchant_dict_add (m_dict, utf8word.c_str(),</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                <a class="code" href="enchant_8h.html#ad43bcd8c01a03f7bee462c7956ca659a">enchant_dict_add</a> (m_dict, utf8word.c_str(),</div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                             utf8word.size());</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;            }</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160; </div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;            <span class="keywordtype">void</span> add_to_session (<span class="keyword">const</span> std::string &amp; utf8word) {</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                enchant_dict_add_to_session (m_dict, utf8word.c_str(),</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                <a class="code" href="enchant_8h.html#a95ae78fc67e8af8e5adecf8822d307b5">enchant_dict_add_to_session</a> (m_dict, utf8word.c_str(),</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                                 utf8word.size());</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;            }</div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160; </div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;            <span class="keywordtype">bool</span> is_added (<span class="keyword">const</span> std::string &amp; utf8word) {</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                <span class="keywordflow">return</span> enchant_dict_is_added (m_dict, utf8word.c_str(),</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                <span class="keywordflow">return</span> <a class="code" href="enchant_8h.html#a746d3fb3a35346be0009bc50452cf330">enchant_dict_is_added</a> (m_dict, utf8word.c_str(),</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                                  utf8word.size());</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;            }</div>
 <div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;            <span class="keywordtype">void</span> remove (<span class="keyword">const</span> std::string &amp; utf8word) {</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;                enchant_dict_remove (m_dict, utf8word.c_str(),</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;                <a class="code" href="enchant_8h.html#af25d45a0b62a7eba72b020292ade061b">enchant_dict_remove</a> (m_dict, utf8word.c_str(),</div>
 <div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;                             utf8word.size());</div>
 <div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;            }</div>
 <div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
 <div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;            <span class="keywordtype">void</span> remove_from_session (<span class="keyword">const</span> std::string &amp; utf8word) {</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                enchant_dict_remove_from_session (m_dict, utf8word.c_str(),</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                <a class="code" href="enchant_8h.html#a2fad6dc171d28cf184a1c2823ab6a702">enchant_dict_remove_from_session</a> (m_dict, utf8word.c_str(),</div>
 <div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;                                 utf8word.size());</div>
 <div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;            }</div>
 <div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160; </div>
 <div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;            <span class="keywordtype">void</span> is_removed (<span class="keyword">const</span> std::string &amp; utf8word) {</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;                enchant_dict_is_removed (m_dict, utf8word.c_str(),</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;                <a class="code" href="enchant_8h.html#ad616d47eeb0ab7e1a7db158f0d4bde07">enchant_dict_is_removed</a> (m_dict, utf8word.c_str(),</div>
 <div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;                                 utf8word.size());</div>
 <div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;            }</div>
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
 <div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;            <span class="keywordtype">void</span> store_replacement (<span class="keyword">const</span> std::string &amp; utf8bad,</div>
 <div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;                        <span class="keyword">const</span> std::string &amp; utf8good) {</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;                enchant_dict_store_replacement (m_dict,</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;                <a class="code" href="enchant_8h.html#a0201b7beed5d5122835a02b41f7213e6">enchant_dict_store_replacement</a> (m_dict,</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;                                utf8bad.c_str(), utf8bad.size(),</div>
 <div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;                                utf8good.c_str(), utf8good.size());</div>
 <div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;            }</div>
@@ -275,9 +248,9 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;                dict-&gt;m_provider_file = provider_file;</div>
 <div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;            }</div>
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160; </div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> (<a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict, <a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * broker)</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> (EnchantDict * dict, EnchantBroker * broker)</div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;                : m_dict (dict), m_broker (broker) {</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;                enchant_dict_describe (m_dict, s_describe_fn, <span class="keyword">this</span>);</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;                <a class="code" href="enchant_8h.html#a9c0caedc9fba2884d79b572c92460801">enchant_dict_describe</a> (m_dict, s_describe_fn, <span class="keyword">this</span>);</div>
 <div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;            }</div>
 <div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160; </div>
 <div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;            <span class="comment">// private, unimplemented</span></div>
@@ -285,8 +258,8 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> (<span class="keyword">const</span> <a class="code" href="classenchant_1_1Dict.html">Dict</a> &amp; rhs);</div>
 <div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a>&amp; operator=(<span class="keyword">const</span> <a class="code" href="classenchant_1_1Dict.html">Dict</a> &amp; rhs);</div>
 <div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160; </div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;            <a class="code" href="struct__EnchantDict.html">EnchantDict</a> * m_dict;</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;            <a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * m_broker;</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;            EnchantDict * m_dict;</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;            EnchantBroker * m_broker;</div>
 <div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
 <div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;            std::string m_lang;</div>
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;            std::string m_provider_name;</div>
@@ -300,19 +273,19 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;        <span class="keyword">public</span>:</div>
 <div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
 <div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;            <a class="code" href="classenchant_1_1Broker.html">Broker</a> ()</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;                : m_broker (enchant_broker_init ())</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;                : m_broker (<a class="code" href="enchant_8h.html#a522f99adcebfeb75479b08583e22a73b">enchant_broker_init</a> ())</div>
 <div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;                {</div>
 <div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;                }</div>
 <div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160; </div>
 <div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;            ~<a class="code" href="classenchant_1_1Broker.html">Broker</a> () {</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;                enchant_broker_free (m_broker);</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;                <a class="code" href="enchant_8h.html#a5bc072d4219ef87b356c98fb2b17285d">enchant_broker_free</a> (m_broker);</div>
 <div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;            }</div>
 <div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160; </div>
 <div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> * request_dict (<span class="keyword">const</span> std::string &amp; lang) {</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;                <a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict = enchant_broker_request_dict (m_broker, lang.c_str());</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;                EnchantDict * dict = <a class="code" href="enchant_8h.html#a3e35f16fba7e2fd0bbc3c2b4d3a9b348">enchant_broker_request_dict</a> (m_broker, lang.c_str());</div>
 <div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160; </div>
 <div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;                <span class="keywordflow">if</span> (!dict) {</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classenchant_1_1Exception.html">enchant::Exception</a> (enchant_broker_get_error (m_broker));</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classenchant_1_1Exception.html">enchant::Exception</a> (<a class="code" href="enchant_8h.html#af86d247b5659355f980f25259f87152a">enchant_broker_get_error</a> (m_broker));</div>
 <div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;                    <span class="keywordflow">return</span> 0; <span class="comment">// never reached</span></div>
 <div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;                }</div>
 <div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160; </div>
@@ -320,10 +293,10 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;            }</div>
 <div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160; </div>
 <div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;            <a class="code" href="classenchant_1_1Dict.html">Dict</a> * request_pwl_dict (<span class="keyword">const</span> std::string &amp; pwl) {</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;                <a class="code" href="struct__EnchantDict.html">EnchantDict</a> * dict = enchant_broker_request_pwl_dict (m_broker, pwl.c_str());</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;                EnchantDict * dict = <a class="code" href="enchant_8h.html#a8c306936bd023ff3f640186311ea89da">enchant_broker_request_pwl_dict</a> (m_broker, pwl.c_str());</div>
 <div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160; </div>
 <div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;                <span class="keywordflow">if</span> (!dict) {</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classenchant_1_1Exception.html">enchant::Exception</a> (enchant_broker_get_error (m_broker));</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;                    <span class="keywordflow">throw</span> <a class="code" href="classenchant_1_1Exception.html">enchant::Exception</a> (<a class="code" href="enchant_8h.html#af86d247b5659355f980f25259f87152a">enchant_broker_get_error</a> (m_broker));</div>
 <div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;                    <span class="keywordflow">return</span> 0; <span class="comment">// never reached</span></div>
 <div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;                }</div>
 <div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160; </div>
@@ -331,20 +304,20 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;            }</div>
 <div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160; </div>
 <div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;            <span class="keywordtype">bool</span> dict_exists (<span class="keyword">const</span> std::string &amp; lang) {</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;                <span class="keywordflow">if</span> (enchant_broker_dict_exists (m_broker, lang.c_str()))</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;                <span class="keywordflow">if</span> (<a class="code" href="enchant_8h.html#a86b33de92d029e5992f7ce91b5a1af7a">enchant_broker_dict_exists</a> (m_broker, lang.c_str()))</div>
 <div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;                    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
 <div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;            }</div>
 <div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160; </div>
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;            <span class="keywordtype">void</span> set_ordering (<span class="keyword">const</span> std::string &amp; tag, <span class="keyword">const</span> std::string &amp; ordering) {</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;                enchant_broker_set_ordering (m_broker, tag.c_str(), ordering.c_str());</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;                <a class="code" href="enchant_8h.html#a0df3477d50a3c7d2f2d8cb4b2629871f">enchant_broker_set_ordering</a> (m_broker, tag.c_str(), ordering.c_str());</div>
 <div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;            }</div>
 <div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160; </div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;            <span class="keywordtype">void</span> describe (EnchantBrokerDescribeFn fn, <span class="keywordtype">void</span> * user_data = NULL) {</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;            <span class="keywordtype">void</span> describe (<a class="code" href="enchant_8h.html#a028e0e8bfcbbdb605868151c602b73ec">EnchantBrokerDescribeFn</a> fn, <span class="keywordtype">void</span> * user_data = NULL) {</div>
 <div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;                enchant_broker_describe (m_broker, fn, user_data);</div>
 <div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;            }</div>
 <div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160; </div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;            <span class="keywordtype">void</span> list_dicts (EnchantDictDescribeFn fn, <span class="keywordtype">void</span> * user_data = NULL) {</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;            <span class="keywordtype">void</span> list_dicts (<a class="code" href="enchant_8h.html#ad554f6e4788e95bd4119c00f49f6ddcc">EnchantDictDescribeFn</a> fn, <span class="keywordtype">void</span> * user_data = NULL) {</div>
 <div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;                enchant_broker_list_dicts (m_broker, fn, user_data);</div>
 <div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;            }</div>
 <div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160; </div>
@@ -354,7 +327,7 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;            <a class="code" href="classenchant_1_1Broker.html">Broker</a> (<span class="keyword">const</span> <a class="code" href="classenchant_1_1Broker.html">Broker</a> &amp; rhs);</div>
 <div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;            <a class="code" href="classenchant_1_1Broker.html">Broker</a>&amp; operator=(<span class="keyword">const</span> <a class="code" href="classenchant_1_1Broker.html">Broker</a> &amp; rhs);</div>
 <div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160; </div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;            <a class="code" href="struct__EnchantBroker.html">EnchantBroker</a> * m_broker;</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;            EnchantBroker * m_broker;</div>
 <div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        }; <span class="comment">// class enchant::Broker</span></div>
 <div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;} <span class="comment">// enchant namespace</span></div>
 <div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160; </div>
@@ -362,14 +335,36 @@ $(document).ready(function(){initNavTree('enchant_09_09_8h_source.html',''); ini
 <div class="ttc" id="aclassenchant_1_1Broker_html"><div class="ttname"><a href="classenchant_1_1Broker.html">enchant::Broker</a></div><div class="ttdef"><b>Definition:</b> enchant++.h:210</div></div>
 <div class="ttc" id="aclassenchant_1_1Dict_html"><div class="ttname"><a href="classenchant_1_1Dict.html">enchant::Dict</a></div><div class="ttdef"><b>Definition:</b> enchant++.h:67</div></div>
 <div class="ttc" id="aclassenchant_1_1Exception_html"><div class="ttname"><a href="classenchant_1_1Exception.html">enchant::Exception</a></div><div class="ttdef"><b>Definition:</b> enchant++.h:47</div></div>
-<div class="ttc" id="astruct__EnchantBroker_html"><div class="ttname"><a href="struct__EnchantBroker.html">_EnchantBroker</a></div><div class="ttdef"><b>Definition:</b> broker.c:127</div></div>
-<div class="ttc" id="astruct__EnchantDict_html"><div class="ttname"><a href="struct__EnchantDict.html">_EnchantDict</a></div><div class="ttdef"><b>Definition:</b> broker.c:176</div></div>
+<div class="ttc" id="aenchant_8h_html"><div class="ttname"><a href="enchant_8h.html">enchant.h</a></div></div>
+<div class="ttc" id="aenchant_8h_html_a0201b7beed5d5122835a02b41f7213e6"><div class="ttname"><a href="enchant_8h.html#a0201b7beed5d5122835a02b41f7213e6">enchant_dict_store_replacement</a></div><div class="ttdeci">void enchant_dict_store_replacement(EnchantDict *dict, const char *const mis, ssize_t mis_len, const char *const cor, ssize_t cor_len)</div></div>
+<div class="ttc" id="aenchant_8h_html_a028e0e8bfcbbdb605868151c602b73ec"><div class="ttname"><a href="enchant_8h.html#a028e0e8bfcbbdb605868151c602b73ec">EnchantBrokerDescribeFn</a></div><div class="ttdeci">void(* EnchantBrokerDescribeFn)(const char *const provider_name, const char *const provider_desc, const char *const provider_dll_file, void *user_data)</div><div class="ttdef"><b>Definition:</b> enchant.h:154</div></div>
+<div class="ttc" id="aenchant_8h_html_a0df3477d50a3c7d2f2d8cb4b2629871f"><div class="ttname"><a href="enchant_8h.html#a0df3477d50a3c7d2f2d8cb4b2629871f">enchant_broker_set_ordering</a></div><div class="ttdeci">void enchant_broker_set_ordering(EnchantBroker *broker, const char *const tag, const char *const ordering)</div></div>
+<div class="ttc" id="aenchant_8h_html_a0e121c0d31f4f8c6aca4825d82c879b9"><div class="ttname"><a href="enchant_8h.html#a0e121c0d31f4f8c6aca4825d82c879b9">enchant_set_prefix_dir</a></div><div class="ttdeci">void enchant_set_prefix_dir(const char *)</div></div>
+<div class="ttc" id="aenchant_8h_html_a2fad6dc171d28cf184a1c2823ab6a702"><div class="ttname"><a href="enchant_8h.html#a2fad6dc171d28cf184a1c2823ab6a702">enchant_dict_remove_from_session</a></div><div class="ttdeci">void enchant_dict_remove_from_session(EnchantDict *dict, const char *const word, ssize_t len)</div></div>
+<div class="ttc" id="aenchant_8h_html_a3e35f16fba7e2fd0bbc3c2b4d3a9b348"><div class="ttname"><a href="enchant_8h.html#a3e35f16fba7e2fd0bbc3c2b4d3a9b348">enchant_broker_request_dict</a></div><div class="ttdeci">EnchantDict * enchant_broker_request_dict(EnchantBroker *broker, const char *const tag)</div></div>
+<div class="ttc" id="aenchant_8h_html_a457fe52741e5cedae922776f4060a9c4"><div class="ttname"><a href="enchant_8h.html#a457fe52741e5cedae922776f4060a9c4">enchant_dict_suggest</a></div><div class="ttdeci">char ** enchant_dict_suggest(EnchantDict *dict, const char *const word, ssize_t len, size_t *out_n_suggs)</div></div>
+<div class="ttc" id="aenchant_8h_html_a522f99adcebfeb75479b08583e22a73b"><div class="ttname"><a href="enchant_8h.html#a522f99adcebfeb75479b08583e22a73b">enchant_broker_init</a></div><div class="ttdeci">EnchantBroker * enchant_broker_init(void)</div></div>
+<div class="ttc" id="aenchant_8h_html_a5bc072d4219ef87b356c98fb2b17285d"><div class="ttname"><a href="enchant_8h.html#a5bc072d4219ef87b356c98fb2b17285d">enchant_broker_free</a></div><div class="ttdeci">void enchant_broker_free(EnchantBroker *broker)</div></div>
+<div class="ttc" id="aenchant_8h_html_a60b563b07b51327e2224612fc7ed15c2"><div class="ttname"><a href="enchant_8h.html#a60b563b07b51327e2224612fc7ed15c2">enchant_dict_get_error</a></div><div class="ttdeci">const char * enchant_dict_get_error(EnchantDict *dict)</div></div>
+<div class="ttc" id="aenchant_8h_html_a746d3fb3a35346be0009bc50452cf330"><div class="ttname"><a href="enchant_8h.html#a746d3fb3a35346be0009bc50452cf330">enchant_dict_is_added</a></div><div class="ttdeci">int enchant_dict_is_added(EnchantDict *dict, const char *const word, ssize_t len)</div></div>
+<div class="ttc" id="aenchant_8h_html_a86b33de92d029e5992f7ce91b5a1af7a"><div class="ttname"><a href="enchant_8h.html#a86b33de92d029e5992f7ce91b5a1af7a">enchant_broker_dict_exists</a></div><div class="ttdeci">int enchant_broker_dict_exists(EnchantBroker *broker, const char *const tag)</div></div>
+<div class="ttc" id="aenchant_8h_html_a8c306936bd023ff3f640186311ea89da"><div class="ttname"><a href="enchant_8h.html#a8c306936bd023ff3f640186311ea89da">enchant_broker_request_pwl_dict</a></div><div class="ttdeci">EnchantDict * enchant_broker_request_pwl_dict(EnchantBroker *broker, const char *const pwl)</div></div>
+<div class="ttc" id="aenchant_8h_html_a95ae78fc67e8af8e5adecf8822d307b5"><div class="ttname"><a href="enchant_8h.html#a95ae78fc67e8af8e5adecf8822d307b5">enchant_dict_add_to_session</a></div><div class="ttdeci">void enchant_dict_add_to_session(EnchantDict *dict, const char *const word, ssize_t len)</div></div>
+<div class="ttc" id="aenchant_8h_html_a9c0caedc9fba2884d79b572c92460801"><div class="ttname"><a href="enchant_8h.html#a9c0caedc9fba2884d79b572c92460801">enchant_dict_describe</a></div><div class="ttdeci">void enchant_dict_describe(EnchantDict *dict, EnchantDictDescribeFn fn, void *user_data)</div></div>
+<div class="ttc" id="aenchant_8h_html_ab5ccc8d6c8786eacb86db6545db191fc"><div class="ttname"><a href="enchant_8h.html#ab5ccc8d6c8786eacb86db6545db191fc">enchant_broker_free_dict</a></div><div class="ttdeci">void enchant_broker_free_dict(EnchantBroker *broker, EnchantDict *dict)</div></div>
+<div class="ttc" id="aenchant_8h_html_ac5905848a3d7342bd5f2124a5f4563ec"><div class="ttname"><a href="enchant_8h.html#ac5905848a3d7342bd5f2124a5f4563ec">enchant_dict_free_string_list</a></div><div class="ttdeci">void enchant_dict_free_string_list(EnchantDict *dict, char **string_list)</div></div>
+<div class="ttc" id="aenchant_8h_html_ad43bcd8c01a03f7bee462c7956ca659a"><div class="ttname"><a href="enchant_8h.html#ad43bcd8c01a03f7bee462c7956ca659a">enchant_dict_add</a></div><div class="ttdeci">void enchant_dict_add(EnchantDict *dict, const char *const word, ssize_t len)</div></div>
+<div class="ttc" id="aenchant_8h_html_ad554f6e4788e95bd4119c00f49f6ddcc"><div class="ttname"><a href="enchant_8h.html#ad554f6e4788e95bd4119c00f49f6ddcc">EnchantDictDescribeFn</a></div><div class="ttdeci">void(* EnchantDictDescribeFn)(const char *const lang_tag, const char *const provider_name, const char *const provider_desc, const char *const provider_file, void *user_data)</div><div class="ttdef"><b>Definition:</b> enchant.h:349</div></div>
+<div class="ttc" id="aenchant_8h_html_ad616d47eeb0ab7e1a7db158f0d4bde07"><div class="ttname"><a href="enchant_8h.html#ad616d47eeb0ab7e1a7db158f0d4bde07">enchant_dict_is_removed</a></div><div class="ttdeci">int enchant_dict_is_removed(EnchantDict *dict, const char *const word, ssize_t len)</div></div>
+<div class="ttc" id="aenchant_8h_html_af25d45a0b62a7eba72b020292ade061b"><div class="ttname"><a href="enchant_8h.html#af25d45a0b62a7eba72b020292ade061b">enchant_dict_remove</a></div><div class="ttdeci">void enchant_dict_remove(EnchantDict *dict, const char *const word, ssize_t len)</div></div>
+<div class="ttc" id="aenchant_8h_html_af4fba3a4aa3c2619238c47a006ae77a3"><div class="ttname"><a href="enchant_8h.html#af4fba3a4aa3c2619238c47a006ae77a3">enchant_dict_check</a></div><div class="ttdeci">int enchant_dict_check(EnchantDict *dict, const char *const word, ssize_t len)</div></div>
+<div class="ttc" id="aenchant_8h_html_af86d247b5659355f980f25259f87152a"><div class="ttname"><a href="enchant_8h.html#af86d247b5659355f980f25259f87152a">enchant_broker_get_error</a></div><div class="ttdeci">const char * enchant_broker_get_error(EnchantBroker *broker)</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>enchant++.h</b></li>
+    <li class="navelem"><a class="el" href="dir_97aefd0d527b934f1d99a682da8fe6a9.html">lib</a></li><li class="navelem"><a class="el" href="enchant_09_09_8h.html">enchant++.h</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
