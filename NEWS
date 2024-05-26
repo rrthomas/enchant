@@ -1,3 +1,43 @@
+2.8.0 (May 26, 2024)
+--------------------
+
+This release adds the ability to use multiple dictionaries in the same
+spell-checking session. This can be useful for checking multilingual text in
+situations where passages or words cannot be marked as being in a particular
+language (for example, plain text or Markdown), and for specialised texts
+where a subject-specific dictionary is useful. The functionality is based on
+the Google Summer of Code “composite dictionary” project by Vidhoon
+Vishwanathan from 2013; a big thanks to him for his work! I have simplified
+his original design, and the implementation in Vala is entirely mine, so he
+is not to blame for any faults it may have in its current form.
+
+Multiple dictionaries are specified by a change to the dictionary tag
+format: most of Enchant’s APIs and its command-line front-end now accept a
+comma-separated list of tags. (This means of course that commas may no
+longer be used in dictionary tags; but until recently that was not allowed
+in any case.)
+
+A minor change has been made to an existing API: enchant_dict_suggest is now
+specified to return an empty list when there are no suggestions. This makes
+it easier to distinguish an error (when NULL is returned) from there simply
+being no suggestions. While this is formally an API change, I am not
+incrementing the major library version as in fact this API was already able
+to return an empty list; and in any case, callers were unlikely to rely on
+the list being non-empty.
+
+The Doxygen documentation has been greatly improved: documentation of
+internal code has been removed, while the public C and C++ header files are
+now clearly documented (in particular, the Doxygen documentation did not
+previously contain proper documentation for the C header file). The
+documentation of the C API has also been improved in several places.
+
+The test suite files have been renamed with shorter, less redundant names,
+to make them easier to navigate.
+
+Some minor improvements to and simplifications of the build system and code
+have also been made.
+
+
 2.7.3 (April 27, 2024)
 ----------------------
 
