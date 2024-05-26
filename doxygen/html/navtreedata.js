@@ -25,22 +25,25 @@
 var NAVTREE =
 [
   [ "Enchant", "index.html", [
-    [ "BOOTSTRAP", "md_gl_mod_bootstrap_README.html", null ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ]
     ] ],
     [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
+      [ "File List", "files.html", "files_dup" ],
+      [ "File Members", "globals.html", [
+        [ "All", "globals.html", null ],
+        [ "Functions", "globals_func.html", null ],
+        [ "Typedefs", "globals_type.html", null ]
+      ] ]
     ] ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"EnchantBrokerTestFixture_8h_source.html",
-"structEnchantGetPrefixDirTestFixture.html#add23ebb2ccd267992f6922d6971eba5d"
+"annotated.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

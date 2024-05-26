@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Enchant: src/enchant-provider.h Source File</title>
+<title>Enchant: lib/enchant-provider.h Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -26,6 +26,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Enchant
+   &#160;<span id="projectnumber">2.7.3</span>
    </div>
    <div id="projectbrief">Generic spell checking library</div>
   </td>
@@ -118,7 +119,7 @@ $(document).ready(function(){initNavTree('enchant-provider_8h_source.html',''); 
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#ifndef ENCHANT_PROVIDER_H</span></div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#define ENCHANT_PROVIDER_H</span></div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;enchant.h&gt;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;<a class="code" href="enchant_8h.html">enchant.h</a>&gt;</span></div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;glib.h&gt;</span></div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &lt;glib-object.h&gt;</span></div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &lt;stddef.h&gt;</span></div>
@@ -209,20 +210,23 @@ $(document).ready(function(){initNavTree('enchant-provider_8h_source.html',''); 
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                   <span class="keywordtype">size_t</span> * out_n_dicts);</div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;};</div>
 <div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160; </div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;}</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160; </div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* ENCHANT_PROVIDER_H */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="astruct__EnchantBroker_html"><div class="ttname"><a href="struct__EnchantBroker.html">_EnchantBroker</a></div><div class="ttdef"><b>Definition:</b> broker.c:127</div></div>
-<div class="ttc" id="astruct__EnchantDict_html"><div class="ttname"><a href="struct__EnchantDict.html">_EnchantDict</a></div><div class="ttdef"><b>Definition:</b> broker.c:176</div></div>
-<div class="ttc" id="astruct__EnchantProvider_html"><div class="ttname"><a href="struct__EnchantProvider.html">_EnchantProvider</a></div><div class="ttdef"><b>Definition:</b> broker.c:134</div></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<a class="code" href="struct__EnchantDict.html">EnchantDict</a> *composite_provider_create_dict (GSList *dicts);</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160; </div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;}</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160; </div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* ENCHANT_PROVIDER_H */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aenchant_8h_html"><div class="ttname"><a href="enchant_8h.html">enchant.h</a></div></div>
+<div class="ttc" id="astruct__EnchantBroker_html"><div class="ttname"><a href="struct__EnchantBroker.html">_EnchantBroker</a></div><div class="ttdef"><b>Definition:</b> broker.c:147</div></div>
+<div class="ttc" id="astruct__EnchantDict_html"><div class="ttname"><a href="struct__EnchantDict.html">_EnchantDict</a></div><div class="ttdef"><b>Definition:</b> broker.c:196</div></div>
+<div class="ttc" id="astruct__EnchantProvider_html"><div class="ttname"><a href="struct__EnchantProvider.html">_EnchantProvider</a></div><div class="ttdef"><b>Definition:</b> broker.c:154</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>enchant-provider.h</b></li>
+    <li class="navelem"><a class="el" href="dir_97aefd0d527b934f1d99a682da8fe6a9.html">lib</a></li><li class="navelem"><b>enchant-provider.h</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>

@@ -1,4 +1,0 @@
-var structEnchantDictionaryGetExtraWordCharactersNotImplemented__TestFixture =
-[
-    [ "EnchantDictionaryGetExtraWordCharactersNotImplemented_TestFixture", "structEnchantDictionaryGetExtraWordCharactersNotImplemented__TestFixture.html#a1902ccf480fa763f354006c3c908c017", null ]
-];
