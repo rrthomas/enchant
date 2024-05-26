@@ -1,6 +1,8 @@
-libenchant -- Generic spell checking library
-Maintainer: Reuben Thomas
-Home page: https://abiword.github.io/enchant/
+# libenchant -- Generic spell checking library
+
+Maintainer: Reuben Thomas  
+Home page: https://abiword.github.io/enchant/  
+Bug reports and other issues: https://github.com/AbiWord/enchant  
 
 libenchant is licensed under the terms of the GNU LGPL (see the file
 COPYING.LIB), with a special exception allowing the use of proprietary
@@ -17,24 +19,23 @@ plugins if desired.
 
 Enchant works with the following spell-checkers:
 
-    * Hunspell (formerly Myspell)
-    * Nuspell
-    * GNU Aspell
-    * Hspell
-    * Voikko
-    * Apple Spell (macOS only)
-    * Zemberek
+* Hunspell (formerly Myspell)
+* Nuspell
+* GNU Aspell
+* Hspell
+* Voikko
+* Apple Spell (macOS only)
+* Zemberek
 
 Enchant is written in Vala, C and C++, and its only external dependency is
-glib. C and C++ compilers are required to build it.
+Glib. C and C++ compilers are required to build it.
 
 Enchant bindings are supplied for C and C++. API documentation is available
 in the doxygen/html directory, or online (see the home page). There are
 third-party bindings for various languages (see the home page).
 
 
-Installation
-------------
+## Installation
 
 Users should install from a release tarball. See the file INSTALL for
 instructions.
@@ -42,8 +43,7 @@ instructions.
 Developers or others wishing to install from a git repository, see HACKING.
 
 
-Usage
------
+## Usage
 
 See the man pages for information on how to use Enchant. In particular,
 information about how to configure which spelling checker to use for each
@@ -51,13 +51,3 @@ language and how to work with personal word lists is in the man page
 enchant(5). To see this man page, in a terminal, give the command:
 
     man 5 enchant
-
-
-Bug reports and development
----------------------------
-
-To report libenchant bugs or request features, please visit
-https://github.com/AbiWord/enchant
-
-If you can't use GitHub do get in touch with the maintainer, Reuben Thomas:
-<rrt@sc3d.org>.
