@@ -1,5 +1,5 @@
 <!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Fri May 17 18:52:51 2024 -->
+<!-- CreationDate: Sun May 26 12:57:40 2024 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -21,6 +21,7 @@
 <h1 align="center">ENCHANT</h1>
 
 <a href="#NAME">NAME</a><br>
+<a href="#LANGUAGE TAGS">LANGUAGE TAGS</a><br>
 <a href="#ORDERING FILE">ORDERING FILE</a><br>
 <a href="#PERSONAL WORD LISTS">PERSONAL WORD LISTS</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
@@ -37,7 +38,24 @@
 
 
 <p style="margin-left:11%; margin-top: 1em">Enchant -
-enchant ordering files and personal word lists</p>
+enchant language tags, ordering files and personal word
+lists</p>
+
+<h2>LANGUAGE TAGS
+<a name="LANGUAGE TAGS"></a>
+</h2>
+
+
+<p style="margin-left:11%; margin-top: 1em">Enchant
+identifies dictionaries by their language tag. A language
+tag is typically an IETF BCP 47 language tag of the form
+<i>LANGUAGE_COUNTRY</i>; for example, <i>en_US</i> or
+<i>zh_SG</i>. Multiple dictionaries may be used together by
+giving a comma-separated list; for example
+<i>en_GB,fr_FR</i>. This can be useful for checking
+multi-lingual text, or for using specialised word lists for
+a particular subject, project or document (these might have
+names such as <i>en-medical</i> or <i>en-my-novel</i>).</p>
 
 <h2>ORDERING FILE
 <a name="ORDERING FILE"></a>
@@ -52,9 +70,7 @@ precedence.</p>
 
 <p style="margin-left:11%; margin-top: 1em">The ordering
 file takes the form <i>language_tag:&lt;comma-separated list
-of spelling providers&gt;</i>. The language tag is typically
-an IETF BCP 47 language tag of the form
-<i>COUNTRY_LANGUAGE</i>. To see what dictionaries are
+of spelling providers&gt;</i>. To see what dictionaries are
 available, run <i>enchant-lsmod-2</i>. &rsquo;*&rsquo; is
 used to mean &ldquo;use this ordering for all languages,
 unless instructed otherwise.&rdquo; For example:</p>
@@ -89,7 +105,7 @@ personal word lists with other spelling checkers that use
 the same format (note that other spell-checkers may not
 support comments!). The spell-checkers known to be
 compatible are Hunspell, Nuspell and Ispell. (Although
-Enchant does not support Ispell as a back-end, it&rsquo;s
+Enchant does not support Ispell as a provider, it&rsquo;s
 still fine to share word lists with it.) Other
 spell-checkers supported by Enchant are either incompatible,
 or have no personal word list mechanism. There may well be
@@ -98,10 +114,10 @@ same format.</p>
 
 <p style="margin-left:11%; margin-top: 1em">Some
 applications use Hunspell or Nuspell, but store the personal
-word list under another name or in another location. Firefox
-is one example. Firefox also seems to reorder its word list
-when updating it; again, this is OK, as the result is still
-in the same format. Anonther example is Thunderbird.</p>
+word list under another name or in another location; Firefox
+and Thunderbird do this. Firefox also seems to reorder its
+word list when updating it; again, this is OK, as the result
+is still in the same format.</p>
 
 <p style="margin-left:11%; margin-top: 1em">To share word
 lists with Enchant, find the other spelling checker&rsquo;s
@@ -116,7 +132,7 @@ with the corresponding dictionary file names:</p>
 ENCHANT-DICT OTHER-DICT | sort -u &gt; merged.txt</p>
 
 <p style="margin-left:11%; margin-top: 1em">Take a look at
-merged.txt to check the merge has worked, then</p>
+<i>merged.txt</i> to check the merge has worked, then</p>
 
 <p style="margin-left:22%; margin-top: 1em">mv merged.txt
 ENCHANT-DICT <br>
