@@ -49,19 +49,6 @@ void print_version(FileStream to) {
 	to.flush();
 }
 
-void print_help(string prog) {
-	GLib.stderr.printf(
-		"""Usage: %s -a|-l|-h|-v [-L] [-d DICTIONARY] [FILE]
-  -d DICTIONARY  use the given dictionary
-  -p FILE        use the given personal word list
-  -a             communicate non-interactively through a pipe like Ispell
-  -l             list only the misspellings
-  -L             display line numbers
-  -h             display help and exit
-  -v             display version information and exit
-""", prog);
-}
-
 string get_line(FileStream fin) {
 	string str = fin.read_line();
 
@@ -91,11 +78,11 @@ bool check_word(Dict dict, string word) {
 		dict.check(word, word.length) == 0;
 }
 
-void do_mode_a(Dict dict, string word, size_t start_pos, size_t lineCount, bool terse_mode) {
+void do_mode_a(Dict dict, string word, size_t start_pos, size_t line_count, bool terse_mode) {
 	if (check_word(dict, word)) {
 		if (!terse_mode) {
-			if (lineCount > 0)
-				print("* %zu\n", lineCount);
+			if (line_count > 0)
+				print("* %zu\n", line_count);
 			else
 				print("*\n");
 		}
@@ -103,14 +90,14 @@ void do_mode_a(Dict dict, string word, size_t start_pos, size_t lineCount, bool 
 		string[] suggs = dict.suggest(word, word.length);
 		if (suggs == null || suggs.length == 0) {
 			print("# ");
-			if (lineCount > 0)
-				print("%zu ", lineCount);
+			if (line_count > 0)
+				print("%zu ", line_count);
 			print_utf(word);
 			print(" %zu\n", start_pos);
 		} else {
 			print("& ");
-			if (lineCount > 0)
-				print("%zu ", lineCount);
+			if (line_count > 0)
+				print("%zu ", line_count);
 			print_utf (word);
 			print(" %zu %zu:", suggs.length, start_pos);
 
@@ -128,10 +115,10 @@ void do_mode_a(Dict dict, string word, size_t start_pos, size_t lineCount, bool 
 	}
 }
 
-void do_mode_l(Dict dict, string word, size_t lineCount) {
+void do_mode_l(Dict dict, string word, size_t line_count) {
 	if (!check_word(dict, word)) {
-		if (lineCount > 0)
-			print("%zu ", lineCount);
+		if (line_count > 0)
+			print("%zu ", line_count);
 		print_utf(word);
 		GLib.stdout.putc('\n');
 	}
@@ -159,8 +146,7 @@ SList<Token> tokenize_line(Dict dict, string line) {
 
 		/* Skip non-word characters. */
 		for (uc = utf.get_char();
-			 uc != 0
-				 && !dict.is_word_character(uc, WordPosition.START);
+			 uc != 0 && !dict.is_word_character(uc, WordPosition.START);
 			 uc = utf.get_char()) {
 			utf = utf.next_char();
 		}
@@ -168,8 +154,7 @@ SList<Token> tokenize_line(Dict dict, string line) {
 
 		/* Skip over word characters. */
 		for (;
-			 uc != 0 &&
-				 dict.is_word_character(uc, WordPosition.MIDDLE);
+			 uc != 0 && dict.is_word_character(uc, WordPosition.MIDDLE);
 			 uc = utf.get_char()) {
 			utf = utf.next_char();
 		}
@@ -194,235 +179,240 @@ SList<Token> tokenize_line(Dict dict, string line) {
 
 errordomain Spelling {
 	EMPTY_WORD,
-    SYNTAX_ERROR,
+	SYNTAX_ERROR,
 }
 
-int parse_file(FileStream fin, Mode mode, bool countLines, string? dictionary, string? perslist) {
-	var terse_mode = false;
-
-	if (mode == Mode.A)
-		print_version(GLib.stdout);
-
-	string lang;
-	if (dictionary != null)
-		lang = dictionary;
-	else {
-		lang = enchant_get_user_language();
-		if (lang == null)
-			return 1;
-		if (lang == "C")
-			lang = "en";
-	}
-
-	/* Enchant will get rid of trailing information like de_DE@euro or de_DE.ISO-8859-15 */
-
-	var broker = new Broker();
-	unowned var dict = broker.request_dict_with_pwl(lang, perslist);
-
-	if (dict == null) {
-		GLib.stderr.printf("No dictionary available for '%s'", lang);
-		string errmsg = broker.get_error();
-		if (errmsg != null)
-			GLib.stderr.printf(": %s", errmsg);
-		GLib.stderr.putc('\n');
-
-		return 1;
-	}
-
-	var corrected_something = false;
-	size_t lineCount = 0;
-	for (var was_last_line = false; !was_last_line;) {
-		bool mode_A_no_command = false;
-		var str = get_line(fin);
-
-		if (countLines)
-			lineCount++;
-
-		if (str.length > 0) {
-			corrected_something = false;
-
-			if (mode == Mode.A) {
-				try {
-					switch (str[0]) {
-					case '&': /* Insert uncapitalised in personal word list */
-						if (str.length == 1)
-							throw new Spelling.EMPTY_WORD("Word missing");
-						if (str.length > 1) {
-							unowned string new_word = str.next_char();
-							unichar c = new_word.get_char_validated();
-							if (c > 0) {
-								dict.add(c.tolower().to_string() + new_word.next_char());
-							} else
-								dict.add(new_word);
-						}
-						break;
-					case '*': /* Insert in personal word list */
-						if (str.length == 1)
-							throw new Spelling.EMPTY_WORD("Word missing");
-						dict.add(str.next_char());
-						break;
-					case '@': /* Accept for this session */
-						if (str.length == 1)
-							throw new Spelling.EMPTY_WORD("Word missing");
-						dict.add_to_session(str.substring(1), -1);
-						break;
-					case '/': /* Remove from personal word list */
-						if (str.length == 1)
-							throw new Spelling.EMPTY_WORD("Word missing");
-						dict.remove(str.substring(1), -1);
-						break;
-					case '_': /* Remove from this session */
-						if (str.length == 1)
-							throw new Spelling.EMPTY_WORD("Word missing");
-						dict.remove_from_session(str.substring(1), -1);
-						break;
-
-					case '%': /* Exit terse mode */
-						terse_mode = false;
-						break;
-					case '!': /* Enter terse mode */
-						terse_mode = true;
-						break;
-
-						/* Ignore these commands */
-					case '#': /* Save personal word list (enchant does this automatically) */
-					case '+': /* LaTeX mode */
-					case '-': /* nroff mode [default] */
-					case '~': /* change string character type (enchant is fixed to UTF-8) */
-					case '`': /* Enter verbose-correction mode */
-						break;
-
-					case '$': /* Miscellaneous commands */
-					{
-						/* Save correction for rest of session [aspell extension] */
-						if (str.has_prefix("$$ra ")) { /* Syntax: $$ra <MISSPELLED>,<REPLACEMENT> */
-							// Enchant no longer supports this.
-						} else if (str.has_prefix("$$wc"))
-							/* Return the extra word chars list */
-							print("%s\n", dict.get_extra_word_characters());
-					}
-					break;
-
-					case '^': /* ^ is used as prefix to prevent interpretation of original
-								 first character as a command */
-					default: /* A word or words to check */
-						mode_A_no_command = true;
-						break;
-					}
-				} catch (Spelling e) {
-					print("Error: The word \"\" is invalid. Empty string.\n");
-				}
-			}
-
-			if (mode != Mode.A || mode_A_no_command) {
-				var tokens = tokenize_line(dict, str);
-				if (tokens == null)
-					GLib.stdout.putc('\n');
-				for (unowned var tok_ptr = tokens; tok_ptr != null; tok_ptr = tok_ptr.next) {
-					corrected_something = true;
-
-					var token = tokens.data;
-					var word = token.word;
-					size_t pos = token.pos;
-
-					if (mode == Mode.A)
-						do_mode_a(dict, word, pos, lineCount, terse_mode);
-					else if (mode == Mode.L)
-						do_mode_l(dict, word, lineCount);
-				}
-			}
-		}
-
-		if (mode == Mode.A && corrected_something)
-			GLib.stdout.putc('\n');
-		GLib.stdout.flush();
-	}
-
-	return 0;
-}
-
-void usage(string progname) {
-	print_help(progname);
+void usage(OptionContext ctx) {
+	print("%s", ctx.get_help(false, null));
 	exit(1);
 }
 
-public int main(string[] args) {
-	var mode = Mode.NONE;
-	string file = null;
-	var countLines = false;
-	string dictionary = null;  /* -d dictionary */
-	string perslist = null ; /* -p personal_word_list */
+public class Main : Object {
+	private static Mode mode = Mode.NONE;
+	private static string dictionary = null;  /* -d dictionary */
+	private static string perslist = null; /* -p personal_word_list */
+	[CCode (array_length = false, array_null_terminated = true)]
+	private static string[] files; /* FILE... */
+	private static bool version = false;
+	private static bool count_lines = false;
+	private static bool ignored;
 
-	/* Initialize system locale */
-	Intl.setlocale();
+	private const OptionEntry[] main_options = {
+		{"pipe", 'a', OptionFlags.NO_ARG, OptionArg.CALLBACK, (void *)Main.set_mode, "Talk to another program through a pipe, like Ispell", null},
+		{"errors-only", 'l', OptionFlags.NO_ARG, OptionArg.CALLBACK, (void *)Main.set_mode, "List only the misspellings", null},
+		{"dictionary", 'd', OptionFlags.NONE, OptionArg.STRING, ref dictionary, "Use the given dictionary", null},
+		{"pwl", 'p', OptionFlags.NONE, OptionArg.FILENAME, ref perslist, "Use the given personal word list", null},
+		{"show-lines", 'L', OptionFlags.NONE, OptionArg.NONE, ref count_lines, "Display line numbers", null},
+		// {"help", 'h', OptionFlags.NONE, OptionArg.NONE, ref help, "display help and exit", null},
+		{"version", 'v', OptionFlags.NONE, OptionArg.NONE, ref version, "Display version information and exit", null},
 
-	get_charset(out charset);
-// FIXME
-// #ifdef _WIN32
-// 	/* If reading from stdin, its CP may not be the system CP (which glib's locale gives us) */
-// 	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) == FILE_TYPE_CHAR)
-// 		charset = g_strdup_printf("CP%u", GetConsoleCP());
-// #endif
+		/* Ignore: Emacs calls ispell with '-m' and '-B'. */
+		{" ", 'm', OptionFlags.HIDDEN, OptionArg.NONE, ref ignored, null, null},
+		{" ", 'B', OptionFlags.HIDDEN, OptionArg.NONE, ref ignored, null, null},
 
-	int optchar;
-	while ((optchar = getopt(args, ":d:p:alvLmBh")) != -1) {
-		switch (optchar) {
-		case 'd':
-			dictionary = optarg;  /* Emacs calls ispell with '-d dictionary'. */
-			break;
-		case 'p':
-			perslist = optarg;
-			break;
+		/* Files */
+		{OPTION_REMAINING, '\0', OptionFlags.NONE, OptionArg.FILENAME_ARRAY, ref files, null, "FILE..."},
+		{null}
+	};
+
+	private static bool set_mode(string option_name, string? val, void *data) {
 		/* The first mode specified takes precedence. */
-		case 'a':
-			if (mode == Mode.NONE)
+		if (mode == Mode.NONE) {
+			if (option_name == "--pipe" || option_name == "-a")
 				mode = Mode.A;
-			break;
-		case 'l':
-			if (mode == Mode.NONE)
+			else if (option_name == "--errors-only" || option_name == "-l")
 				mode = Mode.L;
-			break;
-		case 'L':
-			countLines = true;
-			break;
-		case 'v':
+		}
+		return true;
+	}
+
+	private static bool parse_file(FileStream fin) {
+		var terse_mode = false;
+
+		if (mode == Mode.A)
+			print_version(GLib.stdout);
+
+		string lang;
+		if (dictionary != null)
+			lang = dictionary;
+		else {
+			lang = enchant_get_user_language();
+			if (lang == null)
+				return false;
+			if (lang == "C")
+				lang = "en";
+		}
+
+		var broker = new Broker();
+		unowned var dict = broker.request_dict_with_pwl(lang, perslist);
+
+		if (dict == null) {
+			GLib.stderr.printf("No dictionary available for '%s'", lang);
+			string errmsg = broker.get_error();
+			if (errmsg != null)
+				GLib.stderr.printf(": %s", errmsg);
+			GLib.stderr.putc('\n');
+
+			return false;
+		}
+
+		var corrected_something = false;
+		size_t line_count = 0;
+		for (var was_last_line = false; !was_last_line;) {
+			bool mode_A_no_command = false;
+			var str = get_line(fin);
+
+			if (count_lines)
+				line_count++;
+
+			if (str.length > 0) {
+				corrected_something = false;
+
+				if (mode == Mode.A) {
+					try {
+						switch (str[0]) {
+						case '&': /* Insert uncapitalised in personal word list */
+							if (str.length == 1)
+								throw new Spelling.EMPTY_WORD("Word missing");
+							if (str.length > 1) {
+								unowned string new_word = str.next_char();
+								unichar c = new_word.get_char_validated();
+								if (c > 0) {
+									dict.add(c.tolower().to_string() + new_word.next_char());
+								} else
+									dict.add(new_word);
+							}
+							break;
+						case '*': /* Insert in personal word list */
+							if (str.length == 1)
+								throw new Spelling.EMPTY_WORD("Word missing");
+							dict.add(str.next_char());
+							break;
+						case '@': /* Accept for this session */
+							if (str.length == 1)
+								throw new Spelling.EMPTY_WORD("Word missing");
+							dict.add_to_session(str.substring(1), -1);
+							break;
+						case '/': /* Remove from personal word list */
+							if (str.length == 1)
+								throw new Spelling.EMPTY_WORD("Word missing");
+							dict.remove(str.substring(1), -1);
+							break;
+						case '_': /* Remove from this session */
+							if (str.length == 1)
+								throw new Spelling.EMPTY_WORD("Word missing");
+							dict.remove_from_session(str.substring(1), -1);
+							break;
+
+						case '%': /* Exit terse mode */
+							terse_mode = false;
+							break;
+						case '!': /* Enter terse mode */
+							terse_mode = true;
+							break;
+
+							/* Ignore these commands */
+						case '#': /* Save personal word list (enchant does this automatically) */
+						case '+': /* LaTeX mode */
+						case '-': /* nroff mode [default] */
+						case '~': /* change string character type (enchant is fixed to UTF-8) */
+						case '`': /* Enter verbose-correction mode */
+							break;
+
+						case '$': /* Miscellaneous commands */
+						{
+							/* Save correction for rest of session [aspell extension] */
+							if (str.has_prefix("$$ra ")) { /* Syntax: $$ra <MISSPELLED>,<REPLACEMENT> */
+								// Enchant no longer supports this.
+							} else if (str.has_prefix("$$wc"))
+								/* Return the extra word chars list */
+								print("%s\n", dict.get_extra_word_characters());
+						}
+						break;
+
+						case '^': /* ^ is used as prefix to prevent interpretation of original
+									 first character as a command */
+						default: /* A word or words to check */
+							mode_A_no_command = true;
+							break;
+						}
+					} catch (Spelling e) {
+						print("Error: The word \"\" is invalid. Empty string.\n");
+					}
+				}
+
+				if (mode != Mode.A || mode_A_no_command) {
+					var tokens = tokenize_line(dict, str);
+					if (tokens == null)
+						GLib.stdout.putc('\n');
+					for (unowned var tok_ptr = tokens; tok_ptr != null; tok_ptr = tok_ptr.next) {
+						corrected_something = true;
+
+						var token = tokens.data;
+						var word = token.word;
+						size_t pos = token.pos;
+
+						if (mode == Mode.A)
+							do_mode_a(dict, word, pos, line_count, terse_mode);
+						else if (mode == Mode.L)
+							do_mode_l(dict, word, line_count);
+					}
+				}
+			}
+
+			if (mode == Mode.A && corrected_something)
+				GLib.stdout.putc('\n');
+			GLib.stdout.flush();
+		}
+
+		return true;
+	}
+
+	public static int main(string[] args) {
+		/* Initialize system locale */
+		Intl.setlocale();
+
+		get_charset(out charset);
+		// FIXME
+		// #ifdef _WIN32
+		//	/* If reading from stdin, its CP may not be the system CP (which glib's locale gives us) */
+		//	if (GetFileType(GetStdHandle(STD_INPUT_HANDLE)) == FILE_TYPE_CHAR)
+		//		charset = g_strdup_printf("CP%u", GetConsoleCP());
+		// #endif
+
+		var ctx = new OptionContext("\n\nCheck spelling non-interactively.");
+		ctx.set_help_enabled(true);
+		ctx.add_main_entries(main_options, null);
+		try {
+			ctx.parse(ref args);
+		} catch (OptionError e) {
+			printerr("error %s\n", e.message);
+			usage(ctx);
+		}
+
+		if (version) {
 			print_version(GLib.stdout);
 			exit(0);
-			break;
-		case 'm':
-		case 'B':
-			/* Ignore: Emacs calls ispell with '-m' and '-B'. */
-			break;
-		case 'h':
-			print_help(args[0]);
-			exit(0);
-			break;
-		case ':':
-			GLib.stderr.printf("missing argument to option\n");
-			break;
-		case '?':
-			usage(args[0]);
-			break;
 		}
-	}
 
-	/* Get file argument if given. */
-	if (optind < args.length)
-		file = args[optind++];
+		/* Exit with usage if no mode is set. */
+		if (mode == Mode.NONE)
+			usage(ctx);
 
-	/* Exit with usage if either no mode is set, or if there are excess
-	   non-option arguments. */
-	if (mode == Mode.NONE || optind < args.length)
-		usage(args[0]);
+		/* Process the file or standard input. */
+		FileStream fp = null;
+		if (files == null)
+			return parse_file(GLib.stdin) ? 0 : 1;
 
-	/* Process the file or standard input. */
-	FileStream fp = null;
-	if (file != null) {
-		fp = FileStream.open(file, "rb");
-		if (fp == null) {
-			GLib.stderr.printf("Error: Could not open the file \"%s\" for reading.\n", file);
-			exit(1);
+		foreach (var f in files) {
+			fp = FileStream.open(f, "rb");
+			if (fp == null) {
+				GLib.stderr.printf("Error: Could not open the file \"%s\" for reading.\n", f);
+				exit(1);
+			}
+			if (!parse_file(fp))
+				exit(1);
 		}
+		return 0;
 	}
-	return parse_file(fp == null ? GLib.stdin : fp, mode, countLines, dictionary, perslist);
 }
