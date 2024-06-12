@@ -1,3 +1,14 @@
+2.8.1 (June 12, 2024)
+---------------------
+
+This release restores an optimization removed in 2.8.0 that reduces the
+frequency with which personal wordlists are reloaded. This optimization
+seemed to be unnecessary, as it had no effect on the test suite, but its
+removal caused a significant slow-down for real-world use. Apologies to
+those who are affected by this, and many thanks to the user who reported
+this problem.
+
+
 2.8.0 (May 26, 2024)
 --------------------
 
