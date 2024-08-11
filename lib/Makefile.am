@@ -60,3 +60,10 @@ enchant.html: enchant.5
 	groff -mandoc -Thtml $< > $@
 
 EXTRA_DIST = $(libenchant_data_DATA) $(VAPIS)
+
+loc:
+	$(CLOC) $(ALL_SOURCE_FILES)
+
+ALL_SOURCE_FILES = \
+	Makefile.am \
+	*.vala

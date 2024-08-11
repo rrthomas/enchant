@@ -199,6 +199,10 @@ AM_CONDITIONAL(WITH_APPLESPELL, test "$with_applespell" = yes)
 dnl Experimental/deprecated providers
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([zemberek], [ZEMBEREK], [dbus-glib-1 >= 0.62], [no])
 
+dnl Counting code
+CLOC="cloc --force-lang='Bourne Shell',conf"
+AC_SUBST([CLOC])
+
 dnl =======================================================================================
 
 AC_CONFIG_HEADERS([config.h])
