@@ -52,3 +52,10 @@ enchant_lsmod_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant-lsmod.vala
 enchant_lsmod_@ENCHANT_MAJOR_VERSION@_VALAFLAGS = $(AM_VALAFLAGS) --pkg util
 
 EXTRA_DIST = enchant.1.in enchant-lsmod.1.in util.h $(VAPIS)
+
+loc:
+	$(CLOC) $(ALL_SOURCE_FILES)
+
+ALL_SOURCE_FILES = \
+	Makefile.am \
+	*.vala
