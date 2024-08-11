@@ -139,18 +139,57 @@ void usage(OptionContext ctx) {
 	exit(1);
 }
 
+void describe_dict(string lang_tag,
+				   string provider_name,
+				   string provider_desc,
+				   string provider_file) {
+	print("%s (%s)\n", lang_tag, provider_name);
+}
+
+void describe_word_chars(string lang_tag,
+						 string provider_name,
+						 string provider_desc,
+						 string provider_file,
+						 Dict self) {
+	string word_chars = "";
+	if (self != null)
+		word_chars = self.get_extra_word_characters();
+	print("%s\n", word_chars != null ? word_chars : "");
+}
+
+void describe_provider(string name, string desc, string file) {
+	print("%s (%s)\n", name, desc);
+}
+
+string get_user_language() {
+	// The returned list always contains "C".
+	unowned string[] languages = Intl.get_language_names();
+	GLib.assert(languages != null);
+	return languages[0];
+}
+
 public class Main : Object {
-	private static string dictionary = null;  /* -d dictionary */
-	private static string perslist = null; /* -p personal_word_list */
+	private static string dictionary = null;
+	private static string perslist = null;
 	[CCode (array_length = false, array_null_terminated = true)]
 	private static string[] files; /* FILE... */
 	private static bool version = false;
 	private static bool count_lines = false;
+	private static bool list_providers = false;
+	private static bool list_dictionaries = false;
+	private static bool check_spelling = false;
+	private static bool show_default_dict = false;
+	private static bool show_word_chars = false;
 
 	private const OptionEntry[] main_options = {
 		{"dictionary", 'd', OptionFlags.NONE, OptionArg.STRING, ref dictionary, "Use the given dictionary", "DICTIONARY"},
+		{"check-spelling", 'l', OptionFlags.NONE, OptionArg.NONE, ref check_spelling, "List misspellings in the input files, or standard input", null},
 		{"pwl", 'p', OptionFlags.NONE, OptionArg.FILENAME, ref perslist, "Use the given personal word list", "FILE"},
 		{"show-lines", 'L', OptionFlags.NONE, OptionArg.NONE, ref count_lines, "Display line numbers", null},
+		{"list-providers", '\0', OptionFlags.NONE, OptionArg.NONE, ref list_providers, "List spelling providers", null},
+		{"list-dicts", '\0', OptionFlags.NONE, OptionArg.NONE, ref list_dictionaries, "List all dictionaries", null},
+		{"default-dict", '\0', OptionFlags.NONE, OptionArg.NONE, ref show_default_dict, "Show the default dictionary for the given or default language", null},
+		{"word-chars", '\0', OptionFlags.NONE, OptionArg.NONE, ref show_word_chars, "Show the word characters for the given or default language", null},
 		{"version", 'v', OptionFlags.NONE, OptionArg.NONE, ref version, "Display version information and exit", null},
 
 		/* Files */
@@ -159,22 +198,11 @@ public class Main : Object {
 	};
 
 	private static bool parse_file(FileStream fin) {
-		string lang;
-		if (dictionary != null)
-			lang = dictionary;
-		else {
-			lang = enchant_get_user_language();
-			if (lang == null)
-				return false;
-			if (lang == "C")
-				lang = "en";
-		}
-
 		var broker = new Broker();
-		unowned var dict = broker.request_dict_with_pwl(lang, perslist);
+		unowned var dict = broker.request_dict_with_pwl(dictionary, perslist);
 
 		if (dict == null) {
-			GLib.stderr.printf("No dictionary available for '%s'", lang);
+			GLib.stderr.printf("No dictionary available for '%s'", dictionary);
 			string errmsg = broker.get_error();
 			if (errmsg != null)
 				GLib.stderr.printf(": %s", errmsg);
@@ -223,6 +251,46 @@ public class Main : Object {
 			print("%s\n", PACKAGE_STRING);
 			exit(0);
 		}
+
+		/* Ensure we have a language set. */
+		if (dictionary == null) {
+			dictionary = get_user_language();
+			if (dictionary == "C")
+				dictionary = "en";
+		}
+
+		/* Initialise a broker as we will need it now. */
+		var broker = new Broker();
+
+		if (list_providers) {
+			broker.describe(describe_provider);
+			exit(0);
+		} else if (list_dictionaries) {
+			broker.list_dicts(describe_dict);
+			exit(0);
+		} else if (show_default_dict || show_word_chars) {
+			unowned var dict = broker.request_dict(dictionary);
+			if (dict == null) {
+				GLib.stderr.printf("No dictionary available for '%s'", dictionary);
+				string errmsg = broker.get_error();
+				if (errmsg != null)
+					GLib.stderr.printf(": %s", errmsg);
+				GLib.stderr.putc('\n');
+				exit(1);
+			} else {
+				DictDescribeFn fn;
+				if (show_default_dict)
+					fn = describe_dict;
+				else
+					fn = describe_word_chars;
+				dict.describe(fn, dict);
+				exit(0);
+			}
+		}
+
+		/* Exit with usage if not checking spelling. */
+		if (!check_spelling)
+			usage(ctx);
 
 		/* Process the file or standard input. */
 		FileStream fp = null;

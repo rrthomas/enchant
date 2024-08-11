@@ -1,9 +1,13 @@
 <!-- Creator     : groff version 1.23.0 -->
+<<<<<<< HEAD
 <<<<<<< HEAD:src/enchant-2.html
 <!-- CreationDate: Tue Jul 29 12:07:45 2025 -->
 =======
 <!-- CreationDate: Wed May  7 22:08:14 2025 -->
 >>>>>>> e787445 (Bump major version to 3):src/enchant-3.html
+=======
+<!-- CreationDate: Wed May  7 22:10:28 2025 -->
+>>>>>>> bcc8cd5 (Fold enchant-lsmod into enchant)
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -39,8 +43,9 @@
 </h2>
 
 
-<p style="margin-left:9%; margin-top: 1em">Enchant - a
-spellchecker</p>
+<p style="margin-left:9%; margin-top: 1em">Enchant - list
+provider and dictionary information, and do basic batch
+spell-checking</p>
 
 <h2>SYNOPSIS
 <a name="SYNOPSIS"></a>
@@ -48,8 +53,9 @@ spellchecker</p>
 
 
 <p style="margin-left:9%; margin-top: 1em"><b>enchant-3
--a</b>|<b>-l</b>|<b>-h</b>|<b>-v</b> [<b>-L</b>] [<b>-d</b>
-<i>DICTIONARY</i>] [<i>FILE</i>]</p>
+-l</b>|<b>-h</b>|<b>-v</b>|<b>-lang</b>|<b>-word-chars</b>]
+[<b>language_tag</b>]|<b>-list-dicts</b>] [<b>-L</b>]
+[<b>-d</b> <i>DICTIONARY</i>] [<i>FILE...</i>]</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -57,9 +63,11 @@ spellchecker</p>
 
 
 <p style="margin-left:9%; margin-top: 1em"><b>Enchant</b>
-is an Ispell-compatible spellchecker. Note that unlike
-Ispell, it does not have an interactive mode; it is designed
-to be used by other programs. <b><br>
+gives information about Enchant&rsquo;s spell-checker
+providers and the dictionaries each offers. See
+<b>enchant-3</b>(1) for details about how the providers and
+dictionaries are located. It can also list misspelled words
+in input files or on stdin. <b><br>
 -d</b> <i>DICTIONARY</i></p>
 
 <p style="margin-left:18%;">use the given dictionary</p>
@@ -73,43 +81,72 @@ wordlist</p>
        cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="9%"></td>
-<td width="3%">
+<td width="6%">
 
 
 <p><b>-a</b></p></td>
-<td width="6%"></td>
-<td width="55%">
+<td width="3%"></td>
+<td width="72%">
 
 
 <p>list suggestions in Ispell pipe mode format</p></td>
-<td width="27%">
+<td width="10%">
 </td></tr>
 <tr valign="top" align="left">
 <td width="9%"></td>
-<td width="3%">
+<td width="6%">
 
 
 <p><b>-l</b></p></td>
-<td width="6%"></td>
-<td width="55%">
+<td width="3%"></td>
+<td width="72%">
 
 
 <p>list only the misspellings</p></td>
-<td width="27%">
+<td width="10%">
 </td></tr>
 <tr valign="top" align="left">
 <td width="9%"></td>
-<td width="3%">
+<td width="6%">
 
 
 <p><b>-L</b></p></td>
-<td width="6%"></td>
-<td width="55%">
+<td width="3%"></td>
+<td width="72%">
 
 
 <p>display line numbers</p></td>
-<td width="27%">
+<td width="10%">
 </td></tr>
+<tr valign="top" align="left">
+<td width="9%"></td>
+<td width="6%">
+
+
+<p><b>-lang</b></p></td>
+<td width="3%"></td>
+<td width="72%">
+
+
+<p>Show which provider and dictionary will be used for the
+given language, or all languages if none is supplied.</p></td>
+<td width="10%">
+</td></tr>
+</table>
+
+<p style="margin-left:9%;"><b>-word-chars</b></p>
+
+<p style="margin-left:18%;">Show the extra word characters
+for the given language, if available. This is of little
+interest to most users.</p>
+
+<p style="margin-left:9%;"><b>-list-dicts</b></p>
+
+<p style="margin-left:18%;">List the provider and
+dictionary for all available languages.</p>
+
+<table width="100%" border="0" rules="none" frame="void"
+       cellspacing="0" cellpadding="0">
 <tr valign="top" align="left">
 <td width="9%"></td>
 <td width="3%">
@@ -117,11 +154,11 @@ wordlist</p>
 
 <p><b>-h</b></p></td>
 <td width="6%"></td>
-<td width="55%">
+<td width="46%">
 
 
 <p>display help and exit</p></td>
-<td width="27%">
+<td width="36%">
 </td></tr>
 <tr valign="top" align="left">
 <td width="9%"></td>
@@ -130,11 +167,11 @@ wordlist</p>
 
 <p><b>-v</b></p></td>
 <td width="6%"></td>
-<td width="55%">
+<td width="46%">
 
 
 <p>display version information and exit</p></td>
-<td width="27%">
+<td width="36%">
 </td></tr>
 </table>
 
@@ -154,7 +191,7 @@ personal word lists.</p>
 
 
 <p style="margin-left:9%; margin-top: 1em"><b>enchant-3</b>(5),
-<b>aspell</b>(1), <b>enchant-lsmod-3</b>(1)</p>
+<b>aspell</b>(1),</p>
 
 <h2>AUTHOR
 <a name="AUTHOR"></a>

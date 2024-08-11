@@ -16,17 +16,13 @@ AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgn
 
 VAPIS = config.vapi enchant-@ENCHANT_MAJOR_VERSION@.vapi
 
-dummy.vala: $(BUILT_VAPIS) $(VAPIS)
+dummy.vala: $(VAPIS)
 	touch $@
 
-BUILT_SOURCES = dummy.vala $(BUILT_VAPIS) util.h
+BUILT_SOURCES = dummy.vala
 
-BUILT_VAPIS = util.vapi
-
-util.h util.vapi: libutil.la
-
-dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1
-nodist_doc_DATA = enchant-@ENCHANT_MAJOR_VERSION@.html enchant-lsmod-@ENCHANT_MAJOR_VERSION@.html
+dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1
+nodist_doc_DATA = enchant-@ENCHANT_MAJOR_VERSION@.html
 
 DISTCLEANFILES = $(dist_man_MANS) $(nodist_doc_DATA) dummy.vala
 
@@ -36,22 +32,11 @@ DISTCLEANFILES = $(dist_man_MANS) $(nodist_doc_DATA) dummy.vala
 enchant-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant.1 Makefile.am $(top_builddir)/config.status
 	cp $(abs_builddir)/enchant.1 $@
 
-enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant-lsmod.1 Makefile.am $(top_builddir)/config.status
-	cp $(abs_builddir)/enchant-lsmod.1 $@
-
-noinst_LTLIBRARIES = libutil.la
-libutil_la_SOURCES = util.vala
-libutil_la_VALAFLAGS = $(AM_VALAFLAGS) --vapi=util.vapi --header=util.h
-libutil_la_LIBADD = $(GLIB_LIBS)
-
-LDADD = $(top_builddir)/lib/libenchant-@ENCHANT_MAJOR_VERSION@.la $(GLIB_LIBS) $(top_builddir)/libgnu/libgnu.la libutil.la
-bin_PROGRAMS = enchant-@ENCHANT_MAJOR_VERSION@ enchant-lsmod-@ENCHANT_MAJOR_VERSION@
+LDADD = $(top_builddir)/lib/libenchant-@ENCHANT_MAJOR_VERSION@.la $(GLIB_LIBS) $(top_builddir)/libgnu/libgnu.la
+bin_PROGRAMS = enchant-@ENCHANT_MAJOR_VERSION@
 enchant_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant.vala
-enchant_@ENCHANT_MAJOR_VERSION@_VALAFLAGS = $(AM_VALAFLAGS) --pkg util
-enchant_lsmod_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant-lsmod.vala
-enchant_lsmod_@ENCHANT_MAJOR_VERSION@_VALAFLAGS = $(AM_VALAFLAGS) --pkg util
 
-EXTRA_DIST = enchant.1.in enchant-lsmod.1.in util.h $(VAPIS)
+EXTRA_DIST = enchant.1.in $(VAPIS)
 
 loc-local:
 	$(CLOC) $(ALL_SOURCE_FILES)
