@@ -12,18 +12,20 @@
 \"
 .TH ENCHANT-@ENCHANT_MAJOR_VERSION@ 1
 .SH NAME
-Enchant \- a spellchecker
+Enchant \- list provider and dictionary information, and do basic batch spell-checking
 .SH SYNOPSIS
 .ll +8
 .B enchant-@ENCHANT_MAJOR_VERSION@
-\fB\-a\fR|\fB\-l\fR|\fB\-h\fR|\fB\-v\fR [\fB\-L\fR] [\fB\-d\fR \fIDICTIONARY\fR] [\fIFILE\fR]
+\fB\-l\fR|\fB\-h\fR|\fB\-v\fR|\fB\-lang\fR|\fB-word-chars\fR] [\fBlanguage_tag\fR]|\fB\-list-dicts\fR] [\fB\-L\fR] [\fB\-d\fR \fIDICTIONARY\fR] [\fIFILE...\fR]
+.ll -8
+.br
 .ll -8
 .br
 .SH DESCRIPTION
 .B Enchant
-is an Ispell-compatible spellchecker.
-Note that unlike Ispell, it does not have an interactive mode; it is
-designed to be used by other programs.
+gives information about Enchant\(cqs spell-checker providers and the dictionaries each offers.
+See \fBenchant-@ENCHANT_MAJOR_VERSION@\fR(1) for details about how the providers and dictionaries are located.
+It can also list misspelled words in input files or on stdin.
 .TP
 \fB\-d \fIDICTIONARY\fR
 use the given dictionary
@@ -40,6 +42,15 @@ list only the misspellings
 .B "\-L"
 display line numbers
 .TP
+.B "\-lang"
+Show which provider and dictionary will be used for the given language, or all languages if none is supplied.
+.TP
+.B "\-word\-chars"
+Show the extra word characters for the given language, if available. This is of little interest to most users.
+.TP
+.B "\-list\-dicts"
+List the provider and dictionary for all available languages.
+.TP
 .B "\-h"
 display help and exit
 .TP
@@ -52,6 +63,5 @@ for details of configuration files and personal word lists.
 .SH "SEE ALSO"
 .BR enchant-@ENCHANT_MAJOR_VERSION@ (5),
 .BR aspell (1),
-.BR enchant-lsmod-@ENCHANT_MAJOR_VERSION@ (1)
 .SH "AUTHOR"
 Written by Dom Lachowicz and Reuben Thomas.

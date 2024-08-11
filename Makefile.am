@@ -38,7 +38,6 @@ ALL_SOURCE_FILES = \
 	lib/Makefile.am \
 	lib/*.vala \
 	src/Makefile.am \
-	src/*.h \
 	src/enchant*.vala \
 	providers/Makefile.am \
 	providers/*.[ch] \
