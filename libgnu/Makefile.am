@@ -1,6 +1,6 @@
 ## Makefile.am for the libgnu subdirectory of Enchant
 #
-# Copyright (C) 2017 Reuben Thomas
+# Copyright (C) 2017-2024 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,6 +26,11 @@ AM_CPPFLAGS += -DINSTALLDIR=\"$(bindir)\"
 else
 AM_CPPFLAGS += -DINSTALLDIR=\"$(libdir)\"
 endif
+
+loc:
+	$(CLOC) $(ALL_SOURCE_FILES)
+
+ALL_SOURCE_FILES = libgnu/Makefile.am
 
 # Include auto-generated makefile
 include Makefile.gnulib

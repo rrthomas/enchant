@@ -52,7 +52,7 @@ doxygen: Doxyfile
 dist: doxygen
 
 loc:
-	cloc --force-lang="Bourne Shell",conf $(ALL_SOURCE_FILES)
+	$(CLOC) $(ALL_SOURCE_FILES)
 
 # Ignore built files that are part of the distribution (specifically,
 # doxygen/*).

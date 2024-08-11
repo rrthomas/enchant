@@ -1,6 +1,6 @@
 ## Makefile.am for the providers subdirectory of Enchant
 #
-# Copyright (C) 2017-2023 Reuben Thomas
+# Copyright (C) 2017-2024 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -63,3 +63,12 @@ endif
 enchant_applespell_la_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag=CXX
 enchant_applespell_la_OBJCXXFLAGS = $(AM_OBJCXXFLAGS)
 enchant_applespell_la_SOURCES = applespell_checker.mm
+
+loc:
+	$(CLOC) $(ALL_SOURCE_FILES)
+
+ALL_SOURCE_FILES = \
+	Makefile.am \
+	*.[ch] \
+	*.cpp \
+	*.mm
