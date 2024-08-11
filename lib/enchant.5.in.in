@@ -28,7 +28,7 @@ The per-user file takes precedence.
 .PP
 The ordering file takes the form \fIlanguage_tag:<comma-separated list of spelling
 providers>\fR.
-To see what dictionaries are available, run \fIenchant-lsmod-@ENCHANT_MAJOR_VERSION@\fR. \(oq*\(cq is
+To see what dictionaries are available, run \fIenchant-@ENCHANT_MAJOR_VERSION@ --list-dicts\fR. \(oq*\(cq is
 used to mean \(lquse this ordering for all languages, unless instructed otherwise.\(rq For example:
 .IP
 *:aspell,hunspell,nuspell
@@ -121,7 +121,6 @@ In addition, Enchant looks in the following systems directories for ordering fil
 \fI@PKGDATADIR@-@ENCHANT_MAJOR_VERSION@\fR
 (Or the equivalent location relative to the enchant library for a relocatable build.)
 .SH "SEE ALSO"
-.BR enchant-@ENCHANT_MAJOR_VERSION@ (1),
-.BR enchant-lsmod-@ENCHANT_MAJOR_VERSION@ (1)
+.BR enchant-@ENCHANT_MAJOR_VERSION@ (1)
 .SH "AUTHOR"
 Written by Dom Lachowicz and Reuben Thomas.

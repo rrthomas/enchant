@@ -55,10 +55,10 @@ enchant_test() {
 
 # Test runner.
 # Arguments are command to run.
-enchant_lsmod_test() {
+enchant_no_output_test() {
     exit_code=0
-    #ldd $(which enchant-lsmod-$ENCHANT_MAJOR_VERSION)
-    enchant-lsmod-$ENCHANT_MAJOR_VERSION "$@"
+    #ldd $(which enchant-$ENCHANT_MAJOR_VERSION)
+    enchant-$ENCHANT_MAJOR_VERSION "$@"
     if [ $exit_code != $expected_exit ]; then
         echo "Expected exit code $expected_exit but was $exit_code"
         exit 1

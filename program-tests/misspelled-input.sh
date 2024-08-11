@@ -1,1 +1,1 @@
-enchant_test "$abs_srcdir/misspelled-input.txt"
+enchant_test -l "$abs_srcdir/misspelled-input.txt"
