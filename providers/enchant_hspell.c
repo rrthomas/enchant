@@ -87,7 +87,10 @@ hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
 	char *iso_word = hspell_convert_to_iso8859_8 (me, word, len);
-	g_return_val_if_fail (iso_word, -1);
+	if (iso_word == NULL) {
+		g_warning ("%s: Can't convert word to iso8859-8", __FUNCTION__);
+		return -1;
+	}
 
 	/* check */
 	int preflen;
@@ -108,7 +111,10 @@ hspell_dict_suggest (EnchantDict * me, const char *const word,
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
 	char *iso_word = hspell_convert_to_iso8859_8 (me, word, len);
-	g_return_val_if_fail (iso_word, NULL);
+	if (iso_word == NULL) {
+		g_warning ("%s: Can't convert word to iso8859-8", __FUNCTION__);
+		return NULL;
+	}
 
 	/* get suggestions */
 	struct corlist cl;
