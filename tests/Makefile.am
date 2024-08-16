@@ -137,7 +137,6 @@ main_test_SOURCES = main.test.cpp \
 	provider/dict_set_error.i \
 	provider/get_prefix_dir.cpp \
 	provider/get_user_config_dirs.cpp \
-	provider/get_user_language.cpp \
 	$(NULL)
 main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
 main_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)

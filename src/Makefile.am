@@ -11,16 +11,24 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-AM_CPPFLAGS = -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu -I$(top_srcdir)/lib $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
+AM_VALAFLAGS = --debug --no-color --vapidir=. --vapidir=$(top_srcdir)/lib --pkg config --pkg posix --pkg gio-2.0 --pkg gmodule-2.0 --pkg enchant-2
+AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu -I$(top_srcdir)/lib $(GLIB_CFLAGS)
+
+VAPIS = config.vapi enchant-2.vapi
+
+dummy.vala: $(BUILT_VAPIS) $(VAPIS)
+	touch $@
+
+BUILT_SOURCES = dummy.vala $(BUILT_VAPIS) util.h
+
+BUILT_VAPIS = util.vapi
+
+util.h util.vapi: libutil.la
 
 dist_man_MANS = enchant-@ENCHANT_MAJOR_VERSION@.1 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1
 nodist_doc_DATA = enchant-@ENCHANT_MAJOR_VERSION@.html enchant-lsmod-@ENCHANT_MAJOR_VERSION@.html
 
-edit = sed \
-	-e 's|@PKGDATADIR[@]|$(pkgdatadir)|g' \
-	-e 's|@SYSCONFDIR[@]|$(sysconfdir)|g'
-
-DISTCLEANFILES = $(dist_man_MANS) $(nodist_doc_DATA)
+DISTCLEANFILES = $(dist_man_MANS) $(nodist_doc_DATA) dummy.vala
 
 .1.html:
 	groff -mandoc -Thtml $< > $@
@@ -31,9 +39,23 @@ enchant-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant.1 Makefile.am $(top_build
 enchant-lsmod-@ENCHANT_MAJOR_VERSION@.1: $(builddir)/enchant-lsmod.1 Makefile.am $(top_builddir)/config.status
 	cp $(abs_builddir)/enchant-lsmod.1 $@
 
-LDADD = $(top_builddir)/lib/libenchant-@ENCHANT_MAJOR_VERSION@.la $(GLIB_LIBS) $(top_builddir)/libgnu/libgnu.la
-bin_PROGRAMS = enchant-@ENCHANT_MAJOR_VERSION@ enchant-lsmod-@ENCHANT_MAJOR_VERSION@
-enchant_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant.c
-enchant_lsmod_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant-lsmod.c
+noinst_LTLIBRARIES = libutil.la
+libutil_la_SOURCES = util.vala
+libutil_la_VALAFLAGS = $(AM_VALAFLAGS) --vapi=util.vapi --header=util.h
+libutil_la_LIBADD = $(GLIB_LIBS)
 
-EXTRA_DIST = enchant.1.in enchant-lsmod.1.in
+LDADD = $(top_builddir)/lib/libenchant-@ENCHANT_MAJOR_VERSION@.la $(GLIB_LIBS) $(top_builddir)/libgnu/libgnu.la libutil.la
+bin_PROGRAMS = enchant-@ENCHANT_MAJOR_VERSION@ enchant-lsmod-@ENCHANT_MAJOR_VERSION@
+enchant_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant.vala
+enchant_@ENCHANT_MAJOR_VERSION@_VALAFLAGS = $(AM_VALAFLAGS) --pkg util
+enchant_lsmod_@ENCHANT_MAJOR_VERSION@_SOURCES = enchant-lsmod.vala
+enchant_lsmod_@ENCHANT_MAJOR_VERSION@_VALAFLAGS = $(AM_VALAFLAGS) --pkg util
+
+EXTRA_DIST = enchant.1.in enchant-lsmod.1.in util.h $(VAPIS)
+
+loc:
+	$(CLOC) $(ALL_SOURCE_FILES)
+
+ALL_SOURCE_FILES = \
+	Makefile.am \
+	*.vala

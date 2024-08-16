@@ -67,12 +67,7 @@ struct Provider_TestFixture
     {
         EnchantDict* dict=NULL;        
 
-        // Try getting dictionary for user's default language
-        char *lang = enchant_get_user_language();
-        dict = (*_provider->request_dict) (_provider, lang);
-        g_free (lang);
-
-        // If not available, get the first dictionary listed as being available
+        // Get the first dictionary listed as being available
         if (!dict && _provider->list_dicts)
         {
                 size_t n_dicts;

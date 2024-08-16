@@ -13,7 +13,7 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.71])
-AC_INIT([enchant],[2.8.2])
+AC_INIT([Enchant],[2.8.2])
 AC_CONFIG_SRCDIR(lib/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([subdir-objects tar-ustar])
@@ -198,6 +198,10 @@ AM_CONDITIONAL(WITH_APPLESPELL, test "$with_applespell" = yes)
 
 dnl Experimental/deprecated providers
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([zemberek], [ZEMBEREK], [dbus-glib-1 >= 0.62], [no])
+
+dnl Counting code
+CLOC="cloc --force-lang='Bourne Shell',conf"
+AC_SUBST([CLOC])
 
 dnl =======================================================================================
 
