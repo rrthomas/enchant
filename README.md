@@ -1,8 +1,8 @@
 # libenchant -- Generic spell checking library
 
 Maintainer: Reuben Thomas  
-Home page: https://abiword.github.io/enchant/  
-Bug reports and other issues: https://github.com/AbiWord/enchant  
+Home page: https://rrthomas.github.io/enchant/  
+Bug reports and other issues: https://github.com/rrthomas/enchant  
 
 libenchant is licensed under the terms of the GNU LGPL (see the file
 COPYING.LIB), with a special exception allowing the use of proprietary
