@@ -66,7 +66,7 @@ release: distcheck
 	git tag -a -m "Release tag" "v$(VERSION)" && \
 	git push --follow-tags && \
 	woger github \
-		github_user=AbiWord \
+		github_user=rrthomas \
 		package=$(PACKAGE) \
 		version=$(VERSION) \
 		dist_type=tar.gz
