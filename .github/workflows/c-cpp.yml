@@ -47,8 +47,7 @@ jobs:
       with: { submodules: true }
     - name: Install dependencies
       run: |
-        brew tap nuspell/nuspell
-        brew install automake vala pkg-config dbus-glib groff hspell hunspell libvoikko unittest-cpp nuspell coreutils doxygen graphviz
+        brew install automake vala pkg-config dbus-glib groff hspell hunspell libvoikko nuspell unittest-cpp nuspell coreutils doxygen graphviz
     - name: Bootstrap (gnulib and autoreconf)
       run: PATH="$(brew --prefix)/opt/m4/bin:${PATH}" ./bootstrap
     - name: configure
