@@ -1,3 +1,21 @@
+2.8.3 (October 6, 2024)
+-----------------------
+
+This release marks Enchant’s move from the aegis of the defunct AbiWord to
+the personal care of Reuben Thomas, the current maintainer. Thanks to Hubert
+Figuière, Enchant’s previous steward, for allowing this move, which enables
+me (Reuben) to seek sponsorship for Enchant maintenance without confusion
+over the project’s affiliation.
+
+Code-wise, the two command-line utilities, enchant(1) and enchant-lsmod(1)
+have been rewritten in Vala. All of Enchant’s core is now written in Vala;
+the providers are still a polyglot of C, C++ and Objective C++.
+
+Some minor fixes and improvements to the build system were made.
+
+Missing NEWS was added for release 2.8.2.
+
+
 2.8.2 (August 14, 2024)
 -----------------------
 
