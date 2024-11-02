@@ -301,20 +301,15 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 	@autoreleasepool {
 		// NSLog (@"appleSpell_provider_request_dict");
 		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
-		EnchantDict * dict = enchant_broker_new_dict (me->owner);
 
-		if (!me || !tag || !checker || !dict)
+		if (!me || !tag || !checker)
 			{
 				return 0;
 			}
 
-		dict->check            = appleSpell_dict_check;
-		dict->suggest          = appleSpell_dict_suggest;
-
 		AppleSpellDictionary * ASD = g_new0 (AppleSpellDictionary, 1);
 		if (!ASD)
 			{
-				g_free (dict);
 				return 0;
 			}
 
@@ -324,13 +319,23 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 		if (!ASD->DictionaryName)
 			{
 				g_free (ASD);
-				g_free (dict);
 				return 0;
 			}
 
 		[ASD->DictionaryName retain];
 		// NSLog (@"appleSpell_provider_request_dict: providing dictionary \"%@\"", ASD->DictionaryName);
+
+		EnchantDict * dict = enchant_broker_new_dict (me->owner);
+
+		if (!dict)
+			{
+				return 0;
+			}
+
+		dict->check     = appleSpell_dict_check;
+		dict->suggest   = appleSpell_dict_suggest;
 		dict->user_data = (void *) ASD;
+
 		return dict;
 	}
 }
