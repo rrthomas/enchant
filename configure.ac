@@ -120,6 +120,16 @@ else
 fi
 AC_SUBST([ISYSTEM])
 
+AC_MSG_CHECKING([for native Win32])
+native_win32=no
+case "$host" in
+  *-*-mingw*)
+    native_win32=yes
+    ;;
+esac
+AC_MSG_RESULT([$native_win32])
+AM_CONDITIONAL(OS_WIN32, test "$native_win32" = yes)
+
 AM_CONDITIONAL([SHLIBS_IN_BINDIR], [case "$host_os" in mingw* | cygwin*) true;; *) false;; esac])
 
 dnl ===========================================================================

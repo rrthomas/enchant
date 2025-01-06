@@ -84,6 +84,13 @@ public class EnchantBroker {
 		if (!Module.supported())
 			return;
 
+#if OS_WIN32
+		// gnulib's relocation does not work properly on Win32 without setting
+		// the prefix explicitly.
+		string module_dir = GLib.Win32.get_package_installation_directory_of_module(null);
+		enchant_set_prefix_dir(module_dir);
+#endif
+
 		this.load_providers();
 		this.load_provider_ordering();
 		this.dicts = new GenericSet<EnchantDict>(direct_hash, direct_equal);
