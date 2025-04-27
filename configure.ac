@@ -231,7 +231,7 @@ fi
 
 if test "$with_zemberek" = yes; then
    echo "
-The Zemberek Turkish spell-checking plugin is enabled. It is known
+The Zemberek Turkish spell-checking provider is enabled. It is known
 to cause crashes with WebKit. Use at your own discretion."
 fi
 if test $RELOCATABLE != yes; then
