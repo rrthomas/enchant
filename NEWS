@@ -11,6 +11,10 @@ Code-wise, the two command-line utilities, enchant(1) and enchant-lsmod(1)
 have been rewritten in Vala. All of Enchant’s core is now written in Vala;
 the providers are still a polyglot of C, C++ and Objective C++.
 
+The AppleSpell provider was fixed to not crash when it is partially
+initialised, but initialisation ultimately fails, for example because a
+valid dictionary cannot be found. Thanks to Fredrik Larsson for the fix.
+
 Some minor fixes and improvements to the build system were made.
 
 Missing NEWS was added for release 2.8.2.
