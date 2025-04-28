@@ -11,10 +11,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-AM_VALAFLAGS = --debug --no-color --vapidir=. --vapidir=$(top_srcdir)/lib --pkg config --pkg configmake --pkg posix --pkg gio-2.0 --pkg gmodule-2.0 --pkg enchant-2
+AM_VALAFLAGS = --debug --no-color --vapidir=. --vapidir=$(top_srcdir)/lib --pkg config --pkg configmake --pkg posix --pkg gio-2.0 --pkg gmodule-2.0 --pkg enchant-@ENCHANT_MAJOR_VERSION@
 AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu -I$(top_srcdir)/lib $(GLIB_CFLAGS) $(WARN_VALA_CFLAGS) -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
 
-VAPIS = config.vapi enchant-2.vapi
+VAPIS = config.vapi enchant-@ENCHANT_MAJOR_VERSION@.vapi
 
 dummy.vala: $(BUILT_VAPIS) $(VAPIS)
 	touch $@
