@@ -215,7 +215,7 @@ public class Main : Object {
 		var no_args = args.length <= 1;
 
 		/* Parse command line arguments. */
-		var ctx = new OptionContext("\n\nCheck spelling non-interactively.");
+		var ctx = new OptionContext("\n\nGive information about Enchant configuration, and check spelling non-interactively.");
 		ctx.set_help_enabled(true);
 		ctx.add_main_entries(main_options, null);
 		try {
