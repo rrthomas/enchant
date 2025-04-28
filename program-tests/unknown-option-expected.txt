@@ -13,8 +13,8 @@ Application Options:
   -p, --pwl=FILE                  Use the given personal word list
   -L, --show-lines                Display line numbers
   --list-providers                List spelling providers
-  --list-dicts                    List all dictionaries
-  --default-dict                  Show the default dictionary for the given or default language
+  --list-dictionaries             List all dictionaries
+  --default-dictionary            Show the default dictionary for the given or default language
   --word-chars                    Show the word characters for the given or default language
   -v, --version                   Display version information and exit
 
