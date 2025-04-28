@@ -9,7 +9,6 @@ Help Options:
 
 Application Options:
   -d, --dictionary=DICTIONARY     Use the given dictionary
-  -l, --check-spelling            List misspellings in the input files, or standard input
   -p, --pwl=FILE                  Use the given personal word list
   -L, --show-lines                Display line numbers
   --list-providers                List spelling providers
