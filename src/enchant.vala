@@ -166,13 +166,11 @@ public class Main : Object {
 	private static bool count_lines = false;
 	private static bool list_providers = false;
 	private static bool list_dictionaries = false;
-	private static bool check_spelling = false;
 	private static bool show_default_dict = false;
 	private static bool show_word_chars = false;
 
 	private const OptionEntry[] main_options = {
 		{"dictionary", 'd', OptionFlags.NONE, OptionArg.STRING, ref dictionary, "Use the given dictionary", "DICTIONARY"},
-		{"check-spelling", 'l', OptionFlags.NONE, OptionArg.NONE, ref check_spelling, "List misspellings in the input files, or standard input", null},
 		{"pwl", 'p', OptionFlags.NONE, OptionArg.FILENAME, ref perslist, "Use the given personal word list", "FILE"},
 		{"show-lines", 'L', OptionFlags.NONE, OptionArg.NONE, ref count_lines, "Display line numbers", null},
 		{"list-providers", '\0', OptionFlags.NONE, OptionArg.NONE, ref list_providers, "List spelling providers", null},
@@ -266,20 +264,17 @@ public class Main : Object {
 				fn = describe_word_chars;
 			dict.describe(fn, dict);
 		}
-		if (check_spelling) {
-			/* Process the files or standard input. */
+		foreach (var f in files) {
 			FileStream fp = null;
-			if (files == null)
-				return check_file(broker, dict, GLib.stdin) ? 0 : 1;
-			foreach (var f in files) {
+			if (f != "-") {
 				fp = FileStream.open(f, "rb");
 				if (fp == null) {
 					GLib.stderr.printf("Error: Could not open the file \"%s\" for reading.\n", f);
 					exit(1);
 				}
-				if (!check_file(broker, dict, fp))
-					exit(1);
 			}
+			if (!check_file(broker, dict, fp == null ? GLib.stdin : fp))
+				exit(1);
 		}
 		return 0;
 	}

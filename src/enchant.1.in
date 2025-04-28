@@ -12,7 +12,7 @@
 \"
 .TH ENCHANT-@ENCHANT_MAJOR_VERSION@ 1
 .SH NAME
-Enchant \- list provider and dictionary information, and do basic batch spell-checking
+Enchant \- list provider and dictionary information, and do basic spell-checking
 .SH SYNOPSIS
 .ll +8
 .B enchant-@ENCHANT_MAJOR_VERSION@
@@ -23,7 +23,7 @@ Enchant \- list provider and dictionary information, and do basic batch spell-ch
 .B Enchant
 gives information about Enchant\(cqs spell-checker providers and the dictionaries each offers.
 See \fBenchant\fR(5) for details about how the providers and dictionaries are located.
-It can also list misspelled words in input files or standard input.
+It can also list misspelled words in input files; use \(oq-\(cq to mean standard input.
 .TP
 \fB\-d\fR, \fB\-\-dictionary\fR \fIDICTIONARY\fR
 use the given dictionary
