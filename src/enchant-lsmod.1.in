@@ -22,7 +22,7 @@ enchant-lsmod \- list provider and dictionary information
 .SH DESCRIPTION
 .B enchant-lsmod-@ENCHANT_MAJOR_VERSION@
 gives information about Enchant\(cqs spell-checker providers and the dictionaries each offers.
-See \fBenchant-@ENCHANT_MAJOR_VERSION@\fR(1) for details about how the providers and dictionaries are located.
+See \fBenchant\fR(5) for details about how the providers and dictionaries are located.
 If no command-line options are given, the available providers are listed.
 .SS OPTIONS
 .TP
@@ -41,6 +41,6 @@ Show brief help.
 .B "\-version"
 Prints the program\(cqs version.
 .SH "SEE ALSO"
-.BR enchant-@ENCHANT_MAJOR_VERSION@(1)
+.BR enchant (5)
 .SH "AUTHOR"
 Written by Dom Lachowicz and Reuben Thomas.
