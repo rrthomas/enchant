@@ -212,6 +212,7 @@ public class Main : Object {
 		/* Initialize system locale. */
 		Intl.setlocale();
 		get_charset(out charset);
+		var no_args = args.length <= 1;
 
 		/* Parse command line arguments. */
 		var ctx = new OptionContext("\n\nCheck spelling non-interactively.");
@@ -221,6 +222,9 @@ public class Main : Object {
 			ctx.parse(ref args);
 		} catch (OptionError e) {
 			printerr("%s-%s: %s\n", PACKAGE, ENCHANT_MAJOR_VERSION, e.message);
+			usage(ctx);
+		}
+		if (no_args) {
 			usage(ctx);
 		}
 		if (version) {
@@ -247,19 +251,23 @@ public class Main : Object {
 			exit(1);
 		}
 
+		/* Perform requested actions. */
 		if (list_providers) {
 			broker.describe(describe_provider);
-		} else if (list_dictionaries) {
+		}
+		if (list_dictionaries) {
 			broker.list_dicts(describe_dict);
-		} else if (show_default_dict || show_word_chars) {
+		}
+		if (show_default_dict || show_word_chars) {
 			DictDescribeFn fn;
 			if (show_default_dict)
 				fn = describe_dict;
 			else
 				fn = describe_word_chars;
 			dict.describe(fn, dict);
-		} else if (check_spelling) {
-			/* Process the file or standard input. */
+		}
+		if (check_spelling) {
+			/* Process the files or standard input. */
 			FileStream fp = null;
 			if (files == null)
 				return check_file(broker, dict, GLib.stdin) ? 0 : 1;
@@ -272,8 +280,6 @@ public class Main : Object {
 				if (!check_file(broker, dict, fp))
 					exit(1);
 			}
-		} else {
-			usage(ctx);
 		}
 		return 0;
 	}
