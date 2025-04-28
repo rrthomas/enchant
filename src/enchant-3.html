@@ -1,13 +1,5 @@
 <!-- Creator     : groff version 1.23.0 -->
-<<<<<<< HEAD
-<<<<<<< HEAD:src/enchant-2.html
-<!-- CreationDate: Tue Jul 29 12:07:45 2025 -->
-=======
-<!-- CreationDate: Wed May  7 22:08:14 2025 -->
->>>>>>> e787445 (Bump major version to 3):src/enchant-3.html
-=======
-<!-- CreationDate: Wed May  7 22:10:28 2025 -->
->>>>>>> bcc8cd5 (Fold enchant-lsmod into enchant)
+<!-- CreationDate: Tue Jul 29 12:40:16 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -52,10 +44,9 @@ spell-checking</p>
 </h2>
 
 
-<p style="margin-left:9%; margin-top: 1em"><b>enchant-3
--l</b>|<b>-h</b>|<b>-v</b>|<b>-lang</b>|<b>-word-chars</b>]
-[<b>language_tag</b>]|<b>-list-dicts</b>] [<b>-L</b>]
-[<b>-d</b> <i>DICTIONARY</i>] [<i>FILE...</i>]</p>
+
+<p style="margin-left:9%; margin-top: 1em"><b>enchant-3</b>
+[<i>OPTION</i>...] [<i>FILE...</i>]</p>
 
 <h2>DESCRIPTION
 <a name="DESCRIPTION"></a>
@@ -65,115 +56,58 @@ spell-checking</p>
 <p style="margin-left:9%; margin-top: 1em"><b>Enchant</b>
 gives information about Enchant&rsquo;s spell-checker
 providers and the dictionaries each offers. See
-<b>enchant-3</b>(1) for details about how the providers and
+<b>enchant</b>(5) for details about how the providers and
 dictionaries are located. It can also list misspelled words
-in input files or on stdin. <b><br>
--d</b> <i>DICTIONARY</i></p>
+in input files or standard input. <b><br>
+-d</b>, <b>--dictionary</b> <i>DICTIONARY</i></p>
 
 <p style="margin-left:18%;">use the given dictionary</p>
 
-<p style="margin-left:9%;"><b>-p</b> <i>WORDLIST</i></p>
+<p style="margin-left:9%;"><b>-l</b>,
+<b>--check-spelling</b></p>
+
+<p style="margin-left:18%;">List misspellings in the input
+files, or standard input if none given.</p>
+
+<p style="margin-left:9%;"><b>-p</b>, <b>--pwl</b>
+<i>WORDLIST</i></p>
 
 <p style="margin-left:18%;">use the given personal
 wordlist</p>
 
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="9%"></td>
-<td width="6%">
+<p style="margin-left:9%;"><b>-L</b>,
+<b>--show-lines</b></p>
 
+<p style="margin-left:18%;">display line numbers</p>
 
-<p><b>-a</b></p></td>
-<td width="3%"></td>
-<td width="72%">
+<p style="margin-left:9%;"><b>--list-providers</b></p>
 
+<p style="margin-left:18%;">List spelling providers.</p>
 
-<p>list suggestions in Ispell pipe mode format</p></td>
-<td width="10%">
-</td></tr>
-<tr valign="top" align="left">
-<td width="9%"></td>
-<td width="6%">
+<p style="margin-left:9%;"><b>--list-dictionaries</b></p>
 
+<p style="margin-left:18%;">List all dictionaries, and
+which provider will be used for each.</p>
 
-<p><b>-l</b></p></td>
-<td width="3%"></td>
-<td width="72%">
+<p style="margin-left:9%;"><b>--default-dictionary</b></p>
 
+<p style="margin-left:18%;">Show the default dictionary for
+the given or default language.</p>
 
-<p>list only the misspellings</p></td>
-<td width="10%">
-</td></tr>
-<tr valign="top" align="left">
-<td width="9%"></td>
-<td width="6%">
-
-
-<p><b>-L</b></p></td>
-<td width="3%"></td>
-<td width="72%">
-
-
-<p>display line numbers</p></td>
-<td width="10%">
-</td></tr>
-<tr valign="top" align="left">
-<td width="9%"></td>
-<td width="6%">
-
-
-<p><b>-lang</b></p></td>
-<td width="3%"></td>
-<td width="72%">
-
-
-<p>Show which provider and dictionary will be used for the
-given language, or all languages if none is supplied.</p></td>
-<td width="10%">
-</td></tr>
-</table>
-
-<p style="margin-left:9%;"><b>-word-chars</b></p>
+<p style="margin-left:9%;"><b>--word-chars</b></p>
 
 <p style="margin-left:18%;">Show the extra word characters
-for the given language, if available. This is of little
-interest to most users.</p>
+for the given or default language, if available. This is of
+little interest to most users.</p>
 
-<p style="margin-left:9%;"><b>-list-dicts</b></p>
+<p style="margin-left:9%;"><b>-h</b>, <b>--help</b></p>
 
-<p style="margin-left:18%;">List the provider and
-dictionary for all available languages.</p>
+<p style="margin-left:18%;">display help and exit</p>
 
-<table width="100%" border="0" rules="none" frame="void"
-       cellspacing="0" cellpadding="0">
-<tr valign="top" align="left">
-<td width="9%"></td>
-<td width="3%">
+<p style="margin-left:9%;"><b>-v</b>, <b>--version</b></p>
 
-
-<p><b>-h</b></p></td>
-<td width="6%"></td>
-<td width="46%">
-
-
-<p>display help and exit</p></td>
-<td width="36%">
-</td></tr>
-<tr valign="top" align="left">
-<td width="9%"></td>
-<td width="3%">
-
-
-<p><b>-v</b></p></td>
-<td width="6%"></td>
-<td width="46%">
-
-
-<p>display version information and exit</p></td>
-<td width="36%">
-</td></tr>
-</table>
+<p style="margin-left:18%;">display version information and
+exit</p>
 
 <h2>FILES AND DIRECTORIES
 <a name="FILES AND DIRECTORIES"></a>
@@ -190,7 +124,7 @@ personal word lists.</p>
 
 
 
-<p style="margin-left:9%; margin-top: 1em"><b>enchant-3</b>(5),
+<p style="margin-left:9%; margin-top: 1em"><b>enchant</b>(5),
 <b>aspell</b>(1),</p>
 
 <h2>AUTHOR
