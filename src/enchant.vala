@@ -1,3 +1,4 @@
+#! /usr/bin/env -S vala --vapidir=src --pkg config --pkg posix --pkg enchant-3
 /* enchant: List misspellings in a file.
  *
  * Copyright (C) 2003 Dom Lachowicz
