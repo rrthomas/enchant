@@ -2,7 +2,7 @@ enchant-3: Unknown option --foo
 Usage:
   enchant-3 [OPTION…] FILE... 
 
-Check spelling non-interactively.
+Give information about Enchant configuration, and check spelling non-interactively.
 
 Help Options:
   -h, --help                      Show help options
