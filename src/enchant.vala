@@ -186,20 +186,7 @@ public class Main : Object {
 		{null}
 	};
 
-	private static bool parse_file(FileStream fin) {
-		var broker = new Broker();
-		unowned var dict = broker.request_dict_with_pwl(dictionary, perslist);
-
-		if (dict == null) {
-			GLib.stderr.printf("No dictionary available for '%s'", dictionary);
-			string errmsg = broker.get_error();
-			if (errmsg != null)
-				GLib.stderr.printf(": %s", errmsg);
-			GLib.stderr.putc('\n');
-
-			return false;
-		}
-
+	private static bool check_file(Broker broker, Dict dict, FileStream fin) {
 		size_t line_count = 0;
 		string str;
 		while ((str = get_line(fin)) != null) {
@@ -248,51 +235,45 @@ public class Main : Object {
 				dictionary = "en";
 		}
 
-		/* Initialise a broker as we will need it now. */
+		/* Initialise a broker and request a dictionary. */
 		var broker = new Broker();
+		unowned var dict = broker.request_dict_with_pwl(dictionary, perslist);
+		if (dict == null) {
+			GLib.stderr.printf("No dictionary available for '%s'", dictionary);
+			string errmsg = broker.get_error();
+			if (errmsg != null)
+				GLib.stderr.printf(": %s", errmsg);
+			GLib.stderr.putc('\n');
+			exit(1);
+		}
 
 		if (list_providers) {
 			broker.describe(describe_provider);
-			exit(0);
 		} else if (list_dictionaries) {
 			broker.list_dicts(describe_dict);
-			exit(0);
 		} else if (show_default_dict || show_word_chars) {
-			unowned var dict = broker.request_dict(dictionary);
-			if (dict == null) {
-				GLib.stderr.printf("No dictionary available for '%s'", dictionary);
-				string errmsg = broker.get_error();
-				if (errmsg != null)
-					GLib.stderr.printf(": %s", errmsg);
-				GLib.stderr.putc('\n');
-				exit(1);
-			} else {
-				DictDescribeFn fn;
-				if (show_default_dict)
-					fn = describe_dict;
-				else
-					fn = describe_word_chars;
-				dict.describe(fn, dict);
-				exit(0);
+			DictDescribeFn fn;
+			if (show_default_dict)
+				fn = describe_dict;
+			else
+				fn = describe_word_chars;
+			dict.describe(fn, dict);
+		} else if (check_spelling) {
+			/* Process the file or standard input. */
+			FileStream fp = null;
+			if (files == null)
+				return check_file(broker, dict, GLib.stdin) ? 0 : 1;
+			foreach (var f in files) {
+				fp = FileStream.open(f, "rb");
+				if (fp == null) {
+					GLib.stderr.printf("Error: Could not open the file \"%s\" for reading.\n", f);
+					exit(1);
+				}
+				if (!check_file(broker, dict, fp))
+					exit(1);
 			}
-		}
-
-		/* Exit with usage if not checking spelling. */
-		if (!check_spelling)
+		} else {
 			usage(ctx);
-
-		/* Process the file or standard input. */
-		FileStream fp = null;
-		if (files == null)
-			return parse_file(GLib.stdin) ? 0 : 1;
-		foreach (var f in files) {
-			fp = FileStream.open(f, "rb");
-			if (fp == null) {
-				GLib.stderr.printf("Error: Could not open the file \"%s\" for reading.\n", f);
-				exit(1);
-			}
-			if (!parse_file(fp))
-				exit(1);
 		}
 		return 0;
 	}
