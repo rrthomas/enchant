@@ -80,19 +80,9 @@ void check_line(Dict dict, string word, size_t line_count) {
 }
 
 
-/* Splits a line into a set of (word,word_position) tuples. */
-class Token {
-	public string word;
-	public long pos;
-
-	public Token(string word, long pos) {
-		this.word = word;
-		this.pos = pos;
-	}
-}
-
-SList<Token> tokenize_line(Dict dict, string line) {
-	var tokens = new SList<Token>();
+/* Splits a line into a list of words. */
+SList<string> tokenize_line(Dict dict, string line) {
+	var tokens = new SList<string>();
 	long cur_unichar = 0;
 
 	for (unowned string cur_byte = line; cur_byte[0] != '\0';) {
@@ -107,7 +97,6 @@ SList<Token> tokenize_line(Dict dict, string line) {
 			cur_unichar += 1;
 		}
 		var start_ptr = cur_byte;
-		long start_unichar = cur_unichar;
 
 		/* Skip over word characters. */
 		for (;
@@ -127,7 +116,7 @@ SList<Token> tokenize_line(Dict dict, string line) {
 
 		/* Save (word, position) tuple. */
 		if (word.len > 0) {
-			tokens.append(new Token(word.str, start_unichar));
+			tokens.append(word.str);
 		}
 	}
 
@@ -222,7 +211,7 @@ public class Main : Object {
 				if (tokens == null)
 					GLib.stdout.putc('\n');
 				for (unowned var tok_ptr = tokens; tok_ptr != null; tok_ptr = tok_ptr.next) {
-					check_line(dict, tok_ptr.data.word, line_count);
+					check_line(dict, tok_ptr.data, line_count);
 				}
 			}
 
