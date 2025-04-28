@@ -8,8 +8,6 @@ Help Options:
   -h, --help                      Show help options
 
 Application Options:
-  -a, --pipe                      Talk to another program through a pipe, like Ispell
-  -l, --errors-only               List only the misspellings
   -d, --dictionary=DICTIONARY     Use the given dictionary
   -p, --pwl=FILE                  Use the given personal word list
   -L, --show-lines                Display line numbers
