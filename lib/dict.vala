@@ -225,7 +225,7 @@ public class EnchantDict {
 
 	public void free_string_list(char **string_list) {
 		this.session.clear_error();
-		g_strfreev((string[])(owned)string_list);
+		strfreev((string[])(owned)string_list);
 	}
 
 	public void describe(EnchantDictDescribeFn fn, void *user_data)
