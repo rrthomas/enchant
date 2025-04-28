@@ -1,5 +1,5 @@
-<!-- Creator     : groff version 1.22.4 -->
-<!-- CreationDate: Sun May 26 12:58:50 2024 -->
+<!-- Creator     : groff version 1.23.0 -->
+<!-- CreationDate: Mon Apr 28 22:18:07 2025 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -24,6 +24,7 @@
 <a href="#LANGUAGE TAGS">LANGUAGE TAGS</a><br>
 <a href="#ORDERING FILE">ORDERING FILE</a><br>
 <a href="#PERSONAL WORD LISTS">PERSONAL WORD LISTS</a><br>
+<a href="#SHARING PERSONAL WORD LISTS BETWEEN SPELL-CHECKERS">SHARING PERSONAL WORD LISTS BETWEEN SPELL-CHECKERS</a><br>
 <a href="#ENVIRONMENT">ENVIRONMENT</a><br>
 <a href="#FILES AND DIRECTORIES">FILES AND DIRECTORIES</a><br>
 <a href="#SEE ALSO">SEE ALSO</a><br>
@@ -37,7 +38,7 @@
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Enchant -
+<p style="margin-left:9%; margin-top: 1em">Enchant -
 enchant language tags, ordering files and personal word
 lists</p>
 
@@ -46,7 +47,7 @@ lists</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Enchant
+<p style="margin-left:9%; margin-top: 1em">Enchant
 identifies dictionaries by their language tag. A language
 tag is typically an IETF BCP 47 language tag of the form
 <i>LANGUAGE_COUNTRY</i>; for example, <i>en_US</i> or
@@ -62,21 +63,21 @@ names such as <i>en-medical</i> or <i>en-my-novel</i>).</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Enchant uses
+<p style="margin-left:9%; margin-top: 1em">Enchant uses
 global and per-user ordering files named
 <i>enchant.ordering</i> to decide which spelling provider to
 use for particular languages. The per-user file takes
 precedence.</p>
 
-<p style="margin-left:11%; margin-top: 1em">The ordering
+<p style="margin-left:9%; margin-top: 1em">The ordering
 file takes the form <i>language_tag:&lt;comma-separated list
 of spelling providers&gt;</i>. To see what dictionaries are
-available, run <i>enchant-lsmod-2</i>. &rsquo;*&rsquo; is
+available, run <i>enchant-lsmod-2</i>. &lsquo;*&rsquo; is
 used to mean &ldquo;use this ordering for all languages,
 unless instructed otherwise.&rdquo; For example:</p>
 
 
-<p style="margin-left:22%; margin-top: 1em">*:aspell,hunspell,nuspell
+<p style="margin-left:18%; margin-top: 1em">*:aspell,hunspell,nuspell
 <br>
 en:aspell,hunspell,nuspell <br>
 en_GB:hunspell,nuspell,aspell <br>
@@ -87,7 +88,7 @@ fr:hunspell,nuspell,aspell</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Personal word
+<p style="margin-left:9%; margin-top: 1em">Personal word
 lists are simple plain text files with one word per line.
 The name of the file starts with the language tag and ends
 <i>.dic</i>. Each personal word list has a corresponding
@@ -95,51 +96,54 @@ exclude file, ending in <i>.exc</i>, which lists words that
 are found in the dictionary but that the user wants to be
 considered invalid. The files are stored in an Enchant
 configuration directory; see <b>FILES AND DIRECTORIES</b>
-below. Lines starting with a hash sign &rsquo;#&rsquo; are
+below. Lines starting with a hash sign &lsquo;#&rsquo; are
 ignored.</p>
 
-<p style="margin-left:11%; margin-top: 1em"><b>SHARING
-PERSONAL WORD LISTS BETWEEN SPELL-CHECKERS</b> <br>
-It is possible, and usually safe, to share Enchant&rsquo;s
-personal word lists with other spelling checkers that use
-the same format (note that other spell-checkers may not
-support comments!). The spell-checkers known to be
-compatible are Hunspell, Nuspell and Ispell. (Although
-Enchant does not support Ispell as a provider, it&rsquo;s
-still fine to share word lists with it.) Other
-spell-checkers supported by Enchant are either incompatible,
-or have no personal word list mechanism. There may well be
-yet other spell-checkers, unknown to Enchant, that use the
-same format.</p>
+<h3>SHARING PERSONAL WORD LISTS BETWEEN SPELL-CHECKERS
+<a name="SHARING PERSONAL WORD LISTS BETWEEN SPELL-CHECKERS"></a>
+</h3>
 
-<p style="margin-left:11%; margin-top: 1em">Some
+
+<p style="margin-left:9%; margin-top: 1em">It is possible,
+and usually safe, to share Enchant&rsquo;s personal word
+lists with other spelling checkers that use the same format
+(note that other spell-checkers may not support comments!).
+The spell-checkers known to be compatible are Hunspell,
+Nuspell and Ispell. (Although Enchant does not support
+Ispell as a provider, it&rsquo;s still fine to share word
+lists with it.) Other spell-checkers supported by Enchant
+are either incompatible, or have no personal word list
+mechanism. There may well be yet other spell-checkers,
+unknown to Enchant, that use the same format.</p>
+
+<p style="margin-left:9%; margin-top: 1em">Some
 applications use Hunspell or Nuspell, but store the personal
 word list under another name or in another location; Firefox
 and Thunderbird do this. Firefox also seems to reorder its
 word list when updating it; again, this is OK, as the result
 is still in the same format.</p>
 
-<p style="margin-left:11%; margin-top: 1em">To share word
+<p style="margin-left:9%; margin-top: 1em">To share word
 lists with Enchant, find the other spelling checker&rsquo;s
-word list file, e.g. <i>~/.hunspell_fr_FR</i> or
-<i>~/.config/nuspell/fr_FR</i>, and merge it with the
+word list file, e.g. <i>&#732;/.hunspell_fr_FR</i> or
+<i>&#732;/.config/nuspell/fr_FR</i>, and merge it with the
 corresponding Enchant file, in this case
-<i>~/.config/enchant/fr_FR.dic</i>. Use the following
+<i>&#732;/.config/enchant/fr_FR.dic</i>. Use the following
 command, replacing <i>ENCHANT-DICT</i> and <i>OTHER-DICT</i>
 with the corresponding dictionary file names:</p>
 
-<p style="margin-left:22%; margin-top: 1em">cat
+<p style="margin-left:18%; margin-top: 1em">cat
 ENCHANT-DICT OTHER-DICT | sort -u &gt; merged.txt</p>
 
-<p style="margin-left:11%; margin-top: 1em">Take a look at
+<p style="margin-left:9%; margin-top: 1em">Take a look at
 <i>merged.txt</i> to check the merge has worked, then</p>
 
-<p style="margin-left:22%; margin-top: 1em">mv merged.txt
+<p style="margin-left:18%; margin-top: 1em">mv merged.txt
 ENCHANT-DICT <br>
 rm OTHER-DICT <br>
 ln -s OTHER-DICT ENCHANT-DICT</p>
 
-<p style="margin-left:11%; margin-top: 1em">to replace the
+<p style="margin-left:9%; margin-top: 1em">to replace the
 other dictionary file with a link to the Enchant dictionary,
 again filling in the name of the dictionary files.</p>
 
@@ -148,16 +152,16 @@ again filling in the name of the dictionary files.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">The following
+<p style="margin-left:9%; margin-top: 1em">The following
 variables affect the behavior of Enchant: <i><br>
 ENCHANT_CONFIG_DIR</i></p>
 
-<p style="margin-left:22%;">A directory in which Enchant
+<p style="margin-left:18%;">A directory in which Enchant
 should look for configuration files. See below.</p>
 
-<p style="margin-left:11%;"><i>G_MESSAGES_DEBUG</i></p>
+<p style="margin-left:9%;"><i>G_MESSAGES_DEBUG</i></p>
 
-<p style="margin-left:22%;">Enchant uses GLib&rsquo;s log
+<p style="margin-left:18%;">Enchant uses GLib&rsquo;s log
 functions, with the domain <i>libenchant</i>, to output
 messages useful for debugging. Setting
 <i>G_MESSAGES_DEBUG</i> to <i>libenchant</i> will cause
@@ -169,52 +173,52 @@ the GLib documentation for more details.</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Enchant looks
-in the following places for user files, in decreasing order
-of precedence: <i><br>
+<p style="margin-left:9%; margin-top: 1em">Enchant looks in
+the following places for user files, in decreasing order of
+precedence: <i><br>
 ENCHANT_CONFIG_DIR</i></p>
 
-<p style="margin-left:22%;">(If the environment variable is
+<p style="margin-left:18%;">(If the environment variable is
 set.)</p>
 
-<p style="margin-left:11%;"><i>XDG_CONFIG_HOME/enchant</i>
+<p style="margin-left:9%;"><i>XDG_CONFIG_HOME/enchant</i>
 (non-Windows systems)</p>
 
-<p style="margin-left:22%;">Default:
-<i>~/.config/enchant</i></p>
+<p style="margin-left:18%;">Default:
+<i>&#732;/.config/enchant</i></p>
 
 
-<p style="margin-left:11%;"><i>CSIDL_LOCAL_APPDATA\enchant</i>
+<p style="margin-left:9%;"><i>CSIDL_LOCAL_APPDATA\enchant</i>
 (Windows systems)</p>
 
-<p style="margin-left:22%;">Default: <i>C:\Documents and
+<p style="margin-left:18%;">Default: <i>C:\Documents and
 Settings\</i>username<i>\Local Settings\Application
 Data\enchant</i></p>
 
-<p style="margin-left:11%; margin-top: 1em">Dictionaries
-for some providers are looked for in a subdirectory with the
+<p style="margin-left:9%; margin-top: 1em">Dictionaries for
+some providers are looked for in a subdirectory with the
 same name as the provider, for example
-<i>~/.config/enchant/hunspell</i>. Currently this works for
-Hspell, Hunspell, Nuspell and Voikko.</p>
+<i>&#732;/.config/enchant/hunspell</i>. Currently this works
+for Hspell, Hunspell, Nuspell and Voikko.</p>
 
-<p style="margin-left:11%; margin-top: 1em">Providers also
+<p style="margin-left:9%; margin-top: 1em">Providers also
 look in specific system directories, and in some cases and
 user directories, for their dictionaries; see the
 documentation for each provider.</p>
 
-<p style="margin-left:11%; margin-top: 1em">In addition,
+<p style="margin-left:9%; margin-top: 1em">In addition,
 Enchant looks in the following systems directories for
 ordering files: <i><br>
 /home/rrt/.local/etc/enchant-2</i></p>
 
-<p style="margin-left:22%;">(Or the equivalent location
+<p style="margin-left:18%;">(Or the equivalent location
 relative to the enchant library for a relocatable
 build.)</p>
 
 
-<p style="margin-left:11%;"><i>/home/rrt/.local/share/enchant-2</i></p>
+<p style="margin-left:9%;"><i>/home/rrt/.local/share/enchant-2</i></p>
 
-<p style="margin-left:22%;">(Or the equivalent location
+<p style="margin-left:18%;">(Or the equivalent location
 relative to the enchant library for a relocatable
 build.)</p>
 
@@ -224,7 +228,7 @@ build.)</p>
 
 
 
-<p style="margin-left:11%; margin-top: 1em"><b>enchant-2</b>(1),
+<p style="margin-left:9%; margin-top: 1em"><b>enchant-2</b>(1),
 <b>enchant-lsmod-2</b>(1)</p>
 
 <h2>AUTHOR
@@ -232,7 +236,7 @@ build.)</p>
 </h2>
 
 
-<p style="margin-left:11%; margin-top: 1em">Written by Dom
+<p style="margin-left:9%; margin-top: 1em">Written by Dom
 Lachowicz and Reuben Thomas.</p>
 <hr>
 </body>
