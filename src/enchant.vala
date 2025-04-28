@@ -176,8 +176,8 @@ public class Main : Object {
 		{"pwl", 'p', OptionFlags.NONE, OptionArg.FILENAME, ref perslist, "Use the given personal word list", "FILE"},
 		{"show-lines", 'L', OptionFlags.NONE, OptionArg.NONE, ref count_lines, "Display line numbers", null},
 		{"list-providers", '\0', OptionFlags.NONE, OptionArg.NONE, ref list_providers, "List spelling providers", null},
-		{"list-dicts", '\0', OptionFlags.NONE, OptionArg.NONE, ref list_dictionaries, "List all dictionaries", null},
-		{"default-dict", '\0', OptionFlags.NONE, OptionArg.NONE, ref show_default_dict, "Show the default dictionary for the given or default language", null},
+		{"list-dictionaries", '\0', OptionFlags.NONE, OptionArg.NONE, ref list_dictionaries, "List all dictionaries", null},
+		{"default-dictionary", '\0', OptionFlags.NONE, OptionArg.NONE, ref show_default_dict, "Show the default dictionary for the given or default language", null},
 		{"word-chars", '\0', OptionFlags.NONE, OptionArg.NONE, ref show_word_chars, "Show the word characters for the given or default language", null},
 		{"version", 'v', OptionFlags.NONE, OptionArg.NONE, ref version, "Display version information and exit", null},
 

@@ -1,3 +1,3 @@
-# Running enchant --list-dicts with some providers and dictionaries
+# Running enchant --list-dictionaries with some providers and dictionaries
 # installed does some useful testing.
-enchant_no_output_test --list-dicts
+enchant_no_output_test --list-dictionaries
