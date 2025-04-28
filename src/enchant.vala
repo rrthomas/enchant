@@ -203,8 +203,8 @@ public class Main : Object {
 	private const OptionEntry[] main_options = {
 		{"pipe", 'a', OptionFlags.NO_ARG, OptionArg.CALLBACK, (void *)Main.set_mode, "Talk to another program through a pipe, like Ispell", null},
 		{"errors-only", 'l', OptionFlags.NO_ARG, OptionArg.CALLBACK, (void *)Main.set_mode, "List only the misspellings", null},
-		{"dictionary", 'd', OptionFlags.NONE, OptionArg.STRING, ref dictionary, "Use the given dictionary", null},
-		{"pwl", 'p', OptionFlags.NONE, OptionArg.FILENAME, ref perslist, "Use the given personal word list", null},
+		{"dictionary", 'd', OptionFlags.NONE, OptionArg.STRING, ref dictionary, "Use the given dictionary", "DICTIONARY"},
+		{"pwl", 'p', OptionFlags.NONE, OptionArg.FILENAME, ref perslist, "Use the given personal word list", "FILE"},
 		{"show-lines", 'L', OptionFlags.NONE, OptionArg.NONE, ref count_lines, "Display line numbers", null},
 		{"version", 'v', OptionFlags.NONE, OptionArg.NONE, ref version, "Display version information and exit", null},
 
