@@ -1,6 +1,6 @@
-enchant-2: Unknown option --foo
+enchant-3: Unknown option --foo
 Usage:
-  enchant-2 [OPTION…] FILE... 
+  enchant-3 [OPTION…] FILE... 
 
 Check spelling non-interactively.
 

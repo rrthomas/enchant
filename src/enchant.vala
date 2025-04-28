@@ -1,4 +1,4 @@
-#! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg config --pkg configmake --pkg posix --pkg enchant-2 --pkg util
+#! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg config --pkg configmake --pkg posix --pkg enchant-3 --pkg util
 /* enchant: An ispell-compatible command-line front-end for libenchant.
  *
  * Copyright (C) 2003 Dom Lachowicz
