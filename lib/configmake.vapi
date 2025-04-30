@@ -35,7 +35,6 @@ const string PKGDATADIR;
 [CCode (cheader_filename = "configmake.h")]
 const string INSTALLPREFIX;
 
-[CCode (cheader_filename = "configmake.h")]
+/* These values are supplied on the command line */
 const string ENCHANT_MAJOR_VERSION;
-[CCode (cheader_filename = "configmake.h")]
 const string ENCHANT_VERSION_STRING;
