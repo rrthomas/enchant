@@ -1,3 +1,4 @@
+*.stamp
 /enchant-[1-9]
 /enchant.1
 /enchant-[1-9].1
@@ -11,8 +12,13 @@
 /enchant-lsmod-[1-9].1
 /enchant.c
 /enchant-lsmod.c
+/slurp.c
+/test
+/test.exe
+/test.c
+/testcase.c
+/testutils.c
 /util.[ch]
 /util.vapi
-/libutil_la_vala.stamp
 /libutil_la_vala.stamp-t
 /dummy.vala

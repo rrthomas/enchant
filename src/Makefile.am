@@ -1,7 +1,7 @@
 # Makefile.am for Enchant commands
 #
 # Copyright (C) 2003 Dom Lachowicz
-#               2016-2024 Reuben Thomas
+#               2016-2025 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -11,8 +11,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
-AM_VALAFLAGS = --debug --no-color --vapidir=. --vapidir=$(top_srcdir)/lib --pkg config --pkg posix --pkg gio-2.0 --pkg gmodule-2.0 --pkg enchant-2
-AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu -I$(top_srcdir)/lib $(GLIB_CFLAGS)
+AM_VALAFLAGS = --debug --no-color --vapidir=. --vapidir=$(top_srcdir)/lib --pkg config --pkg configmake --pkg posix --pkg gio-2.0 --pkg gmodule-2.0 --pkg enchant-2
+AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu -I$(top_srcdir)/lib $(GLIB_CFLAGS) -DENCHANT_MAJOR_VERSION=\"@ENCHANT_MAJOR_VERSION@\"
 
 VAPIS = config.vapi enchant-2.vapi
 

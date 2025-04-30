@@ -1,0 +1,6 @@
+# glibc
+leak:getdelim
+
+# gnulib
+leak:set_this_relocation_prefix
+leak:set_relocation_prefix

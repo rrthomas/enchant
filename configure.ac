@@ -16,6 +16,7 @@ AC_PREREQ([2.71])
 AC_INIT([Enchant],[2.8.4])
 AC_CONFIG_SRCDIR(lib/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
+AC_REQUIRE_AUX_FILE([tap-driver.sh])
 AM_INIT_AUTOMAKE([subdir-objects tar-ustar])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
@@ -122,6 +123,17 @@ AC_SUBST([ISYSTEM])
 
 AM_CONDITIONAL([SHLIBS_IN_BINDIR], [case "$host_os" in mingw* | cygwin*) true;; *) false;; esac])
 
+dnl Windows-specific checks
+AC_MSG_CHECKING([for native Win32])
+native_win32=no
+case "$host" in
+  *-*-mingw*)
+    native_win32=yes
+    ;;
+esac
+AC_MSG_RESULT([$native_win32])
+AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
+
 dnl ===========================================================================
 
 AC_LANG_PUSH([C++])
@@ -213,6 +225,7 @@ enchant-$ENCHANT_MAJOR_VERSION.pc:enchant.pc.in
 lib/Makefile
 lib/enchant.5.in
 libgnu/Makefile
+program-tests/Makefile
 providers/Makefile
 src/Makefile
 src/enchant.1

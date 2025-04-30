@@ -14,7 +14,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_DISTCHECK_CONFIGURE_FLAGS = --enable-relocatable
 
-SUBDIRS = libgnu lib src providers tests
+SUBDIRS = libgnu lib src providers tests program-tests
 
 # Note that the template file is called library.pc.in, but generates a
 # versioned .pc file using some magic in AC_CONFIG_FILES.

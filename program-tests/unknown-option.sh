@@ -1,0 +1,2 @@
+expected_exit=1
+enchant_test --foo

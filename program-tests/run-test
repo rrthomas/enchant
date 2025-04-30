@@ -1,0 +1,75 @@
+#!/bin/sh
+# Run an enchant test
+#
+# Copyright (c) 2021-2024 Reuben Thomas <rrt@sc3d.org>
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, see <https://www.gnu.org/licenses/>.
+
+set -e
+
+# Skip test if sysconfdir does not start with prefix, as then relocation won't
+# work. Typical example: prefix=/usr, sysconfdir=/etc
+case "$sysconfdir" in
+    "$prefix/"*)
+        ;;
+    *)
+        echo prefix: "$prefix", sysconfdir: "$sysconfdir"
+        echo "sysconfdir does not start with prefix, cannot run test!"
+        exit 0
+        ;;
+esac
+
+curr_dir="$(pwd)"
+test_file="$curr_dir/$1"
+name="${1%.sh}"
+basename=$(basename "$name")
+test_dir="$curr_dir/$basename.$$"
+echo test_dir: "$test_dir"
+expected_exit=0
+expected_file="$abs_srcdir/$basename-expected.txt"
+
+# Test runner.
+# Arguments are command to run.
+enchant_test() {
+    exit_code=0
+    ldd $(which enchant-$ENCHANT_MAJOR_VERSION)
+    enchant-$ENCHANT_MAJOR_VERSION "$@" > "$basename-output.txt" 2>&1 || exit_code=$?
+    cat "$basename-output.txt"
+    if [ $exit_code != $expected_exit ]; then
+        echo "Expected exit code $expected_exit but was $exit_code"
+        exit 1
+    fi
+    # Fix variation in output:
+    # 1. Convert backslashes to forward slashes
+    # 2. Compress double slashes (from relocated paths on some systems)
+    # 3. Remove prefix of name of 'enchant' executable
+    sed -e 's|\\|/|g' -e 's|//|/|g' -e 's|^.*/enchant-'$ENCHANT_MAJOR_VERSION':|enchant-'$ENCHANT_MAJOR_VERSION':|g' < "$basename-output.txt" > "$basename-output-fixed.txt"
+    $DIFF -u "$expected_file" "$basename-output-fixed.txt"
+}
+
+# Make a test installation of libenchant
+mkdir -p "$test_dir/hunspell"
+cp "$abs_srcdir/en_GB.aff" "$abs_srcdir/en_GB.dic" "$test_dir/hunspell/"
+cd ..
+${MAKE} install DESTDIR="$test_dir"
+export PATH="$test_dir/$bindir:$PATH"
+export LD_LIBRARY_PATH="$test_dir/$libdir"
+export DYLD_LIBRARY_PATH="$test_dir/$libdir"
+cd "$test_dir"
+
+# Set up libenchant configuration
+export ENCHANT_CONFIG_DIR="$test_dir"
+
+# Remove the test directory on exit.
+# Change directory back to $abs_srcdir first so we don't try to remove a
+# directory above the cwd, which is forbidden on some systems.
+trap 'cd "$abs_srcdir" && rm -rf "$test_dir"' EXIT
+
+# Run the test script.
+. "$test_file"
