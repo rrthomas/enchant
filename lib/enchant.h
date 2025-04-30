@@ -298,9 +298,6 @@ const char *enchant_dict_get_error (EnchantDict * dict);
  * string can be appended to a character class used to match word
  * characters.
  *
- * Words containing non-letters not in this string will automatically be
- * rejected by Enchant.
- *
  * Note that for some back-ends the result may be a guess, in which case it
  * may include characters not actually allowed in the given dictionary.
  */
