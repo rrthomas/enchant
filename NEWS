@@ -1,3 +1,11 @@
+2.8.4 (April 29, 2025)
+----------------------
+
+This release fixes a pair of bugs in the word division algorithm of
+enchant(1) introduced in the previous release, 2.8.3. Apologies for this bad
+bug.
+
+
 2.8.3 (April 28, 2025)
 ----------------------
 
