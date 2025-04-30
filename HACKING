@@ -43,7 +43,10 @@ Formatting style
 ----------------
 
    The formatting style of libenchant is a mix of various styles.  Please
-follow the style that seems to predominate in any given area of the code base; broadly, there are different styles for the Vala library code, providers and commands, and the tests.  The public header files are written in GLib style.
+follow the style that seems to predominate in any given area of the code
+base; broadly, there are different styles for the Vala library code,
+providers and commands, and the tests.  The public header files are written
+in GLib style.
 
    Emacs users should use the supplied .dir-locals.el.
 
