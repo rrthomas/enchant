@@ -380,7 +380,7 @@ public class Main : Object {
 		try {
 			ctx.parse(ref args);
 		} catch (OptionError e) {
-			printerr("error %s\n", e.message);
+			printerr("%s-%s: %s\n", PACKAGE, ENCHANT_MAJOR_VERSION, e.message);
 			usage(ctx);
 		}
 
