@@ -138,42 +138,41 @@ class Token {
 
 SList<Token> tokenize_line(Dict dict, string line) {
 	var tokens = new SList<Token>();
-	long start_pos = 0;
-	long cur_pos = 0;
-	unowned string utf = line;
+	long cur_unichar = 0;
 
-	while (utf[0] != '\0') {
+	for (unowned string cur_byte = line; cur_byte[0] != '\0';) {
 		var word = new StringBuilder();
 		unichar uc;
 
 		/* Skip non-word characters. */
-		for (uc = utf.get_char();
+		for (uc = cur_byte.get_char();
 			 uc != 0 && !dict.is_word_character(uc, WordPosition.START);
-			 uc = utf.get_char()) {
-			utf = utf.next_char();
-			cur_pos += 1;
+			 uc = cur_byte.get_char()) {
+			cur_byte = cur_byte.next_char();
+			cur_unichar += 1;
 		}
-		start_pos = cur_pos;
+		var start_ptr = cur_byte;
+		long start_unichar = cur_unichar;
 
 		/* Skip over word characters. */
 		for (;
 			 uc != 0 && dict.is_word_character(uc, WordPosition.MIDDLE);
-			 uc = utf.get_char()) {
-			utf = utf.next_char();
+			 uc = cur_byte.get_char()) {
+			cur_byte = cur_byte.next_char();
 			word.append_unichar(uc);
-			cur_pos += 1;
+			cur_unichar += 1;
 		}
 
 		/* Skip backwards over any characters that can't appear at the end of a word. */
-		unowned string i_utf = utf;
+		unowned string last_char_ptr = cur_byte;
 		for (;
-			 !dict.is_word_character(i_utf.get_char(), WordPosition.END);
-			 i_utf = i_utf.prev_char());
-		word.truncate((char *)i_utf - (char *)line);
+			 !dict.is_word_character(last_char_ptr.get_char(), WordPosition.END);
+			 last_char_ptr = last_char_ptr.prev_char());
+		word.truncate((char *) last_char_ptr.next_char() - (char *) start_ptr);
 
 		/* Save (word, position) tuple. */
 		if (word.len > 0) {
-			tokens.append(new Token(word.str, start_pos));
+			tokens.append(new Token(word.str, start_unichar));
 		}
 	}
 
