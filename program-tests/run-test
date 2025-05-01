@@ -38,7 +38,7 @@ expected_file="$abs_srcdir/$basename-expected.txt"
 # Arguments are command to run.
 enchant_test() {
     exit_code=0
-    ldd $(which enchant-$ENCHANT_MAJOR_VERSION)
+    #ldd $(which enchant-$ENCHANT_MAJOR_VERSION)
     enchant-$ENCHANT_MAJOR_VERSION "$@" > "$basename-output.txt" 2>&1 || exit_code=$?
     cat "$basename-output.txt"
     if [ $exit_code != $expected_exit ]; then
