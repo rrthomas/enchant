@@ -1,0 +1,24 @@
+diff --git a/modules/relocatable-lib-lgpl b/modules/relocatable-lib-lgpl
+index b8ecb51ef8..da905347cd 100644
+--- a/modules/relocatable-lib-lgpl
++++ b/modules/relocatable-lib-lgpl
+@@ -7,6 +7,7 @@ doc/relocatable.texi
+ lib/relocatable.h
+ lib/relocatable.c
+ lib/relocatable.valgrind
++m4/libdl.m4
+ m4/relocatable-lib.m4
+ m4/build-to-host.m4
+ 
+@@ -18,9 +19,11 @@ gl_RELOCATABLE_LIBRARY
+ if test $RELOCATABLE = yes; then
+   AC_LIBOBJ([relocatable])
+ fi
++gl_LIBDL
+ 
+ Makefile.am:
+ DEFS += -DNO_XMALLOC
++lib_LDFLAGS += $(LIBDL)
+ 
+ Include:
+ "relocatable.h"

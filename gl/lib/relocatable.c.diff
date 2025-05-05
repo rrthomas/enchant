@@ -1,0 +1,89 @@
+diff --git a/lib/relocatable.c b/lib/relocatable.c
+index 15b3bc442d..883cca6111 100644
+--- a/lib/relocatable.c
++++ b/lib/relocatable.c
+@@ -71,6 +71,10 @@
+ # define GetModuleFileName GetModuleFileNameA
+ #endif
+ 
++#if !(defined _WIN32 && !defined __CYGWIN__) && !(defined __EMX__)
++#include <dlfcn.h>
++#endif
++
+ /* Faked cheap 'bool'.  */
+ #undef bool
+ #undef false
+@@ -318,10 +324,10 @@ static char *shared_library_fullname;
+ 
+ #if defined _WIN32 && !defined __CYGWIN__
+ /* Native Windows only.
+-   On Cygwin, it is better to use the Cygwin provided /proc interface, than
+-   to use native Windows API and cygwin_conv_to_posix_path, because it
+-   supports longer file names
+-   (see <https://cygwin.com/ml/cygwin/2011-01/msg00410.html>).  */
++
++   On Cygwin, it is better to use dladdr, than to use native Windows
++   API and cygwin_conv_to_posix_path, because it supports longer file
++   names (see <https://cygwin.com/ml/cygwin/2011-01/msg00410.html>).  */
+ 
+ /* Determine the full pathname of the shared library when it is loaded.
+ 
+@@ -402,54 +408,10 @@ _DLL_InitTerm (unsigned long hModule, unsigned long ulFlag)
+ static void
+ find_shared_library_fullname ()
+ {
+-#if (defined __linux__ && (__GLIBC__ >= 2 || defined __UCLIBC__)) || defined __CYGWIN__
+-  /* Linux has /proc/self/maps. glibc 2 and uClibc have the getline()
+-     function.
+-     Cygwin >= 1.5 has /proc/self/maps and the getline() function too.
+-     But it is costly: ca. 0.3 ms on Linux, 3 ms on Cygwin 1.5, and 5 ms on
+-     Cygwin 1.7.  */
+-  FILE *fp;
+-
+-  /* Open the current process' maps file.  It describes one VMA per line.  */
+-  fp = fopen ("/proc/self/maps", "r");
+-  if (fp)
+-    {
+-      unsigned long address = (unsigned long) &find_shared_library_fullname;
+-      for (;;)
+-        {
+-          unsigned long start, end;
+-          int c;
+-
+-          if (fscanf (fp, "%lx-%lx", &start, &end) != 2)
+-            break;
+-          if (address >= start && address <= end - 1)
+-            {
+-              /* Found it.  Now see if this line contains a filename.  */
+-              while (c = getc (fp), c != EOF && c != '\n' && c != '/')
+-                continue;
+-              if (c == '/')
+-                {
+-                  size_t size;
+-                  int len;
+-
+-                  ungetc (c, fp);
+-                  shared_library_fullname = NULL; size = 0;
+-                  len = getline (&shared_library_fullname, &size, fp);
+-                  if (len >= 0)
+-                    {
+-                      /* Success: filled shared_library_fullname.  */
+-                      if (len > 0 && shared_library_fullname[len - 1] == '\n')
+-                        shared_library_fullname[len - 1] = '\0';
+-                    }
+-                }
+-              break;
+-            }
+-          while (c = getc (fp), c != EOF && c != '\n')
+-            continue;
+-        }
+-      fclose (fp);
+-    }
+-#endif
++  Dl_info info;
++  dladdr (find_shared_library_fullname, &info);
++  if (info.dli_fname != NULL)
++      shared_library_fullname = strdup (info.dli_fname);
+ }
+ 
+ #endif /* Native Windows / EMX / Unix */
