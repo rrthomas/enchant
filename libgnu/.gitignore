@@ -53,3 +53,7 @@
 /stdint.in.h
 /verify.h
 /limits.h
+/fcntl.in.h
+/locale.in.h
+/fcntl.h
+/locale.h

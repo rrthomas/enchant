@@ -67,3 +67,12 @@
 /codeset.m4
 /locale-fr.m4
 /vararrays.m4
+/c-bool.m4
+/fcntl-o.m4
+/fcntl_h.m4
+/gnulib-i18n.m4
+/libdl.m4
+/locale_h.m4
+/musl.m4
+/off64_t.m4
+/sys_cdefs_h.m4
