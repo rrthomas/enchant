@@ -22,6 +22,7 @@ jobs:
         cmake --build nuspell-build
         sudo cmake --install nuspell-build
         rm -rf nuspell-*
+        sudo ldconfig
     - name: Bootstrap (gnulib and autoreconf)
       run: ./bootstrap
     - name: configure
