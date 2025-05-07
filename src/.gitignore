@@ -13,12 +13,8 @@
 /enchant.c
 /enchant-lsmod.c
 /slurp.c
-/test
-/test.exe
-/test.c
-/testcase.c
-/testutils.c
 /util.[ch]
 /util.vapi
 /libutil_la_vala.stamp-t
+/libenchant.rc
 /dummy.vala
