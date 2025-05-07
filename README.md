@@ -30,9 +30,9 @@ Enchant works with the following spell-checkers:
 Enchant is written in Vala, C and C++, and its only external dependency is
 Glib. C and C++ compilers are required to build it.
 
-Enchant bindings are supplied for C and C++. API documentation is available
-in the doxygen/html directory, or online (see the home page). There are
-third-party bindings for various languages (see the home page).
+Enchant bindings are supplied for C. API documentation is available in the
+doxygen/html directory, or online (see the home page). There are third-party
+bindings for various languages (see the home page).
 
 
 ## Installation

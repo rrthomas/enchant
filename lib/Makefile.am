@@ -37,7 +37,7 @@ libenchant_@ENCHANT_MAJOR_VERSION@_la_SOURCES = \
 	$(BUILT_SOURCES)
 
 libenchant_includedir = $(pkgincludedir)-@ENCHANT_MAJOR_VERSION@
-libenchant_include_HEADERS = enchant.h enchant++.h
+libenchant_include_HEADERS = enchant.h
 
 libenchant_datadir = $(pkgdatadir)-@ENCHANT_MAJOR_VERSION@
 libenchant_data_DATA = enchant.ordering
