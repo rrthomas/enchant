@@ -51,6 +51,7 @@ EXTRA_DIST = \
 
 AM_TESTS_ENVIRONMENT = \
 	export MAKE=$(MAKE); \
+	export EXEEXT=$(EXEEXT); \
 	export LC_ALL=C; \
 	export prefix=$(prefix); \
 	export sysconfdir=$(sysconfdir); \

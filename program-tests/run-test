@@ -1,7 +1,7 @@
 #!/bin/sh
 # Run an enchant test
 #
-# Copyright (c) 2021-2024 Reuben Thomas <rrt@sc3d.org>
+# Copyright (c) 2021-2025 Reuben Thomas <rrt@sc3d.org>
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,8 +48,8 @@ enchant_test() {
     # Fix variation in output:
     # 1. Convert backslashes to forward slashes
     # 2. Compress double slashes (from relocated paths on some systems)
-    # 3. Remove prefix of name of 'enchant' executable
-    sed -e 's|\\|/|g' -e 's|//|/|g' -e 's|^.*/enchant-'$ENCHANT_MAJOR_VERSION':|enchant-'$ENCHANT_MAJOR_VERSION':|g' < "$basename-output.txt" > "$basename-output-fixed.txt"
+    # 3. Remove suffix of name of 'enchant' executable
+    sed -e 's|\\|/|g' -e 's|//|/|g' -e 's/enchant-'$ENCHANT_MAJOR_VERSION$EXEEXT'/enchant-'$ENCHANT_MAJOR_VERSION'/g' < "$basename-output.txt" > "$basename-output-fixed.txt"
     $DIFF -u "$expected_file" "$basename-output-fixed.txt"
 }
 
