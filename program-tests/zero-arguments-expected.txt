@@ -1,5 +1,5 @@
 Usage:
-  enchant-2 [OPTION?] FILE... 
+  enchant-2 [OPTION…] FILE... 
 
 Check spelling non-interactively.
 
