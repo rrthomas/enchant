@@ -1,3 +1,22 @@
+2.8.5 (May 25, 2025)
+
+This release fixes relocatability for BSDs (including macOS), and fixes the
+build system to make relocatability work better on Windows in some
+environments.
+
+The build system has been updated to detect MSVC’s C++11 support correctly.
+
+Some incorrect documentation was removed from enchant.h: Enchant does not
+automatically reject words containing non-letters not in the list returned
+by enchant_dict_get_extra_word_characters (though it is likely that most
+back-ends will consider them mis-spellings at best!).
+
+The enchant(1) program now has tests, and the error message when the command
+line is invalid has been improved.
+
+There are some minor improvements to the build system.
+
+
 2.8.4 (April 29, 2025)
 ----------------------
 
@@ -189,7 +208,8 @@ for user-installed dictionaries.
 2.6.7 (February 8, 2024)
 ------------------------
 
-This version fixes an error introduced in the previous version that caused the Hunspell provider to fail on startup. Apologies!
+This version fixes an error introduced in the previous version that caused
+the Hunspell provider to fail on startup. Apologies!
 
 
 2.6.6 (February 4, 2024)
