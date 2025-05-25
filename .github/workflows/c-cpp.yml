@@ -98,6 +98,6 @@ jobs:
     - name: make
       run: make --jobs=`nproc`
     - name: make check
-      run: make check --jobs=`nproc`
+      run: make check --jobs=`nproc` || ( cat program-tests/test-suite.log tests/test-suite.log && exit 1 )
     - name: make distcheck
       run: make distcheck --jobs=`nproc`
