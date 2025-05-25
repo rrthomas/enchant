@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script
 #
 # Copyright (C) 2003 Dom Lachowicz
-#               2016-2024 Reuben Thomas
+#               2016-2025 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,7 +13,7 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.71])
-AC_INIT([Enchant],[2.8.4])
+AC_INIT([Enchant],[2.8.5])
 AC_CONFIG_SRCDIR(lib/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
