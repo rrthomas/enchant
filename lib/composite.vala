@@ -51,6 +51,7 @@ int composite_dict_check(EnchantDict? self, string word_buf, real_size_t len) {
 	return err;
 }
 
+[CCode (array_length_pos = 4, array_length_type = "size_t")]
 string[]? composite_dict_suggest(EnchantDict me, string word, real_size_t len) {
 	var cdict = (EnchantCompositeDict)(me.user_data);
 	var error = true;
