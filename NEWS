@@ -1,4 +1,18 @@
+2.8.6 (May 30, 2025)
+--------------------
+
+This release fixes an internal bug where an ABI was incorrectly specified,
+causing errors on some systems, in particular big-endian ones. Thanks to
+Pranav P for the fix.
+
+The program tests (for enchant(1)) have been fixed to work on a wider
+range of systems and with more spelling providers.
+
+The Doxygen documentation has been updated.
+
+
 2.8.5 (May 25, 2025)
+--------------------
 
 This release fixes relocatability for BSDs (including macOS), and fixes the
 build system to make relocatability work better on Windows in some

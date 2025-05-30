@@ -13,7 +13,7 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.71])
-AC_INIT([Enchant],[2.8.5])
+AC_INIT([Enchant],[2.8.6])
 AC_CONFIG_SRCDIR(lib/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
