@@ -38,6 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -458,8 +459,21 @@ hunspell_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 		}
 
 	if (dicts.size () > 0) {
-		dictionary_list = g_new0 (char *, dicts.size() + 1);
+		/* Add "language only" tags to the list. */
+		std::set<std::string> extra_tags;
+		for (size_t i = 0; i < dicts.size(); i++) {
+			std::string tag = dicts[i];
+			for (size_t j = 1; j < tag.length(); j++) {
+				if (ispunct(tag[j])) {
+					extra_tags.insert(tag.substr(0, j));
+					break;
+				}
+			}
+		}
+		for (std::string tag : extra_tags)
+			dicts.push_back(tag);
 
+		dictionary_list = g_new0 (char *, dicts.size() + 1);
 		for (size_t i = 0; i < dicts.size(); i++)
 			dictionary_list[i] = g_strdup (dicts[i].c_str());
 	}
