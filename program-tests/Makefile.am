@@ -45,8 +45,8 @@ EXTRA_DIST = \
 	$(INPUTS) \
 	$(RESULTS) \
 	misspelled-input.txt \
-	en_GB.aff \
-	en_GB.dic \
+	en.aff \
+	en.dic \
 	$(EMPTY)
 
 AM_TESTS_ENVIRONMENT = \

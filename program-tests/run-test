@@ -55,7 +55,7 @@ enchant_test() {
 
 # Make a test installation of libenchant
 mkdir -p "$test_dir/hunspell"
-cp "$abs_srcdir/en_GB.aff" "$abs_srcdir/en_GB.dic" "$test_dir/hunspell/"
+cp "$abs_srcdir/en.aff" "$abs_srcdir/en.dic" "$test_dir/hunspell/"
 cd ..
 ${MAKE} install DESTDIR="$test_dir"
 export PATH="$test_dir/$bindir:$PATH"

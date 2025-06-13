@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003-2004 Joan Moratinos <jmo@softcatala.org>, Dom Lachowicz
- * Copyright (C) 2016-2024 Reuben Thomas
+ * Copyright (C) 2016-2025 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -213,25 +213,6 @@ s_buildDictionaryDirs (EnchantProvider * me, std::vector<std::string> & dirs)
 		}
 }
 
-static void
-s_buildHashNames (EnchantProvider * me, std::vector<std::string> & names, const char * dict)
-{
-	names.clear ();
-
-	std::vector<std::string> dirs;
-	s_buildDictionaryDirs (me, dirs);
-
-	char *dict_dic = g_strconcat(dict, ".dic", nullptr);
-	for (size_t i = 0; i < dirs.size(); i++)
-		{
-			char *tmp = g_build_filename (dirs[i].c_str(), dict_dic, nullptr);
-			names.push_back (tmp);
-			g_free (tmp);
-		}
-
-	g_free(dict_dic);
-}
-
 static const std::string
 s_correspondingAffFile(const std::string & dicFile)
 {
@@ -246,90 +227,38 @@ s_fileExists(const std::string & file)
 	return g_file_test(file.c_str(), G_FILE_TEST_EXISTS) != 0;
 }
 
-static bool is_plausible_dict_for_tag(const char *dir_entry, const char *tag)
-{
-    const char *dic_suffix = ".dic";
-    size_t dic_suffix_len = strlen(dic_suffix);
-    size_t dir_entry_len = strlen(dir_entry);
-    size_t tag_len = strlen(tag);
-
-    if (dir_entry_len - dic_suffix_len < tag_len)
-	return false;
-    if (strcmp(dir_entry+dir_entry_len-dic_suffix_len, dic_suffix) != 0)
-	return false;
-    if (strncmp (dir_entry, tag, tag_len) != 0)
-	return false;
-    //e.g. requested dict for "fi",
-    //reject "fil_PH.dic"
-    //allow "fi-FOO.dic", "fi_FOO.dic", "fi.dic", etc.
-    if (!ispunct(dir_entry[tag_len]))
-	return false;
-    return true;
-}
-
 static char *
-hunspell_request_dictionary (EnchantProvider * me, const char * tag)
+hunspell_find_dictionary (EnchantProvider * me, const char * tag)
 {
-	std::vector<std::string> names;
-
-	s_buildHashNames (me, names, tag);
-
-	for (size_t i = 0; i < names.size (); i++) {
-		if (s_fileExists(names[i]) && s_fileExists(s_correspondingAffFile(names[i]))) {
-			return strdup (names[i].c_str());
-		}
-	}
-
 	std::vector<std::string> dirs;
 	s_buildDictionaryDirs (me, dirs);
 
+	std::string dict_basename(tag);
+	dict_basename += ".dic";
 	for (size_t i = 0; i < dirs.size(); i++) {
-		GError *err = NULL;
-		GDir *dir = g_dir_open (dirs[i].c_str(), 0, &err);
-		g_assert ((dir == NULL && err != NULL) || (dir != NULL && err == NULL));
-		if (err == NULL) {
-			const char *dir_entry;
-			while ((dir_entry = g_dir_read_name (dir)) != NULL) {
-				if (is_plausible_dict_for_tag(dir_entry, tag)) {
-					char *dict = g_build_filename (dirs[i].c_str(),
-								       dir_entry, nullptr);
-					if(s_fileExists(s_correspondingAffFile(dict))) {
-						g_dir_close (dir);
-						return dict;
-					} else {
-						g_debug ("hunspell provider: dictionary file %s has no corresponding affix file", dict);
-					}
-					g_free(dict);
-				}
-			}
+		char *filename = g_build_filename(dirs[i].c_str(), dict_basename.c_str(), nullptr);
+		if (s_fileExists(filename) && s_fileExists(s_correspondingAffFile(filename)))
+			return filename;
+                g_free(filename);
+        }
 
-			g_dir_close (dir);
-		} else {
-			g_debug ("hunspell provider: could not open directory %s: %s", dirs[i].c_str(), err->message);
-			g_error_free (err);
-		}
-	}
-
-	return NULL;
+	return nullptr;
 }
 
 bool
 HunspellChecker::requestDictionary(const char *szLang)
 {
-	char *dic = hunspell_request_dictionary (me, szLang);
+	char *dic = hunspell_find_dictionary (me, szLang);
 	if (!dic)
 		return false;
 
+        if (hunspell) {
+                delete hunspell;
+                free(wordchars);
+                wordchars = NULL;
+        }
 	std::string aff(s_correspondingAffFile(dic));
-	if (s_fileExists(aff))
-	{
-		if (hunspell) {
-			delete hunspell;
-			free(wordchars);
-			wordchars = NULL;
-		}
-		hunspell = new Hunspell(aff.c_str(), dic);
-	}
+        hunspell = new Hunspell(aff.c_str(), dic);
 	free(dic);
 	if(hunspell == NULL){
 		return false;
@@ -504,16 +433,7 @@ static int
 hunspell_provider_dictionary_exists (EnchantProvider * me,
 				     const char *const tag)
 {
-	std::vector <std::string> names;
-	s_buildHashNames (me, names, tag);
-	for (size_t i = 0; i < names.size(); i++) {
-		if (s_fileExists(names[i]) && s_fileExists(s_correspondingAffFile(names[i])))
-		{
-			return 1;
-		}
-	}
-
-	return 0;
+	return hunspell_find_dictionary(me, tag) != NULL;
 }
 
 static const char *
