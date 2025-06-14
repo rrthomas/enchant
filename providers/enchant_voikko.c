@@ -2,6 +2,7 @@
  * Copyright (C) 2003,2004 Dom Lachowicz
  *               2006-2007 Harri Pitkänen <hatapitk@iki.fi>
  *               2006 Anssi Hannula <anssi.hannula@gmail.com>
+ *               2017-2025 Reuben Thomas
  *               2017 Børre Gaup <borre.gaup@uit.no>
  *
  * This library is free software; you can redistribute it and/or
@@ -69,14 +70,14 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 	free(word_nul);
 	if (voikko_sugg_arr == NULL)
 		return NULL;
-	for (*out_n_suggs = 0; voikko_sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++);
+	for (*out_n_suggs = 0; voikko_sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++)
+		;
 
 	char **sugg_arr = calloc(sizeof (char *), *out_n_suggs + 1);
 	if (sugg_arr == NULL)
 		return NULL;
-	for (size_t i = 0; i < *out_n_suggs; i++) {
+	for (size_t i = 0; i < *out_n_suggs; i++)
 		sugg_arr[i] = strdup (voikko_sugg_arr[i]);
-	}
 	voikkoFreeCstrArray (voikko_sugg_arr);
 	return sugg_arr;
 }
@@ -115,12 +116,11 @@ voikko_provider_dictionary_exists (EnchantProvider * me,
 	g_free (user_dict_dir);
 
 	int exists = 0;
-	for (size_t i = 0; voikko_langs[i] != NULL; i++) {
+	for (size_t i = 0; voikko_langs[i] != NULL; i++)
 		if (strncmp (tag, voikko_langs[i], strlen (tag)) == 0) {
 			exists = 1;
 			break;
 		}
-	}
 	voikkoFreeCstrArray(voikko_langs);
 
 	return exists;
@@ -131,9 +131,8 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	const char * voikko_error;
 
-	if (!voikko_provider_dictionary_exists (me, tag)) {
+	if (!voikko_provider_dictionary_exists (me, tag))
 		return NULL;
-	}
 
 	char * user_dict_dir = enchant_provider_get_user_dict_dir (me);
 	struct VoikkoHandle *voikko_handle = voikkoInit (&voikko_error, tag, user_dict_dir);
