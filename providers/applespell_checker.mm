@@ -59,23 +59,20 @@ typedef struct
 AppleSpellChecker::AppleSpellChecker()
 {
 	m_checker = [NSSpellChecker sharedSpellChecker];
-
 	m_languages = [[NSMutableDictionary alloc] initWithCapacity:16];
 	m_dictionaries = [[NSMutableDictionary alloc] initWithCapacity:16];
 }
 
 AppleSpellChecker::~AppleSpellChecker()
 {
-	if (m_languages)
-		{
-			[m_languages release];
-			m_languages = 0;
-		}
-	if (m_dictionaries)
-		{
-			[m_dictionaries release];
-			m_dictionaries = 0;
-		}
+	if (m_languages) {
+		[m_languages release];
+		m_languages = 0;
+	}
+	if (m_dictionaries) {
+		[m_dictionaries release];
+		m_dictionaries = 0;
+	}
 }
 
 void AppleSpellChecker::parseConfigFile (const char * configFile)
@@ -83,35 +80,32 @@ void AppleSpellChecker::parseConfigFile (const char * configFile)
 	if (!m_languages || !m_dictionaries || !configFile)
 		return;
 
-	if (FILE * in = fopen (configFile, "r"))
-		{
-			char line[1024];
-			char code[1024];
-			char name[1024];
-			char lang[1024];
+	if (FILE * in = fopen (configFile, "r")) {
+		char line[1024];
+		char code[1024];
+		char name[1024];
+		char lang[1024];
 
-			while (fgets (line, sizeof(line), in))
-				if (sscanf (line, "%s %s %s", code, name, lang) == 3)
-					{
-						NSString * key      = [[NSString alloc] initWithUTF8String:code];
-						NSString * value    = [[NSString alloc] initWithUTF8String:name];
-						NSString * language = [[NSString alloc] initWithUTF8String:lang];
-
-						if (key && value)
-							{
-								[m_languages setObject:value forKey:key];
-								[m_dictionaries setObject:key forKey:value];
-							}
-
-						if (key)
-							[key release];
-						if (value)
-							[value release];
-						if (language)
-							[language release];
-					}
-			fclose (in);
-		}
+		while (fgets (line, sizeof(line), in))
+			if (sscanf (line, "%s %s %s", code, name, lang) == 3) {
+				NSString * key      = [[NSString alloc] initWithUTF8String:code];
+				NSString * value    = [[NSString alloc] initWithUTF8String:name];
+				NSString * language = [[NSString alloc] initWithUTF8String:lang];
+				
+				if (key && value) {
+					[m_languages setObject:value forKey:key];
+					[m_dictionaries setObject:key forKey:value];
+				}
+				
+				if (key)
+					[key release];
+				if (value)
+					[value release];
+				if (language)
+					[language release];
+			}
+		fclose (in);
+	}
 }
 
 char **AppleSpellChecker::NSArrayToCArray (NSArray<NSString *> *array, size_t *nresult)
@@ -119,22 +113,19 @@ char **AppleSpellChecker::NSArrayToCArray (NSArray<NSString *> *array, size_t *n
 	char ** result = 0;
 	*nresult = 0;
 
-	if (unsigned int count = [array count])
-		{
-			result = g_new0 (char *, static_cast<size_t>(count) + 1);
-			if (result)
-				{
-					for (unsigned int i = 0; i < count; i++)
-						{
-							NSString *str = [array objectAtIndex:i];
+	if (unsigned int count = [array count]) {
+		result = g_new0 (char *, static_cast<size_t>(count) + 1);
+		if (result) {
+			for (unsigned int i = 0; i < count; i++) {
+				NSString *str = [array objectAtIndex:i];
 
-							result[*nresult] = g_strdup ([str UTF8String]);
+				result[*nresult] = g_strdup ([str UTF8String]);
 
-							if (result[*nresult])
-								*nresult = *nresult + 1;
-						}
-				}
+				if (result[*nresult])
+					*nresult = *nresult + 1;
+			}
 		}
+	}
 	return result;
 }
 
@@ -199,16 +190,13 @@ NSString * AppleSpellChecker::requestDictionary (const char * const code)
 		return 0;
 
 	NSString * dictionary = dictionaryForCode ([NSString stringWithUTF8String:code]);
-	if (dictionary)
-		{
-			NSString * language = [m_checker language];
-			if (![m_checker setLanguage:dictionary])
-				{
-					dictionary = 0;
-				}
-			if (language)
-				[m_checker setLanguage:language];
-		}
+	if (dictionary) {
+		NSString * language = [m_checker language];
+		if (![m_checker setLanguage:dictionary])
+			dictionary = 0;
+		if (language)
+			[m_checker setLanguage:language];
+	}
 	return dictionary;
 }
 
@@ -237,16 +225,12 @@ static char ** appleSpell_dict_suggest (EnchantDict * me, const char * const wor
 {
 	@autoreleasepool {
 		if (!me || !word || !len || !out_n_suggs)
-			{
-				return 0;
-			}
+			return 0;
 
 		char ** result = 0;
 
 		if (AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(me->user_data))
-			{
-				result = ASD->AppleSpell->suggestWord (word, len, out_n_suggs, ASD->DictionaryName);
-			}
+			result = ASD->AppleSpell->suggestWord (word, len, out_n_suggs, ASD->DictionaryName);
 
 		return result;
 	}
@@ -256,16 +240,12 @@ static int appleSpell_dict_check (EnchantDict * me, const char * const word, siz
 {
 	@autoreleasepool {
 		if (!me || !word || !len)
-			{
-				return 0;
-			}
+			return 0;
 
 		int result = 0;
 
 		if (AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(me->user_data))
-			{
-				result = ASD->AppleSpell->checkWord (word, len, ASD->DictionaryName);
-			}
+			result = ASD->AppleSpell->checkWord (word, len, ASD->DictionaryName);
 		return result;
 	}
 }
@@ -276,33 +256,25 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
 
 		if (!me || !tag || !checker)
-			{
-				return 0;
-			}
+			return 0;
 
 		AppleSpellDictionary * ASD = g_new0 (AppleSpellDictionary, 1);
 		if (!ASD)
-			{
-				return 0;
-			}
+			return 0;
 
 		ASD->AppleSpell     = checker;
 		ASD->DictionaryName = checker->requestDictionary (tag);
 
-		if (!ASD->DictionaryName)
-			{
-				g_free (ASD);
-				return 0;
-			}
+		if (!ASD->DictionaryName) {
+			g_free (ASD);
+			return 0;
+		}
 
 		[ASD->DictionaryName retain];
 
 		EnchantDict * dict = enchant_broker_new_dict (me->owner);
-
 		if (!dict)
-			{
-				return 0;
-			}
+			return 0;
 
 		dict->check     = appleSpell_dict_check;
 		dict->suggest   = appleSpell_dict_suggest;
@@ -315,15 +287,13 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 static void appleSpell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
 {
 	@autoreleasepool {
-		if (dict)
-			{
-				AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(dict->user_data);
-				if (ASD)
-					{
-						[ASD->DictionaryName release];
-						g_free (ASD);
-					}
+		if (dict) {
+			AppleSpellDictionary * ASD = static_cast<AppleSpellDictionary *>(dict->user_data);
+			if (ASD) {
+				[ASD->DictionaryName release];
+				g_free (ASD);
 			}
+		}
 	}
 }
 
@@ -358,12 +328,11 @@ static char **appleSpell_provider_list_dicts (EnchantProvider *me, size_t *n_dic
 static void appleSpell_provider_dispose (EnchantProvider * me)
 {
 	@autoreleasepool {
-		if (me)
-			{
-				AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
-				if (checker)
-					delete checker;
-			}
+		if (me) {
+			AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
+			if (checker)
+				delete checker;
+		}
 	}
 }
 
@@ -383,9 +352,7 @@ extern "C" {
 		@autoreleasepool {
 			EnchantProvider * provider = enchant_provider_new ();
 			if (!provider)
-				{
-					return 0;
-				}
+				return 0;
 
 			provider->dispose           = appleSpell_provider_dispose;
 			provider->request_dict      = appleSpell_provider_request_dict;
@@ -395,49 +362,32 @@ extern "C" {
 			provider->describe          = appleSpell_provider_describe;
 			provider->list_dicts        = appleSpell_provider_list_dicts;
 
-			AppleSpellChecker * checker = 0;
-			try
-				{
-					checker = new AppleSpellChecker;
-				}
-			catch (...)
-				{
-					checker = 0;
-				}
-			if (checker)
-				{
-					provider->user_data = (void *) checker;
-				}
-			else
-				{
-					g_free (provider);
-					provider = 0;
-				}
+			try {
+				AppleSpellChecker * checker = new AppleSpellChecker;
+				provider->user_data = (void *) checker;
+			} catch (...) {
+				g_free (provider);
+				provider = 0;
+			}
 
 			return provider;
 		}
 	}
 
-	static bool s_bReloadSelf = true;
-
 	void configure_enchant_provider (EnchantProvider * me, const char * module_dir)
 	{
 		@autoreleasepool {
 			if (!me || !module_dir)
-				{
-					return;
-				}
+				return;
 
 			AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
 			if (checker)
-				for (GSList *iter = enchant_get_conf_dirs (); iter; iter = iter->next)
-					{
-						if (gchar * configFile = g_build_filename ((gchar *)iter->data, "AppleSpell.config", NULL))
-						{
-							checker->parseConfigFile (configFile);
-							g_free (configFile);
-						}
+				for (GSList *iter = enchant_get_conf_dirs (); iter; iter = iter->next) {
+					if (gchar * configFile = g_build_filename ((gchar *)iter->data, "AppleSpell.config", NULL)) {
+						checker->parseConfigFile (configFile);
+						g_free (configFile);
 					}
+				}
 
 		}
 
