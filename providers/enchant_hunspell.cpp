@@ -376,23 +376,16 @@ extern "C" {
 static char **
 hunspell_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 {
+	// Enumerate dictionaries in each directory.
 	std::vector<std::string> dict_dirs, dicts;
-	char ** dictionary_list = NULL;
-
 	s_buildDictionaryDirs (me, dict_dirs);
-
 	for (size_t i = 0; i < dict_dirs.size(); i++)
-		{
-			hunspell_provider_enum_dicts (dict_dirs[i].c_str(), dicts);
-		}
+		hunspell_provider_enum_dicts (dict_dirs[i].c_str(), dicts);
 
-	if (dicts.size () > 0) {
-		dictionary_list = g_new0 (char *, dicts.size() + 1);
-
-		for (size_t i = 0; i < dicts.size(); i++)
-			dictionary_list[i] = g_strdup (dicts[i].c_str());
-	}
-
+	// Convert vector to array of pointers and return.
+	char ** dictionary_list = g_new0 (char *, dicts.size() + 1);
+	for (size_t i = 0; i < dicts.size(); i++)
+		dictionary_list[i] = g_strdup (dicts[i].c_str());
 	*out_n_dicts = dicts.size ();
 	return dictionary_list;
 }

@@ -90,24 +90,17 @@ voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dic
 static char **
 voikko_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 {
-	size_t i;
-	char ** out_list = NULL;
 	*out_n_dicts = 0;
 	char * user_dict_dir = enchant_provider_get_user_dict_dir (me);
 	char ** voikko_langs = voikkoListSupportedSpellingLanguages (user_dict_dir);
 	g_free (user_dict_dir);
 
-	for (i = 0; voikko_langs[i] != NULL; i++) {
+	for (size_t i = 0; voikko_langs[i] != NULL; i++)
 		(*out_n_dicts)++;
-	}
 
-	if (*out_n_dicts) {
-		out_list = calloc (*out_n_dicts + 1, sizeof (char *));
-		if (out_list != NULL)
-			for (i = 0; i < *out_n_dicts; i++) {
-				out_list[i] = strdup (voikko_langs[i]);
-			}
-	}
+	char ** out_list = g_new0 (char *, *out_n_dicts + 1);
+	for (size_t i = 0; i < *out_n_dicts; i++)
+		out_list[i] = strdup (voikko_langs[i]);
 	voikkoFreeCstrArray(voikko_langs);
 
 	return out_list;
