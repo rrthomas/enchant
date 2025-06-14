@@ -47,6 +47,9 @@
 // hunspell itself uses this definition (which only supports the BMP)
 #define MAXWORDUTF8LEN (MAXWORDLEN * 3)
 
+#define DIC_SUFFIX ".dic"
+#define DIC_SUFFIX_LEN sizeof(DIC_SUFFIX)
+
 #include <glib.h>
 
 /***************************************************************************/
@@ -205,12 +208,11 @@ s_buildDictionaryDirs (EnchantProvider * me, std::vector<std::string> & dirs)
 	dirs.push_back (tmp);
 	g_free(tmp);
 
-	for (const gchar* const * iter = g_get_system_data_dirs (); *iter; iter++)
-		{
-			tmp = g_build_filename (*iter, me->identify (me), nullptr);
-			dirs.push_back (tmp);
-			g_free(tmp);
-		}
+	for (const gchar* const * iter = g_get_system_data_dirs (); *iter; iter++) {
+		tmp = g_build_filename (*iter, me->identify (me), nullptr);
+		dirs.push_back (tmp);
+		g_free(tmp);
+	}
 }
 
 static const std::string
@@ -234,7 +236,7 @@ hunspell_find_dictionary (EnchantProvider * me, const char * tag)
 	s_buildDictionaryDirs (me, dirs);
 
 	std::string dict_basename(tag);
-	dict_basename += ".dic";
+	dict_basename += DIC_SUFFIX;
 	for (size_t i = 0; i < dirs.size(); i++) {
 		char *filename = g_build_filename(dirs[i].c_str(), dict_basename.c_str(), nullptr);
 		if (s_fileExists(filename) && s_fileExists(s_correspondingAffFile(filename)))
@@ -260,9 +262,8 @@ HunspellChecker::requestDictionary(const char *szLang)
 	std::string aff(s_correspondingAffFile(dic));
         hunspell = new Hunspell(aff.c_str(), dic);
 	free(dic);
-	if(hunspell == NULL){
+	if(hunspell == NULL)
 		return false;
-	}
 	const char *enc = hunspell->get_dic_encoding();
 
 	m_translate_in = g_iconv_open(enc, "UTF-8");
@@ -331,9 +332,8 @@ hunspell_dict_is_word_character (EnchantDict *me, uint32_t uc, size_t n)
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
 	/* Accept quote marks anywhere except at the end of a word, as per
 	   hunspell's textparser.cxx/TextParser::next_token */
-	if ((uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’")) && checker->apostropheIsWordChar) {
+	if ((uc == g_utf8_get_char("'") || uc == g_utf8_get_char("’")) && checker->apostropheIsWordChar)
 		return n < 2;
-	}
 	return g_unichar_isalpha(uc) || g_utf8_strchr(checker->getWordchars(), -1, uc);
 }
 
@@ -347,23 +347,17 @@ hunspell_provider_enum_dicts (const char * const directory,
 		while ((entry = g_dir_read_name (dir)) != NULL) {
 			char * utf8_entry = g_filename_to_utf8 (entry, -1, nullptr, nullptr, nullptr);
 			if (utf8_entry) {
-				std::string dir_entry (utf8_entry);
-				g_free (utf8_entry);
-
-				int hit = dir_entry.rfind (".dic");
-				if (hit != -1) {
-					/* don't include hyphenation dictionaries
-					   and require .aff file to be present*/
-					if(dir_entry.compare (0, 5, "hyph_") != 0)
-					{
-						char * dic = g_build_filename(directory, dir_entry.c_str(), nullptr);
+				size_t utf8_entry_len = strlen(utf8_entry);
+				if (strcmp(utf8_entry+utf8_entry_len-DIC_SUFFIX_LEN, DIC_SUFFIX) == 0) {
+					/* don't include hyphenation dictionaries, and require .aff file to be present*/
+					if (strncmp(utf8_entry, "hyph_", 5) != 0) {
+						char * dic = g_build_filename(directory, utf8_entry, nullptr);
 						if (s_fileExists(s_correspondingAffFile(dic)))
-						{
-							out_dicts.push_back (dir_entry.substr (0, hit));
-						}
+							out_dicts.push_back(g_strndup(utf8_entry, utf8_entry_len-DIC_SUFFIX_LEN));
 						g_free(dic);
 					}
 				}
+				g_free (utf8_entry);
 			}
 		}
 
