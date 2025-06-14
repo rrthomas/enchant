@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003,2004 Dom Lachowicz
- * Copyright (C) 2017-2024 Reuben Thomas
+ * Copyright (C) 2017-2025 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -76,28 +76,25 @@ aspell_dict_suggest (EnchantDict * me, const char *const word,
 	g_free(normalizedWord);
 
 	char **sugg_arr = NULL;
-	if (word_list)
-		{
-			AspellStringEnumeration *suggestions = aspell_word_list_elements (word_list);
-			if (suggestions)
-				{
-					size_t n_suggestions = aspell_word_list_size (word_list);
-					*out_n_suggs = n_suggestions;
+	if (word_list) {
+		AspellStringEnumeration *suggestions = aspell_word_list_elements (word_list);
+		if (suggestions) {
+			size_t n_suggestions = aspell_word_list_size (word_list);
 
-					if (n_suggestions)
-						{
-							sugg_arr = g_new0 (char *, n_suggestions + 1);
-
-							for (size_t i = 0; i < n_suggestions; i++)
-								{
-									const char *sugg = aspell_string_enumeration_next (suggestions);
-									if (sugg)
-										sugg_arr[i] = g_strdup (sugg);
-								}
-						}
-					delete_aspell_string_enumeration (suggestions);
-				}
+			if (n_suggestions) {
+				*out_n_suggs = n_suggestions;
+				sugg_arr = g_new0 (char *, n_suggestions + 1);
+				if (sugg_arr)
+					for (size_t i = 0; i < n_suggestions; i++) {
+						const char *sugg = aspell_string_enumeration_next (suggestions);
+						if (sugg)
+							sugg_arr[i] = g_strdup (sugg);
+					}
+			} else
+				*out_n_suggs = 0;
+			delete_aspell_string_enumeration (suggestions);
 		}
+	}
 
 	return sugg_arr;
 }
@@ -120,12 +117,11 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	AspellCanHaveError *spell_error = new_aspell_speller (spell_config);
 	delete_aspell_config (spell_config);
 
-	if (aspell_error_number (spell_error) != 0)
-		{
-			enchant_provider_set_error (me, aspell_error_message (spell_error));
-			delete_aspell_can_have_error(spell_error);
-			return NULL;
-		}
+	if (aspell_error_number (spell_error) != 0) {
+		enchant_provider_set_error (me, aspell_error_message (spell_error));
+		delete_aspell_can_have_error(spell_error);
+		return NULL;
+	}
 
 	AspellSpeller *manager = to_aspell_speller (spell_error);
 
@@ -161,10 +157,13 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 		(*out_n_dicts)++;
 
 	char ** out_list = g_new0 (char *, *out_n_dicts + 1);
-	for (size_t i = 0; i < *out_n_dicts; i++) {
-		entry = aspell_dict_info_enumeration_next (dels);
-		out_list[i] = g_strdup (entry->name);
-	}
+	if (out_list)
+		for (size_t i = 0; i < *out_n_dicts; i++) {
+			entry = aspell_dict_info_enumeration_next (dels);
+			out_list[i] = g_strdup (entry->name);
+		}
+	else
+		*out_n_dicts = 0;
 
 	delete_aspell_dict_info_enumeration (dels);
 	delete_aspell_config (spell_config);

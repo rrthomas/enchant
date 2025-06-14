@@ -1,7 +1,7 @@
 /* enchant
  * Copyright (C) 2003 Yaacov Zamir
  * Copyright (C) 2004 Dom Lachowicz
- * Copyright (C) 2017-2024 Reuben Thomas
+ * Copyright (C) 2017-2025 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,19 +53,15 @@
 static gchar **
 corlist2strv (struct corlist *cl, size_t nb_sugg)
 {
-	char **sugg_arr = NULL;
-	if (nb_sugg > 0)
-		{
-			sugg_arr = g_new0 (char *, nb_sugg + 1);
-			for (size_t i = 0; i < nb_sugg; i++)
-				{
-					gsize len;
-					const char *sugg = corlist_str (cl, i);
-					if (sugg)
-						sugg_arr[i] = g_convert (sugg,
-									 strlen (sugg),
-									 "utf-8", "iso8859-8", NULL, &len, NULL);
-				}
+	char **sugg_arr = g_new0 (char *, nb_sugg + 1);
+	if (sugg_arr)
+		for (size_t i = 0; i < nb_sugg; i++) {
+			gsize len;
+			const char *sugg = corlist_str (cl, i);
+			if (sugg)
+				sugg_arr[i] = g_convert (sugg,
+							 strlen (sugg),
+							 "utf-8", "iso8859-8", NULL, &len, NULL);
 		}
 
 	return sugg_arr;
@@ -188,11 +184,10 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	struct dict_radix *hspell_dict = NULL;
 	int dict_flag = hspell_init (&hspell_dict, HSPELL_OPT_DEFAULT);
 
-	if (dict_flag != 0 || !hspell_dict)
-		{
-			enchant_provider_set_error (me, "cannot get requested dictionary");
-			return NULL;
-		}
+	if (dict_flag != 0 || !hspell_dict) {
+		enchant_provider_set_error (me, "cannot get requested dictionary");
+		return NULL;
+	}
 
 	EnchantDict *dict = enchant_broker_new_dict (me->owner);
 	dict->user_data = (void *) hspell_dict;
@@ -220,21 +215,22 @@ hspell_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 	GSList * dict_files = hspell_provider_enum_dict_files (user_dict_dir);
 	guint n_user_dicts = g_slist_length (dict_files);
 	char ** out_list = g_new0 (char *, n_user_dicts + 3);
-	for (guint i = 0; i < n_user_dicts; i++) {
-		gchar * dict_file = g_slist_nth_data (dict_files, i);
-		gchar * basename = g_path_get_basename (dict_file);
-		gchar * tag_end = g_strrstr (basename, HSPELL_MAIN_SUFFIX);
-		if (tag_end != NULL) {
-			*tag_end = '\0';
-			out_list[(*out_n_dicts)++] = basename;
-		} else
-			g_free (basename);
-	}
+	if (out_list)
+		for (guint i = 0; i < n_user_dicts; i++) {
+			gchar * dict_file = g_slist_nth_data (dict_files, i);
+			gchar * basename = g_path_get_basename (dict_file);
+			gchar * tag_end = g_strrstr (basename, HSPELL_MAIN_SUFFIX);
+			if (tag_end != NULL) {
+				*tag_end = '\0';
+				out_list[(*out_n_dicts)++] = basename;
+			} else
+				g_free (basename);
+		}
 	g_free (user_dict_dir);
 	g_slist_free_full (dict_files, g_free);
 
 	const char * dictionary_path = hspell_get_dictionary_path();
-	if(dictionary_path && *dictionary_path && g_file_test (dictionary_path, G_FILE_TEST_EXISTS)) {
+	if(out_list && dictionary_path && *dictionary_path && g_file_test (dictionary_path, G_FILE_TEST_EXISTS)) {
 		out_list[(*out_n_dicts)++] = g_strdup ("he");
 		out_list[(*out_n_dicts)++] = g_strdup ("he_IL");
 	}

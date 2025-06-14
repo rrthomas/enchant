@@ -118,11 +118,9 @@ char **AppleSpellChecker::NSArrayToCArray (NSArray<NSString *> *array, size_t *n
 		if (result) {
 			for (unsigned int i = 0; i < count; i++) {
 				NSString *str = [array objectAtIndex:i];
-
 				result[*nresult] = g_strdup ([str UTF8String]);
-
 				if (result[*nresult])
-					*nresult = *nresult + 1;
+					(*nresult)++;
 			}
 		}
 	}

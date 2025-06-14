@@ -62,6 +62,8 @@ static char *do_iconv(GIConv conv, const char *word) {
 	size_t len_in = strlen(in);
 	size_t len_out = len_in * 3;
 	char *out_buf = g_new0(char, len_out + 1);
+	if (out_buf == NULL)
+		return NULL;
 	char *out = out_buf;
 	size_t result = g_iconv(conv, &in, &len_in, &out, &len_out);
 	if (static_cast<size_t>(-1) == result)
@@ -157,18 +159,18 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 
 	std::vector<std::string> sugMS = hunspell->suggest(out);
 	g_free(out);
-	*nsug = sugMS.size();
-	if (*nsug > 0) {
-		char **sug = g_new0 (char *, *nsug + 1);
-		for (size_t i=0, j=0; i<*nsug; i++) {
+	char **sug = g_new0 (char *, *nsug + 1);
+	if (sug) {
+		for (size_t i = 0, j = 0; i < *nsug; i++) {
 			const char *in = sugMS[i].c_str();
 			out = do_iconv(m_translate_out, in);
 			if (out != NULL)
 				sug[j++] = out;
 		}
-		return sug;
-	}
-	return nullptr;
+		*nsug = sugMS.size();
+	} else
+		*nsug = 0;
+	return sug;
 }
 
 void
@@ -378,9 +380,12 @@ hunspell_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 
 	// Convert vector to array of pointers and return.
 	char ** dictionary_list = g_new0 (char *, dicts.size() + 1);
-	for (size_t i = 0; i < dicts.size(); i++)
-		dictionary_list[i] = g_strdup (dicts[i].c_str());
-	*out_n_dicts = dicts.size ();
+	if (dictionary_list) {
+		for (size_t i = 0; i < dicts.size(); i++)
+			dictionary_list[i] = g_strdup (dicts[i].c_str());
+		*out_n_dicts = dicts.size ();
+	} else
+		*out_n_dicts = 0;
 	return dictionary_list;
 }
 

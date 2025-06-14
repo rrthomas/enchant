@@ -73,11 +73,12 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 	for (*out_n_suggs = 0; voikko_sugg_arr[*out_n_suggs] != NULL; (*out_n_suggs)++)
 		;
 
-	char **sugg_arr = calloc(sizeof (char *), *out_n_suggs + 1);
-	if (sugg_arr == NULL)
-		return NULL;
-	for (size_t i = 0; i < *out_n_suggs; i++)
-		sugg_arr[i] = strdup (voikko_sugg_arr[i]);
+	char **sugg_arr = g_new0(char *, *out_n_suggs + 1);
+	if (sugg_arr)
+		for (size_t i = 0; i < *out_n_suggs; i++)
+			sugg_arr[i] = strdup (voikko_sugg_arr[i]);
+	else
+		*out_n_suggs = 0;
 	voikkoFreeCstrArray (voikko_sugg_arr);
 	return sugg_arr;
 }
@@ -100,10 +101,12 @@ voikko_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 		(*out_n_dicts)++;
 
 	char ** out_list = g_new0 (char *, *out_n_dicts + 1);
-	for (size_t i = 0; i < *out_n_dicts; i++)
-		out_list[i] = strdup (voikko_langs[i]);
+	if (out_list)
+		for (size_t i = 0; i < *out_n_dicts; i++)
+			out_list[i] = strdup (voikko_langs[i]);
+	else
+		*out_n_dicts = 0;
 	voikkoFreeCstrArray(voikko_langs);
-
 	return out_list;
 }
 

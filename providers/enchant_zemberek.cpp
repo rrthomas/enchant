@@ -1,5 +1,6 @@
 /* Copyright (C) 2006 Barış Metin <baris@pardus.org.tr>
  * Copyright (C) 2007 Serkan Kaba <serkan_kaba@yahoo.com>
+ * Copyright (C) 2024-2025 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -217,9 +218,13 @@ zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
     }
   else
     {
-        *out_n_dicts = 1;
+        *out_n_dicts = 0;
         char ** out_list = g_new0 (char *, 2);
-        out_list[0] = g_strdup ("tr");
+        if (out_list) {
+          out_list[0] = g_strdup ("tr");
+          if (out_list[0])
+            *out_n_dicts = 1;
+        }
 
         return out_list;
     }

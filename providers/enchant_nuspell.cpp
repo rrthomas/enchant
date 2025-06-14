@@ -1,6 +1,7 @@
 /* enchant
  * Copyright (C) 2022 Dimitrij Mijoski
  * Copyright (C) 2020 Sander van Geloven
+ * Copyright (C) 2024-2025 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -69,14 +70,13 @@ static char** nuspell_dict_suggest(EnchantDict* me, const char* const word,
 	    UniquePtr(g_utf8_normalize(word, len, G_NORMALIZE_NFC), g_free);
 	auto suggestions = vector<string>();
 	dict->suggest(normalized_word.get(), suggestions);
-	if (empty(suggestions)) {
-		*out_n_suggs = 0;
-		return nullptr;
-	}
 	char** sug_list = g_new0(char*, size(suggestions) + 1);
-	transform(begin(suggestions), end(suggestions), sug_list,
-	          [](const string& sug) { return g_strdup(sug.c_str()); });
-	*out_n_suggs = size(suggestions);
+	if (sug_list) {
+		transform(begin(suggestions), end(suggestions), sug_list,
+			  [](const string& sug) { return g_strdup(sug.c_str()); });
+		*out_n_suggs = size(suggestions);
+	} else
+		*out_n_suggs = 0;
 	return sug_list;
 }
 // End EnchantDict functions
@@ -152,10 +152,6 @@ nuspell_provider_list_dicts(EnchantProvider* me,
 	auto dirs = nuspell_get_dict_dirs(me);
 	auto dicts = vector<filesystem::path>();
 	nuspell::search_dirs_for_dicts(dirs, dicts);
-	if (empty(dicts)) {
-		*out_n_dicts = 0;
-		return nullptr;
-	}
 	for (auto& d : dicts)
 		d = d.stem();
 	sort(begin(dicts), end(dicts));
@@ -168,11 +164,14 @@ nuspell_provider_list_dicts(EnchantProvider* me,
 	dicts.erase(it, end(dicts));
 
 	char** dictionary_list = g_new0(char*, size(dicts) + 1);
-	transform(begin(dicts), end(dicts), dictionary_list,
-	          [](const filesystem::path& p) {
-		          return g_strdup(p.string().c_str());
-	          });
-	*out_n_dicts = size(dicts);
+	if (dictionary_list) {
+		transform(begin(dicts), end(dicts), dictionary_list,
+			  [](const filesystem::path& p) {
+				  return g_strdup(p.string().c_str());
+			  });
+		*out_n_dicts = size(dicts);
+	} else
+		*out_n_dicts = 0;
 	return dictionary_list;
 }
 
