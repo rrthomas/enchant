@@ -43,7 +43,11 @@
 
 #include "enchant-provider.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Weffc++"
 #include <hunspell.hxx>
+#pragma GCC diagnostic pop
+
 // hunspell itself uses this definition (which only supports the BMP)
 #define MAXWORDUTF8LEN (MAXWORDLEN * 3)
 

@@ -91,7 +91,7 @@ if test "$gl_gcc_warnings" = yes; then
   dnl Set up the list of undesired warnings.
   nw=
   nw="$nw -Wsystem-headers"   # Don’t let system headers trigger warnings
-  nw="$nw -Wimplicit-fallthrough=5" # We want to allow "fallthrough" comments.
+  nw="$nw -Wabi-tag"          # Gives warnings from library headers.
   nw="$nw -Wold-style-cast"   # Warning from glib macros like g_new0
   nw="$nw -Wuseless-cast"     # Likewise
 
