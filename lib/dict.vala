@@ -61,12 +61,12 @@ public class EnchantDict {
 
 	public unowned string get_extra_word_characters() {
 		return this.get_extra_word_characters_method != null ?
-			this.get_extra_word_characters_method(this) : "";
+			   this.get_extra_word_characters_method(this) : "";
 	}
 
 	public static int is_word_character(EnchantDict? self, uint32 uc_in, real_size_t n)
-			requires (n <= 2)
-		{
+	requires(n <= 2)
+	{
 		if (self != null && self.is_word_character_method != null)
 			return self.is_word_character_method(self, uc_in, n);
 
@@ -84,14 +84,14 @@ public class EnchantDict {
 		case UnicodeType.TITLECASE_LETTER:
 		case UnicodeType.UPPERCASE_LETTER:
 		case UnicodeType.OTHER_LETTER:
-		case UnicodeType.COMBINING_MARK: // Deprecated name for SPACING_MARK
+		case UnicodeType.SPACING_MARK:
 		case UnicodeType.ENCLOSING_MARK:
 		case UnicodeType.NON_SPACING_MARK:
 		case UnicodeType.DECIMAL_NUMBER:
 		case UnicodeType.LETTER_NUMBER:
 		case UnicodeType.OTHER_NUMBER:
 		case UnicodeType.CONNECT_PUNCTUATION:
-			return 1;     /* Enchant 1.3.0 defines word chars like this. */
+			return 1; /* Enchant 1.3.0 defines word chars like this. */
 
 		case UnicodeType.DASH_PUNCTUATION:
 			if ((n == 1) && (type == UnicodeType.DASH_PUNCTUATION))
@@ -141,8 +141,8 @@ public class EnchantDict {
 		return -1;
 	}
 
-	/* Filter out suggestions that are invalid UTF-8 or in the exclude list.
-	   Returns a null-terminated array. */
+	/* Filter out suggestions that are null, invalid UTF-8 or in the exclude
+	   list.  Returns a null-terminated array. */
 	string[] filter_suggestions(string[] suggs) {
 		var sb = new StrvBuilder();
 		foreach (string sugg in suggs)
@@ -229,8 +229,8 @@ public class EnchantDict {
 	}
 
 	public void describe(EnchantDictDescribeFn fn, void *user_data)
-			requires (fn != null)
-		{
+	requires(fn != null)
+	{
 		this.session.clear_error();
 		unowned EnchantProvider provider = this.session.provider;
 

@@ -74,7 +74,7 @@ bool is_all_caps(string word) {
 		case UnicodeType.SURROGATE:
 		case UnicodeType.MODIFIER_LETTER:
 		case UnicodeType.OTHER_LETTER:
-		case UnicodeType.COMBINING_MARK: // Deprecated name for SPACING_MARK
+		case UnicodeType.SPACING_MARK:
 		case UnicodeType.ENCLOSING_MARK:
 		case UnicodeType.NON_SPACING_MARK:
 		case UnicodeType.DECIMAL_NUMBER:
@@ -135,7 +135,7 @@ public class EnchantPWL {
 	public static EnchantPWL init() {
 		return new EnchantPWL() {
 			words = new HashTable<string, string>(str_hash, str_equal),
-				};
+		};
 	}
 
 	/**
