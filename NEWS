@@ -1,3 +1,26 @@
+2.8.7 (June 15, 2025)
+---------------------
+
+This release stops the Hunspell provider from doing partial matching of
+dictionary tags. This fixes an odd situation where it was possible for
+Aspell to have an actual “en” dictionary, which would be shown by
+enchant-lsmod(1), but when requesting that language, if Hunspell was
+configured to take precedence over Aspell, and there was, for example, an
+“en_US” dictionary installed for Hunspell, then that would be used. Thanks
+to @digitcrusher for filing the bug and helping with the solution.
+
+The providers code has been formatted more consistently, simplified in
+places, and made more robust when memory allocation fails. Thanks again to
+@digitcrusher for spotting some simplifications I missed.
+
+The minimum version of GLib required is now 2.76, which is quite recent
+(from a bit over 2 years ago at the time of writing). Use of this enables
+some deprecated APIs to be dropped, and some slight code simplification.
+
+Finally, the compiler warnings used with GCC have been adjusted to turn off
+useless warnings, especially for Vala-generated C.
+
+
 2.8.6 (May 30, 2025)
 --------------------
 
