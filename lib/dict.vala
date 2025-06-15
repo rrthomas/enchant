@@ -143,11 +143,16 @@ public class EnchantDict {
 
 	/* Filter out suggestions that are null, invalid UTF-8 or in the exclude
 	   list.  Returns a null-terminated array. */
-	string[] filter_suggestions(string[] suggs) {
+	string[]? filter_suggestions(string[] suggs) {
 		var sb = new StrvBuilder();
-		foreach (string sugg in suggs)
+		foreach (string sugg in suggs) {
+			if (sugg == null) {
+				this.session.error = @"null entry in suggestions returned by $(this.session.provider.identify(this.session.provider))";
+				return null;
+			}
 			if (sugg.validate() && !this.session.exclude(sugg))
 				sb.add(sugg);
+		}
 
 		return sb.end();
 	}

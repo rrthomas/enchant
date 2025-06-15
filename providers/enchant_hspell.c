@@ -58,10 +58,9 @@ corlist2strv (struct corlist *cl, size_t nb_sugg)
 		for (size_t i = 0; i < nb_sugg; i++) {
 			gsize len;
 			const char *sugg = corlist_str (cl, i);
-			if (sugg)
-				sugg_arr[i] = g_convert (sugg,
-							 strlen (sugg),
-							 "utf-8", "iso8859-8", NULL, &len, NULL);
+			sugg_arr[i] = g_convert (sugg,
+						 strlen (sugg),
+						 "utf-8", "iso8859-8", NULL, &len, NULL);
 		}
 
 	return sugg_arr;
@@ -137,9 +136,9 @@ hspell_provider_enum_dict_files (const char * const directory)
 			if (utf8_entry && g_strrstr (utf8_entry, HSPELL_MAIN_SUFFIX) != NULL) {
 				char * dic = g_build_filename(directory, utf8_entry, NULL);
 				char * desc_file = g_strconcat(dic, ".desc", NULL);
-				if (g_file_test(desc_file, G_FILE_TEST_EXISTS) != 0) {
+				if (desc_file && g_file_test(desc_file, G_FILE_TEST_EXISTS) != 0)
 					out_dicts = g_slist_append (out_dicts, dic);
-				} else
+				else
 					g_free (dic);
 				g_free (desc_file);
 			}

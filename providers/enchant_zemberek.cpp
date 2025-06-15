@@ -222,8 +222,7 @@ zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
         char ** out_list = g_new0 (char *, 2);
         if (out_list) {
           out_list[0] = g_strdup ("tr");
-          if (out_list[0])
-            *out_n_dicts = 1;
+          *out_n_dicts = 1;
         }
 
         return out_list;

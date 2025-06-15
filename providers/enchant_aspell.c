@@ -85,11 +85,8 @@ aspell_dict_suggest (EnchantDict * me, const char *const word,
 				*out_n_suggs = n_suggestions;
 				sugg_arr = g_new0 (char *, n_suggestions + 1);
 				if (sugg_arr)
-					for (size_t i = 0; i < n_suggestions; i++) {
-						const char *sugg = aspell_string_enumeration_next (suggestions);
-						if (sugg)
-							sugg_arr[i] = g_strdup (sugg);
-					}
+					for (size_t i = 0; i < n_suggestions; i++)
+						sugg_arr[i] = g_strdup(aspell_string_enumeration_next(suggestions));
 			} else
 				*out_n_suggs = 0;
 			delete_aspell_string_enumeration (suggestions);

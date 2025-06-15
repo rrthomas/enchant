@@ -1,6 +1,6 @@
 /* enchant
  * Copyright (C) 2003 Dom Lachowicz
- * Copyright (C) 2017-2024 Reuben Thomas
+ * Copyright (C) 2017-2025 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -159,7 +159,8 @@ struct _EnchantDict
 	int (*check) (struct _EnchantDict * me, const char *const word,
 			  size_t len);
 
-	/* returns utf8*/
+	/* Returns an array of *out_n_suggs UTF-8 encoded strings. Elements
+	   of word may be NULL. */
 	char **(*suggest) (struct _EnchantDict * me,
 			   const char *const word, size_t len,
 			   size_t * out_n_suggs);
@@ -202,6 +203,8 @@ struct _EnchantProvider {
 	/* returns utf8*/
 	const  char * (*describe) (struct _EnchantProvider * me);
 
+	/* Returns an array of *out_n_dicts dictionary tags. Elements
+	   of word may be NULL. */
 	char ** (*list_dicts) (struct _EnchantProvider * me,
 			       size_t * out_n_dicts);
 };

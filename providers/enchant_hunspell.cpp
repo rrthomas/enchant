@@ -50,9 +50,7 @@
 
 // hunspell itself uses this definition (which only supports the BMP)
 #define MAXWORDUTF8LEN (MAXWORDLEN * 3)
-
 #define DIC_SUFFIX ".dic"
-#define DIC_SUFFIX_LEN sizeof(DIC_SUFFIX)
 
 #include <glib.h>
 
@@ -353,13 +351,17 @@ hunspell_provider_enum_dicts (const char * const directory,
 		while ((entry = g_dir_read_name (dir)) != NULL) {
 			char * utf8_entry = g_filename_to_utf8 (entry, -1, nullptr, nullptr, nullptr);
 			if (utf8_entry) {
-				size_t utf8_entry_len = strlen(utf8_entry);
-				if (strcmp(utf8_entry+utf8_entry_len-DIC_SUFFIX_LEN, DIC_SUFFIX) == 0) {
-					/* don't include hyphenation dictionaries, and require .aff file to be present*/
-					if (strncmp(utf8_entry, "hyph_", 5) != 0) {
-						char * dic = g_build_filename(directory, utf8_entry, nullptr);
-						if (s_fileExists(s_correspondingAffFile(dic)))
-							out_dicts.push_back(g_strndup(utf8_entry, utf8_entry_len-DIC_SUFFIX_LEN));
+                                std::string dir_entry (utf8_entry);
+                                g_free (utf8_entry);
+
+				std::string::size_type hit = dir_entry.rfind(DIC_SUFFIX);
+                                if (hit != std::string::npos) {
+                                        /* don't include hyphenation dictionaries
+                                           and require .aff file to be present*/
+                                        if (dir_entry.compare (0, 5, "hyph_") != 0) {
+                                                char * dic = g_build_filename(directory, dir_entry.c_str(), nullptr);
+						if (dic && s_fileExists(s_correspondingAffFile(dic)))
+                                                        out_dicts.push_back (dir_entry.substr (0, hit));
 						g_free(dic);
 					}
 				}
