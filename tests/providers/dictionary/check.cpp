@@ -160,8 +160,7 @@ TEST_FIXTURE(DictionaryCheck_TestFixture,
           CHECK(!IsWordInDictionary("ZYx") );
           CHECK(!IsWordInDictionary("Zyx") );
           CHECK(!IsWordInDictionary("zyx") );
-          if (strcmp(_provider_name, "AppleSpell") != 0) /* FIXME: This fails on AppleSpell */
-	    CHECK(!IsWordInDictionary("zYx") );
+	  CHECK(!IsWordInDictionary("zYx") );
       }
     }
 }

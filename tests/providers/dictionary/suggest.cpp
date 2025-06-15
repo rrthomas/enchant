@@ -162,7 +162,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
 TEST_FIXTURE(DictionarySuggest_TestFixture, 
              GetSuggestions_FromTitle_ResultsTitleOrAllCaps)
 {
-    if(_dict && _dict->suggest && strcmp(_provider_name, "AppleSpell") != 0) /* FIXME: This fails on AppleSpell */
+    if(_dict && _dict->suggest)
     {
       std::vector<std::string> suggestions = GetSuggestionsFromWord("Aaa");
       for(std::vector<std::string>::const_iterator i = suggestions.begin();
