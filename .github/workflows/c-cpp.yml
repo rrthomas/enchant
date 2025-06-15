@@ -5,7 +5,7 @@ on: [ push, pull_request ]
 jobs:
   build:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
       ASAN_FLAGS: "-fsanitize=address -fsanitize=undefined"
 
@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v4
       with: { submodules: true }
     - name: Install dependencies
-      run: sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr groff doxygen graphviz valac pkg-config
+      run: sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr groff doxygen graphviz valac pkg-config libltdl-dev
     - name: Install nuspell
       run: |
         sudo apt-get -y install libicu-dev ninja-build

@@ -64,6 +64,14 @@ enchant_applespell_la_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag=CXX
 enchant_applespell_la_OBJCXXFLAGS = $(AM_OBJCXXFLAGS)
 enchant_applespell_la_SOURCES = applespell_checker.mm
 
+install-data-hook:
+	cd $(DESTDIR)$(providerdir) && $(RM) $(provider_LTLIBRARIES) *.a
+
+# Removing files in install-data-hook seems to confuse libtool's uninstall mode,
+# so it fails to remove the .so files. Remove them for it.
+uninstall-hook:
+	cd $(DESTDIR)$(providerdir) && $(RM) $(provider_LTLIBRARIES) *.a *@shlibext@
+
 loc:
 	$(CLOC) $(ALL_SOURCE_FILES)
 

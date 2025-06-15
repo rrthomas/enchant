@@ -130,18 +130,14 @@ public class EnchantBroker {
 		}
 
 		string dir_entry;
-		size_t g_module_suffix_len = Module.SUFFIX.length;
 		while ((dir_entry = dir.read_name()) != null) {
 			Module? module = null;
 			EnchantProvider? provider = null;
 
-			size_t entry_len = dir_entry.length;
-			if (entry_len > g_module_suffix_len &&
-				dir_entry[0] != '.' &&                             /* Skip hidden files */
-				dir_entry.substring((long)(entry_len - g_module_suffix_len)) == Module.SUFFIX) {
+			if (dir_entry[0] != '.') { /* Skip hidden files */
 				string filename = Path.build_filename(dir_name, dir_entry);
-				module = Module.open(filename, 0);
-				if (module != null) {
+				try {
+					module = new Module(filename, 0);
 					void *init_func;
 					if (module.symbol("init_enchant_provider", out init_func)
 						&& init_func != null) {
@@ -155,8 +151,9 @@ public class EnchantBroker {
 							}
 						}
 					}
-				} else
+				} catch (ModuleError e) {
 					warning("Error loading plugin: %s", Module.error());
+				}
 			}
 			if (provider != null) {
 				/* optional entry point to allow modules to look for associated files */
