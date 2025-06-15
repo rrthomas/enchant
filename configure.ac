@@ -113,6 +113,25 @@ if test "$gl_gcc_warnings" = yes; then
   done
   AC_LANG_POP
 
+  # Some warnings triggered by Vala-generated code.
+  AC_LANG_PUSH([C])
+  nw=
+  nw="$nw -Wshadow"
+  nw="$nw -Wnull-dereference"
+  nw="$nw -Wall"
+  nw="$nw -Wunused-macros"
+  nw="$nw -Wincompatible-pointer-types"
+  nw="$nw -fanalyzer"
+  nw="$nw -Wsuggest-attribute=const"
+  nw="$nw -Wsuggest-attribute=malloc"
+  gl_MANYWARN_ALL_GCC([cvala_warnings])
+  gl_MANYWARN_COMPLEMENT([cvala_warnings], [$cvala_warnings], [$nw])
+  for w in $cvala_warnings; do
+    gl_WARN_ADD([$w], [WARN_VALA_CFLAGS])
+  done
+  gl_WARN_ADD([-Wno-incompatible-pointer-types], [WARN_VALA_CFLAGS])
+  AC_LANG_POP
+
   # When compiling with GCC, prefer -isystem to -I when including system
   # include files, to avoid generating useless diagnostics for the files.
   ISYSTEM='-isystem '

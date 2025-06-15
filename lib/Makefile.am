@@ -12,7 +12,7 @@
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
 
 AM_VALAFLAGS = --debug --no-color --vapidir=$(srcdir) --pkg configmake --pkg internal --pkg posix --pkg gnu --pkg gio-2.0 --pkg gmodule-2.0
-AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu $(GLIB_CFLAGS) $(WARN_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
+AM_CPPFLAGS = --include config.h -I$(top_srcdir) $(ISYSTEM)$(top_builddir)/libgnu $(ISYSTEM)$(top_srcdir)/libgnu $(GLIB_CFLAGS) $(WARN_VALA_CFLAGS) -DG_LOG_DOMAIN='"libenchant"'
 
 # FIXME: Require Vala 0.58 when released, and remove copy of gnu.vapi
 VAPIS =	configmake.vapi internal.vapi gnu.vapi
