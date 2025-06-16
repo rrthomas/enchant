@@ -365,7 +365,6 @@ hunspell_provider_enum_dicts (const char * const directory,
 						g_free(dic);
 					}
 				}
-				g_free (utf8_entry);
 			}
 		}
 
