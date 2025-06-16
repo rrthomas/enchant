@@ -25,7 +25,7 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">Enchant<span id="projectnumber">&#160;2.8.5</span>
+   <div id="projectname">Enchant<span id="projectnumber">&#160;2.8.7</span>
    </div>
    <div id="projectbrief">Generic spell checking library</div>
   </td>
@@ -237,7 +237,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enchant_broker_list_d
 <p>Callback used to describe a dictionary.</p>
 <p>enchant_broker_list_dicts @broker: A non-null EnchantBroker</p>
 <p>@user_data: Optional user-data</p>
-<p>Enumerates the dictionaries available from all Enchant providers. </p>
+<p>Enumerates the dictionaries available from all Enchant providers. If a provider returns erroneous data, it will be skipped. </p>
 
 </div>
 </div>
@@ -982,7 +982,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enchant_broker_list_d
       </table>
 </div><div class="memdoc">
 <p>enchant_dict_suggest @dict: A non-null EnchantDict @word: The non-null word you wish to find suggestions for @len: The length of @word in bytes, or -1 for strlen(@word) @out_n_suggs: The location in which to store the number of suggestions returned, or null</p>
-<p>Returns: A null terminated list of suggestions, or null if any of the pre-conditions is not met. </p>
+<p>Returns: A null terminated list of suggestions, or null if any of the pre-conditions is not met, or an error occurs. </p>
 
 </div>
 </div>
