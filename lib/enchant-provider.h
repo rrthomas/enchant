@@ -193,7 +193,7 @@ struct _EnchantProvider {
 				      const char *const tag);
 
 	void (*dispose_dict) (struct _EnchantProvider * me,
-				  EnchantDict * dict);
+			      EnchantDict * dict);
 
 	int (*dictionary_exists) (struct _EnchantProvider * me,
 				  const char *const tag);
@@ -213,8 +213,7 @@ struct _EnchantProvider {
  * composite_provider_create_dict
  * @list_of_dicts: A non-null list of #EnchantDicts
  *
- * Remarks: creates a composite dictionary that composes of EnchantDicts in @list_of_dicts
- *          and maps all methods to composite provider methods for dictionary operations.
+ * Creates a composite dictionary of EnchantDicts in @list_of_dicts
  */
 EnchantDict *composite_provider_create_dict (GSList *dicts);
 
