@@ -26,8 +26,18 @@
  * do so, delete this exception statement from your version.
  */
 
-public class EnchantCompositeDict {
+public class EnchantCompositeDict : EnchantDict {
+	unowned EnchantBroker broker;
 	public SList<weak EnchantDict> dict_list;
+
+	public EnchantCompositeDict(EnchantBroker broker, owned SList<weak EnchantDict> dict_list) {
+		this.broker = broker;
+		this.dict_list = (owned)dict_list;
+		this.check_method = composite_dict_check;
+		this.suggest_method = composite_dict_suggest;
+		this.add_to_session_method = composite_dict_add_to_session;
+		this.remove_from_session_method = composite_dict_remove_from_session;
+	}
 }
 
 int composite_dict_check(EnchantDict? self, string word_buf, real_size_t len) {
@@ -39,7 +49,7 @@ int composite_dict_check(EnchantDict? self, string word_buf, real_size_t len) {
 
 	// Check word in all dictionaries.
 	// Signal error (-1) if and only if all dictionaries error.
-	var cdict = (EnchantCompositeDict)(self.user_data);
+	var cdict = (EnchantCompositeDict)(self);
 	int err = -1;
 	foreach (EnchantDict dict in cdict.dict_list) {
 		int found = EnchantDict.check(dict, word, (real_ssize_t)len);
@@ -53,7 +63,7 @@ int composite_dict_check(EnchantDict? self, string word_buf, real_size_t len) {
 
 [CCode (array_length_pos = 4, array_length_type = "size_t")]
 string[]? composite_dict_suggest(EnchantDict me, string word, real_size_t len) {
-	var cdict = (EnchantCompositeDict)(me.user_data);
+	var cdict = (EnchantCompositeDict)(me);
 	var error = true;
 	var res = new Array<string>();
 	foreach (EnchantDict dict in cdict.dict_list) {
@@ -71,13 +81,13 @@ string[]? composite_dict_suggest(EnchantDict me, string word, real_size_t len) {
 }
 
 void composite_dict_add_to_session(EnchantDict me, string word, real_size_t len) {
-	var cdict = (EnchantCompositeDict)(me.user_data);
+	var cdict = (EnchantCompositeDict)(me);
 	assert(cdict.dict_list.length() > 0);
 	cdict.dict_list.data.add_to_session(word, (real_ssize_t)len);
 }
 
 void composite_dict_remove_from_session(EnchantDict me, string word, real_size_t len) {
-	var cdict = (EnchantCompositeDict)(me.user_data);
+	var cdict = (EnchantCompositeDict)(me);
 	assert(cdict.dict_list.length() > 0);
 	cdict.dict_list.data.remove_from_session(word, (real_ssize_t)len);
 }

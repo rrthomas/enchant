@@ -270,7 +270,7 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 
 		[ASD->DictionaryName retain];
 
-		EnchantDict * dict = enchant_broker_new_dict (me->owner);
+		EnchantDict * dict = enchant_dict_new ();
 		if (!dict)
 			return 0;
 

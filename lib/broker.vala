@@ -259,24 +259,25 @@ public class EnchantBroker {
 
 		session.is_pwl = true;
 
-		unowned var dict = this.new_dict();
+		unowned var dict = this.new_dict(new EnchantDict());
 		dict.session = session;
 		return dict;
 	}
 
 	unowned EnchantDict? _request_dict(string tag, string? pwl) {
 		SList<unowned EnchantProvider> list = this.get_ordered_providers(tag);
-		unowned EnchantDict? dict = null;
+		EnchantDict? dict = null;
 		foreach (unowned EnchantProvider provider in list) {
 			dict = provider.request_dict(provider, tag);
 			if (dict != null) {
+				unowned var dict_ref = this.new_dict(dict);
 				var session = EnchantSession.with_implicit_pwl(provider, tag, pwl);
 				dict.session = session;
-				break;
+				return dict_ref;
 			}
 		}
 
-		return dict;
+		return null;
 	}
 
 	public unowned EnchantDict? request_dict_with_pwl(string composite_tag, string? pwl)
@@ -307,15 +308,8 @@ public class EnchantBroker {
 			return dict_list.data;
 
 		// Create the composite dictionary
-		var comp_dict = new EnchantCompositeDict();
-		comp_dict.dict_list = (owned)dict_list;
-
-		unowned var dict = this.new_dict();
-		dict.user_data = (void *)(owned)comp_dict;
-		dict.check_method = composite_dict_check;
-		dict.suggest_method = composite_dict_suggest;
-		dict.add_to_session_method = composite_dict_add_to_session;
-		dict.remove_from_session_method = composite_dict_remove_from_session;
+		var comp_dict = new EnchantCompositeDict(this, (owned)dict_list);
+		unowned var dict = this.new_dict(comp_dict);
 		dict.session = EnchantSession.with_implicit_pwl(null, tags[0], pwl);
 		return dict;
 	}
@@ -416,8 +410,7 @@ public class EnchantBroker {
 		return exists;
 	}
 
-	public unowned EnchantDict new_dict() {
-		var dict = new EnchantDict();
+	public unowned EnchantDict new_dict(EnchantDict dict) {
 		this.dicts.add(dict);
 		unowned var dict_ref = dict;
 		return dict_ref;

@@ -174,7 +174,9 @@ zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
       {
         Zemberek* checker = new Zemberek();
 
-        EnchantDict* dict = enchant_broker_new_dict(me->owner);
+        EnchantDict* dict = enchant_dict_new();
+        if (dict == NULL)
+                return NULL;
         dict->user_data = (void *) checker;
         dict->check = zemberek_dict_check;
         dict->suggest = zemberek_dict_suggest;

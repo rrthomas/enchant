@@ -408,7 +408,9 @@ hunspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 
-	EnchantDict *dict = enchant_broker_new_dict(me->owner);
+	EnchantDict *dict = enchant_dict_new();
+	if (dict == NULL)
+		return NULL;
 	dict->user_data = (void *) checker;
 	dict->check = hunspell_dict_check;
 	dict->suggest = hunspell_dict_suggest;

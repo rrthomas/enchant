@@ -122,7 +122,9 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 
 	AspellSpeller *manager = to_aspell_speller (spell_error);
 
-	EnchantDict *dict = enchant_broker_new_dict (me->owner);
+	EnchantDict *dict = enchant_dict_new ();
+	if (dict == NULL)
+		return NULL;
 	dict->user_data = (void *) manager;
 	dict->check = aspell_dict_check;
 	dict->suggest = aspell_dict_suggest;

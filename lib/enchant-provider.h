@@ -113,11 +113,11 @@ char *enchant_get_prefix_dir(void);
 char *enchant_relocate (const char *path);
 
 /**
- * enchant_broker_new_dict
+ * enchant_dict_new
  *
- * Returns a new EnchantDict in the given EnchantBroker.
+ * Returns a new EnchantDict.
  */
-EnchantDict *enchant_broker_new_dict (EnchantBroker *broker);
+EnchantDict *enchant_dict_new (void);
 
 /**
  * enchant_dict_set_error

@@ -34,7 +34,7 @@
 static EnchantDict*
 MockProviderRequestEmptyMockDictionary(EnchantProvider *me, const char *)
 {
-    EnchantDict* dict = enchant_broker_new_dict(me->owner);
+    EnchantDict* dict = enchant_dict_new();
     dict->user_data = NULL;
     dict->check = NULL;
     dict->suggest = NULL;
