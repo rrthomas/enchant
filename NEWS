@@ -1,3 +1,13 @@
+2.8.8 (June 16, 2025)
+---------------------
+
+The previous release had a “double-free” bug that typically caused a crash
+on application start-up. Thanks to @AdamWill of Fedora for a quick bug
+report that enabled me to locate and instantly fix the bug (apologies!).
+
+A test to detect this sort of bug in future will be forthcoming.
+
+
 2.8.7 (June 15, 2025)
 ---------------------
 
