@@ -1,3 +1,15 @@
+2.8.9 (June 17, 2025)
+---------------------
+
+This release fixes a critical bug in the Aspell provider that crept into
+2.8.7. Thanks to @hamkg for the report and @chenrui333 analyzing the
+problem.
+
+A test has been added that simply runs `enchant-lsmod -list-dicts`, which
+would have caught this bug and the double-free fixed in the previous
+release.
+
+
 2.8.8 (June 16, 2025)
 ---------------------
 
