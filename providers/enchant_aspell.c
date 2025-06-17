@@ -150,20 +150,22 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 	*out_n_dicts = 0;
 	AspellDictInfoEnumeration * dels = aspell_dict_info_list_elements (dlist);
 
-	/* Note: aspell_dict_info_list_size() is unimplemented: https://github.com/GNUAspell/aspell/issues/155 */
+	/* Collect dictionary names in a single pass to avoid exhausting the enumeration */
+	GPtrArray *dict_names = g_ptr_array_new_with_free_func (g_free);
 	const AspellDictInfo * entry;
-	while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0)
-		(*out_n_dicts)++;
+	while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0) {
+		g_ptr_array_add (dict_names, g_strdup (entry->name));
+	}
 
+	*out_n_dicts = dict_names->len;
 	char ** out_list = g_new0 (char *, *out_n_dicts + 1);
-	if (out_list)
-		for (size_t i = 0; i < *out_n_dicts; i++) {
-			entry = aspell_dict_info_enumeration_next (dels);
-			out_list[i] = g_strdup (entry->name);
-		}
-	else
-		*out_n_dicts = 0;
 
+	/* Copy dictionary names from the temporary array */
+	for (size_t i = 0; i < *out_n_dicts; i++) {
+		out_list[i] = g_strdup ((char*)dict_names->pdata[i]);
+	}
+
+	g_ptr_array_free (dict_names, TRUE);
 	delete_aspell_dict_info_enumeration (dels);
 	delete_aspell_config (spell_config);
 
