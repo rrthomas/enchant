@@ -155,6 +155,8 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 	while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0)
 		(*out_n_dicts)++;
 
+        delete_aspell_dict_info_enumeration (dels);
+        dels = aspell_dict_info_list_elements (dlist);
 	char ** out_list = g_new0 (char *, *out_n_dicts + 1);
 	if (out_list)
 		for (size_t i = 0; i < *out_n_dicts; i++) {
