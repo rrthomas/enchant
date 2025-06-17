@@ -27,7 +27,7 @@ TESTS = \
 	misspelled-input.sh \
 	unknown-option.sh \
 	zero-arguments.sh \
-	run-enchant-lsmod.sh \
+	list-dicts.sh \
 	$(EMPTY)
 
 RESULTS = \
@@ -39,7 +39,7 @@ RESULTS = \
 # Run tests serially, as "make install" commands cannot run in parallel.
 unknown-option.log: misspelled-input.log
 zero-arguments.log: unknown-option.log
-run-enchant-lsmod.log: zero-arguments.log
+list-dicts.log: zero-arguments.log
 
 EXTRA_DIST = \
 	$(SH_LOG_COMPILER) \

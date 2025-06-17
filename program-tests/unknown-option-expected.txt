@@ -1,17 +1,19 @@
-enchant-2: Unknown option --foo
+enchant-3: Unknown option --foo
 Usage:
-  enchant-2 [OPTION…] FILE... 
+  enchant-3 [OPTION…] FILE... 
 
-Check spelling non-interactively.
+Give information about Enchant configuration, and check spelling non-interactively.
 
 Help Options:
   -h, --help                      Show help options
 
 Application Options:
-  -a, --pipe                      Talk to another program through a pipe, like Ispell
-  -l, --errors-only               List only the misspellings
   -d, --dictionary=DICTIONARY     Use the given dictionary
   -p, --pwl=FILE                  Use the given personal word list
   -L, --show-lines                Display line numbers
+  --list-providers                List spelling providers
+  --list-dictionaries             List all dictionaries
+  --default-dictionary            Show the default dictionary for the given or default language
+  --word-chars                    Show the word characters for the given or default language
   -v, --version                   Display version information and exit
 
