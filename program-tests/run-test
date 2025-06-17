@@ -53,6 +53,18 @@ enchant_test() {
     $DIFF -u "$expected_file" "$basename-output-fixed.txt"
 }
 
+# Test runner.
+# Arguments are command to run.
+enchant_lsmod_test() {
+    exit_code=0
+    #ldd $(which enchant-lsmod-$ENCHANT_MAJOR_VERSION)
+    enchant-lsmod-$ENCHANT_MAJOR_VERSION "$@"
+    if [ $exit_code != $expected_exit ]; then
+        echo "Expected exit code $expected_exit but was $exit_code"
+        exit 1
+    fi
+}
+
 # Make a test installation of libenchant
 mkdir -p "$test_dir/hunspell"
 cp "$abs_srcdir/en.aff" "$abs_srcdir/en.dic" "$test_dir/hunspell/"

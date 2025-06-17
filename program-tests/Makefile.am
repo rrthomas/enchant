@@ -1,6 +1,6 @@
 # Tests Makefile.am
 #
-# Copyright (c) 2021-2024 Reuben Thomas <rrt@sc3d.org>
+# Copyright (c) 2021-2025 Reuben Thomas <rrt@sc3d.org>
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,6 +27,7 @@ TESTS = \
 	misspelled-input.sh \
 	unknown-option.sh \
 	zero-arguments.sh \
+	run-enchant-lsmod.sh \
 	$(EMPTY)
 
 RESULTS = \
@@ -38,6 +39,7 @@ RESULTS = \
 # Run tests serially, as "make install" commands cannot run in parallel.
 unknown-option.log: misspelled-input.log
 zero-arguments.log: unknown-option.log
+run-enchant-lsmod.log: zero-arguments.log
 
 EXTRA_DIST = \
 	$(SH_LOG_COMPILER) \
