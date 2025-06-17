@@ -211,18 +211,19 @@ public class Main : Object {
 		/* Initialize system locale. */
 		Intl.setlocale();
 		get_charset(out charset);
+		var no_args = args.length <= 1;
 
 		/* Parse command line arguments. */
 		var ctx = new OptionContext("\n\nGive information about Enchant configuration, and check spelling non-interactively.");
 		ctx.set_help_enabled(true);
 		ctx.add_main_entries(main_options, null);
-		if (args.length <= 1) {
-			usage(ctx);
-		}
 		try {
 			ctx.parse(ref args);
 		} catch (OptionError e) {
 			printerr("%s-%s: %s\n", PACKAGE, ENCHANT_MAJOR_VERSION, e.message);
+			usage(ctx);
+		}
+		if (no_args) {
 			usage(ctx);
 		}
 		if (version) {
