@@ -68,8 +68,10 @@ static char *do_iconv(GIConv conv, const char *word) {
 		return NULL;
 	char *out = out_buf;
 	size_t result = g_iconv(conv, &in, &len_in, &out, &len_out);
-	if (static_cast<size_t>(-1) == result)
+	if (static_cast<size_t>(-1) == result) {
+		free(out_buf);
 		return nullptr;
+        }
 	*out = '\0';
 	return out_buf;
 }
