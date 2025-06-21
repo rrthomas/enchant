@@ -1,3 +1,14 @@
+2.8.10 (June 21, 2025)
+----------------------
+
+This release fixes a crash bug and some space leaks in the Hunspell provider
+that were introduced in 2.8.7.
+
+Thanks to @haansn08 and @mike-fabian for the report and debug information.
+
+The handling of PWL dictionaries has also been simplified slightly.
+
+
 2.8.9 (June 17, 2025)
 ---------------------
 
