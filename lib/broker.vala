@@ -1,3 +1,4 @@
+#! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg internal --pkg gnu provider.vala
 /* libenchant: Broker
  * Copyright (C) 2003, 2004 Dom Lachowicz
  * Copyright (C) 2016-2025 Reuben Thomas <rrt@sc3d.org>

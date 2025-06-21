@@ -1,3 +1,4 @@
+#! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg internal --pkg gnu broker.vala dict.vala
 /* libenchant: Composite dictionaries
  * Copyright (C) 2024 Reuben Thomas <rrt@sc3d.org>
  *

@@ -1,3 +1,4 @@
+#! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg configmake --pkg gnu
 /* enchant: miscellaneous public APIs
  * Copyright (C) 2003, 2004 Dom Lachowicz
  * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>

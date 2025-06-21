@@ -1,3 +1,4 @@
+#! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg config --pkg configmake --pkg posix --pkg enchant-2 --pkg util
 /* enchant: An ispell-compatible command-line front-end for libenchant.
  *
  * Copyright (C) 2003 Dom Lachowicz
@@ -38,7 +39,7 @@ const uint MIN_WORD_LENGTH = 1;
 
 string charset;
 
-enum Mode	{
+enum Mode {
 	NONE,
 	A,
 	L,
@@ -77,7 +78,7 @@ void print_utf(string str) {
 
 bool check_word(Dict dict, string word) {
 	return word.length <= MIN_WORD_LENGTH ||
-		dict.check(word, word.length) == 0;
+		   dict.check(word, word.length) == 0;
 }
 
 void do_mode_a(Dict dict, string word, size_t start_pos, size_t line_count, bool terse_mode) {
@@ -167,7 +168,7 @@ SList<Token> tokenize_line(Dict dict, string line) {
 		unowned string last_char_ptr = cur_byte;
 		for (;
 			 !dict.is_word_character(last_char_ptr.get_char(), WordPosition.END);
-			 last_char_ptr = last_char_ptr.prev_char());
+			 last_char_ptr = last_char_ptr.prev_char()) ;
 		word.truncate((char *) last_char_ptr.next_char() - (char *) start_ptr);
 
 		/* Save (word, position) tuple. */
@@ -312,7 +313,7 @@ public class Main : Object {
 							terse_mode = true;
 							break;
 
-							/* Ignore these commands */
+						/* Ignore these commands */
 						case '#': /* Save personal word list (enchant does this automatically) */
 						case '+': /* LaTeX mode */
 						case '-': /* nroff mode [default] */
@@ -331,8 +332,9 @@ public class Main : Object {
 						}
 						break;
 
-						case '^': /* ^ is used as prefix to prevent interpretation of original
-									 first character as a command */
+						/* ^ is used as prefix to prevent interpretation of
+						 * original first character as a command */
+						case '^':
 						default: /* A word or words to check */
 							mode_A_no_command = true;
 							break;

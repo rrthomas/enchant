@@ -1,3 +1,4 @@
+#! /usr/bin/env -S vala --vapidir lib --pkg internal pwl.vala
 /* libenchant: Session
  * Copyright (C) 2003, 2004 Dom Lachowicz
  * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>

@@ -26,7 +26,7 @@
  * do so, delete this exception statement from your version.
  */
 
-string? buf_to_utf8_string(string str_buf, ssize_t len) {
+public string? buf_to_utf8_string(string str_buf, ssize_t len) {
 	string res = str_buf.substring(0, len);
 	if (res.length == 0 || !res.validate())
 		return null;
