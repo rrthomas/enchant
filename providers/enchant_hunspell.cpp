@@ -162,6 +162,7 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 		return nullptr;
 
 	std::vector<std::string> sugMS = hunspell->suggest(out);
+	*nsug = sugMS.size();
 	g_free(out);
 	char **sug = g_new0 (char *, *nsug + 1);
 	if (sug) {
