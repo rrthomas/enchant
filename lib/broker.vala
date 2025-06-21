@@ -257,8 +257,6 @@ public class EnchantBroker {
 			return null;
 		}
 
-		session.is_pwl = true;
-
 		unowned var dict = this.new_dict(new EnchantDict());
 		dict.session = session;
 		return dict;

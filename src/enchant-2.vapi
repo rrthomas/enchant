@@ -29,7 +29,7 @@ namespace Enchant {
 	public class Dict {
 		public int check (string word, long len = -1);
 		[CCode (array_length_type = "size_t")]
-		public unowned string[] suggest (string word, long len = -1);
+		public string[] suggest (string word, long len = -1);
 		public void add (string word, long len = -1);
 		public void add_to_session (string word, long len = -1);
 		public void remove (string word, long len = -1);

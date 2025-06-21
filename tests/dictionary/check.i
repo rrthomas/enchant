@@ -142,13 +142,6 @@ TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
 }
 
 TEST_FIXTURE(EnchantDictionaryCheckNotImplemented_TestFixture,
-             EnchantDictionaryCheckNotImplemented_Negative1)
-{
-    CHECK_EQUAL(-1, enchant_dict_check(_dict, "hello", -1));
-    CHECK(!dictCheckCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryCheckNotImplemented_TestFixture,
              EnchantDictionaryCheckNotImplemented_InBrokerPwl_1)
 {
     CHECK_EQUAL(1, enchant_dict_check(_pwl, "hello", -1));

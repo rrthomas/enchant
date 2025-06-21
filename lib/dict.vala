@@ -46,12 +46,12 @@ public class EnchantDict {
 	public EnchantSession session;
 
 	// Provider methods
-	public DictCheck check_method;
-	public DictSuggest suggest_method;
-	public DictAddToSession add_to_session_method;
-	public DictRemoveFromSession remove_from_session_method;
-	public DictGetExtraWordCharacters get_extra_word_characters_method;
-	public DictIsWordCharacter is_word_character_method;
+	public DictCheck? check_method;
+	public DictSuggest? suggest_method;
+	public DictAddToSession? add_to_session_method;
+	public DictRemoveFromSession? remove_from_session_method;
+	public DictGetExtraWordCharacters? get_extra_word_characters_method;
+	public DictIsWordCharacter? is_word_character_method;
 
 	~EnchantDict() {
 		unowned EnchantProvider owner = this.session.provider;
@@ -133,12 +133,10 @@ public class EnchantDict {
 		if (self.session.contains(word))
 			return 0;
 
-		if (self.check_method != null)
-			return self.check_method(self, word, word.length);
-		else if (self.session.is_pwl)
+		/* If we have no check method, the word is not in the dictionary. */
+		if (self.check_method == null)
 			return 1;
-
-		return -1;
+		return self.check_method(self, word, word.length);
 	}
 
 	/* Filter out suggestions that are null, invalid UTF-8 or in the exclude
@@ -159,6 +157,8 @@ public class EnchantDict {
 
 	[CCode (array_length_pos = 3, array_length_type = "size_t")]
 	public string[]? suggest(string word_buf, real_ssize_t len) {
+		if (this.suggest_method == null)
+			return null;
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return null;
@@ -166,12 +166,9 @@ public class EnchantDict {
 		this.session.clear_error();
 
 		/* Check for suggestions from provider dictionary */
-		string[]? dict_suggs = null;
-		if (this.suggest_method != null) {
-			dict_suggs = this.suggest_method(this, word, word.length);
-			if (dict_suggs != null)
-				dict_suggs = this.filter_suggestions(dict_suggs);
-		}
+		string[]? dict_suggs = this.suggest_method(this, word, word.length);
+		if (dict_suggs != null)
+			dict_suggs = this.filter_suggestions(dict_suggs);
 
 		return dict_suggs;
 	}

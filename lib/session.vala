@@ -38,7 +38,6 @@ public class EnchantSession {
 	public string language_tag;
 
 	public string error;
-	public bool is_pwl;
 	public EnchantProvider provider;
 
 	EnchantSession() {
@@ -109,14 +108,14 @@ public class EnchantSession {
 
 	public bool exclude(string word) {
 		return !this.session_include.contains(word) &&
-			(this.session_exclude.contains(word) ||
-			 this.exclude_pwl.check(word, word.length) == 0);
+			   (this.session_exclude.contains(word) ||
+				this.exclude_pwl.check(word, word.length) == 0);
 	}
 
 	public bool contains(string word) {
 		return this.session_include.contains(word) ||
-			(this.pwl.check(word, word.length) == 0 &&
-			 this.exclude_pwl.check(word, word.length) != 0);
+			   (this.pwl.check(word, word.length) == 0 &&
+				this.exclude_pwl.check(word, word.length) != 0);
 	}
 
 	public void clear_error() {
