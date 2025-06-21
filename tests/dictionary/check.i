@@ -24,10 +24,6 @@
 #error EnchantDictionaryCheck_TestFixture must be defined as the testfixture class to run these tests against
 #endif
 
-#ifndef EnchantDictionaryCheckNotImplemented_TestFixture
-#error EnchantDictionaryCheckNotImplemented_TestFixture must be defined as the testfixture class to run these tests against
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
@@ -138,13 +134,6 @@ TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
              EnchantDictionaryCheck_InvalidUtf8Word_Negative1)
 {
     CHECK_EQUAL(-1, enchant_dict_check(_dict, "\xa5\xf1\x08", -1));
-    CHECK(!dictCheckCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryCheckNotImplemented_TestFixture,
-             EnchantDictionaryCheckNotImplemented_InBrokerPwl_1)
-{
-    CHECK_EQUAL(1, enchant_dict_check(_pwl, "hello", -1));
     CHECK(!dictCheckCalled);
 }
 

@@ -49,7 +49,7 @@ MyMockDictionaryGetExtraWordCharacters (EnchantDict * dict)
 static EnchantDict* MockProviderRequestGetExtraWordCharactersMockDictionary(EnchantProvider * me, const char *tag)
 {
     
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
+    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->get_extra_word_characters = MyMockDictionaryGetExtraWordCharacters;
     return dict;
 }
@@ -77,7 +77,7 @@ struct EnchantDictionaryGetExtraWordCharacters_TestFixture : EnchantDictionaryGe
 static EnchantDict* MockProviderRequestNoGetExtraWordCharactersMockDictionary(EnchantProvider * me, const char *tag)
 {
     
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
+    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->get_extra_word_characters = NULL;
     return dict;
 }

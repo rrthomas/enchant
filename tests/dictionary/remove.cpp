@@ -26,7 +26,7 @@
 static bool dictCheckCalled;
 
 static int
-MockDictionaryCheck (EnchantDict * dict, const char *const word, size_t len)
+MockDictionaryCheckHello (EnchantDict * dict, const char *const word, size_t len)
 {
     dict;
     dictCheckCalled = true;
@@ -42,7 +42,7 @@ static EnchantDict* MockProviderRequestAddToExcludeMockDictionary(EnchantProvide
 {
     
     EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
-    dict->check = MockDictionaryCheck;
+    dict->check = MockDictionaryCheckHello;
     return dict;
 }
 
@@ -65,8 +65,8 @@ struct EnchantDictionaryRemove_TestFixture : EnchantDictionaryTestFixture
 static EnchantDict* MockProviderRequestCheckMockDictionary(EnchantProvider * me, const char *tag)
 {
     
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
-    dict->check = MockDictionaryCheck;
+    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    dict->check = MockDictionaryCheckHello;
     return dict;
 }
 

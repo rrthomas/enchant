@@ -37,7 +37,7 @@ MockDictionaryAddToSession (EnchantDict * dict, const char *const word, size_t l
 static EnchantDict* MockProviderRequestAddToSessionMockDictionary(EnchantProvider * me, const char *tag)
 {
     
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
+    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->add_to_session = MockDictionaryAddToSession;
     return dict;
 }

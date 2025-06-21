@@ -44,7 +44,7 @@ DictionarySuggestsSat (EnchantDict * dict, const char *const word, size_t len, s
 static EnchantDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
 {
     
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
+    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->suggest = DictionarySuggestsSat;
     return dict;
 }

@@ -47,8 +47,8 @@ public class EnchantDict {
 	public EnchantSession session;
 
 	// Provider methods
-	public DictCheck? check_method;
-	public DictSuggest? suggest_method;
+	public DictCheck check_method;
+	public DictSuggest suggest_method;
 	public DictAddToSession? add_to_session_method;
 	public DictRemoveFromSession? remove_from_session_method;
 	public DictGetExtraWordCharacters? get_extra_word_characters_method;
@@ -134,9 +134,6 @@ public class EnchantDict {
 		if (self.session.contains(word))
 			return 0;
 
-		/* If we have no check method, the word is not in the dictionary. */
-		if (self.check_method == null)
-			return 1;
 		return self.check_method(self, word, word.length);
 	}
 
@@ -158,8 +155,6 @@ public class EnchantDict {
 
 	[CCode (array_length_pos = 3, array_length_type = "size_t")]
 	public string[]? suggest(string word_buf, real_ssize_t len) {
-		if (this.suggest_method == null)
-			return null;
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return null;

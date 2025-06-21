@@ -23,10 +23,6 @@
 #error EnchantDictionarySuggest_TestFixture must be defined as the testfixture class to run these tests against
 #endif
 
-#ifndef EnchantDictionarySuggestNotImplemented_TestFixture
-#error EnchantDictionarySuggestNotImplemented_TestFixture must be defined as the testfixture class to run these tests against
-#endif
-
 /////////////////////////////////////////////////////////////////////////////
 // Test Normal Operation
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
@@ -165,16 +161,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 }
 
 
-TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
-             EnchantDictionarySuggestNotImplemented_NullSuggestions)
-{
-    size_t cSuggestions;
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
-
-    CHECK_EQUAL(cSuggestions, 0);
-    CHECK(!dictSuggestCalled);
-}
-
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
              EnchantDictionarySuggest_SuggestionListWithInvalidUtf8_InvalidSuggestionIgnored_FreeCalled)
 {
@@ -210,17 +196,3 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     CHECK_EQUAL(1 * (std::count(languageTag.begin(), languageTag.end(), ',') + 1), cSuggestions);
     CHECK_EQUAL(Convert(L"fianc\xe9"), _suggestions[0]);
 }
-
-TEST_FIXTURE(EnchantDictionarySuggestNotImplemented_TestFixture,
-             EnchantDictionarySuggest_WordInDictionaryAndExclude_NotInSuggestions)
-{
-    ExternalAddWordToExclude("hello");
-    ExternalAddWordToDictionary("hello");
-
-    ReloadTestDictionary();
-
-    size_t cSuggestions;
-    _suggestions = enchant_dict_suggest(_dict, "helo", -1, &cSuggestions);
-    CHECK_EQUAL(0, cSuggestions);
-}
-

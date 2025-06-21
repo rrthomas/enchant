@@ -258,9 +258,7 @@ public class EnchantBroker {
 			return null;
 		}
 
-		unowned var dict = this.new_dict(new EnchantDict());
-		dict.session = session;
-		return dict;
+		return this.new_dict(new EnchantPwlDict(session));
 	}
 
 	unowned EnchantDict? _request_dict(string tag, string? pwl) {

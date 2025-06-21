@@ -97,7 +97,7 @@ MyMockDictionarySuggest (EnchantDict * dict, const char *const word, size_t len,
 static EnchantDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
 {
     
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
+    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->suggest = MyMockDictionarySuggest;
     return dict;
 }
@@ -107,8 +107,6 @@ static void DictionarySuggest_ProviderConfiguration (EnchantProvider * me, const
      me->request_dict = MockProviderRequestSuggestMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
 }
-
-
 
 
 struct EnchantDictionarySuggest_TestFixture_qaa : EnchantDictionarySuggestTestFixtureBase
@@ -128,43 +126,9 @@ struct EnchantDictionarySuggest_TestFixture_qaaqaa : EnchantDictionarySuggestTes
 };
 
 
-
-static EnchantDict* MockProviderRequestNoSuggestMockDictionary(EnchantProvider * me, const char *tag)
-{
-    
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
-    dict->suggest = NULL;
-    return dict;
-}
-
-static void DictionaryNoSuggest_ProviderConfiguration (EnchantProvider * me, const char *)
-{
-     me->request_dict = MockProviderRequestNoSuggestMockDictionary;
-     me->dispose_dict = MockProviderDisposeDictionary;
-}
-
-struct EnchantDictionarySuggestNotImplemented_TestFixture_qaa : EnchantDictionarySuggestTestFixtureBase
-{
-    //Setup
-    EnchantDictionarySuggestNotImplemented_TestFixture_qaa():
-            EnchantDictionarySuggestTestFixtureBase(DictionaryNoSuggest_ProviderConfiguration, "qaa")
-    { }
-};
-
-struct EnchantDictionarySuggestNotImplemented_TestFixture_qaaqaa : EnchantDictionarySuggestTestFixtureBase
-{
-    //Setup
-    EnchantDictionarySuggestNotImplemented_TestFixture_qaaqaa():
-            EnchantDictionarySuggestTestFixtureBase(DictionaryNoSuggest_ProviderConfiguration, "qaa,qaa")
-    { }
-};
-
 #define EnchantDictionarySuggest_TestFixture EnchantDictionarySuggest_TestFixture_qaa
-#define EnchantDictionarySuggestNotImplemented_TestFixture EnchantDictionarySuggestNotImplemented_TestFixture_qaa
 #include "suggest.i"
 
 #undef EnchantDictionarySuggest_TestFixture
 #define EnchantDictionarySuggest_TestFixture EnchantDictionarySuggest_TestFixture_qaaqaa
-#undef EnchantDictionarySuggestNotImplemented_TestFixture
-#define EnchantDictionarySuggestNotImplemented_TestFixture EnchantDictionarySuggestNotImplemented_TestFixture_qaaqaa
 #include "suggest.i"

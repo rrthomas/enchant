@@ -31,29 +31,18 @@
 #include <string>
 #include <vector>
 
-static EnchantDict*
-MockProviderRequestEmptyMockDictionary(EnchantProvider *me, const char *)
+static int
+MockDictionaryCheck (EnchantDict * ,
+                     const char *const word,
+                     size_t len)
 {
-    EnchantDict* dict = enchant_dict_new();
-    dict->user_data = NULL;
-    dict->check = NULL;
-    dict->suggest = NULL;
-    dict->add_to_session = NULL;
-	
-    return dict;
+    return 1;
 }
-
-static void EmptyDictionary_ProviderConfiguration (EnchantProvider * me, const char *)
-{
-     me->request_dict = MockProviderRequestEmptyMockDictionary;
-     me->dispose_dict = MockProviderDisposeDictionary;
-}
-
 
 static char**
 MockDictionarySuggest (EnchantDict * , 
                        const char *const word,
-		               size_t len, 
+                       size_t len, 
                        size_t * out_n_suggs)
 {
     *out_n_suggs = 4;
@@ -72,14 +61,22 @@ MockDictionarySuggest (EnchantDict * ,
 }
 
 static EnchantDict*
-MockProviderRequestBasicMockDictionary(EnchantProvider *me, const char *tag)
+MockProviderRequestBasicMockDictionary(EnchantProvider *me, const char *)
 {
-    
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
+    EnchantDict* dict = enchant_dict_new();
+    dict->user_data = NULL;
+    dict->check = MockDictionaryCheck;
     dict->suggest = MockDictionarySuggest;
+    dict->add_to_session = NULL;
+	
     return dict;
 }
 
+static void EmptyDictionary_ProviderConfiguration (EnchantProvider * me, const char *)
+{
+     me->request_dict = MockProviderRequestBasicMockDictionary;
+     me->dispose_dict = MockProviderDisposeDictionary;
+}
 
 static void BasicDictionary_ProviderConfiguration (EnchantProvider * me, const char *)
 {

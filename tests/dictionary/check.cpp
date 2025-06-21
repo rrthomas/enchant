@@ -27,7 +27,7 @@
 static bool dictCheckCalled;
 
 static int
-MockDictionaryCheck (EnchantDict * dict, const char *const word, size_t len)
+MockDictionaryCheckHello (EnchantDict * dict, const char *const word, size_t len)
 {
     dict;
     dictCheckCalled = true;
@@ -41,8 +41,8 @@ MockDictionaryCheck (EnchantDict * dict, const char *const word, size_t len)
 static EnchantDict* MockProviderRequestCheckMockDictionary(EnchantProvider * me, const char *tag)
 {
     
-    EnchantDict* dict = MockProviderRequestEmptyMockDictionary(me, tag);
-    dict->check = MockDictionaryCheck;
+    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    dict->check = MockDictionaryCheckHello;
     return dict;
 }
 
@@ -74,33 +74,9 @@ struct EnchantDictionaryCheck_TestFixture_qaaqaa : EnchantDictionaryTestFixture
     }
 };
 
-struct EnchantDictionaryCheckNotImplemented_TestFixture_qaa : EnchantDictionaryTestFixture
-{
-    //Setup
-    EnchantDictionaryCheckNotImplemented_TestFixture_qaa():
-            EnchantDictionaryTestFixture(EmptyDictionary_ProviderConfiguration, "qaa")
-    { 
-        dictCheckCalled = false;
-    }
-};
-
-struct EnchantDictionaryCheckNotImplemented_TestFixture_qaaqaa : EnchantDictionaryTestFixture
-{
-    //Setup
-    EnchantDictionaryCheckNotImplemented_TestFixture_qaaqaa():
-            EnchantDictionaryTestFixture(EmptyDictionary_ProviderConfiguration, "qaa,qaa")
-    { 
-        dictCheckCalled = false;
-    }
-};
-
-
 #define EnchantDictionaryCheck_TestFixture EnchantDictionaryCheck_TestFixture_qaa
-#define EnchantDictionaryCheckNotImplemented_TestFixture EnchantDictionaryCheckNotImplemented_TestFixture_qaa
 #include "check.i"
 
 #undef EnchantDictionaryCheck_TestFixture
 #define EnchantDictionaryCheck_TestFixture EnchantDictionaryCheck_TestFixture_qaaqaa
-#undef EnchantDictionaryCheckNotImplemented_TestFixture
-#define EnchantDictionaryCheckNotImplemented_TestFixture EnchantDictionaryCheckNotImplemented_TestFixture_qaaqaa
 #include "check.i"

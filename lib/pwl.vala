@@ -312,3 +312,20 @@ public class EnchantPWL {
 		unlock_file(f);
 	}
 }
+
+int check_impl(EnchantDict me, string word, real_size_t len) {
+	return 1;
+}
+
+[CCode (array_length_type = "size_t")]
+string[]? suggest_impl(EnchantDict me, string word, real_size_t len) {
+	return null;
+}
+
+public class EnchantPwlDict : EnchantDict {
+	public EnchantPwlDict(EnchantSession session) {
+		this.session = session;
+		this.check_method = check_impl;
+		this.suggest_method = suggest_impl;
+	}
+}
