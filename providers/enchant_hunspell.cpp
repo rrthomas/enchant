@@ -165,13 +165,14 @@ HunspellChecker::suggestWord(const char* const utf8Word, size_t len, size_t *nsu
 	g_free(out);
 	char **sug = g_new0 (char *, *nsug + 1);
 	if (sug) {
-		for (size_t i = 0, j = 0; i < *nsug; i++) {
+		size_t j = 0;
+		for (size_t i = 0; i < *nsug; i++) {
 			const char *in = sugMS[i].c_str();
 			out = do_iconv(m_translate_out, in);
 			if (out != NULL)
 				sug[j++] = out;
 		}
-		*nsug = sugMS.size();
+		*nsug = j;
 	} else
 		*nsug = 0;
 	return sug;
