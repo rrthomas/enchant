@@ -417,12 +417,6 @@ hunspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *) checker;
-	dict->check = hunspell_dict_check;
-	dict->suggest = hunspell_dict_suggest;
-	dict->add_to_session = hunspell_dict_add_to_session;
-	dict->remove_from_session = hunspell_dict_remove_from_session;
-	dict->get_extra_word_characters = hunspell_dict_get_extra_word_characters;
-	dict->is_word_character = hunspell_dict_is_word_character;
 
 	return dict;
 }

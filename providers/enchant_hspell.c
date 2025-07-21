@@ -194,8 +194,6 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *) hspell_dict;
-	dict->check = hspell_dict_check;
-	dict->suggest = hspell_dict_suggest;
 
 	return dict;
 }
