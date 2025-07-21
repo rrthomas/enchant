@@ -170,27 +170,23 @@ struct _EnchantProviderDict
 	EnchantProvider *provider;
 	gchar *language_tag;
 	gchar *error;
-
-	int (*check) (struct _EnchantProviderDict * me, const char *const word,
-			  size_t len);
-
-	/* Returns an array of *out_n_suggs UTF-8 encoded strings. Elements
-	   of word may be NULL. */
-	char **(*suggest) (struct _EnchantProviderDict * me,
-			   const char *const word, size_t len,
-			   size_t * out_n_suggs);
-
-	void (*add_to_session) (struct _EnchantProviderDict * me,
-				const char *const word, size_t len);
-
-	void (*remove_from_session) (struct _EnchantProviderDict * me,
-				const char *const word, size_t len);
-
-	const char * (*get_extra_word_characters) (struct _EnchantProviderDict * me);
-
-	int (*is_word_character) (struct _EnchantProviderDict * me,
-				  uint32_t uc_in, size_t n);
 };
+
+typedef struct _EnchantProviderDictClass EnchantProviderDictClass;
+
+struct _EnchantProviderDictClass {
+	GTypeClass parent_class;
+	void (*finalize) (EnchantProviderDict *self);
+	gint (*check) (EnchantProviderDict* self, const gchar* word, size_t len);
+	gchar** (*suggest) (EnchantProviderDict* self, const gchar* word_buf, size_t len, size_t* result_length1);
+	void (*add_to_session) (EnchantProviderDict* self, const gchar* word, size_t len);
+	void (*remove_from_session) (EnchantProviderDict* self, const gchar* word, size_t len);
+	const gchar* (*get_extra_word_characters) (EnchantProviderDict* self);
+	gint (*is_word_character) (EnchantProviderDict* self, guint32 uc_in, size_t n);
+};
+
+void enchant_provider_dict_unref (gpointer instance);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (EnchantProviderDict, enchant_provider_dict_unref)
 
 typedef struct _EnchantProviderPrivate *EnchantProviderPrivate;
 

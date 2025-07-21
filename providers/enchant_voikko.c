@@ -151,8 +151,6 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *)voikko_handle;
-	dict->check = voikko_dict_check;
-	dict->suggest = voikko_dict_suggest;
 
 	return dict;
 }

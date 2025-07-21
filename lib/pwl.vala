@@ -286,20 +286,3 @@ public class EnchantPWL {
 		unlock_file(f);
 	}
 }
-
-int check_impl(EnchantProviderDict me, string word, real_size_t len) {
-	return 1;
-}
-
-[CCode (array_length_type = "size_t")]
-string[]? suggest_impl(EnchantProviderDict me, string word, real_size_t len) {
-	return null;
-}
-
-public class EnchantPwlDict : EnchantProviderDict {
-	public EnchantPwlDict() {
-		base(null, "Personal Wordlist");
-		this.check_method = check_impl;
-		this.suggest_method = suggest_impl;
-	}
-}

@@ -252,7 +252,7 @@ public class EnchantBroker {
 		 * there is no need for complementary exclude file to add a word to. The word just needs to be
 		 * removed from the broker pwl file
 		 */
-		EnchantDict? session = EnchantDict.with_pwl(new EnchantPwlDict(), pwl, null);
+		EnchantDict? session = EnchantDict.with_pwl(new EnchantProviderDict(null, null), pwl, null);
 		if (session == null) {
 			this.error = @"Couldn't open personal wordlist '$(pwl)'";
 			return null;

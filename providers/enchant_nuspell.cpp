@@ -116,8 +116,6 @@ nuspell_provider_request_dict(EnchantProvider* me,
 	if (dict == nullptr)
 		return nullptr;
 	dict->user_data = static_cast<void*>(dict_cpp.release());
-	dict->check = nuspell_dict_check;
-	dict->suggest = nuspell_dict_suggest;
 	return dict;
 }
 

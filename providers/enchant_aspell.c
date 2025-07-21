@@ -39,6 +39,7 @@
 #include <string.h>
 
 #include <glib.h>
+#include <glib-object.h>
 #include <aspell.h>
 
 #include "enchant-provider.h"
@@ -48,8 +49,25 @@ static EnchantProvider *provider;
 
 EnchantProvider *init_enchant_provider (void);
 
+G_BEGIN_DECLS
+#define TYPE_ASPELL_PROVIDER_DICT (aspell_provider_dict_get_type())
+G_DECLARE_DERIVABLE_TYPE (AspellProviderDict, aspell_provider_dict, ASPELL, PROVIDER_DICT, EnchantProviderDict)
+
+G_END_DECLS
+
+struct _AspellProviderDictClass {
+	GTypeClass parent_class;
+	void (*finalize) (EnchantProviderDict *self);
+	gint (*check) (EnchantProviderDict* self, const gchar* word, size_t len);
+	gchar** (*suggest) (EnchantProviderDict* self, const gchar* word_buf, size_t len, size_t* result_length1);
+	void (*add_to_session) (EnchantProviderDict* self, const gchar* word, size_t len);
+	void (*remove_from_session) (EnchantProviderDict* self, const gchar* word, size_t len);
+	const gchar* (*get_extra_word_characters) (EnchantProviderDict* self);
+	gint (*is_word_character) (EnchantProviderDict* self, guint32 uc_in, size_t n);
+};
+
 static int
-aspell_dict_check (EnchantProviderDict * me, const char *const word, size_t len)
+aspell_provider_dict_check (EnchantProviderDict * me, const char *const word, size_t len)
 {
 	AspellSpeller *manager = (AspellSpeller *) me->user_data;
 
@@ -68,7 +86,7 @@ aspell_dict_check (EnchantProviderDict * me, const char *const word, size_t len)
 }
 
 static char **
-aspell_dict_suggest (EnchantProviderDict * me, const char *const word,
+aspell_provider_dict_suggest (EnchantProviderDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
 	AspellSpeller *manager = (AspellSpeller *) me->user_data;
@@ -99,11 +117,23 @@ aspell_dict_suggest (EnchantProviderDict * me, const char *const word,
 }
 
 static void
-aspell_dict_add_to_session (EnchantProviderDict * me,
+aspell_provider_dict_add_to_session (EnchantProviderDict * me,
 			    const char *const word, size_t len)
 {
 	AspellSpeller *manager = (AspellSpeller *) me->user_data;
 	aspell_speller_add_to_session (manager, word, len);
+}
+
+G_DEFINE_TYPE(AspellProviderDict, aspell_provider_dict, TYPE_ASPELL_PROVIDER_DICT)
+
+static void
+aspell_provider_dict_init (AspellProviderDict *me _GL_UNUSED) {}
+
+static void
+aspell_provider_dict_class_init (AspellProviderDictClass *klass _GL_UNUSED) {
+	klass->check = aspell_provider_dict_check;
+	klass->suggest = aspell_provider_dict_suggest;
+	klass->add_to_session = aspell_provider_dict_add_to_session;
 }
 
 static EnchantProviderDict *
@@ -124,15 +154,12 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 
 	AspellSpeller *manager = to_aspell_speller (spell_error);
 
-	EnchantProviderDict *dict = enchant_provider_dict_new (provider, tag);
-	if (dict == NULL)
-		return NULL;
-	dict->user_data = (void *) manager;
-	dict->check = aspell_dict_check;
-	dict->suggest = aspell_dict_suggest;
-	dict->add_to_session = aspell_dict_add_to_session;
+	AspellProviderDict *dict = g_object_new (TYPE_ASPELL_PROVIDER_DICT, NULL);
+	dict->parent_instance.provider = provider;
+	dict->parent_instance.language_tag = g_strdup(tag);
+	dict->parent_instance.user_data = (void *) manager;
 
-	return dict;
+	return (EnchantProviderDict *)dict;
 }
 
 static void

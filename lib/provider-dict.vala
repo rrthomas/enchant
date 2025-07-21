@@ -28,33 +28,11 @@
  * do so, delete this exception statement from your version.
  */
 
-[CCode (has_target = false)]
-public delegate int DictCheck(EnchantProviderDict me, string word, real_size_t len);
-/* returns utf8*/
-[CCode (has_target = false, array_length_type = "size_t")]
-public delegate string[]? DictSuggest(EnchantProviderDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate void DictAddToSession(EnchantProviderDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate void DictRemoveFromSession(EnchantProviderDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate unowned string DictGetExtraWordCharacters(EnchantProviderDict me);
-[CCode (has_target = false)]
-public delegate int DictIsWordCharacter(EnchantProviderDict me, uint32 uc_in, real_size_t n);
-
 public class EnchantProviderDict {
 	public void *user_data;
 	public EnchantProvider? provider;
 	public string language_tag;
 	public string error;
-
-	// Provider methods
-	public DictCheck check_method;
-	public DictSuggest suggest_method;
-	public DictAddToSession? add_to_session_method;
-	public DictRemoveFromSession? remove_from_session_method;
-	public DictGetExtraWordCharacters? get_extra_word_characters_method;
-	public DictIsWordCharacter? is_word_character_method;
 
 	public EnchantProviderDict(EnchantProvider? provider, string tag) {
 		this.provider = provider;
@@ -70,5 +48,28 @@ public class EnchantProviderDict {
 	public void set_error(string err) {
 		debug("enchant_provider_dict_set_error: %s", err);
 		this.error = err;
+	}
+
+	public virtual int check(string word, real_size_t len) {
+		return 1;
+	}
+
+	/* Returns an array of UTF-8 encoded strings. Elements
+	   of word may be NULL. */
+	[CCode (array_length_pos = 2, array_length_type = "size_t")]
+	public virtual string[]? suggest(string word_buf, real_size_t len) {
+		return null;
+	}
+
+	public virtual void add_to_session(string word, real_size_t len) {}
+
+	public virtual void remove_from_session(string word, real_size_t len) {}
+
+	public virtual unowned string get_extra_word_characters() {
+		return "";
+	}
+
+	public virtual int is_word_character(uint32 uc_in, real_size_t n) {
+		return -1;
 	}
 }

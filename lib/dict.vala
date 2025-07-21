@@ -82,15 +82,17 @@ public class EnchantDict {
 	}
 
 	public unowned string get_extra_word_characters() {
-		return dict.get_extra_word_characters_method != null ?
-			   dict.get_extra_word_characters_method(dict) : "";
+		return dict.get_extra_word_characters();
 	}
 
 	public static int is_word_character(EnchantDict? self, uint32 uc_in, real_size_t n)
 	requires(n <= 2)
 	{
-		if (self != null && self.dict.is_word_character_method != null)
-			return self.dict.is_word_character_method(self.dict, uc_in, n);
+		if (self != null) {
+			var res = self.dict.is_word_character(uc_in, n);
+			if (res != -1)
+				return res;
+		}
 
 		unichar uc = (unichar)uc_in;
 
@@ -145,7 +147,7 @@ public class EnchantDict {
 		if (self.contains(word))
 			return 0;
 
-		return self.dict.check_method(self.dict, word, word.length);
+		return self.dict.check(word, word.length);
 	}
 
 	/* Filter out suggestions that are null, invalid UTF-8 or in the exclude
@@ -167,7 +169,7 @@ public class EnchantDict {
 		this.clear_error();
 
 		/* Check for suggestions from provider dictionary */
-		string[]? dict_suggs = dict.suggest_method(dict, word, word.length);
+		string[]? dict_suggs = dict.suggest(word, word.length);
 		if (dict_suggs != null)
 			dict_suggs = this.filter_suggestions(dict_suggs);
 
@@ -187,8 +189,7 @@ public class EnchantDict {
 		this.clear_error();
 		this.session_exclude.remove(word);
 		this.session_include.add(word);
-		if (dict.add_to_session_method != null)
-			dict.add_to_session_method(dict, word, word.length);
+		dict.add_to_session(word, word.length);
 	}
 
 	public int is_added(string word_buf, real_ssize_t len) {
@@ -212,8 +213,7 @@ public class EnchantDict {
 		this.clear_error();
 		this.session_include.remove(word);
 		this.session_exclude.add(word);
-		if (dict.remove_from_session_method != null)
-			dict.remove_from_session_method(dict, word, word.length);
+		dict.remove_from_session(word, word.length);
 	}
 
 	public int is_removed(string word_buf, real_ssize_t len) {
