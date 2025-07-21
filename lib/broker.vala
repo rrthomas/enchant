@@ -258,7 +258,9 @@ public class EnchantBroker {
 			return null;
 		}
 
-		return this.new_dict(new EnchantPwlDict(session));
+		var dict = new EnchantDict();
+		dict.session = session;
+		return this.new_dict(dict);
 	}
 
 	unowned EnchantDict? _request_dict(string tag, string? pwl) {
@@ -268,8 +270,7 @@ public class EnchantBroker {
 			dict = provider.request_dict(provider, tag);
 			if (dict != null) {
 				unowned var dict_ref = this.new_dict(dict);
-				var session = EnchantSession.with_implicit_pwl(provider, tag, pwl);
-				dict.session = session;
+				dict.session = EnchantSession.with_implicit_pwl(provider, tag, pwl);
 				return dict_ref;
 			}
 		}

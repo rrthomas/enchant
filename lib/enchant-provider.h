@@ -155,26 +155,6 @@ struct _EnchantDict
 	EnchantDictPrivate * priv;
 	void *user_data;
 	void *enchant_private_data;
-
-	int (*check) (struct _EnchantDict * me, const char *const word,
-			  size_t len);
-
-	/* Returns an array of *out_n_suggs UTF-8 encoded strings. Elements
-	   of word may be NULL. */
-	char **(*suggest) (struct _EnchantDict * me,
-			   const char *const word, size_t len,
-			   size_t * out_n_suggs);
-
-	void (*add_to_session) (struct _EnchantDict * me,
-				const char *const word, size_t len);
-
-	void (*remove_from_session) (struct _EnchantDict * me,
-				const char *const word, size_t len);
-
-	const char * (*get_extra_word_characters) (struct _EnchantDict * me);
-
-	int (*is_word_character) (struct _EnchantDict * me,
-				  uint32_t uc_in, size_t n);
 };
 
 typedef struct _EnchantProviderPrivate *EnchantProviderPrivate;

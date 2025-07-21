@@ -28,31 +28,9 @@
  * do so, delete this exception statement from your version.
  */
 
-[CCode (has_target = false)]
-public delegate int DictCheck(EnchantDict me, string word, real_size_t len);
-/* returns utf8*/
-[CCode (has_target = false, array_length_type = "size_t")]
-public delegate string[]? DictSuggest(EnchantDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate void DictAddToSession(EnchantDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate void DictRemoveFromSession(EnchantDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate unowned string DictGetExtraWordCharacters(EnchantDict me);
-[CCode (has_target = false)]
-public delegate int DictIsWordCharacter(EnchantDict me, uint32 uc_in, real_size_t n);
-
 public class EnchantDict {
 	public void *user_data;
 	public EnchantSession session;
-
-	// Provider methods
-	public DictCheck check_method;
-	public DictSuggest suggest_method;
-	public DictAddToSession? add_to_session_method;
-	public DictRemoveFromSession? remove_from_session_method;
-	public DictGetExtraWordCharacters? get_extra_word_characters_method;
-	public DictIsWordCharacter? is_word_character_method;
 
 	~EnchantDict() {
 		unowned EnchantProvider owner = this.session.provider;
@@ -60,17 +38,19 @@ public class EnchantDict {
 			owner.dispose_dict(owner, this);
 	}
 
-	public unowned string get_extra_word_characters() {
-		return this.get_extra_word_characters_method != null ?
-			   this.get_extra_word_characters_method(this) : "";
+	/* returns utf8*/
+	[CCode (array_length_type = "size_t")]
+	public string[]? DictSuggest(string word, real_size_t len) {
+		return null;
 	}
 
-	public static int is_word_character(EnchantDict? self, uint32 uc_in, real_size_t n)
+	public virtual unowned string get_extra_word_characters() {
+		return "";
+	}
+
+	public virtual int is_word_character(uint32 uc_in, real_size_t n)
 	requires(n <= 2)
 	{
-		if (self != null && self.is_word_character_method != null)
-			return self.is_word_character_method(self, uc_in, n);
-
 		unichar uc = (unichar)uc_in;
 
 		/* Accept quote marks anywhere except at the end of a word */
@@ -114,27 +94,24 @@ public class EnchantDict {
 		return this.session.error;
 	}
 
-	/* This is a static method method because Vala does not let us
-	 * alter the value returned when an argument is invalid.
-	 * In this case, we want to return -1 when 'dict' is null. */
-	public static int check(EnchantDict? self, string? word_buf, real_ssize_t len) {
-		if (self == null || word_buf == null)
+	public virtual int check(string? word_buf, real_ssize_t len) {
+		if (this== null || word_buf == null)
 			return -1;
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return -1;
 
-		self.session.clear_error();
+		this.session.clear_error();
 
 		/* first, see if it's to be excluded*/
-		if (self.session.exclude(word))
+		if (this.session.exclude(word))
 			return 1;
 
 		/* then, see if it's in our pwl or session*/
-		if (self.session.contains(word))
+		if (this.session.contains(word))
 			return 0;
 
-		return self.check_method(self, word, word.length);
+		return 1;
 	}
 
 	/* Filter out suggestions that are null, invalid UTF-8 or in the exclude
@@ -153,20 +130,9 @@ public class EnchantDict {
 		return sb.end();
 	}
 
-	[CCode (array_length_pos = 3, array_length_type = "size_t")]
-	public string[]? suggest(string word_buf, real_ssize_t len) {
-		string word = buf_to_utf8_string(word_buf, len);
-		if (word == null)
-			return null;
-
-		this.session.clear_error();
-
-		/* Check for suggestions from provider dictionary */
-		string[]? dict_suggs = this.suggest_method(this, word, word.length);
-		if (dict_suggs != null)
-			dict_suggs = this.filter_suggestions(dict_suggs);
-
-		return dict_suggs;
+	[CCode (array_length_pos = 2, array_length_type = "size_t")]
+	public virtual string[]? suggest(string word_buf, real_ssize_t len) {
+		return null;
 	}
 
 	public void add(string word_buf, real_ssize_t len) {
@@ -175,14 +141,12 @@ public class EnchantDict {
 		session.exclude_pwl.remove(word_buf, len);
 	}
 
-	public void add_to_session(string word_buf, real_ssize_t len) {
+	public virtual void add_to_session(string word_buf, real_ssize_t len) {
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return;
 		this.session.clear_error();
 		this.session.add(word);
-		if (this.add_to_session_method != null)
-			this.add_to_session_method(this, word, word.length);
 	}
 
 	public int is_added(string word_buf, real_ssize_t len) {
@@ -199,14 +163,12 @@ public class EnchantDict {
 		session.exclude_pwl.add(word_buf, len);
 	}
 
-	public void remove_from_session(string word_buf, real_ssize_t len) {
+	public virtual void remove_from_session(string word_buf, real_ssize_t len) {
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return;
 		this.session.clear_error();
 		this.session.remove(word);
-		if (this.remove_from_session_method != null)
-			this.remove_from_session_method(this, word, word.length);
 	}
 
 	public int is_removed(string word_buf, real_ssize_t len) {

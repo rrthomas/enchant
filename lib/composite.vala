@@ -1,6 +1,6 @@
 #! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg internal --pkg gnu broker.vala dict.vala
 /* libenchant: Composite dictionaries
- * Copyright (C) 2024 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2024-2025 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,61 +34,53 @@ public class EnchantCompositeDict : EnchantDict {
 	public EnchantCompositeDict(EnchantBroker broker, owned SList<weak EnchantDict> dict_list) {
 		this.broker = broker;
 		this.dict_list = (owned)dict_list;
-		this.check_method = composite_dict_check;
-		this.suggest_method = composite_dict_suggest;
-		this.add_to_session_method = composite_dict_add_to_session;
-		this.remove_from_session_method = composite_dict_remove_from_session;
 	}
-}
 
-int composite_dict_check(EnchantDict? self, string word_buf, real_size_t len) {
-	if (self == null || word_buf == null)
-		return -1;
-	string word = buf_to_utf8_string(word_buf, (real_ssize_t)len);
-	if (word == null)
-		return -1;
+	public new int check(string word_buf, real_size_t len) {
+		if (this == null || word_buf == null)
+			return -1;
+		string word = buf_to_utf8_string(word_buf, (real_ssize_t)len);
+		if (word == null)
+			return -1;
 
-	// Check word in all dictionaries.
-	// Signal error (-1) if and only if all dictionaries error.
-	var cdict = (EnchantCompositeDict)(self);
-	int err = -1;
-	foreach (EnchantDict dict in cdict.dict_list) {
-		int found = EnchantDict.check(dict, word, (real_ssize_t)len);
-		if (found == 0)
-			return 0;
-		if (found == 1)
-			err = 1;
-	}
-	return err;
-}
-
-[CCode (array_length_pos = 4, array_length_type = "size_t")]
-string[]? composite_dict_suggest(EnchantDict me, string word, real_size_t len) {
-	var cdict = (EnchantCompositeDict)(me);
-	var error = true;
-	var res = new Array<string>();
-	foreach (EnchantDict dict in cdict.dict_list) {
-		var suggs = dict.suggest(word, (real_ssize_t)len);
-		if (suggs != null) {
-			error = false;
-			if (suggs.length > 0)
-				for (real_size_t i = 0; i < suggs.length; i++)
-					res.append_val(suggs[i]);
+		// Check word in all dictionaries.
+		// Signal error (-1) if and only if all dictionaries error.
+		int err = -1;
+		foreach (EnchantDict dict in this.dict_list) {
+			int found = dict.check(word, (real_ssize_t)len);
+			if (found == 0)
+				return 0;
+			if (found == 1)
+				err = 1;
 		}
+		return err;
 	}
-	if (error == true)
-		return null;
-	return res.data;
-}
 
-void composite_dict_add_to_session(EnchantDict me, string word, real_size_t len) {
-	var cdict = (EnchantCompositeDict)(me);
-	assert(cdict.dict_list.length() > 0);
-	cdict.dict_list.data.add_to_session(word, (real_ssize_t)len);
-}
+	[CCode (array_length_pos = 3, array_length_type = "size_t")]
+	public new string[]? suggest(string word, real_size_t len) {
+		var error = true;
+		var res = new Array<string>();
+		foreach (EnchantDict dict in this.dict_list) {
+			var suggs = dict.suggest(word, (real_ssize_t)len);
+			if (suggs != null) {
+				error = false;
+				if (suggs.length > 0)
+					for (real_size_t i = 0; i < suggs.length; i++)
+						res.append_val(suggs[i]);
+			}
+		}
+		if (error == true)
+			return null;
+		return res.steal();
+	}
 
-void composite_dict_remove_from_session(EnchantDict me, string word, real_size_t len) {
-	var cdict = (EnchantCompositeDict)(me);
-	assert(cdict.dict_list.length() > 0);
-	cdict.dict_list.data.remove_from_session(word, (real_ssize_t)len);
+	public new void add_to_session(string word, real_size_t len) {
+		assert(this.dict_list.length() > 0);
+		this.dict_list.data.add_to_session(word, (real_ssize_t)len);
+	}
+
+	public new void remove_from_session(string word, real_size_t len) {
+		assert(this.dict_list.length() > 0);
+		this.dict_list.data.remove_from_session(word, (real_ssize_t)len);
+	}
 }
