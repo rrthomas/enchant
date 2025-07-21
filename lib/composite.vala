@@ -78,7 +78,7 @@ string[]? composite_dict_suggest(EnchantDict me, string word, real_size_t len) {
 	}
 	if (error == true)
 		return null;
-	return res.data;
+	return res.steal();
 }
 
 void composite_dict_add_to_session(EnchantDict me, string word, real_size_t len) {
