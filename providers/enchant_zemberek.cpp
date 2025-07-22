@@ -36,6 +36,8 @@
 #include "enchant-provider.h"
 
 
+static EnchantProvider *provider;
+
 static bool zemberek_service_is_running ()
 {
   GError *Error = NULL;
@@ -174,7 +176,7 @@ zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
       {
         Zemberek* checker = new Zemberek();
 
-        EnchantDict* dict = enchant_dict_new();
+        EnchantDict* dict = enchant_dict_new(provider);
         if (dict == NULL)
                 return NULL;
         dict->user_data = (void *) checker;
@@ -234,7 +236,7 @@ zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 EnchantProvider *
 init_enchant_provider(void)
 {
-    EnchantProvider *provider = enchant_provider_new ();
+    provider = enchant_provider_new ();
     provider->request_dict = zemberek_provider_request_dict;
     provider->dispose_dict = zemberek_provider_dispose_dict;
     provider->identify = zemberek_provider_identify;

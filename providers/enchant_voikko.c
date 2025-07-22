@@ -47,6 +47,8 @@
  * https://voikko.sourceforge.net/
  */
 
+static EnchantProvider *provider;
+
 static int
 voikko_dict_check (EnchantDict * me, const char *const word, size_t len)
 {
@@ -145,7 +147,7 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 
-	EnchantDict *dict = enchant_dict_new ();
+	EnchantDict *dict = enchant_dict_new (provider);
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *)voikko_handle;
@@ -172,7 +174,7 @@ EnchantProvider *init_enchant_provider (void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider = enchant_provider_new ();
+	provider = enchant_provider_new ();
 	if (provider == NULL)
 		return NULL;
 	provider->request_dict = voikko_provider_request_dict;

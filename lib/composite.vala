@@ -32,6 +32,7 @@ public class EnchantCompositeDict : EnchantDict {
 	public SList<weak EnchantDict> dict_list;
 
 	public EnchantCompositeDict(EnchantBroker broker, owned SList<weak EnchantDict> dict_list) {
+		base(null);
 		this.broker = broker;
 		this.dict_list = (owned)dict_list;
 		this.check_method = composite_dict_check;

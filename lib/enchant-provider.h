@@ -114,10 +114,11 @@ char *enchant_relocate (const char *path);
 
 /**
  * enchant_dict_new
+ * @provider: A provider, or %null.
  *
  * Returns a new EnchantDict.
  */
-EnchantDict *enchant_dict_new (void);
+EnchantDict *enchant_dict_new (EnchantProvider *provider);
 
 /**
  * enchant_dict_set_error

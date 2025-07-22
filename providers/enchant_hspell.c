@@ -46,6 +46,8 @@
 
 #define HSPELL_MAIN_SUFFIX ".wgz"
 
+static EnchantProvider *provider;
+
 /**
  * convert struct corlist to **char
  * the **char must be g_freed
@@ -188,7 +190,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 
-	EnchantDict *dict = enchant_dict_new ();
+	EnchantDict *dict = enchant_dict_new (provider);
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *) hspell_dict;
@@ -256,7 +258,7 @@ EnchantProvider *init_enchant_provider (void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider = enchant_provider_new ();
+	provider = enchant_provider_new ();
 	provider->request_dict = hspell_provider_request_dict;
 	provider->dispose_dict = hspell_provider_dispose_dict;
 	provider->identify = hspell_provider_identify;

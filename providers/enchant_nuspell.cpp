@@ -47,6 +47,8 @@
 
 using namespace std;
 
+static EnchantProvider *provider;
+
 // EnchantDict functions
 static int nuspell_dict_check(EnchantDict* me, const char* const word,
                               size_t len)
@@ -110,7 +112,7 @@ nuspell_provider_request_dict(EnchantProvider* me,
 		return nullptr;
 	}
 
-	EnchantDict* dict = enchant_dict_new();
+	EnchantDict* dict = enchant_dict_new(provider);
 	if (dict == nullptr)
 		return nullptr;
 	dict->user_data = static_cast<void*>(dict_cpp.release());
@@ -182,7 +184,7 @@ extern "C" EnchantProvider* init_enchant_provider(void);
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider = enchant_provider_new ();
+	provider = enchant_provider_new ();
 	provider->request_dict = nuspell_provider_request_dict;
 	provider->dispose_dict = nuspell_provider_dispose_dict;
 	provider->dictionary_exists = nuspell_provider_dictionary_exists;

@@ -44,6 +44,8 @@
 #include "enchant-provider.h"
 
 
+static EnchantProvider *provider;
+
 EnchantProvider *init_enchant_provider (void);
 
 static int
@@ -122,7 +124,7 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 
 	AspellSpeller *manager = to_aspell_speller (spell_error);
 
-	EnchantDict *dict = enchant_dict_new ();
+	EnchantDict *dict = enchant_dict_new (provider);
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *) manager;
@@ -187,7 +189,7 @@ aspell_provider_describe (EnchantProvider * me _GL_UNUSED)
 EnchantProvider *
 init_enchant_provider (void)
 {
-	EnchantProvider *provider = enchant_provider_new ();
+	provider = enchant_provider_new ();
 	provider->request_dict = aspell_provider_request_dict;
 	provider->dispose_dict = aspell_provider_dispose_dict;
 	provider->identify = aspell_provider_identify;

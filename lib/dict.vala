@@ -45,6 +45,7 @@ public delegate int DictIsWordCharacter(EnchantDict me, uint32 uc_in, real_size_
 public class EnchantDict {
 	public void *user_data;
 	public EnchantSession session;
+	EnchantProvider? provider;
 	string error;
 
 	// Provider methods
@@ -55,10 +56,13 @@ public class EnchantDict {
 	public DictGetExtraWordCharacters? get_extra_word_characters_method;
 	public DictIsWordCharacter? is_word_character_method;
 
+	public EnchantDict(EnchantProvider? provider) {
+		this.provider = provider;
+	}
+
 	~EnchantDict() {
-		unowned EnchantProvider owner = this.session.provider;
-		if (owner != null)
-			owner.dispose_dict(owner, this);
+		if (this.provider != null)
+			this.provider.dispose_dict(this.provider, this);
 	}
 
 	public unowned string get_extra_word_characters() {
@@ -224,15 +228,14 @@ public class EnchantDict {
 	requires(fn != null)
 	{
 		this.clear_error();
-		unowned EnchantProvider provider = this.session.provider;
 
 		string name;
 		string desc;
 		string file;
 		if (provider != null) {
-			file = provider.module.name();
-			name = provider.identify(provider);
-			desc = provider.describe(provider);
+			file = this.provider.module.name();
+			name = this.provider.identify(provider);
+			desc = this.provider.describe(provider);
 		} else {
 			file = session.personal_filename;
 			name = "Personal Wordlist";

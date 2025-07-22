@@ -26,6 +26,8 @@
 
 #include "enchant-provider.h"
 
+static EnchantProvider *provider;
+
 class AppleSpellChecker
 {
  public:
@@ -270,7 +272,7 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 
 		[ASD->DictionaryName retain];
 
-		EnchantDict * dict = enchant_dict_new ();
+		EnchantDict * dict = enchant_dict_new (provider);
 		if (!dict)
 			return 0;
 
@@ -348,7 +350,7 @@ extern "C" {
 	EnchantProvider *init_enchant_provider (void)
 	{
 		@autoreleasepool {
-			EnchantProvider * provider = enchant_provider_new ();
+			provider = enchant_provider_new ();
 			if (!provider)
 				return 0;
 

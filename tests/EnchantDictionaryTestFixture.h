@@ -63,7 +63,7 @@ MockDictionarySuggest (EnchantDict * ,
 static EnchantDict*
 MockProviderRequestBasicMockDictionary(EnchantProvider *me, const char *)
 {
-    EnchantDict* dict = enchant_dict_new();
+    EnchantDict* dict = enchant_dict_new(me);
     dict->user_data = NULL;
     dict->check = MockDictionaryCheck;
     dict->suggest = MockDictionarySuggest;
