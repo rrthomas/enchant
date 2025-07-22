@@ -141,15 +141,9 @@ public class EnchantDict {
 	   list.  Returns a null-terminated array. */
 	string[]? filter_suggestions(string[] suggs) {
 		var sb = new StrvBuilder();
-		foreach (string sugg in suggs) {
-			if (sugg == null) {
-				this.session.error = @"null entry in suggestions returned by $(this.session.provider.identify(this.session.provider))";
-				return null;
-			}
-			if (sugg.validate() && !this.session.exclude(sugg))
+		foreach (string sugg in suggs)
+			if (sugg != null && sugg.validate() && !this.session.exclude(sugg))
 				sb.add(sugg);
-		}
-
 		return sb.end();
 	}
 
