@@ -1,3 +1,13 @@
+2.8.11 (July 22, 2025)
+----------------------
+
+This release fixes a crash when an empty language tag is given, for example
+to `enchant-2 -p`.
+
+Various aspects of the internal provider API have been simplified, and an
+obsolete header file removed.
+
+
 2.8.10 (June 21, 2025)
 ----------------------
 
