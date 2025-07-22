@@ -64,14 +64,6 @@ TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture,
 }
 
 TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture, 
-             EnchantBrokerRequestPwlDictionary_FileDoesNotExist_SucceedsCreatesFile)
-{
-    _dict = enchant_broker_request_pwl_dict(_broker, _pwlFile.c_str());
-    CHECK(FileExists(_pwlFile));
-    CHECK(_dict);
-}
-
-TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture, 
              EnchantBrokerRequestPwlDictionary_HasPreviousError_ErrorCleared)
 {
   SetErrorOnMockProvider("something bad happened");

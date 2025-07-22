@@ -1,7 +1,7 @@
 #! /usr/bin/env -S vala --vapidir lib --pkg internal pwl.vala
 /* libenchant: Session
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2025 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -57,34 +57,19 @@ public class EnchantSession {
 				provider,
 				Path.build_filename(user_config_dir, "%s.dic".printf(lang)),
 				Path.build_filename(user_config_dir, "%s.exc".printf(lang)),
-				lang,
-				false);
+				lang);
 
-		return EnchantSession.with_pwl(provider, pwl, null, lang, true);
+		return EnchantSession.with_pwl(provider, pwl, null, lang);
 	}
 
 	public static EnchantSession? with_pwl(
 		EnchantProvider? provider,
 		string? pwlname,
 		string? exclname,
-		string lang,
-		bool fail_if_no_pwl
+		string lang
 		) {
-		EnchantPWL pwl = null;
-		if (pwlname != null)
-			pwl = EnchantPWL.with_file(pwlname);
-		if (pwl == null) {
-			if (fail_if_no_pwl)
-				return null;
-			else
-				pwl = EnchantPWL.init();
-		}
-
-		EnchantPWL exclude_pwl = null;
-		if (exclname != null)
-			exclude_pwl = EnchantPWL.with_file(exclname);
-		if (exclude_pwl == null)
-			exclude_pwl = EnchantPWL.init();
+		EnchantPWL pwl = new EnchantPWL(pwlname);
+		EnchantPWL exclude_pwl = new EnchantPWL(exclname);
 
 		EnchantSession session = new EnchantSession();
 		session.pwl = (owned)pwl;

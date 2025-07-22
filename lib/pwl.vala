@@ -1,7 +1,7 @@
 #! /usr/bin/env -S vala --vapidir lib --pkg internal --pkg posix --pkg gnu util.vala
 /* libenchant: Personal word lists
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2025 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -123,39 +123,13 @@ bool is_title_case(string word) {
 
 public class EnchantPWL {
 	public string? filename;
-	public time_t file_changed;
-	public HashTable<string, string> words;
+	public time_t file_changed = 0;
+	public HashTable<string, string> words = new HashTable<string, string>(str_hash, str_equal);
 
-	private EnchantPWL() {}
-
-	/**
-	 * Create and initialise a new, empty PWL
-	 *
-	 * Returns: a new PWL object used to store/check/suggest words.
-	 */
-	public static EnchantPWL init() {
-		return new EnchantPWL() {
-			words = new HashTable<string, string>(str_hash, str_equal),
-		};
-	}
-
-	/**
-	 * Create a PWL and initialize it from a file.
-	 *
-	 * Returns: a new PWL object used to store/check words
-	 * or NULL if the file cannot be opened or created
-	 */
-	[CCode (cname = "enchant_pwl_init_with_file")]
-	public static EnchantPWL? with_file(string file) {
-		var f = FileStream.open(file, "a+");
-		if (f == null)
-			return null;
-		EnchantPWL pwl = new EnchantPWL();
-		pwl.filename = file;
-		pwl.file_changed = 0;
-
-		pwl.refresh_from_file();
-		return pwl;
+	public EnchantPWL(string? filename) {
+		this.filename = filename;
+		if (filename != null)
+			this.refresh_from_file();
 	}
 
 	void add_to_table(string word) {
@@ -197,7 +171,7 @@ public class EnchantPWL {
 
 	public void remove(string word_buf, real_ssize_t len) {
 		// 'check' calls 'refresh_from_file' for us.
-		if (this.check(word_buf, len) == 1)
+		if (this.check(word_buf, len) > 0)
 			return;
 
 		string word = buf_to_utf8_string(word_buf, len);
