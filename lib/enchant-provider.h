@@ -56,9 +56,9 @@ char *enchant_get_user_language(void);
  * enchant_get_user_config_dir
  *
  * Returns a string giving the location of the user's Enchant configuration
- * directory, or NULL on error, or if none exists. Defaults to the value of
- * the environment variable ENCHANT_CONFIG_DIR; if that is not set, then
- * glib's g_get_user_config_dir() is called to get the user's configuration
+ * directory. Defaults to the value of the environment variable
+ * ENCHANT_CONFIG_DIR; if that is not set, or invalid, then glib's
+ * g_get_user_config_dir() is called to get the user's configuration
  * directory, and the sub-directory "enchant" is appended.
  *
  * The returned string must be g_free'd.

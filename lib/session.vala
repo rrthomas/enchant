@@ -46,23 +46,20 @@ public class EnchantSession {
 		this.session_exclude = new GenericSet<string>(str_hash, str_equal);
 	}
 
-	public static EnchantSession? with_implicit_pwl(EnchantProvider? provider, string lang, string? pwl) {
+	public static EnchantSession with_implicit_pwl(EnchantProvider? provider, string lang, string? pwl) {
+		if (pwl != null)
+			return EnchantSession.with_pwl(provider, pwl, null, lang);
+
 		string user_config_dir = enchant_get_user_config_dir();
-		if (user_config_dir == null)
-			return null;
-
 		DirUtils.create_with_parents(user_config_dir, 0700);
-		if (pwl == null)
-			return EnchantSession.with_pwl(
-				provider,
-				Path.build_filename(user_config_dir, "%s.dic".printf(lang)),
-				Path.build_filename(user_config_dir, "%s.exc".printf(lang)),
-				lang);
-
-		return EnchantSession.with_pwl(provider, pwl, null, lang);
+		return EnchantSession.with_pwl(
+			provider,
+			Path.build_filename(user_config_dir, "%s.dic".printf(lang)),
+			Path.build_filename(user_config_dir, "%s.exc".printf(lang)),
+			lang);
 	}
 
-	public static EnchantSession? with_pwl(
+	public static EnchantSession with_pwl(
 		EnchantProvider? provider,
 		string? pwlname,
 		string? exclname,

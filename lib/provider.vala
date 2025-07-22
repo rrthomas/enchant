@@ -1,7 +1,7 @@
 #! /usr/bin/env -S vala --vapidir lib --pkg gnu
 /* enchant: Provider
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2025 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -30,14 +30,12 @@
 
 using Gnu;
 
-string? enchant_get_user_config_dir() {
+string enchant_get_user_config_dir() {
 	unowned string env = Environment.get_variable("ENCHANT_CONFIG_DIR");
 	if (env != null)
 		try {
 			return Filename.to_utf8(env, -1, null, null);
-		} catch (ConvertError e) {
-			return null;
-		}
+		} catch (ConvertError e) {}
 	return Path.build_filename(Environment.get_user_config_dir(), "enchant");
 }
 
@@ -55,9 +53,7 @@ SList enchant_get_conf_dirs() {
 			conf_dirs.append(pkgconfdir);
 	}
 
-	string? user_config_dir = enchant_get_user_config_dir();
-	if (user_config_dir != null)
-		conf_dirs.append(user_config_dir);
+	conf_dirs.append(enchant_get_user_config_dir());
 
 	return conf_dirs;
 }
