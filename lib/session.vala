@@ -38,7 +38,6 @@ public class EnchantSession {
 	public string exclude_filename;
 	public string language_tag;
 
-	public string error;
 	public EnchantProvider provider;
 
 	EnchantSession() {
@@ -99,9 +98,5 @@ public class EnchantSession {
 		return this.session_include.contains(word) ||
 			   (this.pwl.check(word, word.length) == 0 &&
 				this.exclude_pwl.check(word, word.length) != 0);
-	}
-
-	public void clear_error() {
-		this.error = null;
 	}
 }

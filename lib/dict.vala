@@ -45,6 +45,7 @@ public delegate int DictIsWordCharacter(EnchantDict me, uint32 uc_in, real_size_
 public class EnchantDict {
 	public void *user_data;
 	public EnchantSession session;
+	string error;
 
 	// Provider methods
 	public DictCheck check_method;
@@ -105,13 +106,12 @@ public class EnchantDict {
 	}
 
 	public void set_error(string err) {
-		this.session.clear_error();
 		debug("enchant_dict_set_error: %s", err);
-		session.error = err;
+		this.error = err;
 	}
 
 	public unowned string get_error() {
-		return this.session.error;
+		return this.error;
 	}
 
 	/* This is a static method method because Vala does not let us
@@ -124,7 +124,7 @@ public class EnchantDict {
 		if (word == null)
 			return -1;
 
-		self.session.clear_error();
+		self.clear_error();
 
 		/* first, see if it's to be excluded*/
 		if (self.session.exclude(word))
@@ -153,7 +153,7 @@ public class EnchantDict {
 		if (word == null)
 			return null;
 
-		this.session.clear_error();
+		this.clear_error();
 
 		/* Check for suggestions from provider dictionary */
 		string[]? dict_suggs = this.suggest_method(this, word, word.length);
@@ -173,7 +173,7 @@ public class EnchantDict {
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return;
-		this.session.clear_error();
+		this.clear_error();
 		this.session.add(word);
 		if (this.add_to_session_method != null)
 			this.add_to_session_method(this, word, word.length);
@@ -183,7 +183,7 @@ public class EnchantDict {
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return 0;
-		this.session.clear_error();
+		this.clear_error();
 		return session.contains(word) ? 1 : 0;
 	}
 
@@ -197,7 +197,7 @@ public class EnchantDict {
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return;
-		this.session.clear_error();
+		this.clear_error();
 		this.session.remove(word);
 		if (this.remove_from_session_method != null)
 			this.remove_from_session_method(this, word, word.length);
@@ -207,7 +207,7 @@ public class EnchantDict {
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return 0;
-		this.session.clear_error();
+		this.clear_error();
 		return session.exclude(word) ? 1 : 0;
 	}
 
@@ -216,14 +216,14 @@ public class EnchantDict {
 								  string cor, real_ssize_t cor_len) { }
 
 	public void free_string_list(char **string_list) {
-		this.session.clear_error();
+		this.clear_error();
 		strfreev((string[])(owned)string_list);
 	}
 
 	public void describe(EnchantDictDescribeFn fn, void *user_data)
 	requires(fn != null)
 	{
-		this.session.clear_error();
+		this.clear_error();
 		unowned EnchantProvider provider = this.session.provider;
 
 		string name;
@@ -241,5 +241,9 @@ public class EnchantDict {
 
 		string tag = session.language_tag;
 		fn(tag, name, desc, file, user_data);
+	}
+
+	public void clear_error() {
+		this.error = null;
 	}
 }
