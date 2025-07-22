@@ -61,7 +61,7 @@ public class EnchantSession {
 
 	public static EnchantSession with_pwl(
 		EnchantProvider? provider,
-		string? pwlname,
+		string pwlname,
 		string? exclname,
 		string lang
 		) {
