@@ -262,15 +262,11 @@ public class EnchantBroker {
 	}
 
 	unowned EnchantDict? _request_dict(string tag, string? pwl) {
-		SList<unowned EnchantProvider> list = this.get_ordered_providers(tag);
-		EnchantDict? dict = null;
-		foreach (unowned EnchantProvider provider in list) {
-			dict = provider.request_dict(provider, tag);
+		foreach (unowned EnchantProvider provider in this.get_ordered_providers(tag)) {
+			EnchantDict? dict = provider.request_dict(provider, tag);
 			if (dict != null) {
-				unowned var dict_ref = this.new_dict(dict);
-				var session = EnchantSession.with_implicit_pwl(provider, tag, pwl);
-				dict.session = session;
-				return dict_ref;
+				dict.session = EnchantSession.with_implicit_pwl(provider, tag, pwl);
+				return this.new_dict(dict);
 			}
 		}
 
