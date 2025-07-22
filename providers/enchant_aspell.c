@@ -124,7 +124,7 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 
 	AspellSpeller *manager = to_aspell_speller (spell_error);
 
-	EnchantDict *dict = enchant_dict_new (provider);
+	EnchantDict *dict = enchant_dict_new (provider, tag);
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *) manager;

@@ -45,7 +45,7 @@ MockEnGbAndQaaProviderRequestDictionary(EnchantProvider * me, const char *tag)
   	EnchantDict *dict = NULL;
 
     if(MockEnGbAndQaaProviderDictionaryExists(me, tag)){
-	    dict = enchant_dict_new (me);
+	    dict = enchant_dict_new (me, tag);
     }
 	return dict;
 }

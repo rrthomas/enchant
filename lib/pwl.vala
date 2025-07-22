@@ -298,7 +298,7 @@ string[]? suggest_impl(EnchantDict me, string word, real_size_t len) {
 
 public class EnchantPwlDict : EnchantDict {
 	public EnchantPwlDict(EnchantSession session) {
-		base(null);
+		base(null, "Personal Wordlist");
 		this.session = session;
 		this.check_method = check_impl;
 		this.suggest_method = suggest_impl;

@@ -115,10 +115,12 @@ char *enchant_relocate (const char *path);
 /**
  * enchant_dict_new
  * @provider: A provider, or %null.
+ * @tag: The language tag, or a description, for a non-language-specific
+ * dictionary.
  *
  * Returns a new EnchantDict.
  */
-EnchantDict *enchant_dict_new (EnchantProvider *provider);
+EnchantDict *enchant_dict_new (EnchantProvider *provider, const char *tag);
 
 /**
  * enchant_dict_set_error

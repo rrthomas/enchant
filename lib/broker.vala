@@ -252,7 +252,7 @@ public class EnchantBroker {
 		 * there is no need for complementary exclude file to add a word to. The word just needs to be
 		 * removed from the broker pwl file
 		 */
-		EnchantSession? session = EnchantSession.with_pwl(pwl, null, "Personal Wordlist");
+		EnchantSession? session = EnchantSession.with_pwl(pwl, null);
 		if (session == null) {
 			this.error = @"Couldn't open personal wordlist '$(pwl)'";
 			return null;
@@ -301,7 +301,7 @@ public class EnchantBroker {
 			return dict_list.data;
 
 		// Create the composite dictionary
-		var comp_dict = new EnchantCompositeDict(this, (owned)dict_list);
+		var comp_dict = new EnchantCompositeDict(this, (owned)dict_list, composite_tag);
 		unowned var dict = this.new_dict(comp_dict);
 		dict.session = EnchantSession.with_implicit_pwl(tags[0], pwl);
 		return dict;

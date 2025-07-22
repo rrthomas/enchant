@@ -31,7 +31,7 @@ TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
     enchant_dict_describe(_dict, EnchantSingleDictionaryDescribeCallback, &_description);
     CHECK(callbackCalled);
     CHECK(_description.DataIsComplete());
-    CHECK_EQUAL(std::string("qaa"), _description.LanguageTag);
+    CHECK_EQUAL(languageTag, _description.LanguageTag);
 }
 
 TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,

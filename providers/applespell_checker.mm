@@ -272,7 +272,7 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 
 		[ASD->DictionaryName retain];
 
-		EnchantDict * dict = enchant_dict_new (provider);
+		EnchantDict * dict = enchant_dict_new (provider, tag);
 		if (!dict)
 			return 0;
 

@@ -47,6 +47,7 @@ public class EnchantDict {
 	public EnchantSession session;
 	EnchantProvider? provider;
 	string error;
+	string language_tag;
 
 	// Provider methods
 	public DictCheck check_method;
@@ -56,8 +57,9 @@ public class EnchantDict {
 	public DictGetExtraWordCharacters? get_extra_word_characters_method;
 	public DictIsWordCharacter? is_word_character_method;
 
-	public EnchantDict(EnchantProvider? provider) {
+	public EnchantDict(EnchantProvider? provider, string tag) {
 		this.provider = provider;
+		this.language_tag = tag;
 	}
 
 	~EnchantDict() {
@@ -242,8 +244,7 @@ public class EnchantDict {
 			desc = "Personal Wordlist";
 		}
 
-		string tag = session.language_tag;
-		fn(tag, name, desc, file, user_data);
+		fn(this.language_tag, name, desc, file, user_data);
 	}
 
 	public void clear_error() {

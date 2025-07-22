@@ -112,7 +112,7 @@ nuspell_provider_request_dict(EnchantProvider* me,
 		return nullptr;
 	}
 
-	EnchantDict* dict = enchant_dict_new(provider);
+	EnchantDict* dict = enchant_dict_new(provider, tag);
 	if (dict == nullptr)
 		return nullptr;
 	dict->user_data = static_cast<void*>(dict_cpp.release());

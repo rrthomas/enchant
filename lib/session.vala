@@ -36,7 +36,6 @@ public class EnchantSession {
 
 	public string personal_filename;
 	public string exclude_filename;
-	public string language_tag;
 
 	EnchantSession() {
 		this.session_include = new GenericSet<string>(str_hash, str_equal);
@@ -45,28 +44,22 @@ public class EnchantSession {
 
 	public static EnchantSession with_implicit_pwl(string lang, string? pwl) {
 		if (pwl != null)
-			return EnchantSession.with_pwl(pwl, null, lang);
+			return EnchantSession.with_pwl(pwl, null);
 
 		string user_config_dir = enchant_get_user_config_dir();
 		DirUtils.create_with_parents(user_config_dir, 0700);
 		return EnchantSession.with_pwl(
 			Path.build_filename(user_config_dir, "%s.dic".printf(lang)),
-			Path.build_filename(user_config_dir, "%s.exc".printf(lang)),
-			lang);
+			Path.build_filename(user_config_dir, "%s.exc".printf(lang)));
 	}
 
-	public static EnchantSession with_pwl(
-		string pwlname,
-		string? exclname,
-		string lang
-		) {
+	public static EnchantSession with_pwl(string pwlname, string? exclname) {
 		EnchantPWL pwl = new EnchantPWL(pwlname);
 		EnchantPWL exclude_pwl = new EnchantPWL(exclname);
 
 		EnchantSession session = new EnchantSession();
 		session.pwl = (owned)pwl;
 		session.exclude_pwl = (owned)exclude_pwl;
-		session.language_tag = lang;
 		session.personal_filename = pwlname;
 		session.exclude_filename = exclname;
 
