@@ -25,7 +25,7 @@ libenchant_@ENCHANT_MAJOR_VERSION@_la_LIBADD = $(top_builddir)/libgnu/libgnu.la 
 libenchant_@ENCHANT_MAJOR_VERSION@_la_LDFLAGS = -no-undefined -export-symbols-regex '^enchant_.*' -version-info $(VERSION_INFO)
 
 libenchant_@ENCHANT_MAJOR_VERSION@_la_SOURCES = \
-	enchant.h enchant-provider.h pwl.h \
+	enchant.h enchant-provider.h \
 	api.vala \
 	broker.vala \
 	composite.vala \
