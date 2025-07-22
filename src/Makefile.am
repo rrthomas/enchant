@@ -53,7 +53,7 @@ enchant_lsmod_@ENCHANT_MAJOR_VERSION@_VALAFLAGS = $(AM_VALAFLAGS) --pkg util
 
 EXTRA_DIST = enchant.1.in enchant-lsmod.1.in util.h $(VAPIS)
 
-loc:
+loc-local:
 	$(CLOC) $(ALL_SOURCE_FILES)
 
 ALL_SOURCE_FILES = \

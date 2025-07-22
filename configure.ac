@@ -231,8 +231,10 @@ dnl Experimental/deprecated providers
 ENCHANT_CHECK_PKG_CONFIG_PROVIDER([zemberek], [ZEMBEREK], [dbus-glib-1 >= 0.62], [no])
 
 dnl Counting code
-CLOC="cloc --force-lang='Bourne Shell',conf"
-AC_SUBST([CLOC])
+AM_EXTRA_RECURSIVE_TARGETS([loc])
+AC_PATH_PROG(CLOC, cloc, true)
+CLOC_OPTS="--autoconf --force-lang=C,h --force-lang='Bourne Shell',conf"
+AC_SUBST([CLOC_OPTS])
 
 dnl =======================================================================================
 

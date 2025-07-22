@@ -61,9 +61,11 @@ enchant.html: enchant.5
 
 EXTRA_DIST = $(libenchant_data_DATA) $(VAPIS)
 
-loc:
+loc-local:
 	$(CLOC) $(ALL_SOURCE_FILES)
 
 ALL_SOURCE_FILES = \
 	Makefile.am \
-	*.vala
+	*.vala \
+	$(libenchant_include_HEADERS) \
+	enchant-provider.h

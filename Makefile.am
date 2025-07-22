@@ -34,16 +34,7 @@ ALL_SOURCE_FILES = \
 	bootstrap.conf \
 	configure.ac \
 	Makefile.am \
-	libgnu/Makefile.am \
-	lib/Makefile.am \
-	lib/*.vala \
-	src/Makefile.am \
-	src/*.h \
-	src/enchant*.vala \
-	providers/Makefile.am \
-	providers/*.[ch] \
-	providers/*.cpp \
-	providers/*.mm
+	libgnu/Makefile.am
 
 .PHONY:	doxygen
 doxygen: Doxyfile
@@ -51,7 +42,7 @@ doxygen: Doxyfile
 
 dist: doxygen
 
-loc:
+loc-local:
 	$(CLOC) $(ALL_SOURCE_FILES)
 
 # Ignore built files that are part of the distribution (specifically,
