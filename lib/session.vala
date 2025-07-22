@@ -48,7 +48,7 @@ public class EnchantSession {
 
 	public static EnchantSession? with_implicit_pwl(EnchantProvider? provider, string lang, string? pwl) {
 		string user_config_dir = enchant_get_user_config_dir();
-		if (user_config_dir == null || lang == null)
+		if (user_config_dir == null)
 			return null;
 
 		DirUtils.create_with_parents(user_config_dir, 0700);
