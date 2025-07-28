@@ -453,12 +453,19 @@ hunspell_provider_describe (EnchantProvider * me _GL_UNUSED)
 	return "Hunspell Provider";
 }
 
+static void
+hunspell_provider_dispose (EnchantProvider * me _GL_UNUSED)
+{
+	provider = NULL;
+}
+
 EnchantProvider *init_enchant_provider (void);
 
 EnchantProvider *
 init_enchant_provider (void)
 {
 	provider = enchant_provider_new ();
+	provider->dispose = hunspell_provider_dispose;
 	provider->request_dict = hunspell_provider_request_dict;
 	provider->dispose_dict = hunspell_provider_dispose_dict;
 	provider->dictionary_exists = hunspell_provider_dictionary_exists;

@@ -179,12 +179,19 @@ nuspell_provider_list_dicts(EnchantProvider* me,
 	return dictionary_list;
 }
 
+static void
+nuspell_provider_dispose (_GL_UNUSED EnchantProvider *me)
+{
+	provider = nullptr;
+}
+
 extern "C" EnchantProvider* init_enchant_provider(void);
 
 EnchantProvider *
 init_enchant_provider (void)
 {
 	provider = enchant_provider_new ();
+	provider->dispose = nuspell_provider_dispose;
 	provider->request_dict = nuspell_provider_request_dict;
 	provider->dispose_dict = nuspell_provider_dispose_dict;
 	provider->dictionary_exists = nuspell_provider_dictionary_exists;

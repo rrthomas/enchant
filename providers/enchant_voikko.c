@@ -169,6 +169,12 @@ voikko_provider_describe (EnchantProvider * me _GL_UNUSED)
 	return "Voikko Provider";
 }
 
+static void
+voikko_provider_dispose (EnchantProvider * me _GL_UNUSED)
+{
+	provider = NULL;
+}
+
 EnchantProvider *init_enchant_provider (void);
 
 EnchantProvider *
@@ -177,6 +183,7 @@ init_enchant_provider (void)
 	provider = enchant_provider_new ();
 	if (provider == NULL)
 		return NULL;
+	provider->dispose = voikko_provider_dispose;
 	provider->request_dict = voikko_provider_request_dict;
 	provider->dispose_dict = voikko_provider_dispose_dict;
 	provider->dictionary_exists = voikko_provider_dictionary_exists;

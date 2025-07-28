@@ -253,12 +253,19 @@ hspell_provider_describe (EnchantProvider * me _GL_UNUSED)
 	return "Hspell Provider";
 }
 
+static void
+hspell_provider_dispose (EnchantProvider * me _GL_UNUSED)
+{
+	provider = NULL;
+}
+
 EnchantProvider *init_enchant_provider (void);
 
 EnchantProvider *
 init_enchant_provider (void)
 {
 	provider = enchant_provider_new ();
+	provider->dispose = hspell_provider_dispose;
 	provider->request_dict = hspell_provider_request_dict;
 	provider->dispose_dict = hspell_provider_dispose_dict;
 	provider->identify = hspell_provider_identify;

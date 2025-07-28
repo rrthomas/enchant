@@ -186,10 +186,17 @@ aspell_provider_describe (EnchantProvider * me _GL_UNUSED)
 	return "Aspell Provider";
 }
 
+static void
+aspell_provider_dispose (EnchantProvider * me _GL_UNUSED)
+{
+	provider = NULL;
+}
+
 EnchantProvider *
 init_enchant_provider (void)
 {
 	provider = enchant_provider_new ();
+	provider->dispose = aspell_provider_dispose;
 	provider->request_dict = aspell_provider_request_dict;
 	provider->dispose_dict = aspell_provider_dispose_dict;
 	provider->identify = aspell_provider_identify;

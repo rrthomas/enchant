@@ -333,6 +333,7 @@ static void appleSpell_provider_dispose (EnchantProvider * me)
 			if (checker)
 				delete checker;
 		}
+	provider = 0;
 	}
 }
 

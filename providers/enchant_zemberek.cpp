@@ -233,10 +233,17 @@ zemberek_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
     }
 }
 
+static
+zemberek_provider_dispose (EnchantProvider * me _GL_UNUSED)
+{
+	provider = NULL;
+}
+
 EnchantProvider *
 init_enchant_provider(void)
 {
     provider = enchant_provider_new ();
+    provider->dispose = zemberek_provider_dispose;
     provider->request_dict = zemberek_provider_request_dict;
     provider->dispose_dict = zemberek_provider_dispose_dict;
     provider->identify = zemberek_provider_identify;
