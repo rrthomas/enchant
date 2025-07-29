@@ -27,7 +27,7 @@
 
 struct DictionarySuggest_TestFixture : Provider_TestFixture
 {
-    EnchantDict* _dict;
+    EnchantProviderDict* _dict;
     const char *_provider_name;
     std::vector<std::string> _addedWords;
     //Setup
@@ -43,7 +43,7 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
         ReleaseDictionary(_dict);
     }
 
-    std::vector<std::string> GetSuggestionsFromWord(EnchantDict* dict, const std::string& word)
+    std::vector<std::string> GetSuggestionsFromWord(EnchantProviderDict* dict, const std::string& word)
     {
         std::vector<std::string> result;
         if(dict && dict->suggest)
@@ -121,7 +121,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
 TEST_FIXTURE(DictionarySuggest_TestFixture, 
              Suggest_HandlesNFC)
 {
-    EnchantDict* dict = GetDictionary("fr_FR");
+    EnchantProviderDict* dict = GetDictionary("fr_FR");
     if(dict && dict->suggest)
     {
       std::vector<std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"fran\x00e7" L"ais")); //NFC latin small letter c with cedilla
@@ -133,7 +133,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
 TEST_FIXTURE(DictionarySuggest_TestFixture, 
              Suggest_HandlesNFD)
 {
-    EnchantDict* dict = GetDictionary("fr_FR");
+    EnchantProviderDict* dict = GetDictionary("fr_FR");
     if(dict && dict->suggest)
     {
       std::vector<std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"franc\x0327" L"ais")); //NFD combining cedilla

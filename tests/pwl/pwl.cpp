@@ -30,7 +30,7 @@
 #include <algorithm>
 
 static char **
-DictionarySuggestsSat (EnchantDict * dict, const char *const word, size_t len, size_t * out_n_suggs)
+DictionarySuggestsSat (EnchantProviderDict * dict, const char *const word, size_t len, size_t * out_n_suggs)
 {
     *out_n_suggs = 1;
     char **sugg_arr = NULL;
@@ -41,10 +41,9 @@ DictionarySuggestsSat (EnchantDict * dict, const char *const word, size_t len, s
     return sugg_arr;
 }
 
-static EnchantDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantProviderDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
 {
-    
-    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    EnchantProviderDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->suggest = DictionarySuggestsSat;
     return dict;
 }

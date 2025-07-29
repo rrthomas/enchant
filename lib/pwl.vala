@@ -287,19 +287,18 @@ public class EnchantPWL {
 	}
 }
 
-int check_impl(EnchantDict me, string word, real_size_t len) {
+int check_impl(EnchantProviderDict me, string word, real_size_t len) {
 	return 1;
 }
 
 [CCode (array_length_type = "size_t")]
-string[]? suggest_impl(EnchantDict me, string word, real_size_t len) {
+string[]? suggest_impl(EnchantProviderDict me, string word, real_size_t len) {
 	return null;
 }
 
-public class EnchantPwlDict : EnchantDict {
-	public EnchantPwlDict(EnchantSession session) {
+public class EnchantPwlDict : EnchantProviderDict {
+	public EnchantPwlDict() {
 		base(null, "Personal Wordlist");
-		this.session = session;
 		this.check_method = check_impl;
 		this.suggest_method = suggest_impl;
 	}

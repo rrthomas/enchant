@@ -39,16 +39,15 @@ struct EnchantDictionaryIsWordCharacterTestFixtureBase : EnchantDictionaryTestFi
 };
 
 static int
-MyMockDictionaryIsWordCharacter (EnchantDict * dict, uint32_t uc, size_t n)
+MyMockDictionaryIsWordCharacter (EnchantProviderDict * dict, uint32_t uc, size_t n)
 {
     dictIsWordCharacterCalled = true;
     return 0;
 }
 
-static EnchantDict* MockProviderRequestIsWordCharacterMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantProviderDict* MockProviderRequestIsWordCharacterMockDictionary(EnchantProvider * me, const char *tag)
 {
-    
-    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    EnchantProviderDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->is_word_character = MyMockDictionaryIsWordCharacter;
     return dict;
 }
@@ -73,10 +72,9 @@ struct EnchantDictionaryIsWordCharacter_TestFixture : EnchantDictionaryIsWordCha
 
 
 
-static EnchantDict* MockProviderRequestNoIsWordCharacterMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantProviderDict* MockProviderRequestNoIsWordCharacterMockDictionary(EnchantProvider * me, const char *tag)
 {
-    
-    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    EnchantProviderDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->is_word_character = NULL;
     return dict;
 }

@@ -28,8 +28,8 @@
 
 struct DictionaryCheck_TestFixture : Provider_TestFixture
 {
-    typedef std::multimap<EnchantDict*, std::string> AddedWordsByDict;
-    EnchantDict* _dict;
+    typedef std::multimap<EnchantProviderDict*, std::string> AddedWordsByDict;
+    EnchantProviderDict* _dict;
     const char *_provider_name;
     AddedWordsByDict _addedWordsByDict;
 
@@ -53,7 +53,7 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
         ReleaseDictionary(_dict);
     }
 
-    virtual void ReleaseDictionary(EnchantDict* dict){
+    virtual void ReleaseDictionary(EnchantProviderDict* dict){
         std::pair<AddedWordsByDict::const_iterator,
                   AddedWordsByDict::const_iterator>
                   addedWords = _addedWordsByDict.equal_range(dict);
@@ -68,7 +68,7 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
         return IsWordInDictionary(_dict, word);
     }
 
-    static bool IsWordInDictionary(EnchantDict* dict, const std::string& word)
+    static bool IsWordInDictionary(EnchantProviderDict* dict, const std::string& word)
     {
         assert(dict && dict->check); // tests must check this before calling
 
@@ -80,7 +80,7 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
         return AddWordToDictionary(_dict, word);
     }
 
-    bool AddWordToDictionary(EnchantDict* dict, const std::string& word)
+    bool AddWordToDictionary(EnchantProviderDict* dict, const std::string& word)
     {
         if(dict == NULL)
         {
@@ -137,7 +137,7 @@ TEST_FIXTURE(DictionaryCheck_TestFixture,
 TEST_FIXTURE(DictionaryCheck_TestFixture, 
              IsWordInDictionary_SuccessfulCheckWithComposedAndDecomposed)
 {
-    EnchantDict* dict = GetDictionary("fr_FR");
+    EnchantProviderDict* dict = GetDictionary("fr_FR");
     if(dict && dict->check)
     {
         CHECK( IsWordInDictionary(dict, Convert(L"Fran\x00e7" L"ais")) ); //NFC latin small letter c with cedilla

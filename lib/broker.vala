@@ -76,7 +76,7 @@ delegate void EnchantPreConfigureFunc(EnchantProvider provider, string module_di
 public class EnchantBroker {
 	SList<EnchantProvider> provider_list;   /* list of all of the spelling backend providers */
 	HashTable<string, string> provider_ordering; /* map of language tag -> provider order */
-	GenericSet<EnchantDict> dicts;
+	GenericSet<EnchantDict> sessions;
 
 	string _error;
 
@@ -87,7 +87,7 @@ public class EnchantBroker {
 
 		this.load_providers();
 		this.load_provider_ordering();
-		this.dicts = new GenericSet<EnchantDict>(direct_hash, direct_equal);
+		this.sessions = new GenericSet<EnchantDict>(direct_hash, direct_equal);
 	}
 
 	~EnchantBroker() {
@@ -252,22 +252,20 @@ public class EnchantBroker {
 		 * there is no need for complementary exclude file to add a word to. The word just needs to be
 		 * removed from the broker pwl file
 		 */
-		EnchantSession? session = EnchantSession.with_pwl(pwl, null);
+		EnchantDict? session = EnchantDict.with_pwl(new EnchantPwlDict(), pwl, null);
 		if (session == null) {
 			this.error = @"Couldn't open personal wordlist '$(pwl)'";
 			return null;
 		}
 
-		return this.new_dict(new EnchantPwlDict(session));
+		return this.new_dict(session);
 	}
 
 	unowned EnchantDict? _request_dict(string tag, string? pwl) {
 		foreach (unowned EnchantProvider provider in this.get_ordered_providers(tag)) {
-			EnchantDict? dict = provider.request_dict(provider, tag);
-			if (dict != null) {
-				dict.session = EnchantSession.with_implicit_pwl(tag, pwl);
-				return this.new_dict(dict);
-			}
+			EnchantProviderDict? dict = provider.request_dict(provider, tag);
+			if (dict != null)
+				return this.new_dict(EnchantDict.with_implicit_pwl(dict, tag, pwl));
 		}
 
 		return null;
@@ -285,26 +283,24 @@ public class EnchantBroker {
 		this.clear_error();
 
 		// Get the dictionaries, and return null if none found
-		var dict_list = new SList<weak EnchantDict>();
+		var session_list = new SList<weak EnchantDict>();
 		foreach (unowned string tag in tags) {
 			string normalized_tag = normalize_dictionary_tag(tag);
-			unowned EnchantDict dict = this._request_dict(normalized_tag, pwl);
-			if (dict == null)
-				dict = this._request_dict(iso_639_from_tag(normalized_tag), pwl);
-			if (dict == null)
+			unowned EnchantDict? session = this._request_dict(normalized_tag, pwl);
+			if (session == null)
+				session = this._request_dict(iso_639_from_tag(normalized_tag), pwl);
+			if (session == null)
 				return null;
-			dict_list.append(dict);
+			session_list.append(session);
 		}
 
 		// If there was only one tag, return a single dictionary.
-		if (dict_list.length() == 1)
-			return dict_list.data;
+		if (session_list.length() == 1)
+			return session_list.data;
 
 		// Create the composite dictionary
-		var comp_dict = new EnchantCompositeDict(this, (owned)dict_list, composite_tag);
-		unowned var dict = this.new_dict(comp_dict);
-		dict.session = EnchantSession.with_implicit_pwl(tags[0], pwl);
-		return dict;
+		var comp_dict = new EnchantCompositeDict(this, (owned)session_list, composite_tag);
+		return this.new_dict(EnchantDict.with_implicit_pwl(comp_dict, tags[0], pwl));
 	}
 
 	public unowned EnchantDict? request_dict(string tag) {
@@ -403,14 +399,14 @@ public class EnchantBroker {
 		return exists;
 	}
 
-	public unowned EnchantDict new_dict(EnchantDict dict) {
-		this.dicts.add(dict);
-		unowned var dict_ref = dict;
-		return dict_ref;
+	public unowned EnchantDict new_dict(EnchantDict session) {
+		this.sessions.add(session);
+		unowned var session_ref = session;
+		return session_ref;
 	}
 
-	public void free_dict(EnchantDict dict) {
-		this.dicts.remove(dict);
+	public void free_dict(EnchantDict session) {
+		this.sessions.remove(session);
 		this.clear_error();
 	}
 }

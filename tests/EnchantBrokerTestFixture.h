@@ -39,19 +39,19 @@ MockEnGbAndQaaProviderDictionaryExists (EnchantProvider *,
 }
 
 
-static EnchantDict*
+static EnchantProviderDict*
 MockEnGbAndQaaProviderRequestDictionary(EnchantProvider * me, const char *tag)
 {
-  	EnchantDict *dict = NULL;
+    EnchantProviderDict *dict = NULL;
 
     if(MockEnGbAndQaaProviderDictionaryExists(me, tag)){
-	    dict = enchant_dict_new (me, tag);
+	    dict = enchant_provider_dict_new (me, tag);
     }
 	return dict;
 }
 
 static void
-MockProviderDisposeDictionary (EnchantProvider *, EnchantDict * dict)
+MockProviderDisposeDictionary (EnchantProvider *, EnchantProviderDict * dict)
 {
 }
 

@@ -61,7 +61,7 @@ struct EnchantDictionarySuggestTestFixtureBase : EnchantDictionaryTestFixture
 };
 
 static char **
-MyMockDictionarySuggest (EnchantDict * dict, const char *const word, size_t len, size_t * out_n_suggs)
+MyMockDictionarySuggest (EnchantProviderDict * dict, const char *const word, size_t len, size_t * out_n_suggs)
 {
     dictSuggestCalled = true;
     suggestWord = std::string(word,len);
@@ -94,10 +94,9 @@ MyMockDictionarySuggest (EnchantDict * dict, const char *const word, size_t len,
     return sugg_arr;
 }
 
-static EnchantDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantProviderDict* MockProviderRequestSuggestMockDictionary(EnchantProvider * me, const char *tag)
 {
-    
-    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    EnchantProviderDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->suggest = MyMockDictionarySuggest;
     return dict;
 }

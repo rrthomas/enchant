@@ -69,18 +69,18 @@ corlist2strv (struct corlist *cl, size_t nb_sugg)
 }
 
 static char *
-hspell_convert_to_iso8859_8 (EnchantDict *me, const char *const word, size_t len)
+hspell_convert_to_iso8859_8 (EnchantProviderDict *me, const char *const word, size_t len)
 {
 	/* convert to iso 8859-8 */
 	gsize length;
 	char *iso_word = g_convert (word, len, "iso8859-8", "utf-8", NULL, &length, NULL);
 	if (iso_word == NULL)
-		enchant_dict_set_error (me, "word not valid Hebrew (could not be converted to ISO-8859-8)");
+		enchant_provider_dict_set_error (me, "word not valid Hebrew (could not be converted to ISO-8859-8)");
 	return iso_word;
 }
 
 static int
-hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
+hspell_dict_check (EnchantProviderDict * me, const char *const word, size_t len)
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
 	char *iso_word = hspell_convert_to_iso8859_8 (me, word, len);
@@ -103,7 +103,7 @@ hspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static char **
-hspell_dict_suggest (EnchantDict * me, const char *const word,
+hspell_dict_suggest (EnchantProviderDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)me->user_data;
@@ -152,7 +152,7 @@ hspell_provider_enum_dict_files (const char * const directory)
 	return out_dicts;
 }
 
-static EnchantDict *
+static EnchantProviderDict *
 hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	g_debug("hspell_provider_request_dict");
@@ -190,7 +190,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 
-	EnchantDict *dict = enchant_dict_new (provider, tag);
+	EnchantProviderDict *dict = enchant_provider_dict_new (provider, tag);
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *) hspell_dict;
@@ -201,7 +201,7 @@ hspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 }
 
 static void
-hspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+hspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantProviderDict * dict)
 {
 	struct dict_radix *hspell_dict = (struct dict_radix *)dict->user_data;
 	hspell_uninit (hspell_dict);

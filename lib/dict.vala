@@ -1,7 +1,7 @@
-#! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg internal provider.vala session.vala
-/* enchant: Dict
+#! /usr/bin/env -S vala --vapidir lib --pkg internal pwl.vala
+/* libenchant: Dict
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2024 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2025 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,55 +28,80 @@
  * do so, delete this exception statement from your version.
  */
 
-[CCode (has_target = false)]
-public delegate int DictCheck(EnchantDict me, string word, real_size_t len);
-/* returns utf8*/
-[CCode (has_target = false, array_length_type = "size_t")]
-public delegate string[]? DictSuggest(EnchantDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate void DictAddToSession(EnchantDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate void DictRemoveFromSession(EnchantDict me, string word, real_size_t len);
-[CCode (has_target = false)]
-public delegate unowned string DictGetExtraWordCharacters(EnchantDict me);
-[CCode (has_target = false)]
-public delegate int DictIsWordCharacter(EnchantDict me, uint32 uc_in, real_size_t n);
-
 public class EnchantDict {
-	public void *user_data;
-	public EnchantSession session;
-	EnchantProvider? provider;
-	string error;
-	string language_tag;
+	public GenericSet<string> session_include;
+	public GenericSet<string> session_exclude;
+	public EnchantPWL pwl;
+	public EnchantPWL exclude_pwl;
+	EnchantProviderDict dict;
 
-	// Provider methods
-	public DictCheck check_method;
-	public DictSuggest suggest_method;
-	public DictAddToSession? add_to_session_method;
-	public DictRemoveFromSession? remove_from_session_method;
-	public DictGetExtraWordCharacters? get_extra_word_characters_method;
-	public DictIsWordCharacter? is_word_character_method;
+	public string personal_filename;
+	public string exclude_filename;
 
-	public EnchantDict(EnchantProvider? provider, string tag) {
-		this.provider = provider;
-		this.language_tag = tag;
+	EnchantDict() {
+		this.session_include = new GenericSet<string>(str_hash, str_equal);
+		this.session_exclude = new GenericSet<string>(str_hash, str_equal);
 	}
 
-	~EnchantDict() {
-		if (this.provider != null)
-			this.provider.dispose_dict(this.provider, this);
+	public static EnchantDict with_implicit_pwl(EnchantProviderDict dict, string lang, string? pwl) {
+		if (pwl != null)
+			return EnchantDict.with_pwl(dict, pwl, null);
+
+		string user_config_dir = enchant_get_user_config_dir();
+		DirUtils.create_with_parents(user_config_dir, 0700);
+		return EnchantDict.with_pwl(
+			dict,
+			Path.build_filename(user_config_dir, "%s.dic".printf(lang)),
+			Path.build_filename(user_config_dir, "%s.exc".printf(lang)));
 	}
 
+	public static EnchantDict with_pwl(EnchantProviderDict dict, string pwlname, string? exclname) {
+		EnchantPWL pwl = new EnchantPWL(pwlname);
+		EnchantPWL exclude_pwl = new EnchantPWL(exclname);
+
+		EnchantDict session = new EnchantDict();
+		session.dict = dict;
+		session.pwl = (owned)pwl;
+		session.exclude_pwl = (owned)exclude_pwl;
+		session.personal_filename = pwlname;
+		session.exclude_filename = exclname;
+
+		return session;
+	}
+
+	public void session_add(string word) {
+		this.session_exclude.remove(word);
+		this.session_include.add(word);
+	}
+
+	public void session_remove(string word) {
+		this.session_include.remove(word);
+		this.session_exclude.add(word);
+	}
+
+	public bool exclude(string word) {
+		return !this.session_include.contains(word) &&
+			   (this.session_exclude.contains(word) ||
+				this.exclude_pwl.check(word, word.length) == 0);
+	}
+
+	public bool contains(string word) {
+		return this.session_include.contains(word) ||
+			   (this.pwl.check(word, word.length) == 0 &&
+				this.exclude_pwl.check(word, word.length) != 0);
+	}
+
+	// Dictionary methods
 	public unowned string get_extra_word_characters() {
-		return this.get_extra_word_characters_method != null ?
-			   this.get_extra_word_characters_method(this) : "";
+		return dict.get_extra_word_characters_method != null ?
+			   dict.get_extra_word_characters_method(dict) : "";
 	}
 
 	public static int is_word_character(EnchantDict? self, uint32 uc_in, real_size_t n)
 	requires(n <= 2)
 	{
-		if (self != null && self.is_word_character_method != null)
-			return self.is_word_character_method(self, uc_in, n);
+		if (self != null && self.dict.is_word_character_method != null)
+			return self.dict.is_word_character_method(self.dict, uc_in, n);
 
 		unichar uc = (unichar)uc_in;
 
@@ -111,13 +136,8 @@ public class EnchantDict {
 		}
 	}
 
-	public void set_error(string err) {
-		debug("enchant_dict_set_error: %s", err);
-		this.error = err;
-	}
-
 	public unowned string get_error() {
-		return this.error;
+		return this.dict.error;
 	}
 
 	/* This is a static method method because Vala does not let us
@@ -133,14 +153,14 @@ public class EnchantDict {
 		self.clear_error();
 
 		/* first, see if it's to be excluded*/
-		if (self.session.exclude(word))
+		if (self.exclude(word))
 			return 1;
 
 		/* then, see if it's in our pwl or session*/
-		if (self.session.contains(word))
+		if (self.contains(word))
 			return 0;
 
-		return self.check_method(self, word, word.length);
+		return self.dict.check_method(self.dict, word, word.length);
 	}
 
 	/* Filter out suggestions that are null, invalid UTF-8 or in the exclude
@@ -148,7 +168,7 @@ public class EnchantDict {
 	string[]? filter_suggestions(string[] suggs) {
 		var sb = new StrvBuilder();
 		foreach (string sugg in suggs)
-			if (sugg != null && sugg.validate() && !this.session.exclude(sugg))
+			if (sugg != null && sugg.validate() && !this.exclude(sugg))
 				sb.add(sugg);
 		return sb.end();
 	}
@@ -162,7 +182,7 @@ public class EnchantDict {
 		this.clear_error();
 
 		/* Check for suggestions from provider dictionary */
-		string[]? dict_suggs = this.suggest_method(this, word, word.length);
+		string[]? dict_suggs = dict.suggest_method(dict, word, word.length);
 		if (dict_suggs != null)
 			dict_suggs = this.filter_suggestions(dict_suggs);
 
@@ -171,8 +191,8 @@ public class EnchantDict {
 
 	public void add(string word_buf, real_ssize_t len) {
 		this.add_to_session(word_buf, len);
-		session.pwl.add(word_buf, len);
-		session.exclude_pwl.remove(word_buf, len);
+		this.pwl.add(word_buf, len);
+		this.exclude_pwl.remove(word_buf, len);
 	}
 
 	public void add_to_session(string word_buf, real_ssize_t len) {
@@ -180,9 +200,9 @@ public class EnchantDict {
 		if (word == null)
 			return;
 		this.clear_error();
-		this.session.add(word);
-		if (this.add_to_session_method != null)
-			this.add_to_session_method(this, word, word.length);
+		this.session_add(word);
+		if (dict.add_to_session_method != null)
+			dict.add_to_session_method(dict, word, word.length);
 	}
 
 	public int is_added(string word_buf, real_ssize_t len) {
@@ -190,13 +210,13 @@ public class EnchantDict {
 		if (word == null)
 			return 0;
 		this.clear_error();
-		return session.contains(word) ? 1 : 0;
+		return this.contains(word) ? 1 : 0;
 	}
 
 	public void remove(string word_buf, real_ssize_t len) {
 		this.remove_from_session(word_buf, len);
-		session.pwl.remove(word_buf, len);
-		session.exclude_pwl.add(word_buf, len);
+		this.pwl.remove(word_buf, len);
+		this.exclude_pwl.add(word_buf, len);
 	}
 
 	public void remove_from_session(string word_buf, real_ssize_t len) {
@@ -204,9 +224,9 @@ public class EnchantDict {
 		if (word == null)
 			return;
 		this.clear_error();
-		this.session.remove(word);
-		if (this.remove_from_session_method != null)
-			this.remove_from_session_method(this, word, word.length);
+		this.session_remove(word);
+		if (dict.remove_from_session_method != null)
+			dict.remove_from_session_method(dict, word, word.length);
 	}
 
 	public int is_removed(string word_buf, real_ssize_t len) {
@@ -214,7 +234,7 @@ public class EnchantDict {
 		if (word == null)
 			return 0;
 		this.clear_error();
-		return session.exclude(word) ? 1 : 0;
+		return this.exclude(word) ? 1 : 0;
 	}
 
 	/* Stub for obsolete API. */
@@ -234,20 +254,28 @@ public class EnchantDict {
 		string name;
 		string desc;
 		string file;
-		if (provider != null) {
-			file = this.provider.module.name();
-			name = this.provider.identify(provider);
-			desc = this.provider.describe(provider);
+		if (dict.provider != null) {
+			file = dict.provider.module.name();
+			name = dict.provider.identify(dict.provider);
+			desc = dict.provider.describe(dict.provider);
 		} else {
-			file = session.personal_filename;
+			file = this.personal_filename;
 			name = "Personal Wordlist";
 			desc = "Personal Wordlist";
 		}
 
-		fn(this.language_tag, name, desc, file, user_data);
+		fn(dict.language_tag, name, desc, file, user_data);
+	}
+
+	// FIXME: This API is only used for testing.
+	public void set_error(string err) {
+		debug("enchant_dict_set_error: %s", err);
+		this.dict.set_error(err);
 	}
 
 	public void clear_error() {
-		this.error = null;
+		if (this.dict != null) {
+			this.dict.error = null;
+		}
 	}
 }

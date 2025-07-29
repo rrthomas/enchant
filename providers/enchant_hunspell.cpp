@@ -295,7 +295,7 @@ HunspellChecker::requestDictionary(const char *szLang)
  */
 
 static char **
-hunspell_dict_suggest (EnchantDict * me, const char *const word,
+hunspell_dict_suggest (EnchantProviderDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
@@ -303,7 +303,7 @@ hunspell_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 static int
-hunspell_dict_check (EnchantDict * me, const char *const word, size_t len)
+hunspell_dict_check (EnchantProviderDict * me, const char *const word, size_t len)
 {
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
 
@@ -314,7 +314,7 @@ hunspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static void
-hunspell_dict_add_to_session (EnchantDict * me,
+hunspell_dict_add_to_session (EnchantProviderDict * me,
 			      const char *const word, size_t len)
 {
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
@@ -322,7 +322,7 @@ hunspell_dict_add_to_session (EnchantDict * me,
 }
 
 static void
-hunspell_dict_remove_from_session (EnchantDict * me,
+hunspell_dict_remove_from_session (EnchantProviderDict * me,
 				   const char *const word, size_t len)
 {
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
@@ -330,14 +330,14 @@ hunspell_dict_remove_from_session (EnchantDict * me,
 }
 
 static const char*
-hunspell_dict_get_extra_word_characters (EnchantDict *me)
+hunspell_dict_get_extra_word_characters (EnchantProviderDict *me)
 {
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
 	return checker->getWordchars();
 }
 
 static int
-hunspell_dict_is_word_character (EnchantDict *me, uint32_t uc, size_t n)
+hunspell_dict_is_word_character (EnchantProviderDict *me, uint32_t uc, size_t n)
 {
 	HunspellChecker * checker = static_cast<HunspellChecker *>(me->user_data);
 	/* Accept quote marks anywhere except at the end of a word, as per
@@ -400,7 +400,7 @@ hunspell_provider_list_dicts (EnchantProvider * me, size_t * out_n_dicts)
 	return dictionary_list;
 }
 
-static EnchantDict *
+static EnchantProviderDict *
 hunspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 {
 	HunspellChecker * checker = new HunspellChecker(me);
@@ -413,7 +413,7 @@ hunspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 
-	EnchantDict *dict = enchant_dict_new(provider, tag);
+	EnchantProviderDict *dict = enchant_provider_dict_new(provider, tag);
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *) checker;
@@ -428,7 +428,7 @@ hunspell_provider_request_dict(EnchantProvider * me, const char *const tag)
 }
 
 static void
-hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+hunspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantProviderDict * dict)
 {
 	HunspellChecker *checker = (HunspellChecker *) dict->user_data;
 	delete checker;

@@ -39,6 +39,7 @@
 extern "C" {
 #endif
 
+typedef struct _EnchantProviderDict EnchantProviderDict;
 typedef struct _EnchantProvider EnchantProvider;
 
 /**
@@ -113,14 +114,14 @@ char *enchant_get_prefix_dir(void);
 char *enchant_relocate (const char *path);
 
 /**
- * enchant_dict_new
+ * enchant_provider_dict_new
  * @provider: A provider, or %null.
  * @tag: The language tag, or a description, for a non-language-specific
  * dictionary.
  *
- * Returns a new EnchantDict.
+ * Returns a new EnchantProviderDict.
  */
-EnchantDict *enchant_dict_new (EnchantProvider *provider, const char *tag);
+EnchantProviderDict *enchant_provider_dict_new (EnchantProvider *provider, const char *tag);
 
 /**
  * enchant_dict_set_error
@@ -128,9 +129,18 @@ EnchantDict *enchant_dict_new (EnchantProvider *provider, const char *tag);
  * @err: A non-null error message
  *
  * Sets the current runtime error to @err. This API is private to the
- * providers.
+ * providers, and only used for testing.
  */
 void enchant_dict_set_error (EnchantDict * dict, const char * const err);
+
+/**
+ * enchant_dict_set_error
+ * @dict: A non-null dictionary
+ * @err: A non-null error message
+ *
+ * Sets the current runtime error to @err.
+ */
+void enchant_provider_dict_set_error (EnchantProviderDict * dict, const char * const err);
 
 /**
  * enchant_provider_new
@@ -149,34 +159,36 @@ EnchantProvider *enchant_provider_new (void);
  */
 void enchant_provider_set_error (EnchantProvider * provider, const char * const err);
 
-typedef struct _EnchantDictPrivate *EnchantDictPrivate;
+typedef struct _EnchantProviderDictPrivate *EnchantProviderDictPrivate;
 
-struct _EnchantDict
+struct _EnchantProviderDict
 {
 	GTypeInstance parent_instance;
 	volatile int ref_count;
-	EnchantDictPrivate * priv;
+	EnchantProviderDictPrivate * priv;
 	void *user_data;
-	void *enchant_private_data;
+	EnchantProvider *provider;
+	gchar *language_tag;
+	gchar *error;
 
-	int (*check) (struct _EnchantDict * me, const char *const word,
+	int (*check) (struct _EnchantProviderDict * me, const char *const word,
 			  size_t len);
 
 	/* Returns an array of *out_n_suggs UTF-8 encoded strings. Elements
 	   of word may be NULL. */
-	char **(*suggest) (struct _EnchantDict * me,
+	char **(*suggest) (struct _EnchantProviderDict * me,
 			   const char *const word, size_t len,
 			   size_t * out_n_suggs);
 
-	void (*add_to_session) (struct _EnchantDict * me,
+	void (*add_to_session) (struct _EnchantProviderDict * me,
 				const char *const word, size_t len);
 
-	void (*remove_from_session) (struct _EnchantDict * me,
+	void (*remove_from_session) (struct _EnchantProviderDict * me,
 				const char *const word, size_t len);
 
-	const char * (*get_extra_word_characters) (struct _EnchantDict * me);
+	const char * (*get_extra_word_characters) (struct _EnchantProviderDict * me);
 
-	int (*is_word_character) (struct _EnchantDict * me,
+	int (*is_word_character) (struct _EnchantProviderDict * me,
 				  uint32_t uc_in, size_t n);
 };
 
@@ -192,11 +204,11 @@ struct _EnchantProvider {
 
 	void (*dispose) (struct _EnchantProvider * me);
 
-	EnchantDict *(*request_dict) (struct _EnchantProvider * me,
+	EnchantProviderDict *(*request_dict) (struct _EnchantProvider * me,
 				      const char *const tag);
 
 	void (*dispose_dict) (struct _EnchantProvider * me,
-			      EnchantDict * dict);
+			      EnchantProviderDict * dict);
 
 	int (*dictionary_exists) (struct _EnchantProvider * me,
 				  const char *const tag);

@@ -28,7 +28,7 @@
 static bool dictCheckCalled;
 
 static int
-MockDictionaryCheckHello (EnchantDict * dict, const char *const word, size_t len)
+MockDictionaryCheckHello (EnchantProviderDict * dict, const char *const word, size_t len)
 {
     dict;
     dictCheckCalled = true;
@@ -40,10 +40,9 @@ MockDictionaryCheckHello (EnchantDict * dict, const char *const word, size_t len
 }
 
 
-static EnchantDict* MockProviderRequestCheckMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantProviderDict* MockProviderRequestCheckMockDictionary(EnchantProvider * me, const char *tag)
 {
-    
-    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    EnchantProviderDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->check = MockDictionaryCheckHello;
     return dict;
 }

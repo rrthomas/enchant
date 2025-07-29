@@ -25,7 +25,7 @@
 #include "EnchantBrokerTestFixture.h"
 
 static bool requestDictionaryCalled;
-static EnchantDict * RequestDictionary (EnchantProvider *me, const char *tag)
+static EnchantProviderDict * RequestDictionary (EnchantProvider *me, const char *tag)
 {
     requestDictionaryCalled = true;
     return MockEnGbAndQaaProviderRequestDictionary(me, tag);

@@ -40,16 +40,15 @@ struct EnchantDictionaryGetExtraWordCharactersTestFixtureBase : EnchantDictionar
 };
 
 static const char *
-MyMockDictionaryGetExtraWordCharacters (EnchantDict * dict)
+MyMockDictionaryGetExtraWordCharacters (EnchantProviderDict * dict)
 {
     dictGetExtraWordCharactersCalled = true;
     return "01-";
 }
 
-static EnchantDict* MockProviderRequestGetExtraWordCharactersMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantProviderDict* MockProviderRequestGetExtraWordCharactersMockDictionary(EnchantProvider * me, const char *tag)
 {
-    
-    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    EnchantProviderDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->get_extra_word_characters = MyMockDictionaryGetExtraWordCharacters;
     return dict;
 }
@@ -74,10 +73,9 @@ struct EnchantDictionaryGetExtraWordCharacters_TestFixture : EnchantDictionaryGe
 
 
 
-static EnchantDict* MockProviderRequestNoGetExtraWordCharactersMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantProviderDict* MockProviderRequestNoGetExtraWordCharactersMockDictionary(EnchantProvider * me, const char *tag)
 {
-    
-    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    EnchantProviderDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->get_extra_word_characters = NULL;
     return dict;
 }

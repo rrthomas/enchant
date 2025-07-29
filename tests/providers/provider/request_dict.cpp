@@ -26,7 +26,7 @@
 
 struct ProviderRequestDictionary_TestFixture : Provider_TestFixture
 {
-    EnchantDict* _dict;
+    EnchantProviderDict* _dict;
     //Setup
     ProviderRequestDictionary_TestFixture():_dict(NULL)
     { 

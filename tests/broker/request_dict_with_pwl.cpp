@@ -1,5 +1,5 @@
 /* Copyright (c) 2007 Eric Scott Albright
- * Copyright (c) 2023-2024 Reuben Thomas
+ * Copyright (c) 2023-2025 Reuben Thomas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,7 @@
 #include "EnchantBrokerTestFixture.h"
 
 static bool requestDictionaryCalled;
-static EnchantDict * RequestDictionaryWithPwl (EnchantProvider *me, const char *tag)
+static EnchantProviderDict * RequestDictionaryWithPwl (EnchantProvider *me, const char *tag)
 {
     requestDictionaryCalled = true;
     return MockEnGbAndQaaProviderRequestDictionary(me, tag);

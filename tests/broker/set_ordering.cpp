@@ -27,12 +27,12 @@
 static bool mock1ProviderRequestDictionaryCalled;
 static bool mock2ProviderRequestDictionaryCalled;
 
-static EnchantDict * RequestDictionary1 (EnchantProvider *me, const char *tag)
+static EnchantProviderDict * RequestDictionary1 (EnchantProvider *me, const char *tag)
 {
 	mock1ProviderRequestDictionaryCalled = true;
 	return MockEnGbAndQaaProviderRequestDictionary(me, tag);
 }
-static EnchantDict * RequestDictionary2 (EnchantProvider *me, const char *tag)
+static EnchantProviderDict * RequestDictionary2 (EnchantProvider *me, const char *tag)
 {
 	mock2ProviderRequestDictionaryCalled = true;
 	return MockEnGbAndQaaProviderRequestDictionary(me, tag);

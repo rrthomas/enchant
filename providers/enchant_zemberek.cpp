@@ -146,7 +146,7 @@ extern "C" {
 EnchantProvider *init_enchant_provider(void);
 
 static int
-zemberek_dict_check (EnchantDict * me, const char *const word, size_t len)
+zemberek_dict_check (EnchantProviderDict * me, const char *const word, size_t len)
 {
     Zemberek *checker = (Zemberek *) me->user_data;
     char *word_nul = g_strndup(word, len);
@@ -156,7 +156,7 @@ zemberek_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static char**
-zemberek_dict_suggest (EnchantDict * me, const char *const word,
+zemberek_dict_suggest (EnchantProviderDict * me, const char *const word,
                        size_t len, size_t * out_n_suggs)
 {
     Zemberek *checker = (Zemberek *) me->user_data;
@@ -166,7 +166,7 @@ zemberek_dict_suggest (EnchantDict * me, const char *const word,
     return result;
 }
 
-static EnchantDict*
+static EnchantProviderDict*
 zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
 {
     if (!((strcmp(tag, "tr") == 0) || (strncmp(tag, "tr_", 3) == 0)))
@@ -176,7 +176,7 @@ zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
       {
         Zemberek* checker = new Zemberek();
 
-        EnchantDict* dict = enchant_dict_new(provider, tag);
+        EnchantProviderDict* dict = enchant_provider_dict_new(provider, tag);
         if (dict == NULL)
                 return NULL;
         dict->user_data = (void *) checker;
@@ -193,7 +193,7 @@ zemberek_provider_request_dict(EnchantProvider *me, const char *tag)
 }
 
 static void
-zemberek_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+zemberek_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantProviderDict * dict)
 {
     Zemberek *checker = (Zemberek *) dict->user_data;
     delete checker;

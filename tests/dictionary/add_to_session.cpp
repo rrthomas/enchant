@@ -27,17 +27,16 @@ static bool addToSessionCalled;
 static std::string wordToAdd;
 
 static void
-MockDictionaryAddToSession (EnchantDict * dict, const char *const word, size_t len)
+MockDictionaryAddToSession (EnchantProviderDict * dict, const char *const word, size_t len)
 {
     dict;
     addToSessionCalled = true;
     wordToAdd = std::string(word, len);
 }
 
-static EnchantDict* MockProviderRequestAddToSessionMockDictionary(EnchantProvider * me, const char *tag)
+static EnchantProviderDict* MockProviderRequestAddToSessionMockDictionary(EnchantProvider * me, const char *tag)
 {
-    
-    EnchantDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
+    EnchantProviderDict* dict = MockProviderRequestBasicMockDictionary(me, tag);
     dict->add_to_session = MockDictionaryAddToSession;
     return dict;
 }

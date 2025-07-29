@@ -25,14 +25,14 @@
 #include <stdio.h>
 #include "mock_provider.h"
 
-static EnchantDict *
+static EnchantProviderDict *
 mock_provider_request_dict(EnchantProvider *, const char *const)
 {
     return NULL;
 }
 
 static void
-mock_provider_dispose_dict(EnchantProvider *me, EnchantDict *dict)
+mock_provider_dispose_dict(EnchantProvider *me, EnchantProviderDict *dict)
 {
 }
 

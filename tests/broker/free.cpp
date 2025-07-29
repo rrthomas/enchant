@@ -35,7 +35,7 @@ AlternativeDispose (EnchantProvider *me) { }
 
 bool disposeDictionaryCalled;
 static void
-DisposeDictionary (EnchantProvider *me, EnchantDict * dict)
+DisposeDictionary (EnchantProvider *me, EnchantProviderDict * dict)
 {
     disposeDictionaryCalled = true;
     MockProviderDisposeDictionary(me, dict);

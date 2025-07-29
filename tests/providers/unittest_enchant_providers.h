@@ -63,9 +63,9 @@ struct Provider_TestFixture
         return ws;
     }
 
-    EnchantDict* GetDefaultDictionary()
+    EnchantProviderDict* GetDefaultDictionary()
     {
-        EnchantDict* dict=NULL;        
+        EnchantProviderDict* dict=NULL;
 
         // Get the first dictionary listed as being available
         if (!dict && _provider->list_dicts)
@@ -80,12 +80,12 @@ struct Provider_TestFixture
         return dict;
     }
 
-    EnchantDict* GetDictionary(const char* language)
+    EnchantProviderDict* GetDictionary(const char* language)
     {
             return (*_provider->request_dict) (_provider, language);
     }
 
-    virtual void ReleaseDictionary(EnchantDict* dict)
+    virtual void ReleaseDictionary(EnchantProviderDict* dict)
     {
         if (dict)
             _provider->dispose_dict(_provider, dict);

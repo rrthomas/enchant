@@ -49,7 +49,7 @@ static EnchantProvider *provider;
 EnchantProvider *init_enchant_provider (void);
 
 static int
-aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
+aspell_dict_check (EnchantProviderDict * me, const char *const word, size_t len)
 {
 	AspellSpeller *manager = (AspellSpeller *) me->user_data;
 
@@ -62,13 +62,13 @@ aspell_dict_check (EnchantDict * me, const char *const word, size_t len)
 	else if (val > 0)
 		return 0;
 	else {
-		enchant_dict_set_error (me, aspell_speller_error_message (manager));
+		enchant_provider_dict_set_error (me, aspell_speller_error_message (manager));
 		return -1;
 	}
 }
 
 static char **
-aspell_dict_suggest (EnchantDict * me, const char *const word,
+aspell_dict_suggest (EnchantProviderDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
 	AspellSpeller *manager = (AspellSpeller *) me->user_data;
@@ -99,14 +99,14 @@ aspell_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 static void
-aspell_dict_add_to_session (EnchantDict * me,
+aspell_dict_add_to_session (EnchantProviderDict * me,
 			    const char *const word, size_t len)
 {
 	AspellSpeller *manager = (AspellSpeller *) me->user_data;
 	aspell_speller_add_to_session (manager, word, len);
 }
 
-static EnchantDict *
+static EnchantProviderDict *
 aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	AspellConfig *spell_config = new_aspell_config ();
@@ -124,7 +124,7 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 
 	AspellSpeller *manager = to_aspell_speller (spell_error);
 
-	EnchantDict *dict = enchant_dict_new (provider, tag);
+	EnchantProviderDict *dict = enchant_provider_dict_new (provider, tag);
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *) manager;
@@ -136,7 +136,7 @@ aspell_provider_request_dict (EnchantProvider * me, const char *const tag)
 }
 
 static void
-aspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+aspell_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantProviderDict * dict)
 {
 	AspellSpeller *manager = (AspellSpeller *) dict->user_data;
 	delete_aspell_speller (manager);

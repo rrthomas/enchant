@@ -50,7 +50,7 @@
 static EnchantProvider *provider;
 
 static int
-voikko_dict_check (EnchantDict * me, const char *const word, size_t len)
+voikko_dict_check (EnchantProviderDict * me, const char *const word, size_t len)
 {
 	char *word_nul = g_strndup(word, len);
 	int result = voikkoSpellCstr((struct VoikkoHandle *)me->user_data, word_nul);
@@ -64,7 +64,7 @@ voikko_dict_check (EnchantDict * me, const char *const word, size_t len)
 }
 
 static char **
-voikko_dict_suggest (EnchantDict * me, const char *const word,
+voikko_dict_suggest (EnchantProviderDict * me, const char *const word,
 		     size_t len, size_t * out_n_suggs)
 {
 	char *word_nul = g_strndup(word, len);
@@ -86,7 +86,7 @@ voikko_dict_suggest (EnchantDict * me, const char *const word,
 }
 
 static void
-voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantDict * dict)
+voikko_provider_dispose_dict (EnchantProvider * me _GL_UNUSED, EnchantProviderDict * dict)
 {
 	voikkoTerminate((struct VoikkoHandle *)dict->user_data);
 }
@@ -131,7 +131,7 @@ voikko_provider_dictionary_exists (EnchantProvider * me,
 	return exists;
 }
 
-static EnchantDict *
+static EnchantProviderDict *
 voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 {
 	const char * voikko_error;
@@ -147,7 +147,7 @@ voikko_provider_request_dict (EnchantProvider * me, const char *const tag)
 		return NULL;
 	}
 
-	EnchantDict *dict = enchant_dict_new (provider, tag);
+	EnchantProviderDict *dict = enchant_provider_dict_new (provider, tag);
 	if (dict == NULL)
 		return NULL;
 	dict->user_data = (void *)voikko_handle;

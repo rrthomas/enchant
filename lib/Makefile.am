@@ -1,7 +1,7 @@
 # Makefile.am for Enchant library
 #
 # Copyright (C) 2003 Dom Lachowicz
-#               2016-2024 Reuben Thomas
+#               2016-2025 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,8 +31,8 @@ libenchant_@ENCHANT_MAJOR_VERSION@_la_SOURCES = \
 	composite.vala \
 	dict.vala \
 	provider.vala \
+	provider-dict.vala \
 	pwl.vala \
-	session.vala \
 	util.vala \
 	$(BUILT_SOURCES)
 

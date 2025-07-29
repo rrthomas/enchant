@@ -49,8 +49,8 @@ using namespace std;
 
 static EnchantProvider *provider;
 
-// EnchantDict functions
-static int nuspell_dict_check(EnchantDict* me, const char* const word,
+// EnchantProviderDict functions
+static int nuspell_dict_check(EnchantProviderDict* me, const char* const word,
                               size_t len)
 {
 	auto dict = static_cast<nuspell::Dictionary*>(me->user_data);
@@ -61,7 +61,7 @@ static int nuspell_dict_check(EnchantDict* me, const char* const word,
 	return !dict->spell(normalized_word.get());
 }
 
-static char** nuspell_dict_suggest(EnchantDict* me, const char* const word,
+static char** nuspell_dict_suggest(EnchantProviderDict* me, const char* const word,
                                    size_t len, size_t* out_n_suggs)
 {
 	auto dict = static_cast<nuspell::Dictionary*>(me->user_data);
@@ -81,7 +81,7 @@ static char** nuspell_dict_suggest(EnchantDict* me, const char* const word,
 		*out_n_suggs = 0;
 	return sug_list;
 }
-// End EnchantDict functions
+// End EnchantProviderDict functions
 
 // EnchantProvider functions
 static vector<filesystem::path>
@@ -95,7 +95,7 @@ nuspell_get_dict_dirs(EnchantProvider *me)
 	return dirs;
 }
 
-static EnchantDict*
+static EnchantProviderDict*
 nuspell_provider_request_dict(EnchantProvider* me,
                               const char* const tag)
 {
@@ -112,7 +112,7 @@ nuspell_provider_request_dict(EnchantProvider* me,
 		return nullptr;
 	}
 
-	EnchantDict* dict = enchant_dict_new(provider, tag);
+	EnchantProviderDict* dict = enchant_provider_dict_new(provider, tag);
 	if (dict == nullptr)
 		return nullptr;
 	dict->user_data = static_cast<void*>(dict_cpp.release());
@@ -122,7 +122,7 @@ nuspell_provider_request_dict(EnchantProvider* me,
 }
 
 static void nuspell_provider_dispose_dict(_GL_UNUSED EnchantProvider* me,
-                                          EnchantDict* dict)
+                                          EnchantProviderDict* dict)
 {
 	auto dict_cpp = static_cast<nuspell::Dictionary*>(dict->user_data);
 	delete dict_cpp;

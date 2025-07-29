@@ -221,7 +221,7 @@ char **AppleSpellChecker::listDictionaries (size_t *ndict)
  * Enchant
  */
 
-static char ** appleSpell_dict_suggest (EnchantDict * me, const char * const word, size_t len, size_t * out_n_suggs)
+static char ** appleSpell_dict_suggest (EnchantProviderDict * me, const char * const word, size_t len, size_t * out_n_suggs)
 {
 	@autoreleasepool {
 		if (!me || !word || !len || !out_n_suggs)
@@ -236,7 +236,7 @@ static char ** appleSpell_dict_suggest (EnchantDict * me, const char * const wor
 	}
 }
 
-static int appleSpell_dict_check (EnchantDict * me, const char * const word, size_t len)
+static int appleSpell_dict_check (EnchantProviderDict * me, const char * const word, size_t len)
 {
 	@autoreleasepool {
 		if (!me || !word || !len)
@@ -250,7 +250,7 @@ static int appleSpell_dict_check (EnchantDict * me, const char * const word, siz
 	}
 }
 
-static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, const char * const tag)
+static EnchantProviderDict * appleSpell_provider_request_dict (EnchantProvider * me, const char * const tag)
 {
 	@autoreleasepool {
 		AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
@@ -272,7 +272,7 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 
 		[ASD->DictionaryName retain];
 
-		EnchantDict * dict = enchant_dict_new (provider, tag);
+		EnchantProviderDict * dict = enchant_provider_dict_new (provider, tag);
 		if (!dict)
 			return 0;
 
@@ -284,7 +284,7 @@ static EnchantDict * appleSpell_provider_request_dict (EnchantProvider * me, con
 	}
 }
 
-static void appleSpell_provider_dispose_dict (EnchantProvider * me, EnchantDict * dict)
+static void appleSpell_provider_dispose_dict (EnchantProvider * me, EnchantProviderDict * dict)
 {
 	@autoreleasepool {
 		if (dict) {

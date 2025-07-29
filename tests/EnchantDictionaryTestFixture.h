@@ -32,7 +32,7 @@
 #include <vector>
 
 static int
-MockDictionaryCheck (EnchantDict * ,
+MockDictionaryCheck (EnchantProviderDict * ,
                      const char *const word,
                      size_t len)
 {
@@ -40,7 +40,7 @@ MockDictionaryCheck (EnchantDict * ,
 }
 
 static char**
-MockDictionarySuggest (EnchantDict * , 
+MockDictionarySuggest (EnchantProviderDict * , 
                        const char *const word,
                        size_t len, 
                        size_t * out_n_suggs)
@@ -60,15 +60,15 @@ MockDictionarySuggest (EnchantDict * ,
     return sugg_arr;
 }
 
-static EnchantDict*
+static EnchantProviderDict*
 MockProviderRequestBasicMockDictionary(EnchantProvider *me, const char *tag)
 {
-    EnchantDict* dict = enchant_dict_new(me, tag);
+    EnchantProviderDict* dict = enchant_provider_dict_new(me, tag);
     dict->user_data = NULL;
     dict->check = MockDictionaryCheck;
     dict->suggest = MockDictionarySuggest;
     dict->add_to_session = NULL;
-	
+
     return dict;
 }
 
@@ -304,7 +304,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
     std::vector<std::string> GetExpectedSuggestions(const std::string& s, size_t begin = 0)
     {
         size_t cSuggestions;
-        char** expectedSuggestions = MockDictionarySuggest (_dict, 
+        char** expectedSuggestions = MockDictionarySuggest (NULL, 
                                                             s.c_str(),
 		                                                    s.size(), 
                                                             &cSuggestions);

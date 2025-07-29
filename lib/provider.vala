@@ -65,9 +65,9 @@ public string enchant_get_prefix_dir() {
 [CCode (has_target = false)]
 public delegate void ProviderDispose(EnchantProvider me);
 [CCode (has_target = false)]
-public delegate EnchantDict ProviderRequestDict(EnchantProvider me, string tag);
+public delegate EnchantProviderDict ProviderRequestDict(EnchantProvider me, string tag);
 [CCode (has_target = false)]
-public delegate void ProviderDisposeDict(EnchantProvider me, EnchantDict dict);
+public delegate void ProviderDisposeDict(EnchantProvider me, EnchantProviderDict dict);
 [CCode (has_target = false)]
 public delegate int ProviderDictionaryExists(EnchantProvider me, string tag);
 /* returns utf8*/
