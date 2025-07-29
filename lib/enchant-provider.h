@@ -212,14 +212,6 @@ struct _EnchantProvider {
 			       size_t * out_n_dicts);
 };
 
-/**
- * composite_provider_create_dict
- * @list_of_dicts: A non-null list of #EnchantDicts
- *
- * Creates a composite dictionary of EnchantDicts in @list_of_dicts
- */
-EnchantDict *composite_provider_create_dict (GSList *dicts);
-
 #ifdef __cplusplus
 }
 #endif
