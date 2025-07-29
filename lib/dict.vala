@@ -69,29 +69,18 @@ public class EnchantDict {
 		return session;
 	}
 
-	public void session_add(string word) {
-		this.session_exclude.remove(word);
-		this.session_include.add(word);
-	}
-
-	public void session_remove(string word) {
-		this.session_include.remove(word);
-		this.session_exclude.add(word);
-	}
-
-	public bool exclude(string word) {
+	bool excluded(string word) {
 		return !this.session_include.contains(word) &&
 			   (this.session_exclude.contains(word) ||
 				this.exclude_pwl.check(word, word.length) == 0);
 	}
 
-	public bool contains(string word) {
+	bool contains(string word) {
 		return this.session_include.contains(word) ||
 			   (this.pwl.check(word, word.length) == 0 &&
 				this.exclude_pwl.check(word, word.length) != 0);
 	}
 
-	// Dictionary methods
 	public unowned string get_extra_word_characters() {
 		return dict.get_extra_word_characters_method != null ?
 			   dict.get_extra_word_characters_method(dict) : "";
@@ -136,10 +125,6 @@ public class EnchantDict {
 		}
 	}
 
-	public unowned string get_error() {
-		return this.dict.error;
-	}
-
 	/* This is a static method method because Vala does not let us
 	 * alter the value returned when an argument is invalid.
 	 * In this case, we want to return -1 when 'dict' is null. */
@@ -152,11 +137,11 @@ public class EnchantDict {
 
 		self.clear_error();
 
-		/* first, see if it's to be excluded*/
-		if (self.exclude(word))
+		/* first, see if it's excluded */
+		if (self.excluded(word))
 			return 1;
 
-		/* then, see if it's in our pwl or session*/
+		/* then, see if it's in our pwl or session */
 		if (self.contains(word))
 			return 0;
 
@@ -168,7 +153,7 @@ public class EnchantDict {
 	string[]? filter_suggestions(string[] suggs) {
 		var sb = new StrvBuilder();
 		foreach (string sugg in suggs)
-			if (sugg != null && sugg.validate() && !this.exclude(sugg))
+			if (sugg != null && sugg.validate() && !this.excluded(sugg))
 				sb.add(sugg);
 		return sb.end();
 	}
@@ -200,7 +185,8 @@ public class EnchantDict {
 		if (word == null)
 			return;
 		this.clear_error();
-		this.session_add(word);
+		this.session_exclude.remove(word);
+		this.session_include.add(word);
 		if (dict.add_to_session_method != null)
 			dict.add_to_session_method(dict, word, word.length);
 	}
@@ -224,7 +210,8 @@ public class EnchantDict {
 		if (word == null)
 			return;
 		this.clear_error();
-		this.session_remove(word);
+		this.session_include.remove(word);
+		this.session_exclude.add(word);
 		if (dict.remove_from_session_method != null)
 			dict.remove_from_session_method(dict, word, word.length);
 	}
@@ -234,7 +221,7 @@ public class EnchantDict {
 		if (word == null)
 			return 0;
 		this.clear_error();
-		return this.exclude(word) ? 1 : 0;
+		return this.excluded(word) ? 1 : 0;
 	}
 
 	/* Stub for obsolete API. */
@@ -269,8 +256,11 @@ public class EnchantDict {
 
 	// FIXME: This API is only used for testing.
 	public void set_error(string err) {
-		debug("enchant_dict_set_error: %s", err);
 		this.dict.set_error(err);
+	}
+
+	public unowned string get_error() {
+		return this.dict.error;
 	}
 
 	public void clear_error() {
