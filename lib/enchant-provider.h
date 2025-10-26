@@ -171,23 +171,39 @@ struct _EnchantProviderDict
 	gchar *language_tag;
 	gchar *error;
 
+	// Implement enchant_dict_check for the given provider dictionary.
+	// This method is mandatory.
 	int (*check) (struct _EnchantProviderDict * me, const char *const word,
 			  size_t len);
 
-	/* Returns an array of *out_n_suggs UTF-8 encoded strings. Elements
-	   of word may be NULL. */
+	// Implement enchant_dict_suggest for the given provider dictionary.
+	// Returns an array of *out_n_suggs UTF-8 encoded strings. Elements
+	// of word may be NULL.
+	// This method is mandatory.
 	char **(*suggest) (struct _EnchantProviderDict * me,
 			   const char *const word, size_t len,
 			   size_t * out_n_suggs);
 
+	// Implement enchant_dict_add_to_session for the given provider
+	// dictionary.
+	// This method is optional.
 	void (*add_to_session) (struct _EnchantProviderDict * me,
 				const char *const word, size_t len);
 
+	// Implement enchant_dict_remove_from_session for the given provider
+	// dictionary.
+	// This method is optional.
 	void (*remove_from_session) (struct _EnchantProviderDict * me,
 				const char *const word, size_t len);
 
+	// Implement enchant_dict_get_extra_word_characters for the given
+	// provider dictionary.
+	// This method is optional.
 	const char * (*get_extra_word_characters) (struct _EnchantProviderDict * me);
 
+	// Implement enchant_dict_is_word_character for the given provider
+	// dictionary.
+	// This method is optional.
 	int (*is_word_character) (struct _EnchantProviderDict * me,
 				  uint32_t uc_in, size_t n);
 };
@@ -202,24 +218,38 @@ struct _EnchantProvider {
 	void* enchant_private_data;
 	EnchantBroker* owner;
 
+	// Free any resources associated with this provider.
+	// This method is mandatory.
 	void (*dispose) (struct _EnchantProvider * me);
 
+	// Return a provider dictionary for the given language tag, or NULL if
+	// no suitable dictionary can be found.
+	// This method is mandatory.
 	EnchantProviderDict *(*request_dict) (struct _EnchantProvider * me,
 				      const char *const tag);
 
+	// Free any resources associated with the given provider dictionary.
+	// This method is mandatory.
 	void (*dispose_dict) (struct _EnchantProvider * me,
 			      EnchantProviderDict * dict);
 
+	// Return 1 if a dictionary for the given tag exists, or 0 if not.
+	// This method is optional.
 	int (*dictionary_exists) (struct _EnchantProvider * me,
 				  const char *const tag);
 
-	/* returns utf8*/
+	// Return a UTF-8 string identifying the provider. This string should
+	// be a single word, without spaces.
+	// This method is mandatory.
 	const char * (*identify) (struct _EnchantProvider * me);
-	/* returns utf8*/
+
+	// Return a UTF-8 string describing the provider.
+	// This method is mandatory.
 	const  char * (*describe) (struct _EnchantProvider * me);
 
-	/* Returns an array of *out_n_dicts dictionary tags. Elements
-	   of word may be NULL. */
+	// Return an array of *out_n_dicts dictionary tags. Elements
+	// of word may be NULL.
+	// This method is mandatory.
 	char ** (*list_dicts) (struct _EnchantProvider * me,
 			       size_t * out_n_dicts);
 };
