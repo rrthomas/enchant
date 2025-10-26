@@ -86,7 +86,7 @@ public class EnchantProvider {
 	public ProviderDispose dispose;
 	public ProviderRequestDict request_dict;
 	public ProviderDisposeDict dispose_dict;
-	public ProviderDictionaryExists dictionary_exists;
+	public ProviderDictionaryExists? dictionary_exists;
 	public ProviderIdentify identify;
 	public ProviderDescribe describe;
 	public ProviderListDicts list_dicts;
