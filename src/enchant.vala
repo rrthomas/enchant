@@ -152,7 +152,7 @@ SList<Token> tokenize_line(Dict dict, string line) {
 			cur_byte = cur_byte.next_char();
 			cur_unichar += 1;
 		}
-		var start_ptr = cur_byte;
+		unowned var start_ptr = cur_byte;
 		long start_unichar = cur_unichar;
 
 		/* Skip over word characters. */
@@ -165,7 +165,7 @@ SList<Token> tokenize_line(Dict dict, string line) {
 		}
 
 		/* Skip backwards over any characters that can't appear at the end of a word. */
-		unowned string last_char_ptr = cur_byte;
+		unowned string last_char_ptr = cur_byte.prev_char();
 		for (;
 			 !dict.is_word_character(last_char_ptr.get_char(), WordPosition.END);
 			 last_char_ptr = last_char_ptr.prev_char()) ;
