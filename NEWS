@@ -1,3 +1,18 @@
+2.8.13 (November 19, 2025)
+--------------------------
+
+This release fixes a bug in the word division algorithm of enchant(1)
+introduced in 2.8.4, which itself was attempting to fix bugs introduced in
+the previous release. This could have caused a crash, but it seems we were
+saved by careful bounds checking in GLib. Instead, it merely meant that
+characters not valid at the end of a word were not removed as they should be
+before spell-checking.
+
+Note that this bug only affected users of the enchant(1) program, for
+example Emacs users using it via Emacs’s “ispell” command. Users using
+libenchant (i.e. most users) were not affected.
+
+
 2.8.12 (July 28, 2025)
 ----------------------
 
