@@ -171,6 +171,26 @@ SList<Token> tokenize_line(Dict dict, string line) {
 			 last_char_ptr = last_char_ptr.prev_char()) ;
 		word.truncate((char *) last_char_ptr.next_char() - (char *) start_ptr);
 
+		/* Check there is at least one letter. */
+		var found_word_char = false;
+		for (unowned string p = word.str; p[0] != '\0'; p = p.next_char()) {
+			uc = p.get_char();
+			switch (uc.type()) {
+			case UnicodeType.MODIFIER_LETTER:
+			case UnicodeType.LOWERCASE_LETTER:
+			case UnicodeType.TITLECASE_LETTER:
+			case UnicodeType.UPPERCASE_LETTER:
+			case UnicodeType.OTHER_LETTER:
+				found_word_char = true;
+				break;
+			default:
+				break;
+			}
+		}
+		if (!found_word_char) {
+			break;
+		}
+
 		/* Save (word, position) tuple. */
 		if (word.len > 0) {
 			tokens.append(new Token(word.str, start_unichar));
