@@ -1,3 +1,13 @@
+2.8.14 (November 20, 2025)
+--------------------------
+
+This release fixes a test failure in the previous release, and improves
+enchant(1)’s word division algorithm, so that it only considers words that
+contain at least one letter. (Words may contain characters that aren’t
+letters, but Enchant was for example considering “1900” to be a word, which
+is probably not helpful.)
+
+
 2.8.13 (November 19, 2025)
 --------------------------
 
