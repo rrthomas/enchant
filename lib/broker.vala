@@ -138,7 +138,7 @@ public class EnchantBroker {
 			if (dir_entry[0] != '.') { /* Skip hidden files */
 				string filename = Path.build_filename(dir_name, dir_entry);
 				try {
-					module = new Module(filename, 0);
+					module = Module.open(filename, ModuleFlags.BIND_LAZY);
 					void *init_func;
 					if (module.symbol("init_enchant_provider", out init_func)
 						&& init_func != null) {
