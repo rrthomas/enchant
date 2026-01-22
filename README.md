@@ -25,6 +25,7 @@ Enchant works with the following spell-checkers:
 * Hspell
 * Voikko
 * Apple Spell (macOS only)
+* WinSpell (Windows only)
 * Zemberek
 
 Enchant is written in Vala, C and C++, and its only external dependency is
