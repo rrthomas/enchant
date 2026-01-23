@@ -80,6 +80,7 @@ jobs:
           patch git groff
           mingw-w64-${{matrix.env}}-autotools
           mingw-w64-${{matrix.env}}-pkg-config
+          mingw-w64-${{matrix.env}}-crt
           mingw-w64-${{matrix.env}}-gcc
           mingw-w64-${{matrix.env}}-vala
           mingw-w64-${{matrix.env}}-glib2

@@ -231,7 +231,7 @@ AM_CONDITIONAL(WITH_WIN8, test "$with_win8" = yes)
 dnl Add Windows target to CFLAGS.
 AS_IF([test "$with_win8" = yes],
   [WIN8_CFLAGS="-D_WIN32_WINNT=_WIN32_WINNT_WIN8 -DNTDDI_VERSION=NTDDI_WIN8"
-   WIN8_LIBS="-lole32 -loleaut32"
+   WIN8_LIBS="-lole32 -loleaut32 -luuid"
    AC_SUBST([WIN8_CFLAGS])
    AC_SUBST([WIN8_LIBS])
   ])

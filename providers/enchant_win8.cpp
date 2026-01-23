@@ -142,10 +142,10 @@ win8_dict_check(EnchantProviderDict* dict, const char* const word, size_t len)
         error->Release();
         errors->Release();
         return 1; // spelling issue
-    } else {
-        errors->Release();
-        return 0; // correct
     }
+    
+    errors->Release();
+    return 0; // correct
 }
 
 static char**
