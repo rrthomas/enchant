@@ -50,9 +50,9 @@ utf16_to_utf8(const wchar_t* const str, gboolean from_bcp47)
 }
 
 static wchar_t*
-utf8_to_utf16(const char* const str, size_t len, gboolean to_bcp47)
+utf8_to_utf16(const char* const str, gssize len, gboolean to_bcp47)
 {
-    wchar_t* utf16 = (wchar_t*)g_utf8_to_utf16(str, len, nullptr, nullptr, nullptr);
+    wchar_t* utf16 = (wchar_t*)g_utf8_to_utf16(str, (glong)len, nullptr, nullptr, nullptr);
     if (utf16 && to_bcp47) {
         wchar_t* p = utf16;
         // bcp47 tags use syntax "en-US" while the myspell versions are "en_US"
@@ -93,8 +93,10 @@ win8_dict_add_to_session(EnchantProviderDict* dict, const char* const word, size
     auto checker = static_cast<ISpellChecker*>(dict->user_data);
     wchar_t* wword = utf8_to_utf16(word, len, FALSE);
 
-    checker->Add(wword);
-    g_free(wword);
+    if (wword) {
+        checker->Add(wword);
+        g_free(wword);
+    }
 }
 
 static void
@@ -107,8 +109,10 @@ win8_dict_remove_from_session(EnchantProviderDict* dict, const char* const word,
     if (SUCCEEDED(checker->QueryInterface(__uuidof(ISpellChecker2), (void**)&checker2))) {
         wchar_t* wword = utf8_to_utf16(word, len, FALSE);
 
-        checker2->Remove(wword);
-        g_free(wword);
+        if (wword) {
+            checker2->Remove(wword);
+            g_free(wword);
+        }
 
         checker2->Release();
     }
@@ -122,6 +126,10 @@ win8_dict_check(EnchantProviderDict* dict, const char* const word, size_t len)
     IEnumSpellingError* errors;
     ISpellingError* error = nullptr;
     HRESULT hr;
+
+    if (!wword) {
+        return -1; // conversion error
+    }
 
     hr = checker->Check(wword, &errors);
     g_free(wword);
@@ -147,6 +155,11 @@ win8_dict_suggest(EnchantProviderDict* dict, const char* const word, size_t len,
     wchar_t* wword = utf8_to_utf16(word, len, FALSE);
     IEnumString* suggestions;
     HRESULT hr;
+
+    if (!wword) {
+        *out_n_suggs = 0;
+        return nullptr;
+    }
 
     hr = checker->Suggest(wword, &suggestions);
     g_free(wword);
@@ -231,6 +244,7 @@ win8_provider_dispose(EnchantProvider* provider)
         auto factory = static_cast<ISpellCheckerFactory*>(provider->user_data);
         factory->Release();
     }
+    CoUninitialize();
 }
 
 static const char*
@@ -254,10 +268,19 @@ init_enchant_provider(void)
     EnchantProvider* provider;
     ISpellCheckerFactory* factory;
 
+    // Initialize COM (required before using SpellCheckerFactory)
+    HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    if (FAILED(hr) && hr != RPC_E_CHANGED_MODE) {
+        // RPC_E_CHANGED_MODE means COM was already initialized with a different
+        // threading model, which is fine - we can still use it
+        return nullptr;
+    }
+
     if (FAILED(CoCreateInstance(__uuidof(SpellCheckerFactory),
                                 nullptr,
                                 CLSCTX_INPROC_SERVER,
                                 IID_PPV_ARGS(&factory)))) {
+        CoUninitialize();
         return nullptr;
     }
 
