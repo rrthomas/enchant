@@ -202,7 +202,7 @@ win8_provider_request_dict(EnchantProvider* provider, const char* const tag)
 }
 
 static void
-win8_provider_dispose_dict(G_GNUC_UNUSED EnchantProvider* provider, EnchantProviderDict* dict)
+win8_provider_dispose_dict(_GL_UNUSED EnchantProvider* provider, EnchantProviderDict* dict)
 {
     if (dict) {
         auto checker = static_cast<ISpellChecker*>(dict->user_data);
@@ -248,13 +248,13 @@ win8_provider_dispose(EnchantProvider* provider)
 }
 
 static const char*
-win8_provider_identify(G_GNUC_UNUSED EnchantProvider* provider)
+win8_provider_identify(_GL_UNUSED EnchantProvider* provider)
 {
     return "win8";
 }
 
 static const char*
-win8_provider_describe(G_GNUC_UNUSED EnchantProvider* provider)
+win8_provider_describe(_GL_UNUSED EnchantProvider* provider)
 {
     return "Windows 8 SpellCheck Provider";
 }
