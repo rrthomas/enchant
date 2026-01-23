@@ -188,7 +188,7 @@ AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
   [ENCHANT_CHECK_PROVIDER_SETUP([$1], [$4])
    AS_IF([test "$with_[]$1" != no],
       [if test "$3" != NOLIB; then
-         AC_CHECK_LIB([$1], [$3],,, [$5])
+         AC_CHECK_LIB([$1], [$3], [:],, [$5])
       else
          ac_cv_lib_[]$1[]_[]$3=yes
       fi
@@ -200,7 +200,11 @@ AC_DEFUN([ENCHANT_CHECK_LIB_PROVIDER],
       else
          with_[]$1=yes
          build_providers="$build_providers $1"
-         LIBS="$LIBS $5"
+         if test "$3" != NOLIB; then
+              $2[]_LIBS="-l$1"
+         fi
+         $2[]_LIBS="$$2[]_LIBS $5"
+         AC_SUBST([$2_LIBS])
       fi])
    AM_CONDITIONAL(WITH_[]$2, test "$with_[]$1" = yes)])
 
