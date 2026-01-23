@@ -24,10 +24,14 @@ AM_LDFLAGS = -module -avoid-version -no-undefined $(GLIB_LIBS) $(top_builddir)/l
 if WITH_ASPELL
 provider_LTLIBRARIES += enchant_aspell.la
 endif
+enchant_aspell_la_CFLAGS = $(AM_CFLAGS) $(ASPELL_CFLAGS)
+enchant_aspell_la_LIBADD = $(ASPELL_LIBS)
 
 if WITH_HSPELL
 provider_LTLIBRARIES += enchant_hspell.la
 endif
+enchant_hspell_la_CFLAGS = $(AM_CFLAGS) $(HSPELL_CFLAGS)
+enchant_hspell_la_LIBADD = $(HSPELL_LIBS)
 
 if WITH_HUNSPELL
 provider_LTLIBRARIES += enchant_hunspell.la
