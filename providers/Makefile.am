@@ -73,6 +73,7 @@ libenchant_data_DATA = AppleSpell.config
 endif
 enchant_applespell_la_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag=CXX
 enchant_applespell_la_OBJCXXFLAGS = $(AM_OBJCXXFLAGS)
+enchant_applespell_la_LIBADD = $(APPLESPELL_LIBS)
 enchant_applespell_la_SOURCES = applespell_checker.mm
 
 install-data-hook:
