@@ -1,4 +1,7 @@
-/* MIT License
+/* Note: This file links against LGPLv3+ gnulib modules (bcp47).
+ * The combined work is thus distributed under LGPLv3+.
+ *
+ * MIT License
  *
  * Copyright (c) 2026 Moritz Mechelk
  *
@@ -105,7 +108,7 @@ static void
 win8_dict_add_to_session(EnchantProviderDict* dict, const char* const word, size_t len)
 {
 	auto checker = static_cast<ISpellChecker*>(dict->user_data);
-	LPCWSTR w_word = (LPCWSTR)g_utf8_to_utf16(word, (glong)len, nullptr, nullptr, nullptr);
+	LPWSTR w_word = (LPWSTR)g_utf8_to_utf16(word, (glong)len, nullptr, nullptr, nullptr);
 
 	if (w_word) {
 		checker->Add(w_word);
@@ -121,7 +124,7 @@ win8_dict_remove_from_session(EnchantProviderDict* dict, const char* const word,
 	// try to use ISpellChecker2::Remove if available (Windows 10+)
 	ISpellChecker2* checker2;
 	if (SUCCEEDED(checker->QueryInterface(__uuidof(ISpellChecker2), (void**)&checker2))) {
-		LPCWSTR w_word = (LPCWSTR)g_utf8_to_utf16(word, (glong)len, nullptr, nullptr, nullptr);
+		LPWSTR w_word = (LPWSTR)g_utf8_to_utf16(word, (glong)len, nullptr, nullptr, nullptr);
 
 		if (w_word) {
 			checker2->Remove(w_word);
@@ -136,7 +139,7 @@ static int
 win8_dict_check(EnchantProviderDict* dict, const char* const word, size_t len)
 {
 	auto checker = static_cast<ISpellChecker*>(dict->user_data);
-	LPCWSTR w_word = (LPCWSTR)g_utf8_to_utf16(word, (glong)len, nullptr, nullptr, nullptr);
+	LPWSTR w_word = (LPWSTR)g_utf8_to_utf16(word, (glong)len, nullptr, nullptr, nullptr);
 
 	if (!w_word) {
 		return -1; // conversion error
@@ -165,7 +168,7 @@ static char**
 win8_dict_suggest(EnchantProviderDict* dict, const char* const word, size_t len, size_t* out_n_suggs)
 {
 	auto checker = static_cast<ISpellChecker*>(dict->user_data);
-	LPCWSTR w_word = (LPCWSTR)g_utf8_to_utf16(word, (glong)len, nullptr, nullptr, nullptr);
+	LPWSTR w_word = (LPWSTR)g_utf8_to_utf16(word, (glong)len, nullptr, nullptr, nullptr);
 
 	if (!w_word) {
 		*out_n_suggs = 0;
@@ -196,7 +199,7 @@ win8_provider_request_dict(EnchantProvider* provider, const char* const xpg_tag)
 		return nullptr;
 	}
 
-	LPCWSTR w_bcp47_tag = (LPCWSTR)g_utf8_to_utf16(bcp47_tag, -1, nullptr, nullptr, nullptr);
+	LPWSTR w_bcp47_tag = (LPWSTR)g_utf8_to_utf16(bcp47_tag, -1, nullptr, nullptr, nullptr);
 	g_free(bcp47_tag);
 	if (!w_bcp47_tag) {
 		return nullptr;
@@ -240,7 +243,7 @@ win8_provider_dictionary_exists(EnchantProvider* provider, const char* const xpg
 		return 0;
 	}
 
-	LPCWSTR w_bcp47_tag = (LPCWSTR)g_utf8_to_utf16(bcp47_tag, -1, nullptr, nullptr, nullptr);
+	LPWSTR w_bcp47_tag = (LPWSTR)g_utf8_to_utf16(bcp47_tag, -1, nullptr, nullptr, nullptr);
 	g_free(bcp47_tag);
 	if (!w_bcp47_tag) {
 		return 0;
