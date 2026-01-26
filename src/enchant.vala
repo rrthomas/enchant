@@ -53,6 +53,11 @@ void print_version(FileStream to) {
 string? get_line(FileStream fin) {
 	string str = fin.read_line();
 	if (str != null && str.length > 0) {
+		/* If the string is already valid UTF-8, return it. */
+		if (str.validate())
+			return str;
+
+		/* Otherwise, try to convert from locale charset to UTF-8. */
 		try {
 			return convert(str, str.length, "UTF-8", charset);
 		} catch (ConvertError e) {
