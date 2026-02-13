@@ -128,8 +128,6 @@ public class EnchantPWL {
 
 	public EnchantPWL(string? filename) {
 		this.filename = filename;
-		if (filename != null)
-			this.refresh_from_file();
 	}
 
 	void add_to_table(string word) {
