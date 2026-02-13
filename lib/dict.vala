@@ -57,7 +57,7 @@ public class EnchantDict {
 
 	public static EnchantDict with_pwl(EnchantProviderDict dict, string pwlname, string? exclname) {
 		EnchantPWL pwl = new EnchantPWL(pwlname);
-		EnchantPWL exclude_pwl = new EnchantPWL(exclname);
+		EnchantPWL exclude_pwl = new EnchantPWL(exclname, true);
 
 		EnchantDict session = new EnchantDict();
 		session.dict = dict;
@@ -71,14 +71,14 @@ public class EnchantDict {
 
 	bool excluded(string word) {
 		return !this.session_include.contains(word) &&
-			   (this.session_exclude.contains(word) ||
-				this.exclude_pwl.check(word, word.length) == 0);
+			(this.session_exclude.contains(word) ||
+			 this.exclude_pwl.check(this, word, word.length) == 0);
 	}
 
 	bool contains(string word) {
 		return this.session_include.contains(word) ||
-			   (this.pwl.check(word, word.length) == 0 &&
-				this.exclude_pwl.check(word, word.length) != 0);
+			(this.pwl.check(this, word, word.length) == 0 &&
+			 this.exclude_pwl.check(this, word, word.length) != 0);
 	}
 
 	public unowned string get_extra_word_characters() {
@@ -175,9 +175,9 @@ public class EnchantDict {
 	}
 
 	public void add(string word_buf, real_ssize_t len) {
+		this.pwl.add(this, word_buf, len);
+		this.exclude_pwl.remove(this, word_buf, len);
 		this.add_to_session(word_buf, len);
-		this.pwl.add(word_buf, len);
-		this.exclude_pwl.remove(word_buf, len);
 	}
 
 	public void add_to_session(string word_buf, real_ssize_t len) {
@@ -200,9 +200,9 @@ public class EnchantDict {
 	}
 
 	public void remove(string word_buf, real_ssize_t len) {
+		this.pwl.remove(this, word_buf, len);
+		this.exclude_pwl.add(this, word_buf, len);
 		this.remove_from_session(word_buf, len);
-		this.pwl.remove(word_buf, len);
-		this.exclude_pwl.add(word_buf, len);
 	}
 
 	public void remove_from_session(string word_buf, real_ssize_t len) {

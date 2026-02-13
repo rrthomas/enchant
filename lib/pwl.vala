@@ -123,11 +123,13 @@ bool is_title_case(string word) {
 
 public class EnchantPWL {
 	private string? filename;
+	private bool exclude = false;
 	private time_t file_changed = 0;
 	private HashTable<string, string> words = new HashTable<string, string>(str_hash, str_equal);
 
-	public EnchantPWL(string? filename) {
+	public EnchantPWL(string? filename, bool exclude = false) {
 		this.filename = filename;
+		this.exclude = exclude;
 	}
 
 	void add_to_table(string word) {
@@ -136,10 +138,10 @@ public class EnchantPWL {
 			this.words.insert(normalized_word, word);
 	}
 
-	public void add(string word_buf, real_ssize_t len) {
+	public void add(EnchantDict session, string word_buf, real_ssize_t len) {
 		string word = buf_to_utf8_string(word_buf, len);
 
-		this.refresh_from_file();
+		this.refresh_from_file(session);
 		this.add_to_table(word);
 
 		if (this.filename != null) {
@@ -167,10 +169,8 @@ public class EnchantPWL {
 		}
 	}
 
-	public void remove(string word_buf, real_ssize_t len) {
-		// 'check' calls 'refresh_from_file' for us.
-		if (this.check(word_buf, len) > 0)
-			return;
+	public void remove(EnchantDict session, string word_buf, real_ssize_t len) {
+		this.refresh_from_file(session);
 
 		string word = buf_to_utf8_string(word_buf, len);
 		this.words.remove(word.normalize());
@@ -224,9 +224,9 @@ public class EnchantPWL {
 		}
 	}
 
-	public int check(string word_buf, real_ssize_t len) {
+	public int check(EnchantDict session, string word_buf, real_ssize_t len) {
 		string word = buf_to_utf8_string(word_buf, len);
-		this.refresh_from_file();
+		this.refresh_from_file(session);
 
 		if (this.words.contains(word.normalize()))
 			return 0;
@@ -247,7 +247,7 @@ public class EnchantPWL {
 		return 1; /* not found */
 	}
 
-	void refresh_from_file() {
+	void refresh_from_file(EnchantDict session) {
 		if (this.filename == null)
 			return;
 
@@ -257,11 +257,17 @@ public class EnchantPWL {
 		if (this.file_changed == stats.st_mtime) /* nothing changed since last read */
 			return;
 
-		this.words = new HashTable<string, string>(str_hash, str_equal);
-
 		FileStream? f = FileStream.open(this.filename, "r");
 		if (f == null)
 			return;
+
+		// Remove current words from session.
+		if (!this.exclude) {
+			foreach (string w in this.words.get_keys())
+				session.remove_from_session(w, w.length);
+		}
+
+		this.words = new HashTable<string, string>(str_hash, str_equal);
 
 		this.file_changed = stats.st_mtime;
 		lock_file(f);
@@ -282,6 +288,12 @@ public class EnchantPWL {
 		}
 
 		unlock_file(f);
+
+		// Add new words to session.
+		if (!this.exclude) {
+			foreach (string w in this.words.get_keys())
+				session.add_to_session(w, w.length);
+		}
 	}
 }
 
