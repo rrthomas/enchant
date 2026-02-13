@@ -122,9 +122,9 @@ bool is_title_case(string word) {
 }
 
 public class EnchantPWL {
-	public string? filename;
-	public time_t file_changed = 0;
-	public HashTable<string, string> words = new HashTable<string, string>(str_hash, str_equal);
+	private string? filename;
+	private time_t file_changed = 0;
+	private HashTable<string, string> words = new HashTable<string, string>(str_hash, str_equal);
 
 	public EnchantPWL(string? filename) {
 		this.filename = filename;
