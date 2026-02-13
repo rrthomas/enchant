@@ -203,7 +203,7 @@ public class EnchantPWL {
 						break;
 					} else {
 						if ((word_pos == 0 || contents[word_pos - 1] == '\n' || contents[word_pos - 1] == '\r') &&
-							(word_pos == contents.length || contents[word_pos + word.length] == '\n' || contents[word_pos + word.length] == '\r')) {
+							(word_pos + word.length == contents.length || contents[word_pos + word.length] == '\n' || contents[word_pos + word.length] == '\r')) {
 							f.puts(contents.substring(start_index, word_pos - start_index));
 							start_index = word_pos + word.length;
 							while (contents[start_index] == '\n' || contents[start_index] == '\r')
