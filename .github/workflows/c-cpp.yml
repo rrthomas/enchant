@@ -80,6 +80,7 @@ jobs:
           patch git groff
           mingw-w64-${{matrix.env}}-autotools
           mingw-w64-${{matrix.env}}-pkg-config
+          mingw-w64-${{matrix.env}}-crt
           mingw-w64-${{matrix.env}}-gcc
           mingw-w64-${{matrix.env}}-vala
           mingw-w64-${{matrix.env}}-glib2
@@ -94,7 +95,9 @@ jobs:
     - name: Bootstrap (gnulib and autoreconf)
       run: ./bootstrap
     - name: configure
-      run: ./configure --enable-relocatable
+      # set lt_cv_deplibs_check_method to pass_all to work around linker error regarding -luuid
+      # similar issue as https://github.com/msys2/MINGW-packages/issues/16836
+      run: lt_cv_deplibs_check_method='pass_all' ./configure --enable-relocatable
     - name: make
       run: make --jobs=`nproc`
     - name: make check
