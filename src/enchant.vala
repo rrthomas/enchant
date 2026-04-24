@@ -188,7 +188,7 @@ SList<Token> tokenize_line(Dict dict, string line) {
 			}
 		}
 		if (!found_word_char) {
-			break;
+			continue;
 		}
 
 		/* Save (word, position) tuple. */
