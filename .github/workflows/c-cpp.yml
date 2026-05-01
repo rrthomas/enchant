@@ -10,7 +10,7 @@ jobs:
       ASAN_FLAGS: "-fsanitize=address -fsanitize=undefined"
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with: { submodules: true }
     - name: Install dependencies
       run: sudo apt-get -y install libglib2.0-dev libaspell-dev hspell libhunspell-dev libvoikko-dev voikko-fi aspell-en libunittest++-dev hunspell-fr groff doxygen graphviz valac pkg-config libltdl-dev
@@ -44,7 +44,7 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with: { submodules: true }
     - name: Install dependencies
       run: |
@@ -89,7 +89,7 @@ jobs:
           mingw-w64-${{matrix.env}}-unittest-cpp
           mingw-w64-${{matrix.env}}-doxygen
           mingw-w64-${{matrix.env}}-graphviz
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with: { submodules: true }
     - name: Bootstrap (gnulib and autoreconf)
       run: ./bootstrap
