@@ -1,3 +1,11 @@
+2.8.16 (May 1, 2026)
+--------------------
+
+This release fixes a bug introduced in 2.8.14: after rejecting a word for
+not containing at least one letter, enchant(1) would skip the rest of the
+line.
+
+
 2.8.15 (February 13, 2026)
 --------------------------
 
