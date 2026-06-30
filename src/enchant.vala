@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2003 Dom Lachowicz
  *               2007 Hannu Väisänen
- *               2016-2024 Reuben Thomas
+ *               2016-2026 Reuben Thomas
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -228,9 +228,10 @@ public class Main : Object {
 		{"show-lines", 'L', OptionFlags.NONE, OptionArg.NONE, ref count_lines, "Display line numbers", null},
 		{"version", 'v', OptionFlags.NONE, OptionArg.NONE, ref version, "Display version information and exit", null},
 
-		/* Ignore: Emacs calls ispell with '-m' and '-B'. */
+		/* Ignore: Emacs can call ispell with the following options. */
 		{" ", 'm', OptionFlags.HIDDEN, OptionArg.NONE, ref ignored, null, null},
 		{" ", 'B', OptionFlags.HIDDEN, OptionArg.NONE, ref ignored, null, null},
+		{" ", 'C', OptionFlags.HIDDEN, OptionArg.NONE, ref ignored, null, null},
 
 		/* Files */
 		{OPTION_REMAINING, '\0', OptionFlags.NONE, OptionArg.FILENAME_ARRAY, ref files, null, "FILE..."},
