@@ -1,3 +1,9 @@
+2.8.17 (June 29, 2026)
+----------------------
+
+Make enchant silently ignore -C flag, for better Emacs compatibility.
+
+
 2.8.16 (May 1, 2026)
 --------------------
 
