@@ -65,7 +65,7 @@ string? get_line(FileStream fin) {
 void print_utf(string str) {
 	size_t bytes_written;
 	try {
-		string native = str.locale_from_utf8(str.length, null, out bytes_written);
+		string native = convert(str, str.length, charset, "UTF-8", null, out bytes_written);
 		/* Print arbitrary bytes (including potential NULs). */
 		unowned uint8[] buf = (uint8[]) native;
 		buf.length = (int)bytes_written;
@@ -395,7 +395,7 @@ public class Main : Object {
 	public static int main(string[] args) {
 		/* Initialize system locale */
 		Intl.setlocale();
-		get_charset(out charset);
+		charset = NLItem.CODESET.to_string();
 
 		var ctx = new OptionContext("\n\nCheck spelling non-interactively.");
 		ctx.set_help_enabled(true);

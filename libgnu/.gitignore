@@ -57,3 +57,13 @@
 /locale.in.h
 /fcntl.h
 /locale.h
+/langinfo.h
+/langinfo.in.h
+/localeconv.c
+/nl_langinfo-lock.c
+/nl_langinfo.c
+/setlocale-lock.c
+/setlocale_null-unlocked.c
+/setlocale_null.c
+/setlocale_null.h
+/windows-initguard.h

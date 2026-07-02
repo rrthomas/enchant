@@ -76,3 +76,9 @@
 /musl.m4
 /off64_t.m4
 /sys_cdefs_h.m4
+/langinfo_h.m4
+/localeconv.m4
+/nl_langinfo.m4
+/setlocale_null.m4
+/threadlib.m4
+/visibility.m4
