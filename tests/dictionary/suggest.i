@@ -97,7 +97,7 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
              EnchantDictionarySuggest_SuggestionExcluded_Empty)
 {
     suggestBehavior = returnFianceNfc;
-    RemoveWordFromDictionary(Convert(L"fianc\xe9"));  // u00e9 = Latin small letter e with acute
+    RemoveWordFromDictionary(u8"fianc\u00e9");  // u00e9 = Latin small letter e with acute
 
     size_t cSuggestions;
     _suggestions = enchant_dict_suggest(_dict, "fiance", -1, &cSuggestions);
@@ -176,7 +176,7 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 {
     suggestBehavior = returnFianceNfc;
 
-    ExternalAddWordToDictionary(Convert(L"fiance\x301")); // NFD u0301 = Combining acute accent
+    ExternalAddWordToDictionary(u8"fiance\u0301"); // NFD u0301 = Combining acute accent
 
     ReloadTestDictionary();
 
@@ -185,5 +185,5 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
     CHECK(_suggestions);
 
     CHECK_EQUAL(1 * (std::count(languageTag.begin(), languageTag.end(), ',') + 1), cSuggestions);
-    CHECK_EQUAL(Convert(L"fianc\xe9"), _suggestions[0]);
+    CHECK_EQUAL(reinterpret_cast<const char *>(u8"fianc\u00e9"), _suggestions[0]);
 }

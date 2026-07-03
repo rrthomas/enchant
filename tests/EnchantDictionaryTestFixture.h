@@ -218,21 +218,39 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
     }
 
     bool IsWordInSession(const std::string& word){
-        return enchant_dict_is_added(_dict, word.c_str(), word.size())!=0;
+        return enchant_dict_is_added(_dict, word.c_str(), word.length())!=0;
+    }
+
+    bool IsWordInSession(const std::u8string& word){
+        return enchant_dict_is_added(_dict, reinterpret_cast<const char *>(word.c_str()), word.length())!=0;
     }
 
     bool IsWordInDictionary(const std::string& word){
-        return enchant_dict_check(_dict, word.c_str(), word.size())==0;
+        return enchant_dict_check(_dict, word.c_str(), word.length())==0;
+    }
+
+    bool IsWordInDictionary(const std::u8string& word){
+        return enchant_dict_check(_dict, reinterpret_cast<const char *>(word.c_str()), word.length())==0;
     }
 
     void RemoveWordFromDictionary(const std::string& word)
     {
-        enchant_dict_remove(_dict, word.c_str(), word.size());
+        enchant_dict_remove(_dict, word.c_str(), word.length());
+    }
+
+    void RemoveWordFromDictionary(const std::u8string& word)
+    {
+        enchant_dict_remove(_dict, reinterpret_cast<const char *>(word.c_str()), word.length());
     }
 
     void AddWordToDictionary(const std::string& word)
     {
-	enchant_dict_add(_dict, word.c_str(), word.size());
+	enchant_dict_add(_dict, word.c_str(), word.length());
+    }
+
+    void AddWordToDictionary(const std::u8string& word)
+    {
+	enchant_dict_add(_dict, reinterpret_cast<const char *>(word.c_str()), word.length());
     }
 
     void AddWordsToDictionary(const std::vector<std::string>& sWords)
@@ -249,23 +267,37 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         ExternalAddWordToFile(word, GetPersonalDictFileName());
     }
 
+    void ExternalAddWordToDictionary(const std::u8string& word)
+    {
+        ExternalAddWordToFile(word, GetPersonalDictFileName());
+    }
+
     void ExternalAddWordToExclude(const std::string& word)
     {
         ExternalAddWordToFile(word, GetExcludeDictFileName());
     }
 
-    static void ExternalAddWordToFile(const std::string& word, const std::string& filename)
+    static void ExternalAddWordToFile(const char *word, const std::string& filename)
     {
         sleep(1); // FAT systems have a 2 second resolution
                      // NTFS is appreciably faster but no specs on what it is exactly
                      // c runtime library's time_t has a 1 second resolution
         FILE * f = g_fopen(filename.c_str(), "a");
-	if(f)
-	{
+	if(f) {
             fputc('\n', f);
-            fputs(word.c_str(), f);
+            fputs(word, f);
             fclose(f);
 	}
+    }
+
+    static void ExternalAddWordToFile(const std::string& word, const std::string& filename)
+    {
+        ExternalAddWordToFile(word.c_str(), filename);
+    }
+
+    static void ExternalAddWordToFile(const std::u8string& word, const std::string& filename)
+    {
+        ExternalAddWordToFile(reinterpret_cast<const char *>(word.c_str()), filename);
     }
 
     void ExternalAddNewLineToDictionary()
@@ -306,7 +338,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         size_t cSuggestions;
         char** expectedSuggestions = MockDictionarySuggest (NULL, 
                                                             s.c_str(),
-		                                                    s.size(), 
+                                                            s.length(), 
                                                             &cSuggestions);
 
         std::vector<std::string> result;
@@ -324,7 +356,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
         std::vector<std::string> result;
 
         size_t cSuggestions;
-        char** suggestions = enchant_dict_suggest(_dict, word.c_str(), word.size(), &cSuggestions);
+        char** suggestions = enchant_dict_suggest(_dict, word.c_str(), word.length(), &cSuggestions);
 
         if(suggestions != NULL){
             result.insert(result.begin(), suggestions, suggestions+cSuggestions);

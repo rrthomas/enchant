@@ -43,22 +43,30 @@ struct DictionarySuggest_TestFixture : Provider_TestFixture
         ReleaseDictionary(_dict);
     }
 
-    std::vector<std::string> GetSuggestionsFromWord(EnchantProviderDict* dict, const std::string& word)
+    std::vector<std::string> GetSuggestionsFromWord(EnchantProviderDict* dict, const char *word, size_t len)
     {
         std::vector<std::string> result;
         if(dict && dict->suggest)
         {
             size_t cSuggestions;
-            char** suggestions = (*dict->suggest)(dict, word.c_str(), word.size(), &cSuggestions);
+            char** suggestions = (*dict->suggest)(dict, word, len, &cSuggestions);
 
-            if(suggestions != NULL){
+            if(suggestions != NULL)
                 result.insert(result.begin(), suggestions, suggestions+cSuggestions);
-            }
 
             g_strfreev(suggestions);
         }
-        
+
         return result;
+    }
+
+    std::vector<std::string> GetSuggestionsFromWord(EnchantProviderDict* dict, const std::string& word) {
+        return GetSuggestionsFromWord(dict, word.c_str(), word.length());
+    }
+
+    std::vector<std::string> GetSuggestionsFromWord(EnchantProviderDict* dict, const std::u8string& word)
+    {
+        return GetSuggestionsFromWord(dict, reinterpret_cast<const char *>(word.c_str()), word.length());
     }
 
     std::vector<std::string> GetSuggestionsFromWord(const std::string& word)
@@ -124,7 +132,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
     EnchantProviderDict* dict = GetDictionary("fr_FR");
     if(dict && dict->suggest)
     {
-      std::vector<std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"fran\x00e7" L"ais")); //NFC latin small letter c with cedilla
+      std::vector<std::string> suggestions = GetSuggestionsFromWord(dict, u8"fran\u00e7ais"); //NFC latin small letter c with cedilla
       CHECK(suggestions.size() != 0);
     }
     ReleaseDictionary(dict);
@@ -136,7 +144,7 @@ TEST_FIXTURE(DictionarySuggest_TestFixture,
     EnchantProviderDict* dict = GetDictionary("fr_FR");
     if(dict && dict->suggest)
     {
-      std::vector<std::string> suggestions = GetSuggestionsFromWord(dict, Convert(L"franc\x0327" L"ais")); //NFD combining cedilla
+      std::vector<std::string> suggestions = GetSuggestionsFromWord(dict, u8"franc\u0327ais"); //NFD combining cedilla
       CHECK(suggestions.size() != 0);
     }
     ReleaseDictionary(dict);
