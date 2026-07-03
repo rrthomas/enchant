@@ -73,13 +73,6 @@ TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
-             EnchantDictionaryDescribe_NullDict_DoNothing)
-{
-    enchant_dict_describe(NULL, EnchantSingleDictionaryDescribeCallback, &_description);
-    CHECK(!callbackCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryDescribe_TestFixture,
              EnchantDictionaryDescribe_NullCallback_DoNothing)
 {
     enchant_dict_describe(_dict, NULL, &_description);

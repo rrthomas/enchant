@@ -1,7 +1,7 @@
 #! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg internal --pkg gnu provider.vala
 /* libenchant: Broker
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2025 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2026 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -105,8 +105,11 @@ public class EnchantBroker {
 		set { _error = value; }
 	}
 
-	public void set_ordering(string tag, string ordering) {
+	public void set_ordering(string? tag, string? ordering) {
 		this.clear_error();
+
+		if (tag == null || ordering == null)
+			return;
 
 		string tag_dupl = normalize_dictionary_tag(tag);
 		string ordering_dupl = ordering.strip();
@@ -217,7 +220,10 @@ public class EnchantBroker {
 		}
 	}
 
-	public SList<unowned EnchantProvider> get_ordered_providers(string tag) {
+	public SList<unowned EnchantProvider>? get_ordered_providers(string? tag) {
+		if (tag == null)
+			return null;
+
 		string ordering = this.provider_ordering.lookup(tag);
 		if (ordering == null)
 			ordering = this.provider_ordering.lookup("*");
@@ -243,10 +249,12 @@ public class EnchantBroker {
 		return list;
 	}
 
-	public unowned EnchantDict? request_pwl_dict(string pwl)
-	requires (pwl.length > 0)
+	public unowned EnchantDict? request_pwl_dict(string? pwl)
 	{
 		this.clear_error();
+
+		if (pwl == null || pwl.length == 0)
+			return null;
 
 		/* since the broker pwl file is a read/write file (there is no readonly dictionary associated)
 		 * there is no need for complementary exclude file to add a word to. The word just needs to be
@@ -271,9 +279,11 @@ public class EnchantBroker {
 		return null;
 	}
 
-	public unowned EnchantDict? request_dict_with_pwl(string composite_tag, string? pwl)
-	requires (composite_tag.length > 0)
+	public unowned EnchantDict? request_dict_with_pwl(string? composite_tag, string? pwl)
 	{
+		if (composite_tag == null || composite_tag.length == 0)
+			return null;
+
 		// Parse the composite tag and check each is non-empty
 		var tags = composite_tag.split(",");
 		foreach (unowned string tag in tags)
@@ -303,15 +313,16 @@ public class EnchantBroker {
 		return this.new_dict(EnchantDict.with_implicit_pwl(comp_dict, tags[0], pwl));
 	}
 
-	public unowned EnchantDict? request_dict(string tag) {
+	public unowned EnchantDict? request_dict(string? tag) {
 		return this.request_dict_with_pwl(tag, null);
 	}
 
-	public void describe(EnchantBrokerDescribeFn fn, void * user_data)
-	requires (fn != null)
+	public void describe(EnchantBrokerDescribeFn? fn, void * user_data)
 	{
-
 		this.clear_error();
+
+		if (fn == null)
+			return;
 
 		foreach (unowned EnchantProvider provider in this.provider_list) {
 			string name = provider.identify(provider);
@@ -322,9 +333,11 @@ public class EnchantBroker {
 		}
 	}
 
-	public void list_dicts(EnchantDictDescribeFn fn, void *user_data)
-	requires (fn != null)
+	public void list_dicts(EnchantDictDescribeFn? fn, void *user_data)
 	{
+		if (fn == null)
+			return;
+
 		var tag_map = new HashTable<string, unowned EnchantProvider>(str_hash, str_equal);
 
 		this.clear_error();
@@ -368,23 +381,24 @@ public class EnchantBroker {
 		}
 	}
 
-	public int _dict_exists(string tag)
-	/* don't query the providers if it is an empty string */
-	requires (tag.length > 0)
+	int _dict_exists(string tag)
 	{
 		foreach (unowned EnchantProvider provider in this.provider_list)
 			if (provider._dictionary_exists(tag) != 0)
 				return 1;
-
 		return 0;
 	}
 
-	public int dict_exists(string tag)
-	requires (tag.length > 0)
+	public int dict_exists(string? tag)
 	{
 		this.clear_error();
 
+		if (tag == null || tag.length == 0)
+			return 0;
+
 		string normalized_tag = normalize_dictionary_tag(tag);
+		if (normalized_tag.length == 0)
+			return 0;
 		int exists = 0;
 
 		if ((exists = this._dict_exists(normalized_tag)) == 0) {
@@ -399,13 +413,17 @@ public class EnchantBroker {
 		return exists;
 	}
 
-	public unowned EnchantDict new_dict(EnchantDict session) {
+	public unowned EnchantDict? new_dict(EnchantDict? session) {
+		if (session == null)
+			return null;
 		this.sessions.add(session);
 		unowned var session_ref = session;
 		return session_ref;
 	}
 
-	public void free_dict(EnchantDict session) {
+	public void free_dict(EnchantDict? session) {
+		if (session == null)
+			return;
 		this.sessions.remove(session);
 		this.clear_error();
 	}

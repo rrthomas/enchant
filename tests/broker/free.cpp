@@ -100,13 +100,6 @@ TEST_FIXTURE(EnchantBrokerFreeAlternativeDisposeTestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerFreeTestFixture,
-             EnchantBrokerFree_NullBroker_DoNothing)
-{
-    enchant_broker_free(NULL);
-    CHECK(!disposeWasCalled);
-}
-
-TEST_FIXTURE(EnchantBrokerFreeTestFixture,
              EnchantBrokerFree_DictionaryNotFreed_FreesDictionary)
 {
     EnchantDict* dict = enchant_broker_request_dict(_broker, "en_GB");

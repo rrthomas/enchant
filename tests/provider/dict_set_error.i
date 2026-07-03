@@ -38,14 +38,6 @@ TEST_FIXTURE(EnchantDictionarySetError_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictionarySetError_TestFixture, 
-             SetErrorMessageOnDictionary_NullDictionary_NoErrorSet)
-{
-    enchant_dict_set_error(NULL, "Error message to display");
-
-    CHECK_EQUAL(std::string(), GetErrorMessage());
-}
-
-TEST_FIXTURE(EnchantDictionarySetError_TestFixture, 
              SetErrorMessageOnDictionary_NullError_NoErrorSet)
 {
     enchant_dict_set_error(_dict, NULL);

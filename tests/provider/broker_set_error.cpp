@@ -58,14 +58,6 @@ TEST_FIXTURE(EnchantBrokerSetErrorTests,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerSetErrorTests, 
-             SetErrorMessageOnProvider_NullProvider_NoErrorSet)
-{
-    enchant_provider_set_error(NULL, "Error message to display");
-
-    CHECK_EQUAL(std::string(), GetErrorMessage());
-}
-
-TEST_FIXTURE(EnchantBrokerSetErrorTests, 
              SetErrorMessageOnProvider_NullError_NoErrorSet)
 {
     enchant_provider_set_error(provider, NULL);

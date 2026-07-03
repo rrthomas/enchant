@@ -45,11 +45,3 @@ TEST_FIXTURE(EnchantBrokerTestFixture,
 {
     CHECK_EQUAL((void*)NULL, (void*)enchant_broker_get_error(_broker));
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Error Conditions
-
-TEST(EnchantBrokerGetError_NullBroker_Null)
-{
-    CHECK_EQUAL((void*)NULL, (void*)enchant_broker_get_error(NULL));
-}

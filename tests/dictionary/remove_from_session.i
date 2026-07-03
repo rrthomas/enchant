@@ -110,13 +110,6 @@ TEST_FIXTURE(EnchantDictionaryRemoveFromSession_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictionaryRemoveFromSession_TestFixture,
-             EnchantDictionaryRemoveFromSession_NullDictionary_NotRemoved)
-{
-    enchant_dict_remove_from_session(NULL, "hello", -1);
-    CHECK(IsWordInDictionary("hello"));
-}
-
-TEST_FIXTURE(EnchantDictionaryRemoveFromSession_TestFixture,
              EnchantDictionaryRemoveFromSession_NullWord_NotRemoved)
 {
     enchant_dict_remove_from_session(_dict, NULL, -1);

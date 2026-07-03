@@ -50,10 +50,3 @@ TEST_FIXTURE(EnchantDictionaryTestFixture,
 {
     CHECK_EQUAL((void*)NULL, (void*)enchant_dict_get_error(_dict));
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Error Conditions
-TEST(EnchantDictionaryGetError_NullBroker_Null)
-{
-    CHECK_EQUAL((void*)NULL, (void*)enchant_dict_get_error(NULL));
-}

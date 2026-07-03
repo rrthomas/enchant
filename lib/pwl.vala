@@ -138,8 +138,13 @@ public class EnchantPWL {
 			this.words.insert(normalized_word, word);
 	}
 
-	public void add(EnchantDict session, string word_buf, real_ssize_t len) {
+	public void add(EnchantDict session, string? word_buf, real_ssize_t len) {
+		if (word_buf == null)
+			return;
+
 		string word = buf_to_utf8_string(word_buf, len);
+		if (word == null || word.length == 0)
+			return;
 
 		this.refresh_from_file(session);
 		this.add_to_table(word);
@@ -170,9 +175,14 @@ public class EnchantPWL {
 	}
 
 	public void remove(EnchantDict session, string word_buf, real_ssize_t len) {
-		this.refresh_from_file(session);
+		if (word_buf == null)
+			return;
 
 		string word = buf_to_utf8_string(word_buf, len);
+		if (word == null || word.length == 0)
+			return;
+
+		this.refresh_from_file(session);
 		this.words.remove(word.normalize());
 
 		if (this.filename != null) {
@@ -225,7 +235,13 @@ public class EnchantPWL {
 	}
 
 	public int check(EnchantDict session, string word_buf, real_ssize_t len) {
+		if (word_buf == null)
+			return 0;
+
 		string word = buf_to_utf8_string(word_buf, len);
+		if (word == null || word.length == 0)
+			return 0;
+
 		this.refresh_from_file(session);
 
 		if (this.words.contains(word.normalize()))

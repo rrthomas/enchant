@@ -84,12 +84,6 @@ TEST_FIXTURE(EnchantDictionaryIsAdded_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictionaryIsAdded_TestFixture,
-             EnchantDictionaryIsAdded_NullDictionary_0)
-{
-    CHECK_EQUAL(0, enchant_dict_is_added(NULL, "hello", -1));
-}
-
-TEST_FIXTURE(EnchantDictionaryIsAdded_TestFixture,
              EnchantDictionaryIsAdded_NullWord_0)
 {
     CHECK_EQUAL(0, enchant_dict_is_added(_dict, NULL, -1));

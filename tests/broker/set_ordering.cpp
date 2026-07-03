@@ -276,14 +276,6 @@ TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
-			 EnchantBrokerSetOrdering_NullBroker_DoNothing)
-{
-	enchant_broker_set_ordering(_broker, "qaa", "mock2,mock1");
-	enchant_broker_set_ordering(NULL, "qaa", "mock1,mock2");
-	CHECK_EQUAL(Mock2ThenMock1, GetProviderOrder("qaa"));
-}
-
-TEST_FIXTURE(EnchantBrokerSetOrdering_TestFixture,
 			 EnchantBrokerSetOrdering_NullLanguageTag_DoNothing)
 {
 	enchant_broker_set_ordering(_broker, "*", "mock2,mock1");

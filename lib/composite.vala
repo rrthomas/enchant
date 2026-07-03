@@ -1,6 +1,6 @@
 #! /usr/bin/env -S vala --vapidir src --vapidir lib --pkg internal --pkg gnu broker.vala dict.vala
 /* libenchant: Composite dictionaries
- * Copyright (C) 2024-2025 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2024-2026 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -42,7 +42,7 @@ public class EnchantCompositeDict : EnchantProviderDict {
 	}
 }
 
-int composite_dict_check(EnchantProviderDict? self, string word_buf, real_size_t len) {
+int composite_dict_check(EnchantProviderDict? self, string? word_buf, real_size_t len) {
 	if (self == null || word_buf == null)
 		return -1;
 	string word = buf_to_utf8_string(word_buf, (real_ssize_t)len);

@@ -122,13 +122,6 @@ TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
-             EnchantDictionaryAddToSession_NullDictionary_NotAdded)
-{
-    enchant_dict_add_to_session(NULL, "hello", -1);
-    CHECK(!addToSessionCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryAddToSession_TestFixture,
              EnchantDictionaryAddToSession_NullWord_NotAdded)
 {
     enchant_dict_add_to_session(_dict, NULL, -1);

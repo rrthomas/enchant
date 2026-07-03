@@ -1,4 +1,5 @@
 /* Copyright (c) 2007 Eric Scott Albright
+ * Copyright (C) 2023-2026 Reuben Thomas
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +23,8 @@
 #include "config.h"
 #include <stdio.h>
 #include <UnitTest++/UnitTest++.h>
+#include <glib.h>
+
 #include "EnchantBrokerTestFixture.h"
 #include "enchant.h"
 
@@ -36,6 +39,7 @@ int main(){
   return 1;
 #else
   enchant_set_prefix_dir(".");
+  g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL);
   return UnitTest::RunAllTests();
 #endif
 }

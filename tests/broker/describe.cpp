@@ -247,13 +247,6 @@ TEST_FIXTURE(EnchantBrokerDescribeTestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerDescribeTestFixture, 
-             EnchantBrokerDescribe_NullBroker_DoNothing)
-{
-  enchant_broker_describe(NULL, EnchantBrokerDescribeCallback, &_providerList);
-  CHECK_EQUAL((void*)NULL, global_user_data);
-}
-
-TEST_FIXTURE(EnchantBrokerDescribeTestFixture, 
              EnchantBrokerDescribe_NullDescribeFunction_DoNothing)
 {
   enchant_broker_describe(_broker, NULL, &_providerList);

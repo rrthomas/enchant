@@ -127,12 +127,3 @@ TEST_FIXTURE(EnchantDictionaryGetExtraWordCharactersNotImplemented_TestFixture,
     _extraWordCharacters = enchant_dict_get_extra_word_characters(_dict);
     CHECK_EQUAL(_extraWordCharacters, "");
 }
-
-/////////////////////////////////////////////////////////////////////////////
-// Test Error Conditions
-TEST_FIXTURE(EnchantDictionaryGetExtraWordCharacters_TestFixture,
-             EnchantDictionaryGetExtraWordCharacters_NullDictionarySuppliedMethodNotCalled)
-{
-    _extraWordCharacters = enchant_dict_get_extra_word_characters(NULL);
-    CHECK(!dictGetExtraWordCharactersCalled);
-}

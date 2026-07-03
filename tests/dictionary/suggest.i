@@ -116,15 +116,6 @@ TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
-             EnchantDictionarySuggest_NullDictionary_NullSuggestions)
-{
-    _suggestions = enchant_dict_suggest(NULL, "helo", -1, NULL);
-
-    CHECK(!_suggestions);
-    CHECK(!dictSuggestCalled);
-}
-
-TEST_FIXTURE(EnchantDictionarySuggest_TestFixture,
              EnchantDictionarySuggest_NullWord_NullSuggestions)
 {
     _suggestions = enchant_dict_suggest(_dict, NULL, -1, NULL);

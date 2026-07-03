@@ -112,12 +112,6 @@ TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
 // Test Error Conditions
 
 TEST_FIXTURE(EnchantBrokerDictExistsTestFixture, 
-             EnchantBrokerDictExists_NullBroker_0)
-{
-    CHECK_EQUAL(0, enchant_broker_dict_exists (NULL, "en_US"));
-}
-
-TEST_FIXTURE(EnchantBrokerDictExistsTestFixture, 
              EnchantBrokerDictExists_NullTag_0)
 {
     CHECK_EQUAL(0, enchant_broker_dict_exists (_broker, NULL));

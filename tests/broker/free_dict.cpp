@@ -128,13 +128,6 @@ TEST_FIXTURE(EnchantBrokerFreeDictTestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerFreeDictTestFixture, 
-             EnchantBrokerFreeDict_NullBroker_DoNothing)
-{
-    enchant_broker_free_dict(NULL, _dictionary);
-    CHECK_EQUAL((EnchantProviderDict*)NULL, dictionaryToBeFreed);
-}
-
-TEST_FIXTURE(EnchantBrokerFreeDictTestFixture, 
              EnchantBrokerFreeDict_NullDict_DoNothing)
 {
     enchant_broker_free_dict(_broker, NULL);

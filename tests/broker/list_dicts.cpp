@@ -156,13 +156,6 @@ TEST_FIXTURE(EnchantBrokerListDictionaries_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerListDictionaries_TestFixture,
-             EnchantBrokerListDictionaries_NullBroker_DoNotCallDescribeFunction)
-{
-    enchant_broker_list_dicts(NULL, EnchantDictionaryDescribeAssignUserDataToStaticCallback, NULL);
-    CHECK(!listDictionariesCalled);
-}
-
-TEST_FIXTURE(EnchantBrokerListDictionaries_TestFixture,
              EnchantBrokerListDictionaries_NullCallback_DoNotCallDescribeFunction)
 {
     enchant_broker_list_dicts(_broker, NULL, NULL);

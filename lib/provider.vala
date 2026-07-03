@@ -1,7 +1,7 @@
-#! /usr/bin/env -S vala --vapidir lib --pkg gnu
+#! /usr/bin/env -S vala --vapidir lib --pkg gnu --pkg configmake
 /* enchant: Provider
  * Copyright (C) 2003, 2004 Dom Lachowicz
- * Copyright (C) 2016-2025 Reuben Thomas <rrt@sc3d.org>
+ * Copyright (C) 2016-2026 Reuben Thomas <rrt@sc3d.org>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -81,7 +81,7 @@ public delegate string[] ProviderListDicts(EnchantProvider me);
 
 public class EnchantProvider {
 	public void *user_data;
-	public Module module;
+	public Module? module;
 	public unowned EnchantBroker? owner;
 	public ProviderDispose dispose;
 	public ProviderRequestDict request_dict;
@@ -96,10 +96,11 @@ public class EnchantProvider {
 		if (this.dispose != null)
 			this.dispose(this);
 		/* close module only after invoking dispose */
-		module.close();
+		if (module != null)
+			module.close();
 	}
 
-	public static bool is_valid(EnchantProvider provider) {
+	public static bool is_valid(EnchantProvider? provider) {
 		if (provider == null)
 			warning("EnchantProvider cannot be NULL");
 		else if (provider.request_dict == null)
@@ -122,7 +123,10 @@ public class EnchantProvider {
 		return false;
 	}
 
-	public void set_error(string err) {
+	public void set_error(string? err) {
+		if (err == null)
+			return;
+
 		unowned EnchantBroker broker = this.owner;
 		if (broker == null)
 			return;

@@ -84,12 +84,6 @@ TEST_FIXTURE(EnchantDictionaryIsRemoved_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictionaryIsRemoved_TestFixture,
-             EnchantDictionaryIsRemoved_NullDictionary_0)
-{
-    CHECK_EQUAL(0, enchant_dict_is_removed(NULL, "hello", -1));
-}
-
-TEST_FIXTURE(EnchantDictionaryIsRemoved_TestFixture,
              EnchantDictionaryIsRemoved_NullWord_0)
 {
     CHECK_EQUAL(0, enchant_dict_is_removed(_dict, NULL, -1));

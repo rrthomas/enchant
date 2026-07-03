@@ -78,14 +78,6 @@ TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture,
-             EnchantBrokerRequestPwlDictionary_NullBroker_NULL)
-{
-    _dict = enchant_broker_request_pwl_dict(NULL, _pwlFile.c_str());
-
-    CHECK_EQUAL((void*)NULL, (void*)_dict);
-}
-
-TEST_FIXTURE(EnchantBrokerRequestPwlDictionary_TestFixture,
              EnchantBrokerRequestPwlDictionary_NullFilename_NULL)
 {
     _dict = enchant_broker_request_pwl_dict(_broker, NULL);

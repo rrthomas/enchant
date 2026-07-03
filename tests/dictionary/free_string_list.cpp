@@ -71,12 +71,6 @@ TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
-             EnchantDictFreeStringList_NullDict_DoNothing)
-{
-    enchant_dict_free_string_list(NULL, _string_list);
-}
-
-TEST_FIXTURE(EnchantDictFreeStringList_TestFixture,
              EnchantDictFreeStringList_NullStringList_DoNothing)
 {
     enchant_dict_free_string_list(_dict, NULL);
