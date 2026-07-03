@@ -37,12 +37,14 @@
 /sys/
 /unistd.h
 /getopt-cdefs.in.h
+/getopt-cdefs.h
 /getopt-core.h
 /getopt-ext.h
 /getopt-pfx-core.h
 /getopt-pfx-ext.h
 /getopt.c
 /getopt.in.h
+/getopt.h
 /getopt1.c
 /getopt_int.h
 /gettext.h
