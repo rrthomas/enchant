@@ -37,8 +37,6 @@ using Posix;
 /* word has to be bigger than this to be checked */
 const uint MIN_WORD_LENGTH = 1;
 
-string charset;
-
 enum Mode {
 	NONE,
 	A,
@@ -48,32 +46,6 @@ enum Mode {
 void print_version(FileStream to) {
 	to.printf("@(#) International Ispell Version 3.1.20 (but really Enchant %s)\n", PACKAGE_VERSION);
 	to.flush();
-}
-
-string? get_line(FileStream fin) {
-	string str = fin.read_line();
-	if (str != null && str.length > 0) {
-		try {
-			return convert(str, str.length, "UTF-8", charset);
-		} catch (ConvertError e) {
-			/* Assume that str is already utf8 and glib is just being stupid. */
-		}
-	}
-	return str;
-}
-
-void print_utf(string str) {
-	size_t bytes_written;
-	try {
-		string native = str.locale_from_utf8(str.length, null, out bytes_written);
-		/* Print arbitrary bytes (including potential NULs). */
-		unowned uint8[] buf = (uint8[]) native;
-		buf.length = (int)bytes_written;
-		GLib.stdout.write(buf);
-	} catch (GLib.ConvertError e) {
-		/* Assume that it's already utf8 and glib is just being stupid. */
-		print("%s", str);
-	}
 }
 
 bool check_word(Dict dict, string word) {
@@ -95,18 +67,18 @@ void do_mode_a(Dict dict, string word, size_t start_pos, size_t line_count, bool
 			print("# ");
 			if (line_count > 0)
 				print("%zu ", line_count);
-			print_utf(word);
+			print(word);
 			print(" %zu\n", start_pos);
 		} else {
 			print("& ");
 			if (line_count > 0)
 				print("%zu ", line_count);
-			print_utf (word);
+			print(word);
 			print(" %zu %zu:", suggs.length, start_pos);
 
 			for (size_t i = 0; i < suggs.length; i++) {
 				GLib.stdout.putc(' ');
-				print_utf(suggs[i]);
+				print(suggs[i]);
 
 				if (i != suggs.length - 1)
 					GLib.stdout.putc(',');
@@ -120,7 +92,7 @@ void do_mode_l(Dict dict, string word, size_t line_count) {
 	if (!check_word(dict, word)) {
 		if (line_count > 0)
 			print("%zu ", line_count);
-		print_utf(word);
+		print(word);
 		GLib.stdout.putc('\n');
 	}
 }
@@ -282,7 +254,7 @@ public class Main : Object {
 		var corrected_something = false;
 		size_t line_count = 0;
 		string str;
-		while ((str = get_line(fin)) != null) {
+		while ((str = fin.read_line()) != null) {
 			bool mode_A_no_command = false;
 
 			if (count_lines)
@@ -395,7 +367,6 @@ public class Main : Object {
 	public static int main(string[] args) {
 		/* Initialize system locale */
 		Intl.setlocale();
-		get_charset(out charset);
 
 		var ctx = new OptionContext("\n\nCheck spelling non-interactively.");
 		ctx.set_help_enabled(true);

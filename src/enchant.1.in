@@ -1,6 +1,6 @@
 \" Enchant program man page
 \"
-\" Copyright (C) 2017-2023 Reuben Thomas
+\" Copyright (C) 2017-2026 Reuben Thomas
 \"
 \" This library is distributed in the hope that it will be useful,
 \" but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,6 +24,7 @@ Enchant \- a spellchecker
 is an Ispell-compatible spellchecker.
 Note that unlike Ispell, it does not have an interactive mode; it is
 designed to be used by other programs.
+Enchant requires its input to be UTF-8.
 .TP
 \fB\-d \fIDICTIONARY\fR
 use the given dictionary
