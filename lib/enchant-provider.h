@@ -92,18 +92,6 @@ char *enchant_provider_get_user_dict_dir (EnchantProvider * provider);
 GSList *enchant_get_conf_dirs (void);
 
 /**
- * enchant_get_prefix_dir
- *
- * Returns a string giving the location of the base directory of the enchant
- * installation. This corresponds roughly to the --prefix option given to
- * ./configure when enchant is compiled, except it is determined at runtime
- * based on the location of the enchant library.
- *
- * The return value must be free'd.
- */
-char *enchant_get_prefix_dir(void);
-
-/**
  * enchant_relocate
  *
  * Returns a string giving the relocated path according to the location of

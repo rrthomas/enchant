@@ -58,10 +58,6 @@ SList enchant_get_conf_dirs() {
 	return conf_dirs;
 }
 
-public string enchant_get_prefix_dir() {
-	return relocate(INSTALLPREFIX);
-}
-
 [CCode (has_target = false)]
 public delegate void ProviderDispose(EnchantProvider me);
 [CCode (has_target = false)]

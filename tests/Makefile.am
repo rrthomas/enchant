@@ -135,7 +135,6 @@ main_test_SOURCES = main.test.cpp \
 	provider/broker_set_error.cpp \
 	provider/dict_set_error.cpp \
 	provider/dict_set_error.i \
-	provider/get_prefix_dir.cpp \
 	provider/get_user_config_dirs.cpp \
 	$(NULL)
 main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
