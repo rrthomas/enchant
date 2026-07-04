@@ -35,6 +35,7 @@
 
 #include <string>
 #include <locale>
+#include <codecvt>
 
 #include "enchant.h"
 #include "enchant-provider.h"
@@ -127,7 +128,19 @@ struct EnchantTestFixture
         return(g_access(filepath.c_str(), 0)==0);
     }
 
-    static std::string AddToPath(const std::string & path, const std::string & fileOrDirName)
+    std::string Convert(const std::wstring & ws)
+    {
+        std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
+        return convert.to_bytes(ws);
+    }
+
+    std::wstring Convert(const std::string & s)
+    {
+        std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> convert;
+        return convert.from_bytes(s);
+    }
+
+  static std::string AddToPath(const std::string & path, const std::string & fileOrDirName)
     {
         std::string result;
         gchar* filename = g_build_filename(path.c_str(), fileOrDirName.c_str(), NULL);

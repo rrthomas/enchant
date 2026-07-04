@@ -68,11 +68,6 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
         return IsWordInDictionary(_dict, word);
     }
 
-    bool IsWordInDictionary(const std::u8string& word)
-    {
-        return IsWordInDictionary(_dict, word);
-    }
-
     static bool IsWordInDictionary(EnchantProviderDict* dict, const std::string& word)
     {
         assert(dict && dict->check); // tests must check this before calling
@@ -80,49 +75,34 @@ struct DictionaryCheck_TestFixture : Provider_TestFixture
         return (*dict->check)(dict, word.c_str(), word.length()) == 0; //check returns 0 when successful and 1 when not successful
     }
 
-    static bool IsWordInDictionary(EnchantProviderDict* dict, const std::u8string& word)
-    {
-        assert(dict && dict->check); // tests must check this before calling
-
-        return (*dict->check)(dict, reinterpret_cast<const char *>(word.c_str()), word.length()) == 0; //check returns 0 when successful and 1 when not successful
-    }
-
     bool AddWordToDictionary(const std::string& word)
     {
         return AddWordToDictionary(_dict, word);
     }
 
-    bool AddWordToDictionary(const std::u8string& word)
+    bool AddWordToDictionary(EnchantProviderDict* dict, const std::string& word)
     {
-        return AddWordToDictionary(_dict, word);
-    }
-
-    bool AddWordToDictionary(EnchantProviderDict* dict, const char *word, size_t len) {
         if(dict == NULL)
+        {
             return false;
+        }
 
-        if(dict->check(dict, word, len))
+        if(IsWordInDictionary(word))
+        {
             return true;
+        }
 
         // prefer adding it to the session so it will get automatically removed
         if(dict->add_to_session)
         {
-            (*dict->add_to_session) (dict, word, len);
-            if(dict->check(dict, word, len))
+            (*dict->add_to_session) (dict, word.c_str(), word.length());
+            if(IsWordInDictionary(word))
+            {
                 return true;
+            }
         }
 
         return false;
-    }
-
-    bool AddWordToDictionary(EnchantProviderDict* dict, const std::string& word)
-    {
-        return AddWordToDictionary(dict, word.c_str(), word.length());
-    }
-
-    bool AddWordToDictionary(EnchantProviderDict* dict, const std::u8string& word)
-    {
-        return AddWordToDictionary(dict, reinterpret_cast<const char *>(word.c_str()), word.length());
     }
 };
 
@@ -133,10 +113,10 @@ TEST_FIXTURE(DictionaryCheck_TestFixture,
 {
     if(_dict && _dict->check)
     {
-      if(AddWordToDictionary(u8"fiancé" u8"deleteme"))
+      if(AddWordToDictionary(Convert(L"fianc\x00e9" L"deleteme"))) // u00e9 = Latin small letter e with acute
       {
-          CHECK( IsWordInDictionary(u8"fianc\u00e9" u8"deleteme") ); //NFC
-          CHECK( IsWordInDictionary(u8"fiance\u0301" u8"deleteme") ); //NFD u0301 = Combining acute accent
+          CHECK( IsWordInDictionary(Convert(L"fianc\x00e9" L"deleteme")) ); //NFC
+          CHECK( IsWordInDictionary(Convert(L"fiance\x0301" L"deleteme")) ); //NFD u0301 = Combining acute accent
       }
     }
 }
@@ -146,10 +126,10 @@ TEST_FIXTURE(DictionaryCheck_TestFixture,
 {
     if(_dict && _dict->check)
     {
-      if(AddWordToDictionary(u8"fiance\u0301" u8"deletethis")) // u0301 = Combining acute accent
+      if(AddWordToDictionary(Convert(L"fiance\x0301" L"deletethis"))) // u0301 = Combining acute accent
       {
-          CHECK( IsWordInDictionary(u8"fianc\u00e9" u8"deletethis") ); //NFC
-          CHECK( IsWordInDictionary(u8"fiance\u0301" u8"deletethis") ); //NFD
+          CHECK( IsWordInDictionary(Convert(L"fianc\x00e9" L"deletethis")) ); //NFC
+          CHECK( IsWordInDictionary(Convert(L"fiance\x0301" L"deletethis")) ); //NFD
       }
     }
 }
@@ -160,8 +140,8 @@ TEST_FIXTURE(DictionaryCheck_TestFixture,
     EnchantProviderDict* dict = GetDictionary("fr_FR");
     if(dict && dict->check)
     {
-        CHECK( IsWordInDictionary(dict, u8"Fran\u00e7ais") ); //NFC latin small letter c with cedilla
-        CHECK( IsWordInDictionary(dict, u8"Franc\u0327ais") ); //NFD combining cedilla
+        CHECK( IsWordInDictionary(dict, Convert(L"Fran\x00e7" L"ais")) ); //NFC latin small letter c with cedilla
+        CHECK( IsWordInDictionary(dict, Convert(L"Franc\x0327" L"ais")) ); //NFD combining cedilla
     }
     ReleaseDictionary(dict);
 }

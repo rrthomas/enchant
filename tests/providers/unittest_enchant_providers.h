@@ -37,6 +37,32 @@ struct Provider_TestFixture
         _provider = GetProviderForTests();
     }
 
+    std::string Convert(const std::wstring & ws)
+    {
+        gchar* str;
+        switch (sizeof(wchar_t)) {
+        case 2:
+                str = g_utf16_to_utf8((gunichar2*)ws.c_str(), (glong)ws.length(), NULL, NULL, NULL);
+                break;
+        case 4:
+                str = g_ucs4_to_utf8((gunichar*)ws.c_str(), (glong)ws.length(), NULL, NULL, NULL);
+                break;
+        default:
+                abort();
+        }
+        std::string s(str);
+        g_free(str);
+        return s;
+    }
+
+    std::wstring Convert(const std::string & s)
+    {
+        gunichar2* str = g_utf8_to_utf16(s.c_str(), (glong)s.length(), NULL, NULL, NULL);
+        std::wstring ws((wchar_t*)str);
+        g_free(str);
+        return ws;
+    }
+
     EnchantProviderDict* GetDefaultDictionary()
     {
         EnchantProviderDict* dict=NULL;
