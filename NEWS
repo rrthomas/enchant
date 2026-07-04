@@ -1,3 +1,46 @@
+2.8.18 (July 4, 2026)
+---------------------
+
+This release fixes compatibility with the latest Vala compiler, version
+0.56.19. The problem was Enchant’s fault; the change in behaviour by valac,
+of returning different values for some return types when a method
+precondition failed, was fine. The Enchant code was allowing these checks to
+fail rather than validating arguments. Manual validation has been added for
+most arguments, except the “self” argument for “method calls”, which is
+usually the argument in first position, e.g. the EnchantBroker pointer
+argument to all enchant_broker_* APIs. Applications can call
+`g_log_set_always_fatal(G_LOG_LEVEL_CRITICAL)` or equivalent to make these
+tests cause an assertion failure; otherwise, critical errors will be logged,
+and in some cases a different value will be returned by the API from that
+previously returned. I have not changed the major version of the library,
+since the return code in such cases was always undocumented: the APIs
+require non-NULL pointers.
+
+enchant(1) now assumes UTF-8 input and produces only UTF-8 output.
+Previously, it assumed the system locale for input, and converted to the
+system locale on output. This worked badly on Windows, where the system
+locale is often reported as a legacy 8-bit code page, even when the user
+environment is Unicode, and was also incorrect in cases where enchant(1) was
+reading from a file in some other encoding, usually UTF-8.
+
+The macOS spelling checker used to have a hard-wired list of languages it
+supported. Drop this, and support all languages supported by the system.
+Further, do not offer e.g. an “en_US” dictionary when “en” is requested. (A
+similar change to the Hunspell provider was made in version 2.8.7.)
+
+Some code clean-up has been done, removing some unused code, and making some
+minor improvements to the build system. I’m surprised how in a codebase of
+modest size (a few thousand lines for the main library, spelling providers
+and command-line utilities) that I’ve completely rewritten and worked on for
+some years, I still find things that don’t need to be there!
+
+The tests have been updated to drop the use of the deprecated codecvt APIs,
+and instead use u8 string literals. As a result, Enchant’s build system now
+requires C++20. Do let me know if this is a problem; as far as I can tell,
+that should be fine for packagers on up-to-date systems, as C++20 has been
+supported by the main compilers for a few years now.
+
+
 2.8.17 (June 29, 2026)
 ----------------------
 
