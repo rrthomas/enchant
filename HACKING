@@ -32,7 +32,7 @@ Working in libenchant
 
     When you submit code for inclusion in libenchant, please keep those
 things in mind.  Performance is not generally an issue: Enchant leaves the
-heavy lifting to its spelling providers.  Specifically, this means:
+heavy lifting to its spelling providers.  Specifically:
 
 	- Clarity of design and function are paramount
 	- Make sure your code does not generate warnings
@@ -48,8 +48,6 @@ base; broadly, there are different styles for the Vala library code,
 providers and commands, and the tests.  The public header files are written
 in GLib style.
 
-   Emacs users should use the supplied .dir-locals.el.
-
    Remember: Use tabs for indentation: that will keep your
 code honest as you will be forced to split your routines into more
 modular chunks (as detailed by Linus). 
@@ -63,10 +61,10 @@ code, and in C/C++:
 	- Follow the Gtk+ namespace convention for function names:
 	  module_submodule_operation
 
-	- Do not submit code that is just a temporary workaround for a
-	  full fledged feature.  We do not want to maintain limited
-	  features.  It is better to submit an implementation designed
-	  to be expanded and enhanced, even if it is not completely
+	- Do not submit code that is just a temporary workaround for the
+	  lack of a full fledged feature.  We do not want to maintain
+	  limited features.  It is better to submit an implementation
+	  designed to be expanded and enhanced, even if it is not completely
 	  finished.
 
    All of this is to ensure the libenchant code will be kept within
