@@ -1,6 +1,6 @@
 ## Makefile.am for the providers subdirectory of Enchant
 #
-# Copyright (C) 2017-2024 Reuben Thomas
+# Copyright (C) 2017-2026 Reuben Thomas
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -9,8 +9,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program; if not, see <https://www.gnu.org/licenses/>.
-
-EXTRA_DIST = AppleSpell.config
 
 provider_LTLIBRARIES =
 providerdir = $(pkglibdir)-@ENCHANT_MAJOR_VERSION@
@@ -62,7 +60,6 @@ enchant_zemberek_la_SOURCES = enchant_zemberek.cpp
 
 if WITH_APPLESPELL
 provider_LTLIBRARIES += enchant_applespell.la
-libenchant_data_DATA = AppleSpell.config
 endif
 enchant_applespell_la_LIBTOOLFLAGS = $(AM_LIBTOOLFLAGS) --tag=CXX
 enchant_applespell_la_OBJCXXFLAGS = $(AM_OBJCXXFLAGS)

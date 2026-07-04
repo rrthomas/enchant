@@ -141,11 +141,6 @@ main_test_DEPENDENCIES = $(LIBENCHANT_COPY)
 main_test_LDADD = $(LIBENCHANT_COPY) $(GLIB_LIBS) $(UNITTESTPP_LIBS)
 main_test_CPPFLAGS = $(AM_CPPFLAGS) $(UNITTESTPP_CFLAGS) -DLIBDIR_SUBDIR=\"$(libdir_subdir)\"
 
-APPLESPELL_CONFIG = config/AppleSpell.config
-$(APPLESPELL_CONFIG): $(top_srcdir)/providers/AppleSpell.config
-	$(MKDIR_P) config
-	cp $(top_srcdir)/providers/AppleSpell.config config/
-
 providers_test_SOURCES = providers/providers.test.cpp \
 	EnchantTestFixture.h \
 	EnchantBrokerTestFixture.h \

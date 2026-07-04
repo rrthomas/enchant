@@ -1,6 +1,7 @@
 /* enchant
  * Copyright (C) 2004 Remi Payette
  * Copyright (C) 2004 Francis James Franklin
+ * Copyright (C) 2017-2026 Reuben Thomas
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -35,16 +36,12 @@ class AppleSpellChecker
 
 	~AppleSpellChecker();
 
-	void		parseConfigFile (const char * configFile);
-
 	bool		checkWord (const char * word, size_t len, NSString * lang);
 	char **		suggestWord (const char * const word, size_t len, size_t * nsug, NSString * lang);
 
 	NSString *	requestDictionary (const char * const code);
 	char **		listDictionaries (size_t *ndicts);
  private:
-	NSString *	dictionaryForCode (NSString * code);
-	NSString *	codeForDictionary (NSString * dict);
 	char **		NSArrayToCArray (NSArray<NSString *> *array, size_t *nresult);
 
 	NSSpellChecker *	m_checker;
@@ -77,39 +74,6 @@ AppleSpellChecker::~AppleSpellChecker()
 	}
 }
 
-void AppleSpellChecker::parseConfigFile (const char * configFile)
-{
-	if (!m_languages || !m_dictionaries || !configFile)
-		return;
-
-	if (FILE * in = fopen (configFile, "r")) {
-		char line[1024];
-		char code[1024];
-		char name[1024];
-		char lang[1024];
-
-		while (fgets (line, sizeof(line), in))
-			if (sscanf (line, "%s %s %s", code, name, lang) == 3) {
-				NSString * key      = [[NSString alloc] initWithUTF8String:code];
-				NSString * value    = [[NSString alloc] initWithUTF8String:name];
-				NSString * language = [[NSString alloc] initWithUTF8String:lang];
-				
-				if (key && value) {
-					[m_languages setObject:value forKey:key];
-					[m_dictionaries setObject:key forKey:value];
-				}
-				
-				if (key)
-					[key release];
-				if (value)
-					[value release];
-				if (language)
-					[language release];
-			}
-		fclose (in);
-	}
-}
-
 char **AppleSpellChecker::NSArrayToCArray (NSArray<NSString *> *array, size_t *nresult)
 {
 	char ** result = 0;
@@ -127,22 +91,6 @@ char **AppleSpellChecker::NSArrayToCArray (NSArray<NSString *> *array, size_t *n
 		}
 	}
 	return result;
-}
-
-NSString * AppleSpellChecker::dictionaryForCode (NSString * code)
-{
-	if (!m_languages)
-		return 0;
-
-	return [m_languages objectForKey:code];
-}
-
-NSString * AppleSpellChecker::codeForDictionary (NSString * dict)
-{
-	if (!m_dictionaries)
-		return 0;
-
-	return [m_dictionaries objectForKey:dict];
 }
 
 bool AppleSpellChecker::checkWord (const char * word, size_t len, NSString * lang)
@@ -189,14 +137,12 @@ NSString * AppleSpellChecker::requestDictionary (const char * const code)
 	if (!m_checker || !code)
 		return 0;
 
-	NSString * dictionary = dictionaryForCode ([NSString stringWithUTF8String:code]);
-	if (dictionary) {
-		NSString * language = [m_checker language];
-		if (![m_checker setLanguage:dictionary])
-			dictionary = 0;
-		if (language)
-			[m_checker setLanguage:language];
-	}
+	NSString * dictionary = [NSString stringWithUTF8String:code];
+	NSString * language = [m_checker language];
+	if (![m_checker setLanguage:dictionary])
+		dictionary = 0;
+	if (language)
+		[m_checker setLanguage:language];
 	return dictionary;
 }
 
@@ -208,11 +154,8 @@ char **AppleSpellChecker::listDictionaries (size_t *ndict)
 	NSArray<NSString *> *availLanguages = [m_checker availableLanguages];
 	NSMutableArray<NSString *> *availDicts = [NSMutableArray arrayWithCapacity:[availLanguages count]];
 
-	for (NSString *string in availLanguages) {
-		NSString *code = codeForDictionary(string);
-		if (code)
-			[availDicts addObject:code];
-	}
+	for (NSString *string in availLanguages)
+		[availDicts addObject:string];
 
 	return NSArrayToCArray(availDicts, ndict);
 }
@@ -373,25 +316,5 @@ extern "C" {
 
 			return provider;
 		}
-	}
-
-	void configure_enchant_provider (EnchantProvider * me, const char * module_dir)
-	{
-		@autoreleasepool {
-			if (!me || !module_dir)
-				return;
-
-			AppleSpellChecker * checker = static_cast<AppleSpellChecker *>(me->user_data);
-			if (checker)
-				for (GSList *iter = enchant_get_conf_dirs (); iter; iter = iter->next) {
-					if (gchar * configFile = g_build_filename ((gchar *)iter->data, "AppleSpell.config", NULL)) {
-						checker->parseConfigFile (configFile);
-						g_free (configFile);
-					}
-				}
-
-		}
-
-		return;
 	}
 }
