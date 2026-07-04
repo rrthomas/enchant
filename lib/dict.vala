@@ -127,27 +127,24 @@ public class EnchantDict {
 		}
 	}
 
-	/* This is a static method method because Vala does not let us
-	 * alter the value returned when an argument is invalid.
-	 * In this case, we want to return -1 when 'dict' is null. */
-	public static int check(EnchantDict? self, string? word_buf, real_ssize_t len) {
-		if (self == null || word_buf == null)
+	public int check(string? word_buf, real_ssize_t len) {
+		if (word_buf == null)
 			return -1;
 		string word = buf_to_utf8_string(word_buf, len);
 		if (word == null)
 			return -1;
 
-		self.clear_error();
+		this.clear_error();
 
 		/* first, see if it's excluded */
-		if (self.excluded(word))
+		if (this.excluded(word))
 			return 1;
 
 		/* then, see if it's in our pwl or session */
-		if (self.contains(word))
+		if (this.contains(word))
 			return 0;
 
-		return self.dict.check_method(self.dict, word, word.length);
+		return this.dict.check_method(this.dict, word, word.length);
 	}
 
 	/* Filter out suggestions that are null, invalid UTF-8 or in the exclude

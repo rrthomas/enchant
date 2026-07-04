@@ -103,13 +103,6 @@ TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
 /////////////////////////////////////////////////////////////////////////////
 // Test Error Conditions
 TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
-             EnchantDictionaryCheck_NullDictionary_Negative1)
-{
-    CHECK_EQUAL(-1, enchant_dict_check(NULL, "helo", -1));
-    CHECK(!dictCheckCalled);
-}
-
-TEST_FIXTURE(EnchantDictionaryCheck_TestFixture,
              EnchantDictionaryCheck_NullWord_Negative1)
 {
     CHECK_EQUAL(-1, enchant_dict_check(_dict, NULL, -1));

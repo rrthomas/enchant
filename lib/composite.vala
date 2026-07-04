@@ -54,7 +54,7 @@ int composite_dict_check(EnchantProviderDict? self, string? word_buf, real_size_
 	var cdict = (EnchantCompositeDict)(self);
 	int err = -1;
 	foreach (EnchantDict session in cdict.session_list) {
-		int found = EnchantDict.check(session, word, (real_ssize_t)len);
+		int found = session.check(word, (real_ssize_t)len);
 		if (found == 0)
 			return 0;
 		if (found == 1)
