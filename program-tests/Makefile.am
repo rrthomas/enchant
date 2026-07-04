@@ -1,6 +1,6 @@
 # Tests Makefile.am
 #
-# Copyright (c) 2021-2025 Reuben Thomas <rrt@sc3d.org>
+# Copyright (c) 2021-2026 Reuben Thomas <rrt@sc3d.org>
 #
 # This library is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,10 +15,8 @@ SH_LOG_COMPILER = $(srcdir)/run-test
 
 if OS_WIN32
 DIFF="diff --strip-trailing-cr"
-PATH_CONVERT="cygpath --mixed"
 else
 DIFF=diff
-PATH_CONVERT=echo
 endif
 
 EMPTY =
@@ -61,6 +59,5 @@ AM_TESTS_ENVIRONMENT = \
 	export libdir=$(libdir); \
 	export abs_srcdir=$(abs_srcdir); \
 	export DIFF=$(DIFF); \
-	export PATH_CONVERT=$(PATH_CONVERT); \
 	export ENCHANT_MAJOR_VERSION=$(ENCHANT_MAJOR_VERSION); \
 	export LSAN_OPTIONS=suppressions=$(abs_srcdir)/asan-suppressions.txt:fast_unwind_on_malloc=0:print_suppressions=0;
