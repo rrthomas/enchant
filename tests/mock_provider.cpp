@@ -56,13 +56,15 @@ mock_provider_list_dicts (EnchantProvider *me, size_t *out_n_dicts)
 }
 
 static ConfigureHook _hook;
+static ConfigureHook _userHook;
 
 
 extern "C" {
 
 void
-set_configure(ConfigureHook hook){
+set_configure(ConfigureHook hook, ConfigureHook userHook){
     _hook = hook;
+    _userHook = userHook;
 }
 
 
@@ -94,15 +96,14 @@ init_enchant_provider(void)
     provider->list_dicts = mock_provider_list_dicts;
     provider->dictionary_exists = NULL;
 
-    return provider;
-}
-
-void
-configure_enchant_provider(EnchantProvider * me, const char *dir_name)
-{
     if(_hook){
-        _hook(me, dir_name);
+        _hook(provider);
     }
+    if(_userHook){
+        _userHook(provider);
+    }
+
+    return provider;
 }
 
 }

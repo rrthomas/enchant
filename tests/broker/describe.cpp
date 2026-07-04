@@ -90,7 +90,7 @@ MockProvider2Identify (EnchantProvider *)
 	return "mock2";
 }
 
-static void Provider2Configuration (EnchantProvider * me, const char *)
+static void Provider2Configuration (EnchantProvider * me)
 {
      me->identify = MockProvider2Identify;
      me->describe = MockProviderDescribe;
@@ -106,7 +106,7 @@ struct EnchantBrokerDescribeTestFixtureBase : EnchantBrokerTestFixture
     { }
 };
 
-static void List_Providers_ProviderConfiguration (EnchantProvider * me, const char *)
+static void List_Providers_ProviderConfiguration (EnchantProvider * me)
 {
      me->identify = MockProviderIdentify;
      me->describe = MockProviderDescribe;
@@ -123,7 +123,7 @@ struct EnchantBrokerDescribeTestFixture : EnchantBrokerDescribeTestFixtureBase
 };
 
 
-static void List_Providers_ProviderConfigurationNoIdentify (EnchantProvider * me, const char *)
+static void List_Providers_ProviderConfigurationNoIdentify (EnchantProvider * me)
 {
      me->identify = NULL;
 }
@@ -138,7 +138,7 @@ struct EnchantBrokerDescribe_ProviderLacksIdentify_TestFixture : EnchantBrokerDe
     }
 };
 
-static void List_Providers_ProviderConfigurationNoDescribe (EnchantProvider * me, const char *)
+static void List_Providers_ProviderConfigurationNoDescribe (EnchantProvider * me)
 {
      me->describe = NULL;
 }
@@ -159,7 +159,7 @@ MockProviderIllegalUtf8 (EnchantProvider *)
 	return "\xa5\xf1\x08";
 }
 
-static void List_Providers_ProviderConfigurationInvalidIdentify (EnchantProvider * me, const char *)
+static void List_Providers_ProviderConfigurationInvalidIdentify (EnchantProvider * me)
 {
      me->identify = MockProviderIllegalUtf8;
 }
@@ -174,7 +174,7 @@ struct EnchantBrokerDescribe_ProviderHasInvalidUtf8Identify_TestFixture : Enchan
     }
 };
 
-static void List_Providers_ProviderConfigurationInvalidDescribe (EnchantProvider * me, const char *)
+static void List_Providers_ProviderConfigurationInvalidDescribe (EnchantProvider * me)
 {
      me->describe = MockProviderIllegalUtf8;
 }

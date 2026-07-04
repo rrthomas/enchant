@@ -46,7 +46,7 @@ static EnchantProviderDict* MockProviderRequestCheckMockDictionary(EnchantProvid
 }
 
 
-static void DictionaryCheck_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryCheck_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestCheckMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;

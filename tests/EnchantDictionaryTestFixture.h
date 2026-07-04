@@ -72,13 +72,13 @@ MockProviderRequestBasicMockDictionary(EnchantProvider *me, const char *tag)
     return dict;
 }
 
-static void EmptyDictionary_ProviderConfiguration (EnchantProvider * me, const char *)
+static void EmptyDictionary_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestBasicMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
 }
 
-static void BasicDictionary_ProviderConfiguration (EnchantProvider * me, const char *)
+static void BasicDictionary_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestBasicMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;

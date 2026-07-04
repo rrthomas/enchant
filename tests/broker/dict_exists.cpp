@@ -30,7 +30,7 @@ static int DoesDictionaryExist (EnchantProvider * me, const char *const tag)
     return MockEnGbAndQaaProviderDictionaryExists(me, tag);
 }
 
-static void Dictionary_Exists_ProviderConfiguration (EnchantProvider * me, const char *)
+static void Dictionary_Exists_ProviderConfiguration (EnchantProvider * me)
 {
      me->dictionary_exists=DoesDictionaryExist;
 }
@@ -54,7 +54,7 @@ static char** ListDictionaries (EnchantProvider * me, size_t * out_n_dicts)
    return MockEnGbAndQaaProviderListDictionaries(me, out_n_dicts);
 }
 
-static void List_Dictionaries_ProviderConfiguration (EnchantProvider * me, const char *)
+static void List_Dictionaries_ProviderConfiguration (EnchantProvider * me)
 {
      me->list_dicts=ListDictionaries;
 }
@@ -76,7 +76,7 @@ struct EnchantBrokerDictExists_ProviderImplementsListDictionaries_TestFixture : 
 #define DictionaryExistsMethodCalled listDictionariesCalled
 #include "dict_exists.i"
 
-static void ProviderConfiguration (EnchantProvider * me, const char *)
+static void ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockEnGbAndQaaProviderRequestDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;

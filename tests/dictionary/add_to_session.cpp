@@ -41,7 +41,7 @@ static EnchantProviderDict* MockProviderRequestAddToSessionMockDictionary(Enchan
     return dict;
 }
 
-static void DictionaryAddToSession_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryAddToSession_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestAddToSessionMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;

@@ -48,13 +48,13 @@ MockProvider2Identify (EnchantProvider *)
 {
 	return "mock2";
 }
-static void Request_Dictionary_ProviderConfiguration1 (EnchantProvider * me, const char *)
+static void Request_Dictionary_ProviderConfiguration1 (EnchantProvider * me)
 {
 	 me->request_dict = RequestDictionary1;
 	 me->dispose_dict = MockProviderDisposeDictionary;
 	 me->identify = MockProvider1Identify;
 }
-static void Request_Dictionary_ProviderConfiguration2 (EnchantProvider * me, const char *)
+static void Request_Dictionary_ProviderConfiguration2 (EnchantProvider * me)
 {
 	 me->request_dict = RequestDictionary2;
 	 me->dispose_dict = MockProviderDisposeDictionary;

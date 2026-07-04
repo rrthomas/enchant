@@ -101,7 +101,7 @@ static EnchantProviderDict* MockProviderRequestSuggestMockDictionary(EnchantProv
     return dict;
 }
 
-static void DictionarySuggest_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionarySuggest_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestSuggestMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;

@@ -53,7 +53,7 @@ static EnchantProviderDict* MockProviderRequestGetExtraWordCharactersMockDiction
     return dict;
 }
 
-static void DictionaryGetExtraWordCharacters_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryGetExtraWordCharacters_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestGetExtraWordCharactersMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
@@ -80,7 +80,7 @@ static EnchantProviderDict* MockProviderRequestNoGetExtraWordCharactersMockDicti
     return dict;
 }
 
-static void DictionaryNoGetExtraWordCharacters_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryNoGetExtraWordCharacters_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestNoGetExtraWordCharactersMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;

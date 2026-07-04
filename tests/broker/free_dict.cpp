@@ -38,7 +38,7 @@ AlternativeDisposeDictionary (EnchantProvider *me, EnchantProviderDict * dict)
     MockProviderDisposeDictionary(me, dict);
 }
 
-static void ProviderConfiguration (EnchantProvider * me, const char *)
+static void ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockEnGbAndQaaProviderRequestDictionary;
      me->dispose_dict = DisposeDictionary;
@@ -62,7 +62,7 @@ struct EnchantBrokerFreeDictTestFixture: EnchantBrokerTestFixture
     EnchantDict* _dictionary;
 };
 
-static void AlternativeDisposeProviderConfiguration (EnchantProvider * me, const char *)
+static void AlternativeDisposeProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockEnGbAndQaaProviderRequestDictionary;
      me->dispose_dict = AlternativeDisposeDictionary;

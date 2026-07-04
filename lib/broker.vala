@@ -160,20 +160,6 @@ public class EnchantBroker {
 				}
 			}
 			if (provider != null) {
-				/* optional entry point to allow modules to look for associated files */
-				void *conf_func;
-				if (module.symbol("configure_enchant_provider", out conf_func)
-					&& conf_func != null) {
-					((EnchantPreConfigureFunc)conf_func)(provider, dir_name);
-					if (!EnchantProvider.is_valid(provider)) {
-						warning("Error loading plugin: %s's configure_enchant_provider modified provider and it is now invalid", dir_entry);
-						if (provider.dispose != null)
-							provider.dispose(provider);
-						provider = null;
-					}
-				}
-			}
-			if (provider != null) {
 				provider.module = (owned)module;
 				provider.owner = this;
 				this.provider_list.append((owned)provider);

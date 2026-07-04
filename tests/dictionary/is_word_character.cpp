@@ -52,7 +52,7 @@ static EnchantProviderDict* MockProviderRequestIsWordCharacterMockDictionary(Enc
     return dict;
 }
 
-static void DictionaryIsWordCharacter_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryIsWordCharacter_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestIsWordCharacterMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
@@ -79,7 +79,7 @@ static EnchantProviderDict* MockProviderRequestNoIsWordCharacterMockDictionary(E
     return dict;
 }
 
-static void DictionaryNoIsWordCharacter_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryNoIsWordCharacter_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestNoIsWordCharacterMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;

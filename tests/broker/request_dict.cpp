@@ -31,7 +31,7 @@ static EnchantProviderDict * RequestDictionary (EnchantProvider *me, const char 
     return MockEnGbAndQaaProviderRequestDictionary(me, tag);
 }
 
-static void Request_Dictionary_ProviderConfiguration (EnchantProvider * me, const char *)
+static void Request_Dictionary_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = RequestDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;

@@ -3,15 +3,14 @@
 
 #include "enchant-provider.h"
 
-typedef void (*ConfigureHook) (EnchantProvider * me, const char * dir_name);
+typedef void (*ConfigureHook) (EnchantProvider * me);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void set_configure(ConfigureHook hook);
+void set_configure(ConfigureHook hook, ConfigureHook hook2);
 EnchantProvider * init_enchant_provider(void);
-void configure_enchant_provider(EnchantProvider * me, const char *dir_name);
 
 #ifdef __cplusplus
 }

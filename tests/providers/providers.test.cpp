@@ -36,7 +36,7 @@ int TestProvider(char* filename);
 int TestProvidersInDirectory(char * dir_name);
 
 typedef EnchantProvider *(*EnchantProviderInitFunc) (void);
-typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider, const char * module_dir);
+typedef void             (*EnchantPreConfigureFunc) (EnchantProvider * provider);
 
 // from lib.c: we need this so that providers can set errors.
 struct _EnchantBroker {
@@ -143,17 +143,6 @@ int TestProvider(char* filename)
 				&& init_func)
 				{
 					g_provider = init_func ();
-				}
-
-			/* optional entry point to allow modules to look for associated files
-			 */
-			if (g_provider && 
-                g_module_symbol(module, "configure_enchant_provider", (gpointer *) (&conf_func))
-				&& conf_func)
-				{
-                    char* dir_name = g_path_get_dirname(filename);
-					conf_func (g_provider, dir_name);
-                    g_free(dir_name);
 				}
 		} 
 	else 

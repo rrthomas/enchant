@@ -45,7 +45,7 @@ static EnchantProviderDict* MockProviderRequestAddToExcludeMockDictionary(Enchan
     return dict;
 }
 
-static void DictionaryAddToExclude_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryAddToExclude_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestAddToExcludeMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
@@ -68,7 +68,7 @@ static EnchantProviderDict* MockProviderRequestCheckMockDictionary(EnchantProvid
     return dict;
 }
 
-static void DictionaryCheck_ProviderConfiguration (EnchantProvider * me, const char *)
+static void DictionaryCheck_ProviderConfiguration (EnchantProvider * me)
 {
      me->request_dict = MockProviderRequestCheckMockDictionary;
      me->dispose_dict = MockProviderDisposeDictionary;
