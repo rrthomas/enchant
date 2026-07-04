@@ -5,6 +5,7 @@
 *.trs
 *.log
 enchant-*.tar.gz
+.envrc
 .libs
 .deps
 .dirstamp
