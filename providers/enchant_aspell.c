@@ -154,7 +154,7 @@ aspell_provider_list_dicts (EnchantProvider * me _GL_UNUSED,
 
 	/* Note: aspell_dict_info_list_size() is unimplemented: https://github.com/GNUAspell/aspell/issues/155 */
 	const AspellDictInfo * entry;
-	while ( (entry = aspell_dict_info_enumeration_next(dels)) != 0)
+	while ( (entry = aspell_dict_info_enumeration_next(dels)) != NULL)
 		(*out_n_dicts)++;
 
         delete_aspell_dict_info_enumeration (dels);
