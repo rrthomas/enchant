@@ -4,9 +4,14 @@
 /alloca.in.h
 /assert.h
 /arg-nonnull.h
+/bcp47.c
+/bcp47.h
+/c-ctype.h
+/c-ctype.c
 /c++defs.h
 /flock.c
 /malloc.c
+/memeq.c
 /msvc-inval.c
 /msvc-inval.h
 /msvc-nothrow.c
@@ -59,3 +64,5 @@
 /locale.in.h
 /fcntl.h
 /locale.h
+/stdlib.c
+/streq.c

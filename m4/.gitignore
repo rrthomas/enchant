@@ -76,3 +76,7 @@
 /musl.m4
 /off64_t.m4
 /sys_cdefs_h.m4
+/gettext_h.m4
+/locale-en.m4
+/memeq.m4
+/streq.m4
