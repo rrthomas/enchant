@@ -1,3 +1,16 @@
+2.8.19 (July 7, 2026)
+---------------------
+
+This release adds a provider for WinSpell: Windows users can now use the
+native system spelling checker via Enchant. Many thanks to Moritz Mechelk
+for working on this, and the HexChat authors whose code he used.
+
+The change in the previous release to update the tests and require the use
+of C++20 have been reverted. I had not realised how old some systems were
+that people are still packaging up-to-date Enchant on! We’re back to
+requiring C++11.
+
+
 2.8.18 (July 4, 2026)
 ---------------------
 
