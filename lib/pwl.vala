@@ -124,7 +124,7 @@ bool is_title_case(string word) {
 public class EnchantPWL {
 	private string? filename;
 	private bool exclude = false;
-	private time_t file_changed = 0;
+	private Posix.timespec file_changed = {0, 0};
 	private HashTable<string, string> words = new HashTable<string, string>(str_hash, str_equal);
 
 	public EnchantPWL(string? filename, bool exclude = false) {
@@ -157,7 +157,7 @@ public class EnchantPWL {
 				lock_file(f);
 				Posix.Stat stats;
 				if (Posix.stat(this.filename, out stats) == 0)
-					this.file_changed = stats.st_mtime;
+					this.file_changed = stats.st_mtim;
 
 				/* Add a newline if the file doesn't end with one. */
 				if (f.seek(-1, FileSeek.END) == 0) {
@@ -227,7 +227,7 @@ public class EnchantPWL {
 
 				Posix.Stat stats;
 				if (Posix.stat(this.filename, out stats) == 0)
-					this.file_changed = stats.st_mtime;
+					this.file_changed = stats.st_mtim;
 
 				unlock_file(f);
 			}
@@ -270,7 +270,7 @@ public class EnchantPWL {
 		Posix.Stat stats;
 		if (Posix.stat(this.filename, out stats) == -1)
 			return; /* presumably won't be able to open the file either */
-		if (this.file_changed == stats.st_mtime) /* nothing changed since last read */
+		if (this.file_changed == stats.st_mtim) /* nothing changed since last read */
 			return;
 
 		FileStream? f = FileStream.open(this.filename, "r");
@@ -285,7 +285,7 @@ public class EnchantPWL {
 
 		this.words = new HashTable<string, string>(str_hash, str_equal);
 
-		this.file_changed = stats.st_mtime;
+		this.file_changed = stats.st_mtim;
 		lock_file(f);
 
 		size_t line_number = 1;
