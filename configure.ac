@@ -17,7 +17,7 @@ AC_INIT([Enchant],[2.8.21])
 AC_CONFIG_SRCDIR(lib/enchant.h)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_REQUIRE_AUX_FILE([tap-driver.sh])
-AM_INIT_AUTOMAKE([subdir-objects tar-ustar])
+AM_INIT_AUTOMAKE([1.17 subdir-objects tar-ustar])
 AC_CANONICAL_HOST
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -50,6 +50,11 @@ AC_SUBST(VERSION_INFO)
 AC_SUBST(ENCHANT_MAJOR_VERSION)
 AC_SUBST(ENCHANT_MINOR_VERSION)
 AC_SUBST(ENCHANT_MICRO_VERSION)
+
+dnl Get file system resolution, for tests
+AC_MSG_CHECKING([filesystem timestamp resolution])
+AC_MSG_RESULT([$am_cv_filesystem_timestamp_resolution])
+AC_DEFINE_UNQUOTED(FILESYSTEM_TIMESTAMP_RESOLUTION, [$am_cv_filesystem_timestamp_resolution], [Resolution of file system in seconds])
 
 dnl Checks for programs.
 AC_PROG_CC

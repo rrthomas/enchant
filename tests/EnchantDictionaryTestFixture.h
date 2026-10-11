@@ -22,14 +22,22 @@
 #ifndef __ENCHANTDICTIONARYTESTFIXTURE
 #define __ENCHANTDICTIONARYTESTFIXTURE
 
+#include "config.h"
+
 #include "EnchantBrokerTestFixture.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
 #include <unistd.h>
 #include <string>
 #include <vector>
+
+static timespec fs_wait = {
+    (time_t)(FILESYSTEM_TIMESTAMP_RESOLUTION * 1000000000) / 1000000000,
+    (time_t)(FILESYSTEM_TIMESTAMP_RESOLUTION * 1000000000) % 1000000000,
+};
 
 static int
 MockDictionaryCheck (EnchantProviderDict * ,
@@ -256,9 +264,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     static void ExternalAddWordToFile(const std::string& word, const std::string& filename)
     {
-        sleep(1); // FAT systems have a 2 second resolution
-                     // NTFS is appreciably faster but no specs on what it is exactly
-                     // c runtime library's time_t has a 1 second resolution
+        nanosleep(&fs_wait, NULL);
         FILE * f = g_fopen(filename.c_str(), "a");
 	if(f)
 	{
@@ -270,9 +276,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     void ExternalAddNewLineToDictionary()
     {
-        sleep(1); // FAT systems have a 2 second resolution
-                     // NTFS is appreciably faster but no specs on what it is exactly
-                     // c runtime library's time_t has a 1 second resolution
+        nanosleep(&fs_wait, NULL);
         FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "a");
         if(f)
         {
@@ -283,9 +287,7 @@ struct EnchantDictionaryTestFixture : EnchantBrokerTestFixture
 
     void ExternalAddWordsToDictionary(const std::vector<std::string>& sWords)
     {
-        sleep(1); // FAT systems have a 2 second resolution
-                     // NTFS is appreciably faster but no specs on what it is exactly
-                     // c runtime library's time_t has a 1 second resolution
+        nanosleep(&fs_wait, NULL);
         FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "a");
         if(f)
         {

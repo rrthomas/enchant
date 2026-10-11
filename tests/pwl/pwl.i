@@ -67,9 +67,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
 {
     const char* Utf8Bom = "\xef\xbb\xbf";
 
-    sleep(1); // FAT systems have a 2 second resolution
-                 // NTFS is appreciably faster but no specs on what it is exactly
-                 // c runtime library's time_t has a 1 second resolution
+    nanosleep(&fs_wait, NULL);
     FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "a");
 	if(f)
 	{
@@ -123,9 +121,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
     sWords.push_back("bat");
     sWords.push_back("tot");
 
-    sleep(1); // FAT systems have a 2 second resolution
-                 // NTFS is appreciably faster but no specs on what it is exactly
-                 // c runtime library's time_t has a 1 second resolution
+    nanosleep(&fs_wait, NULL);
     FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "a");
     if(f)
     {
@@ -559,9 +555,7 @@ TEST_FIXTURE(EnchantPwl_TestFixture,
   sWords.push_back("cat");
   sWords.push_back("hat");
 
-  sleep(1); // FAT systems have a 2 second resolution
-               // NTFS is appreciably faster but no specs on what it is exactly
-               // c runtime library's time_t has a 1 second resolution
+  nanosleep(&fs_wait, NULL);
   FILE * f = g_fopen(GetPersonalDictFileName().c_str(), "a");
   if(f) {
     fputs(Utf8Bom, f);
