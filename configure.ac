@@ -158,7 +158,7 @@ esac
 AC_MSG_RESULT([$native_win32])
 AM_CONDITIONAL(OS_WIN32, test "x$native_win32" = "xyes")
 
-dnl ===========================================================================
+dnl =======================================================================================
 
 AC_LANG_PUSH([C++])
 PKG_CHECK_EXISTS([UnitTest++],
@@ -258,7 +258,7 @@ AC_PATH_PROG(CLOC, cloc, true)
 CLOC_OPTS="--autoconf --force-lang=C,h --force-lang='Bourne Shell',conf"
 AC_SUBST([CLOC_OPTS])
 
-dnl =======================================================================================
+dnl ===========================================================================================
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
