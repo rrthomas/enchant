@@ -68,10 +68,42 @@ namespace Gnu {
 	[CCode (cheader_filename = "sys/file.h")]
 	public int flock (int fd, FlockOperation operation);
 
+	[CCode (cheader_filename = "binary-io.h")]
+	public int set_binary_mode(int fd, int mode);
+
+	[CCode (cheader_filename = "fcntl.h")]
+	public const int O_BINARY;
+	[CCode (cheader_filename = "fcntl.h")]
+	public const int O_TEXT;
+
+	[CCode (cheader_filename = "stat-time.h")]
+	public long get_stat_atime_ns (Posix.Stat st);
+	[CCode (cheader_filename = "stat-time.h")]
+	public long get_stat_ctime_ns (Posix.Stat st);
+	[CCode (cheader_filename = "stat-time.h")]
+	public long get_stat_mtime_ns (Posix.Stat st);
+	[CCode (cheader_filename = "stat-time.h")]
+	public long get_stat_birthtime_ns (Posix.Stat st);
+
+	[SimpleType]
+	[CCode (cname = "struct timespec_value", cheader_filename = "time.h", has_type_id = false)]
+	public struct timespec_value {
+		public time_t tv_sec;
+		public long tv_nsec;
+	}
+	[CCode (cheader_filename = "stat-time.h")]
+	public timespec_value get_stat_atime (Posix.Stat st);
+	[CCode (cheader_filename = "stat-time.h")]
+	public timespec_value get_stat_ctime (Posix.Stat st);
+	[CCode (cheader_filename = "stat-time.h")]
+	public timespec_value get_stat_mtime (Posix.Stat st);
+	[CCode (cheader_filename = "stat-time.h")]
+	public timespec_value get_stat_birthtime (Posix.Stat st);
+
 	[CCode (cheader_filename = "quote.h")]
 	public string quote (string arg);
 
-	[CCode (cheader_filename = "relocatable.h", cname = "relocate", type ="const char*")]
+	[CCode (cheader_filename = "relocatable.h", cname = "relocate", type = "const char*")]
 	char* _gnulib_relocate (char* path);
 	[CCode (cname = "_vala_gnulib_relocate")]
 	public string relocate (string path) {
