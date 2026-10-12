@@ -11,5 +11,6 @@
 /mdate-sh
 /missing
 /options-parser
+/tap-driver.sh
 /test-driver
 /texinfo.tex
