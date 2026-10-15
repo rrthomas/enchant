@@ -1,0 +1,56 @@
+#!/bin/bash
+# Meson-compatible program test runner for Enchant.
+# This replaces the autotools run-test script for use with meson.
+set -e
+
+curr_dir="$(pwd)"
+test_script="$1"
+name="${test_script%.sh}"
+basename=$(basename "$name")
+test_dir="$curr_dir/$basename.$$"
+
+expected_exit=0
+expected_file="@SOURCE_DIR@/$basename-expected.txt"
+enchant_exe="@ENCHANT_EXE@"
+enchant_lsmod_exe="@ENCHANT_LSMOD_EXE@"
+abs_srcdir="@SOURCE_DIR@"
+
+# Use diff with platform-appropriate flags
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*)
+    DIFF="diff --strip-trailing-cr"
+    ;;
+  *)
+    DIFF=diff
+    ;;
+esac
+
+enchant_test() {
+    exit_code=0
+    "$enchant_exe" "$@" > "$basename-output.txt" 2>&1 || exit_code=$?
+    cat "$basename-output.txt"
+    if [ $exit_code != $expected_exit ]; then
+        echo "Expected exit code $expected_exit but was $exit_code"
+        exit 1
+    fi
+    # Fix variation in output:
+    # 1. Convert backslashes to forward slashes
+    # 2. Compress double slashes (from relocated paths on some systems)
+    sed -e 's|\\|/|g' -e 's|//|/|g' < "$basename-output.txt" > "$basename-output-fixed.txt"
+    $DIFF -u "$expected_file" "$basename-output-fixed.txt"
+}
+
+enchant_lsmod_test() {
+    exit_code=0
+    "$enchant_lsmod_exe" "$@"
+    if [ $exit_code != $expected_exit ]; then
+        echo "Expected exit code $expected_exit but was $exit_code"
+        exit 1
+    fi
+}
+
+export ENCHANT_CONFIG_DIR="$curr_dir"
+export ENCHANT_MAJOR_VERSION="@ENCHANT_MAJOR_VERSION@"
+
+# Source the test script
+. "$test_script"

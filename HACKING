@@ -21,6 +21,39 @@ See INSTALL (which is created by bootstrap) for instructions from this point
 on.
 
 
+Building with Meson
+-------------------
+
+As an alternative to the autotools build described above, Enchant can be
+built with Meson.  The Meson build system is provided in parallel with the
+autotools build, and both should produce equivalent results.
+
+First, run
+
+./bootstrap
+
+to import gnulib and generate the files needed for the build (as for the
+autotools build), then
+
+meson setup build
+meson compile -C build
+
+Meson requires the meson build system (at least version 0.60) and ninja.
+Optional features, such as the spell-checker providers, are selected with
+options, e.g.
+
+meson setup build -Daspell=disabled
+
+(see meson_options.txt for the full list of options).  Tests can be run
+with
+
+meson test -C build
+
+and the build can be installed with
+
+meson install -C build
+
+
 Working in libenchant
 ---------------------
 

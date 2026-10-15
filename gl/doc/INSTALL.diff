@@ -1,6 +1,6 @@
 --- gnulib/doc/INSTALL	2017-02-23 15:26:15.296354123 +0000
 +++ INSTALL	2017-12-08 15:38:22.819949859 +0000
-@@ -1,3 +1,44 @@
+@@ -1,3 +1,71 @@
 +Building and installing libenchant
 +**********************************
 +
@@ -15,6 +15,33 @@
 +=================
 +
 +See HACKING.
++
++
++Building with Meson
++===================
++
++Enchant can also be built with Meson, which is provided in parallel with
++the autotools build described below, and should produce an equivalent
++installation.
++
++Meson requires the meson build system (at least version 0.60) with ninja.
++From a release tarball, or a git checkout once bootstrapped (see HACKING),
++configure and build with:
++
++meson setup build
++meson compile -C build
++
++then run the tests and install with:
++
++meson test -C build
++meson install -C build
++
++Optional features, such as the spell-checker providers, are selected with
++Meson options, e.g.:
++
++meson setup build -Daspell=disabled
++
++See meson_options.txt for the full list of options.
 +
 +
 +Parallel installation
