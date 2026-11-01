@@ -1,0 +1,8 @@
+option('hunspell', type: 'feature', value: 'auto', description: 'Enable Hunspell provider')
+option('nuspell', type: 'feature', value: 'auto', description: 'Enable Nuspell provider')
+option('aspell', type: 'feature', value: 'auto', description: 'Enable Aspell provider')
+option('hspell', type: 'feature', value: 'auto', description: 'Enable Hspell provider')
+option('voikko', type: 'feature', value: 'auto', description: 'Enable Voikko provider')
+option('winspell', type: 'feature', value: 'auto', description: 'Enable WinSpell provider (Windows only)')
+option('applespell', type: 'feature', value: 'auto', description: 'Enable AppleSpell provider (macOS only)')
+option('zemberek', type: 'feature', value: 'disabled', description: 'Enable Zemberek provider')
