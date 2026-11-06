@@ -82,6 +82,7 @@
 /pthread_sigmask.c
 /raise.c
 /select.c
+/signal.h
 /signal.in.h
 /sigprocmask.c
 /sockets.c
@@ -91,7 +92,9 @@
 /stat-w32.c
 /stat-w32.h
 /stat.c
+/stdckdint.h
 /stdckdint.in.h
+/stdcountof.h
 /stdcountof.in.h
 /sys_select.in.h
 /sys_socket.c
@@ -99,6 +102,7 @@
 /sys_stat.in.h
 /sys_time.in.h
 /sys_uio.in.h
+/time.h
 /time.in.h
 /w32sock.h
 /windows-once.c
