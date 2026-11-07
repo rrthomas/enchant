@@ -66,7 +66,6 @@ gl_INIT
 AC_SUBST([objdir])
 LT_SYS_MODULE_EXT
 AC_SUBST([shlibext], [$libltdl_cv_shlibext])
-AC_CONFIG_LIBOBJ_DIR([libgnu])
 AC_PATH_PROG([DOXYGEN],[doxygen],[AC_MSG_ERROR([Doxygen not found])])
 
 dnl Vala
