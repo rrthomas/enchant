@@ -68,6 +68,7 @@
 /streq.c
 /dup2.c
 /errno.in.h
+/errno.h
 /fd-hook.c
 /fd-hook.h
 /filename.h
