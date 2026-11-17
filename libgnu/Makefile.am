@@ -22,9 +22,9 @@ noinst_LTLIBRARIES =
 AM_CPPFLAGS = -DIN_LIBRARY -DENABLE_COSTLY_RELOCATABLE
 
 if SHLIBS_IN_BINDIR
-AM_CPPFLAGS += -DINSTALLDIR=BINDIR -include configmake.h
+AM_CPPFLAGS += -DINSTALLDIR=BINDIR -include config.h -include configmake.h
 else
-AM_CPPFLAGS += -DINSTALLDIR=LIBDIR -include configmake.h
+AM_CPPFLAGS += -DINSTALLDIR=LIBDIR -include config.h -include configmake.h
 endif
 
 loc:
