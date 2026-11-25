@@ -30,6 +30,16 @@
 
 using Gnu;
 
+// A region subtag in BCP 47 consists of either two letters (GB) or three
+// digits (419).
+bool is_region_subtag(string subtag) {
+	if (subtag.length == 2)
+		return subtag[0].isalpha() && subtag[1].isalpha();
+	if (subtag.length == 3)
+		return subtag[0].isdigit() && subtag[1].isdigit() && subtag[2].isdigit();
+	return false;
+}
+
 string normalize_dictionary_tag(string dict_tag) {
 	string new_tag = dict_tag.strip();
 
@@ -46,15 +56,23 @@ string normalize_dictionary_tag(string dict_tag) {
 		 ++i)
 		sb.append_c(new_tag[i].tolower());
 
-	/* turn en-GB into en_GB */
-	if (new_tag[i] == '-' || new_tag[i] == '_')
-		sb.append_c('_');
-
-	/* first run of alphanumberics after first '_' is converted to upper
-	   case */
-	if (new_tag[i] != '\0')
-		for (++i; new_tag[i].isalnum(); ++i)
-			sb.append_c(new_tag[i].toupper());
+	// Turn en-GB and en_gb into en_GB, but exclusively when the subtag
+	// immediately after the language takes the form of a region. Every
+	// other subtag, such as the variant in ca-valencia, remains exactly as
+	// originally written, including the separator preceding it, ensuring that
+	// a tag written exactly the way a provider lists the dictionary still
+	// matches it.
+	if (new_tag[i] != '\0') {
+		int end = i + 1;
+		while (new_tag[end].isalnum())
+			++end;
+		string subtag = new_tag.substring(i + 1, end - i - 1);
+		if (is_region_subtag(subtag)) {
+			sb.append_c('_');
+			sb.append(subtag.ascii_up());
+			i = end;
+		}
+	}
 
 	/* Copy remaining characters */
 	while (new_tag[i] != '\0')
@@ -63,8 +81,13 @@ string normalize_dictionary_tag(string dict_tag) {
 	return sb.str;
 }
 
+// The language consists of all characters located before
+// the first '_' or '-'.
 string iso_639_from_tag(string dict_tag) {
-	return dict_tag.substring(0, dict_tag.index_of_char('_'));
+	int i = 0;
+	while (dict_tag[i] != '\0' && dict_tag[i] != '_' && dict_tag[i] != '-')
+		++i;
+	return dict_tag.substring(0, i);
 }
 
 [CCode (has_target = false)]

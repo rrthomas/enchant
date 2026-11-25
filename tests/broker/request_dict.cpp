@@ -83,6 +83,17 @@ TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
     CHECK(requestDictionaryCalled);
 }
 
+// When there is no dictionary available for the whole tag, a tag that
+// includes a variant falls back to its associated language, just as a tag
+// specifying a region does.
+TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
+             EnchantBrokerRequestDictionary_ProviderHasBaseOfVariant_CallsProvider)
+{
+    _dict = enchant_broker_request_dict(_broker, "qaa-xyzzy");
+    CHECK(_dict);
+    CHECK(requestDictionaryCalled);
+}
+
 
 TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture, 
              EnchantBrokerRequestDictionary_WhitespaceSurroundingLanguageTag_Removed)
@@ -130,6 +141,15 @@ TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
     CHECK(_dict);
 }
 
+// A region specified using three digits, such as es-419, undergoes
+// normalization identical to that of a region specified using two letters.
+TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
+             EnchantBrokerRequestDictionary_NumericRegionInLanguageTag_SubstitutedWithUnderscore)
+{
+    _dict = enchant_broker_request_dict(_broker, "es-419");
+    CHECK(_dict);
+}
+
 TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture, 
              EnchantBrokerRequestDictionary_DifferentCase_Finds)
 {
@@ -141,6 +161,39 @@ TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
              EnchantBrokerRequestDictionary_DifferentCase_NoRegion_Finds)
 {
   _dict = enchant_broker_request_dict(_broker, "QAA");
+  CHECK(_dict);
+}
+
+// A subtag following the language that lacks the form of a region, such as
+// the variant in ca-valencia, must be passed to the provider exactly as
+// written. Previously, it was converted to upper-case as though it were a
+// region, resulting in a request for ca_VALENCIA, which prevented retrieval
+// of a dictionary reported by enchant_broker_list_dicts under the name it was
+// listed with. Hunspell dictionaries such as ca-valencia.dic, or the Romansh
+// rm-rumgr.dic and rm-sursilv.dic, are distributed using precisely these
+// names.
+TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
+             EnchantBrokerRequestDictionary_VariantInLanguageTag_NotTreatedAsRegion)
+{
+  _dict = enchant_broker_request_dict(_broker, "ca-valencia");
+  CHECK(_dict);
+}
+
+// The language remains in lower-cased form even when a variant follows it.
+TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
+             EnchantBrokerRequestDictionary_DifferentCase_Variant_Finds)
+{
+  _dict = enchant_broker_request_dict(_broker, "CA-valencia");
+  CHECK(_dict);
+}
+
+// A script subtag is preserved exactly as written, including its case: sr-Latn
+// must not be transformed into sr_LATN, which previously fell back to the
+// dictionary for sr.
+TEST_FIXTURE(EnchantBrokerRequestDictionary_TestFixture,
+             EnchantBrokerRequestDictionary_ScriptInLanguageTag_CasePreserved)
+{
+  _dict = enchant_broker_request_dict(_broker, "sr-Latn");
   CHECK(_dict);
 }
 
