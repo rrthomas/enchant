@@ -111,12 +111,11 @@ public class EnchantBroker {
 		if (tag == null || ordering == null)
 			return;
 
-		string tag_dupl = normalize_dictionary_tag(tag);
 		string ordering_dupl = ordering.strip();
 
-		if (tag_dupl != null && tag_dupl.length > 0 &&
+		if (tag != null && tag.length > 0 &&
 			ordering_dupl != null && ordering_dupl.length > 0)
-			this.provider_ordering.insert(tag_dupl, ordering_dupl);
+			this.provider_ordering.insert(tag, ordering_dupl);
 	}
 
 	void load_providers() {
@@ -281,8 +280,11 @@ public class EnchantBroker {
 		// Get the dictionaries, and return null if none found
 		var session_list = new SList<weak EnchantDict>();
 		foreach (unowned string tag in tags) {
-			string normalized_tag = normalize_dictionary_tag(tag);
-			unowned EnchantDict? session = this._request_dict(normalized_tag, pwl);
+			unowned EnchantDict? session = this._request_dict(tag, pwl);
+			if (session == null) {
+				string normalized_tag = normalize_dictionary_tag(tag);
+				session = this._request_dict(normalized_tag, pwl);
+			}
 			if (session == null)
 				session = this._request_dict(iso_639_from_tag(normalized_tag), pwl);
 			if (session == null) {
@@ -387,18 +389,20 @@ public class EnchantBroker {
 		if (tag == null || tag.length == 0)
 			return 0;
 
-		string normalized_tag = normalize_dictionary_tag(tag);
-		if (normalized_tag.length == 0)
-			return 0;
 		int exists = 0;
 
-		if ((exists = this._dict_exists(normalized_tag)) == 0) {
-			string iso_639_only_tag = iso_639_from_tag(normalized_tag);
-			if (iso_639_only_tag == null)
+		if ((exists = this._dict_exists(tag)) == 0) {
+			string normalized_tag = normalize_dictionary_tag(tag);
+			if (normalized_tag.length == 0)
 				return 0;
 
-			if (normalized_tag != iso_639_only_tag)
-				exists = this._dict_exists(iso_639_only_tag);
+			if ((exists = this._dict_exists(normalized_tag)) == 0) {
+				string iso_639_only_tag = iso_639_from_tag(normalized_tag);
+				if (iso_639_only_tag == null)
+					return 0;
+				if (normalized_tag != iso_639_only_tag)
+					exists = this._dict_exists(iso_639_only_tag);
+			}
 		}
 
 		return exists;
