@@ -31,11 +31,19 @@
 
 //////////////////////////////////////
 // Mock provider functions
+
+// In addition to en_GB and qaa, the mock provider includes ca-valencia,
+// a dictionary whose tag carries a BCP 47 variant subtag rather than a
+// region, as the Hunspell provider lists it for a file named
+// ca-valencia.dic; sr-Latn, whose tag carries a script subtag in mixed
+// case; and es_419, whose region is expressed using three digits.
 static int
 MockEnGbAndQaaProviderDictionaryExists (EnchantProvider *,
 				     const char *const tag)
 {
-    return (strcmp(tag, "en_GB")==0 || strcmp(tag, "qaa") ==0);
+    return (strcmp(tag, "en_GB")==0 || strcmp(tag, "qaa") ==0 ||
+            strcmp(tag, "ca-valencia") ==0 || strcmp(tag, "sr-Latn") ==0 ||
+            strcmp(tag, "es_419") ==0);
 }
 
 
@@ -71,10 +79,13 @@ static char **
 MockEnGbAndQaaProviderListDictionaries (EnchantProvider *, 
 			      size_t * out_n_dicts)
 {
-    *out_n_dicts = 2;
+    *out_n_dicts = 5;
     char** out_list = g_new0 (char *, *out_n_dicts + 1);
     out_list[0] = g_strdup ("en_GB");
     out_list[1] = g_strdup ("qaa");
+    out_list[2] = g_strdup ("ca-valencia");
+    out_list[3] = g_strdup ("sr-Latn");
+    out_list[4] = g_strdup ("es_419");
 
     return out_list;
 }

@@ -29,6 +29,15 @@ TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
   CHECK_EQUAL(2,DictionaryExistsMethodCalled);
 }
 
+// A tag that includes a variant falls back to its language, just as a tag
+// specifying a region does.
+TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
+             EnchantBrokerDictExists_BaseOfVariantDictExists_TrueAsksTwice)
+{
+  CHECK_EQUAL(1, enchant_broker_dict_exists(_broker, "qaa-xyzzy"));
+  CHECK_EQUAL(2,DictionaryExistsMethodCalled);
+}
+
 TEST_FIXTURE(EnchantBrokerDictExistsTestFixture, 
              EnchantBrokerDictExists_ExtraStuffAfterSecondUnderscore_NotStrippedForComparison)
 {
@@ -77,6 +86,15 @@ TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
   CHECK_EQUAL(1, enchant_broker_dict_exists(_broker, "en-GB"));
 }
 
+// A region may also be expressed using three digits: "es-419" is normalized to
+// "es_419" in the identical manner as "en-GB" is normalized to "en_GB".
+TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
+             EnchantBrokerDictExists_NumericRegionInLanguageTag_SubstitutedWithUnderscore)
+{
+  CHECK_EQUAL(1, enchant_broker_dict_exists(_broker, "es-419"));
+  CHECK_EQUAL(1,DictionaryExistsMethodCalled);
+}
+
 TEST_FIXTURE(EnchantBrokerDictExistsTestFixture, 
              EnchantBrokerDictExists_CalledWhenDictionaryIsNotInUse_MakesCall)
 {
@@ -95,6 +113,24 @@ TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
              EnchantBrokerDictExists_DifferentCase_NoRegion_Finds)
 {
   CHECK_EQUAL(1, enchant_broker_dict_exists(_broker, "QAA"));
+}
+
+// A variant subtag does not function as a region: "ca-valencia" is queried
+// exactly as written, without being transformed into "ca_VALENCIA".
+TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
+             EnchantBrokerDictExists_VariantInLanguageTag_NotTreatedAsRegion)
+{
+  CHECK_EQUAL(1, enchant_broker_dict_exists(_broker, "ca-valencia"));
+  CHECK_EQUAL(1,DictionaryExistsMethodCalled);
+}
+
+// A script subtag keeps its original casing: "sr-Latn" is requested exactly
+// as written, neither as "sr_LATN" nor as "sr-latn".
+TEST_FIXTURE(EnchantBrokerDictExistsTestFixture,
+             EnchantBrokerDictExists_ScriptInLanguageTag_CasePreserved)
+{
+  CHECK_EQUAL(1, enchant_broker_dict_exists(_broker, "sr-Latn"));
+  CHECK_EQUAL(1,DictionaryExistsMethodCalled);
 }
 
 
